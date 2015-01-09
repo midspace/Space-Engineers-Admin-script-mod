@@ -1,0 +1,233 @@
+namespace midspace.adminscripts
+{
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.VRageData;
+    using Sandbox.ModAPI;
+    using Sandbox.ModAPI.Interfaces;
+    using VRageMath;
+    using Sandbox.Definitions;
+
+    public static class Extensions
+    {
+        public static Vector3 ToHsvColor(this Color color)
+        {
+            var hsvColor = color.ColorToHSV();
+            return new Vector3(hsvColor.X, hsvColor.Y * 2f - 1f, hsvColor.Z * 2f - 1f);
+        }
+
+        public static Color ToColor(this Vector3 hsv)
+        {
+            return new Vector3(hsv.X, (hsv.Y + 1f) / 2f, (hsv.Z + 1f) / 2f).HSVtoColor();
+        }
+
+        public static SerializableVector3 ToSerializableVector3(this Vector3D v)
+        {
+            return new SerializableVector3((float)v.X, (float)v.Y, (float)v.Z);
+        }
+
+        public static SerializableVector3D ToSerializableVector3D(this Vector3D v)
+        {
+            return new SerializableVector3D(v.X, v.Y, v.Z);
+        }
+
+        public static float ToGridLength(this MyCubeSize cubeSize)
+        {
+            return MyDefinitionManager.Static.GetCubeSize(cubeSize);
+        }
+
+        /// <summary>
+        /// Find all grids attached to the specified grid, either by piston or rotor.
+        /// This will iterate through all attached grids, until all are found.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>A list of all attached grids, including the original.</returns>
+        public static List<IMyCubeGrid> GetAttachedGrids(this IMyEntity entity)
+        {
+            return GetAttachedGrids(entity as IMyCubeGrid);
+        }
+
+        /// <summary>
+        /// Find all grids attached to the specified grid, either by piston or rotor.
+        /// This will iterate through all attached grids, until all are found.
+        /// </summary>
+        /// <param name="cubeGrid"></param>
+        /// <returns>A list of all attached grids, including the original.</returns>
+        public static List<IMyCubeGrid> GetAttachedGrids(this IMyCubeGrid cubeGrid)
+        {
+            if (cubeGrid == null)
+                return new List<IMyCubeGrid>();
+
+            var results = new List<IMyCubeGrid> { cubeGrid };
+            GetAttachedGrids(cubeGrid, ref results);
+            return results;
+        }
+
+        private static void GetAttachedGrids(IMyCubeGrid cubeGrid, ref List<IMyCubeGrid> results)
+        {
+            if (cubeGrid == null)
+                return;
+
+            var blocks = new List<IMySlimBlock>();
+            cubeGrid.GetBlocks(blocks, b => b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull);
+
+            foreach (var block in blocks)
+            {
+                //MyAPIGateway.Utilities.ShowMessage("Block", string.Format("{0}", block.FatBlock.BlockDefinition.TypeId));
+
+                if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase))
+                {
+                    // The MotorStator which inherits from MotorBase.
+                    var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
+                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.ExistsById(motorBase.RotorEntityId))
+                        continue;
+                    var entityParent = MyAPIGateway.Entities.GetEntityById(motorBase.RotorEntityId).Parent as IMyCubeGrid;
+                    if (entityParent == null)
+                        continue;
+                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
+                    {
+                        results.Add(entityParent);
+                        GetAttachedGrids(entityParent, ref results);
+                    }
+                }
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedRotor) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorRotor) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RealWheel) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Wheel))
+                {
+                    // The Rotor Part.
+                    var motorCube = Support.FindRotorBase(block.FatBlock.EntityId);
+                    if (motorCube == null)
+                        continue;
+                    var entityParent = (IMyCubeGrid)motorCube.Parent;
+                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
+                    {
+                        results.Add(entityParent);
+                        GetAttachedGrids(entityParent, ref results);
+                    }
+                }
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
+                {
+                    var pistonTop = block.GetObjectBuilder() as MyObjectBuilder_PistonTop;
+                    if (pistonTop == null || pistonTop.PistonBlockId == 0 || !MyAPIGateway.Entities.ExistsById(pistonTop.PistonBlockId))
+                        continue;
+                    var entityParent = MyAPIGateway.Entities.GetEntityById(pistonTop.PistonBlockId).Parent as IMyCubeGrid;
+                    if (entityParent == null)
+                        continue;
+                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
+                    {
+                        results.Add(entityParent);
+                        GetAttachedGrids(entityParent, ref results);
+                    }
+                }
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase))
+                {
+                    var pistonBase = block.GetObjectBuilder() as MyObjectBuilder_PistonBase;
+                    if (pistonBase == null || pistonBase.TopBlockId == 0 || !MyAPIGateway.Entities.ExistsById(pistonBase.TopBlockId))
+                        continue;
+                    var entityParent = MyAPIGateway.Entities.GetEntityById(pistonBase.TopBlockId).Parent as IMyCubeGrid;
+                    if (entityParent == null)
+                        continue;
+                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
+                    {
+                        results.Add(entityParent);
+                        GetAttachedGrids(entityParent, ref results);
+                    }
+                }
+            }
+        }
+
+        public static IMyControllableEntity[] FindWorkingCockpits(this IMyEntity entity)
+        {
+            var cubeGrid = entity as Sandbox.ModAPI.Ingame.IMyCubeGrid;
+
+            if (cubeGrid != null)
+            {
+                var blocks = new List<Sandbox.ModAPI.Ingame.IMySlimBlock>();
+                cubeGrid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.IsWorking 
+                    && f.FatBlock is IMyControllableEntity
+                    && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit));
+                return blocks.Select(f => (IMyControllableEntity)f.FatBlock).ToArray();
+            }
+
+            return new IMyControllableEntity[0];
+        }
+
+        /// <summary>
+        /// Determines if the player is an Administrator of the active game session.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns>True if is specified player is an Administrator in the active game.</returns>
+        public static bool IsAdmin(this IMyPlayer player)
+        {
+            // Offline mode. You are the only player.
+            if (MyAPIGateway.Session.OnlineMode == MyOnlineModeEnum.OFFLINE)
+            {
+                return true;
+            }
+
+            // Hosted game, and the player is hosting the server.
+            if (MyAPIGateway.Multiplayer.IsServerPlayer(player.Client))
+            {
+                return true;
+            }
+
+            // determine if client is admin of Dedicated server.
+            var clients = MyAPIGateway.Session.GetCheckpoint("null").Clients;
+            if (clients != null)
+            {
+                var client = clients.FirstOrDefault(c => c.SteamId == player.SteamUserId && c.IsAdmin);
+                return client != null;
+                // If user is not in the list, automatically assume they are not an Admin.
+            }
+
+            // clients is null when it's not a dedicated server.
+            // Otherwise Treat everyone as Normal Player.
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if the player is an Author/Creator.
+        /// This is used expressly for testing of commands that are not yet ready 
+        /// to be released to the public, and should not be visible to the Help command list or accessible.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static bool IsExperimentalCreator(this IMyPlayer player)
+        {
+            switch (player.SteamUserId)
+            {
+                case 76561197961224864L:
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Adds an element with the provided key and value to the System.Collections.Generic.IDictionary&gt;TKey,TValue&lt;.
+        /// If the provide key already exists, then the existing key is updated with the newly supplied value.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key">The object to use as the key of the element to add.</param>
+        /// <param name="value">The object to use as the value of the element to add.</param>
+        /// <exception cref="System.ArgumentNullException">key is null</exception>
+        /// <exception cref="System.NotSupportedException">The System.Collections.Generic.IDictionary&gt;TKey,TValue&lt; is read-only.</exception>
+        public static void Update<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+            if (dictionary.ContainsKey(key))
+                dictionary[key] = value;
+            else
+                dictionary.Add(key, value);
+        }
+    }
+}

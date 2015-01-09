@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0C5DEA28-0313-4862-A77C-CC194EEA8220}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>midspace.adminscripts</RootNamespace>
+    <AssemblyName>midspace.adminscripts</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Sandbox.Common">
+      <HintPath>D:\Program Files (x86)\Steam\SteamApps\common\SpaceEngineers\Bin64\Sandbox.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sandbox.Game">
+      <HintPath>D:\Program Files (x86)\Steam\SteamApps\common\SpaceEngineers\Bin64\Sandbox.Game.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="VRage.Common">
+      <HintPath>D:\Program Files (x86)\Steam\SteamApps\common\SpaceEngineers\Bin64\VRage.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Library">
+      <HintPath>D:\Program Files (x86)\Steam\SteamApps\common\SpaceEngineers\Bin64\VRage.Library.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Math">
+      <HintPath>D:\Program Files (x86)\Steam\SteamApps\common\SpaceEngineers\Bin64\VRage.Math.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChatCommandService.cs" />
+    <Compile Include="CommandAddPrefab.cs" />
+    <Compile Include="CommandClaim.cs" />
+    <Compile Include="CommandDate.cs" />
+    <Compile Include="CommandInventoryDrop.cs" />
+    <Compile Include="CommandEject.cs" />
+    <Compile Include="CommandHeading.cs" />
+    <Compile Include="CommandHelloWorld.cs" />
+    <Compile Include="CommandIdentify.cs" />
+    <Compile Include="CommandListAsteroids.cs" />
+    <Compile Include="CommandListPrefabs.cs" />
+    <Compile Include="CommandListShips.cs" />
+    <Compile Include="CommandListVoxels.cs" />
+    <Compile Include="CommandMeteor.cs" />
+    <Compile Include="CommandPastePrefab.cs" />
+    <Compile Include="CommandPosition.cs" />
+    <Compile Include="CommandRespawn.cs" />
+    <Compile Include="CommandRotateAsteroid.cs" />
+    <Compile Include="CommandSetVector.cs" />
+    <Compile Include="CommandSlay.cs" />
+    <Compile Include="CommandSmite.cs" />
+    <Compile Include="CommandStatus.cs" />
+    <Compile Include="CommandStop.cs" />
+    <Compile Include="CommandTeleport.cs" />
+    <Compile Include="CommandHelp.cs" />
+    <Compile Include="CommandTeleportJump.cs" />
+    <Compile Include="CommandTeleportOffset.cs" />
+    <Compile Include="CommandTeleportToPlayer.cs" />
+    <Compile Include="CommandTime.cs" />
+    <Compile Include="CommandVersion.cs" />
+    <Compile Include="CommandVoxelClear.cs" />
+    <Compile Include="CommandVoxelSet.cs" />
+    <Compile Include="CommandAddVoxel.cs" />
+    <Compile Include="CommandTest.cs" />
+    <Compile Include="CommandListBots.cs" />
+    <Compile Include="CommandSaveGame.cs" />
+    <Compile Include="ChatCommandSecurity.cs" />
+    <Compile Include="CommandRevoke.cs" />
+    <Compile Include="CommandFactionPromote.cs" />
+    <Compile Include="CommandFlyTo.cs" />
+    <Compile Include="CommandCountObjects.cs" />
+    <Compile Include="CommandPullObjects.cs" />
+    <Compile Include="CommandFactionDemote.cs" />
+    <Compile Include="CommandFactionKick.cs" />
+    <Compile Include="CommandFactionJoin.cs" />
+    <Compile Include="CommandShare.cs" />
+    <Compile Include="CommandTeleportToShip.cs" />
+    <Compile Include="CommandFactionRemove.cs" />
+    <Compile Include="CommandSpreadAsteroids.cs" />
+    <Compile Include="CommandListShips2.cs" />
+    <Compile Include="CommandGameName.cs" />
+    <Compile Include="CommandTeleportSave.cs" />
+    <Compile Include="CommandTeleportList.cs" />
+    <Compile Include="CommandTeleportFavorite.cs" />
+    <Compile Include="CommandTeleportDelete.cs" />
+    <Compile Include="CommandOff.cs" />
+    <Compile Include="CommandOn.cs" />
+    <Compile Include="CommandInventoryClear.cs" />
+    <Compile Include="CommandInventoryAdd.cs" />
+    <Compile Include="CommandFindOre.cs" />
+    <Compile Include="CommandListBlueprints.cs" />
+    <Compile Include="CommandAddWireframe.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="ChatCommand.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="VoxelEditLogic.cs" />
+    <Compile Include="ChatCommandLogic.cs" />
+    <Compile Include="Support.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\modinfo.sbmi">
+      <Link>modinfo.sbmi</Link>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
