@@ -119,6 +119,9 @@
     <Compile Include="CommandFindOre.cs" />
     <Compile Include="CommandListBlueprints.cs" />
     <Compile Include="CommandAddWireframe.cs" />
+    <Compile Include="CommandSessionCreative.cs" />
+    <Compile Include="CommandSessionCopyPaste.cs" />
+    <Compile Include="CommandSessionCargoShips.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />

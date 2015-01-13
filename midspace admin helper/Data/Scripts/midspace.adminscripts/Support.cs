@@ -50,7 +50,7 @@ namespace midspace.adminscripts
             {
                 if (findShips)
                 {
-                    var cubeGrid = entity as Sandbox.ModAPI.Ingame.IMyCubeGrid;
+                    var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
 
                     // check if the ray comes anywhere near the Grid before continuing.
                     if (cubeGrid != null && ray.Intersects(entity.WorldAABB).HasValue)
@@ -150,7 +150,7 @@ namespace midspace.adminscripts
                 else if (searchTransmittingBlockNames)
                 {
                     // look for a ship with an antenna or beacon with partially matching name.
-                    var blocks = new List<Sandbox.ModAPI.Ingame.IMySlimBlock>();
+                    var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                     ((IMyCubeGrid)ship).GetBlocks(blocks, f => f.FatBlock != null && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RadioAntenna) || f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon)));
                     if (blocks.Any(b => ((Sandbox.ModAPI.Ingame.IMyTerminalBlock)b.FatBlock).CustomName.IndexOf(findShipName, StringComparison.InvariantCultureIgnoreCase) >= 0))
                     {

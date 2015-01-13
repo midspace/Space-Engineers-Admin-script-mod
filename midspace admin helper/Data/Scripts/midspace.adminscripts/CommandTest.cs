@@ -201,7 +201,7 @@
 
                 foreach (var entity in entites)
                 {
-                    var cubeGrid = entity as Sandbox.ModAPI.Ingame.IMyCubeGrid;
+                    var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
 
                     // check if the ray comes anywhere near the Grid before continuing.
                     var ray = new RayD(position, worldMatrix.Forward);
@@ -210,7 +210,7 @@
                         var hit = cubeGrid.RayCastBlocks(position, worldMatrix.Forward * 1000);
                         if (hit.HasValue)
                         {
-                            var blocks = new List<Sandbox.ModAPI.Ingame.IMySlimBlock>();
+                            var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                             cubeGrid.GetBlocks(blocks, f => f.FatBlock != null);
                             MyAPIGateway.Utilities.ShowMessage("AABB", string.Format("{0}", entity.WorldAABB));
 
@@ -408,7 +408,7 @@
                 var allEntites = new HashSet<IMyEntity>();
                 MyAPIGateway.Entities.GetEntities(allEntites, e => e != null);
 
-                var sphere = new BoundingSphereD(Vector3.Zero, 1000000f);
+                var sphere = new BoundingSphereD(Vector3D.Zero, 1000000f);
                 var allSphereEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
 
                 MyAPIGateway.Utilities.ShowMessage("All Entities", String.Format("{0} == {1} ??", allEntites.Count, allSphereEntities.Count));
@@ -540,7 +540,17 @@
                 var entites = new HashSet<IMyEntity>();
                 MyAPIGateway.Entities.GetEntities(entites, e => e != null);
 
-                
+                //var physicalItem = MyDefinitionManager.Static.GetCubeBlockDefinition(new MyDefinitionId(typeof(MyObjectBuilder_SpaceBall), "SpaceBallLarge"));
+                //physicalItem.Public = true;
+
+                //MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed = 2000;
+                //MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed = 2000;
+                MyAPIGateway.Session.GetCheckpoint("null").GameMode = MyGameModeEnum.Creative;
+                //MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled
+                //MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = true;
+
+                //MyAPIGateway.Utilities.ShowMessage("Sun Distance", string.Format("{0}", MyDefinitionManager.Static.EnvironmentDefinition.DistanceToSun));
+                //MyDefinitionManager.Static.EnvironmentDefinition.DirectionToSun = new Vector3(0, 1, 0);
 
                 foreach (var entity in entites)
                 {
@@ -548,11 +558,18 @@
                     if (cubeGrid != null)
                     {
                         var terminalsys = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid);
-                        MyAPIGateway.Utilities.ShowMessage("Grid count", string.Format("{0} {1} {2}", cubeGrid.DisplayName, terminalsys.Blocks.Count, terminalsys.BlockGroups.Count));
+                        //MyAPIGateway.Utilities.ShowMessage("Grid count", string.Format("{0} {1} {2}", cubeGrid.DisplayName, terminalsys.Blocks.Count, terminalsys.BlockGroups.Count));
 
-                        //var blocks = new List<Sandbox.ModAPI.Ingame.IMySlimBlock>();
+                        //var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                         //cubeGrid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock == MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity);
                         //MyAPIGateway.Utilities.ShowMessage("Pilot count", string.Format("{0}", blocks.Count));
+
+                        //cubeGrid.GetBlocks(blocks);
+                        //foreach (var block in blocks)
+                        //{
+                        //    cubeGrid.ColorBlocks(block.Position, block.Position, VRageMath.Color.Gold.ToHsvColor());
+                        //}
+
                     }
                 }
 
@@ -561,35 +578,7 @@
 
             #endregion
 
-
-
-
-
             return false;
         }
     }
-
-        public static class CubeFinders
-        {
-            internal static bool IsValidCockpit(Sandbox.ModAPI.Ingame.IMySlimBlock block)
-            {
-                if (block.FatBlock == null)
-                    return false;
-
-                if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit)
-                    || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RemoteControl))
-                {
-                    var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(block.FatBlock.BlockDefinition);
-                    var cockpitDefintion = definition as MyCockpitDefinition;
-                    if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
-                        return true;
-
-                    var remoteDefintion = definition as MyRemoteControlDefinition;
-                    if (remoteDefintion != null && remoteDefintion.EnableShipControl)
-                        return true;
-                }
-
-                return false; // Player cannot be Passenger!
-            }
-        }
 }

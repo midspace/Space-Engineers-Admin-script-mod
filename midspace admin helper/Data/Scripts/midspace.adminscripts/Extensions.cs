@@ -9,6 +9,7 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
     using Sandbox.Definitions;
+    using System;
 
     public static class Extensions
     {
@@ -145,11 +146,11 @@ namespace midspace.adminscripts
 
         public static IMyControllableEntity[] FindWorkingCockpits(this IMyEntity entity)
         {
-            var cubeGrid = entity as Sandbox.ModAPI.Ingame.IMyCubeGrid;
+            var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
 
             if (cubeGrid != null)
             {
-                var blocks = new List<Sandbox.ModAPI.Ingame.IMySlimBlock>();
+                var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.IsWorking 
                     && f.FatBlock is IMyControllableEntity
                     && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit));
@@ -191,6 +192,27 @@ namespace midspace.adminscripts
             // Otherwise Treat everyone as Normal Player.
 
             return false;
+        }
+
+        public static bool IsValidCockpit(Sandbox.ModAPI.Ingame.IMySlimBlock block)
+        {
+            if (block.FatBlock == null)
+                return false;
+
+            if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit)
+                || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RemoteControl))
+            {
+                var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(block.FatBlock.BlockDefinition);
+                var cockpitDefintion = definition as MyCockpitDefinition;
+                if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
+                    return true;
+
+                var remoteDefintion = definition as MyRemoteControlDefinition;
+                if (remoteDefintion != null && remoteDefintion.EnableShipControl)
+                    return true;
+            }
+
+            return false; // Player cannot be Passenger!
         }
 
         /// <summary>

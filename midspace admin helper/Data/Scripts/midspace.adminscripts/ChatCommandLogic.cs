@@ -121,6 +121,9 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandRevoke());
             //ChatCommandService.Register(new CommandRotateAsteroid());  //not working any more
             ChatCommandService.Register(new CommandSaveGame());
+            ChatCommandService.Register(new CommandSessionCreative());
+            ChatCommandService.Register(new CommandSessionCargoShips());
+            ChatCommandService.Register(new CommandSessionCopyPaste());
             ChatCommandService.Register(new CommandSetVector());
             //ChatCommandService.Register(new CommandShare());  //not working
             ChatCommandService.Register(new CommandSlay());

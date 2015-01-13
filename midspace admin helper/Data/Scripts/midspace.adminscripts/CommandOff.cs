@@ -82,7 +82,7 @@
 
             foreach (var cubeGrid in grids)
             {
-                var blocks = new List<Sandbox.ModAPI.Ingame.IMySlimBlock>();
+                var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, f => f.FatBlock != null
                     && f.FatBlock is IMyFunctionalBlock
                     && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor));

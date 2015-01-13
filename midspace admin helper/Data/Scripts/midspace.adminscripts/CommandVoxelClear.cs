@@ -23,7 +23,7 @@
             // voxelclear [on] [off]
             if (messageText.StartsWith("/voxelclear ", StringComparison.InvariantCultureIgnoreCase))
             {
-                var strings = messageText.Split(' ');
+                var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (strings.Length > 1)
                 {
                     if (strings[1].Equals("on", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("1", StringComparison.InvariantCultureIgnoreCase))
