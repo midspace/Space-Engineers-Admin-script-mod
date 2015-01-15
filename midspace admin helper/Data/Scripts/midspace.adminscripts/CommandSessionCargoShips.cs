@@ -14,7 +14,7 @@
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/CargoShips [on|off]", "Turns Cargo Ships mode on or off for you.");
+            MyAPIGateway.Utilities.ShowMessage("/CargoShips <on|off>", "Turns spawning of Cargo ships and Exploration ships mode on or off.");
 
             // Turns on spawning of Cargo ships and Exploration ships.
 

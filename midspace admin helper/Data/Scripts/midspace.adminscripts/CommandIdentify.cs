@@ -78,7 +78,7 @@
 
                         displayType = gridCube.IsStatic ? "Station" : gridCube.GridSizeEnum.ToString() + " Ship";
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N} m\r\nMass: {1:N} kg\r\nVelocity: {2}\r\nSpeed: {3:N} m/s\r\nCenter Mass: {4}\r\nSize: {5}\r\nNumber of Blocks: {6:#,##0}\r\nAttached Grids: {7:#,##0}",
+                        description = string.Format("Distance: {0:N} m\r\nMass: {1:N} kg\r\nVector: {2}\r\nVelocity: {3:N} m/s\r\nCenter Mass: {4}\r\nSize: {5}\r\nNumber of Blocks: {6:#,##0}\r\nAttached Grids: {7:#,##0}",
                             distance, 
                             gridCube.Physics.Mass, 
                             gridCube.Physics.LinearVelocity, 
@@ -96,7 +96,7 @@
                         description = string.Format("Distance: {0:N}", distance);
                     }
 
-                    MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), displayName, " ", description, null, "OK");
+                    MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     return true;
                 }
 

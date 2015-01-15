@@ -99,8 +99,12 @@
                     cockPit.MoveAndRotateStopped();
                 }
 
-                grid.Physics.AngularVelocity = Vector3.Zero;
-                grid.Physics.LinearVelocity = Vector3.Zero;
+                //grid.Physics.AngularVelocity = Vector3.Zero;
+                //grid.Physics.LinearVelocity = Vector3.Zero;
+                grid.Physics.ClearSpeed(); // Same as above.
+
+                // TODO : may need to iterate through thrusters and turn off any thrust override.
+                // 01.064.010 requires using the Action("DecreaseOverride") repeatbly until override is 0.
             }
 
             return true;

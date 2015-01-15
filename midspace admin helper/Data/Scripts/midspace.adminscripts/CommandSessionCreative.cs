@@ -14,12 +14,12 @@
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/creative [on|off]", "Turns creative mode on or off for you.");
+            MyAPIGateway.Utilities.ShowMessage("/creative <on|off>", "Turns creative mode on or off for you.");
 
             // Allows you to change the game mode to Creative.
 
             // On Single player, these changes are permanent to you game.
-            // On a Hosted game, anyone connecting after making a change will also inheritt them.
+            // On a Hosted game, anyone connecting after making a change will also inherit them.
             // On a dedicated server, you can:
             // * drop single blocks at any range, however they will only have 1% construction even though they appear 100% to you.
             // * remove any block instantly as per normal.
