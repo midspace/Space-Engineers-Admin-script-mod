@@ -16,17 +16,20 @@ namespace midspace.adminscripts
         public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips = true, bool findPlayers = true, bool findAsteroids = true)
         {
             Matrix worldMatrix;
-            Vector3D position;
+            Vector3D startPosition;
+            Vector3D endPosition;
             if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
             {
                 worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true); // most accurate for player view.
-                position = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
+                startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * 1000.5f;
             }
             else
             {
                 worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 // TODO: need to adjust for position of cockpit within ship.
-                position = worldMatrix.Translation + worldMatrix.Forward * 1.5f;
+                startPosition = worldMatrix.Translation + worldMatrix.Forward * 1.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * 1001.5f;
             }
 
             //var worldMatrix = MyAPIGateway.Session.Player.PlayerCharacter.Entity.WorldMatrix;
@@ -44,7 +47,7 @@ namespace midspace.adminscripts
             MyAPIGateway.Entities.GetEntities(entites, e => e != null);
 
             var list = new Dictionary<IMyEntity, double>();
-            var ray = new RayD(position, worldMatrix.Forward);
+            var ray = new RayD(startPosition, worldMatrix.Forward);
 
             foreach (var entity in entites)
             {
@@ -55,10 +58,10 @@ namespace midspace.adminscripts
                     // check if the ray comes anywhere near the Grid before continuing.
                     if (cubeGrid != null && ray.Intersects(entity.WorldAABB).HasValue)
                     {
-                        var hit = cubeGrid.RayCastBlocks(position, worldMatrix.Forward * 1000);
+                        var hit = cubeGrid.RayCastBlocks(startPosition, endPosition);
                         if (hit.HasValue)
                         {
-                            var distance = (position - cubeGrid.GridIntegerToWorld(hit.Value)).Length();
+                            var distance = (startPosition - cubeGrid.GridIntegerToWorld(hit.Value)).Length();
                             list.Add(entity, distance);
                         }
                     }
@@ -69,7 +72,7 @@ namespace midspace.adminscripts
                     var controller = entity as IMyControllableEntity;
                     if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId != entity.EntityId && controller != null && ray.Intersects(entity.WorldAABB).HasValue)
                     {
-                        var distance = (position - entity.GetPosition()).Length();
+                        var distance = (startPosition - entity.GetPosition()).Length();
                         list.Add(entity, distance);
                     }
                 }
@@ -83,7 +86,7 @@ namespace midspace.adminscripts
                         var hit = ray.Intersects(aabb);
                         if (hit.HasValue)
                         {
-                            var distance = (position - hit.Value).Length();
+                            var distance = (startPosition - hit.Value).Length();
                             list.Add(entity, distance);
                         }
                     }
