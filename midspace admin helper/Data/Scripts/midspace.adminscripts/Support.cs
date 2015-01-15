@@ -15,6 +15,14 @@ namespace midspace.adminscripts
     {
         public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips = true, bool findPlayers = true, bool findAsteroids = true)
         {
+            IMyEntity entity;
+            double distance;
+            FindLookAtEntity(controlledEntity, out entity, out distance, findShips, findPlayers, findAsteroids);
+            return entity;
+        }
+
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, bool findShips = true, bool findPlayers = true, bool findAsteroids = true)
+        {
             Matrix worldMatrix;
             Vector3D startPosition;
             Vector3D endPosition;
@@ -22,14 +30,14 @@ namespace midspace.adminscripts
             {
                 worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true); // most accurate for player view.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
-                endPosition = worldMatrix.Translation + worldMatrix.Forward * 1000.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * 5000.5f;
             }
             else
             {
                 worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 // TODO: need to adjust for position of cockpit within ship.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 1.5f;
-                endPosition = worldMatrix.Translation + worldMatrix.Forward * 1001.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * 5001.5f;
             }
 
             //var worldMatrix = MyAPIGateway.Session.Player.PlayerCharacter.Entity.WorldMatrix;
@@ -94,10 +102,16 @@ namespace midspace.adminscripts
             }
 
             if (list.Count == 0)
-                return null;
+            {
+                lookEntity = null;
+                lookDistance = 0;
+                return;
+            }
 
             // find the closest Entity.
-            return list.OrderBy(f => f.Value).First().Key;
+            var item = list.OrderBy(f => f.Value).First();
+            lookEntity = item.Key;
+            lookDistance = item.Value;
         }
 
         public static IMyCubeBlock FindRotorBase(long entityId, IMyCubeGrid parent = null)
