@@ -29,6 +29,8 @@
                     double.Parse(match.Groups["Y"].Value, CultureInfo.InvariantCulture),
                     double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
 
+                var currentPosition = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
+
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                 {
                     // Move the player only.
@@ -38,6 +40,7 @@
                 {
                     // Move the ship the player is piloting.
                     var cubeGrid = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetTopMostParent();
+                    currentPosition = cubeGrid.GetPosition();
                     var grids = cubeGrid.GetAttachedGrids();
                     var worldOffset = position - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
@@ -47,6 +50,8 @@
                     }
                 }
 
+                //save teleport in history
+                CommandBack.SaveTeleportInHistory(currentPosition);
                 return true;
             }
 

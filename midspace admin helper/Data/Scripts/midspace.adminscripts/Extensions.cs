@@ -151,7 +151,7 @@ namespace midspace.adminscripts
             if (cubeGrid != null)
             {
                 var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
-                cubeGrid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.IsWorking 
+                cubeGrid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.IsWorking
                     && f.FatBlock is IMyControllableEntity
                     && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit));
                 return blocks.Select(f => (IMyControllableEntity)f.FatBlock).ToArray();
@@ -227,6 +227,8 @@ namespace midspace.adminscripts
             switch (player.SteamUserId)
             {
                 case 76561197961224864L:
+                    return true;
+                case 76561198048142826L:
                     return true;
             }
 

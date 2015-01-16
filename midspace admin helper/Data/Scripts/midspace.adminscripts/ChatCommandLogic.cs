@@ -84,8 +84,9 @@ namespace midspace.adminscripts
 
             ChatCommandService.Register(new CommandAddPrefab());
             ChatCommandService.Register(new CommandAddWireframe());
-            //ChatCommandService.Register(new CommandAddVoxel());  //not working any more
-            ChatCommandService.Register(new CommandCountObjects());
+			//ChatCommandService.Register(new CommandAddVoxel());  //not working any more
+			ChatCommandService.Register(new CommandBack());
+			ChatCommandService.Register(new CommandCountObjects());
             ChatCommandService.Register(new CommandClaim());
             ChatCommandService.Register(new CommandDate());
             ChatCommandService.Register(new CommandEject());

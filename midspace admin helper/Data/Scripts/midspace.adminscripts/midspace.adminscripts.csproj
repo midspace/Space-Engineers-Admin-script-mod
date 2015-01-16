@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="ChatCommandService.cs" />
     <Compile Include="CommandAddPrefab.cs" />
+    <Compile Include="CommandBack.cs" />
     <Compile Include="CommandClaim.cs" />
     <Compile Include="CommandDate.cs" />
     <Compile Include="CommandInventoryDrop.cs" />

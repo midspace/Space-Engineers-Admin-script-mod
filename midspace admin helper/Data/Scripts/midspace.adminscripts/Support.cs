@@ -127,7 +127,7 @@ namespace midspace.adminscripts
                     continue;
 
                 var blocks = new List<IMySlimBlock>();
-                cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null && 
+                cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null &&
                     (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
                     block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
                     block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
@@ -199,8 +199,10 @@ namespace midspace.adminscripts
         public static bool MovePlayerToPlayer(IMyPlayer player, IMyPlayer targetPlayer, bool safely = true)
         {
             var worldMatrix = targetPlayer.Controller.ControlledEntity.Entity.WorldMatrix;
-            
+
             var position = worldMatrix.Translation + worldMatrix.Forward * -2.5d;
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
 
             if (safely)
             {
@@ -224,6 +226,9 @@ namespace midspace.adminscripts
             player.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
             player.Controller.ControlledEntity.Entity.SetPosition(position);
 
+            //save teleport in history
+            CommandBack.SaveTeleportInHistory(currentPosition);
+
             return true;
         }
 
@@ -234,6 +239,8 @@ namespace midspace.adminscripts
 
             var worldMatrix = cockpit.WorldMatrix;
             var position = worldMatrix.Translation + worldMatrix.Forward * -2.5d + worldMatrix.Up * -0.9d;  // Suitable for Large 1x1x1 cockpit.
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
 
             var matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
             var linearVelocity = cockpit.Parent.Physics.LinearVelocity;
@@ -248,12 +255,17 @@ namespace midspace.adminscripts
             // the player will bounce off objects before it's correct orentation is actually registered.
             player.Controller.ControlledEntity.Entity.SetPosition(position);
 
+            //save teleport in history
+            CommandBack.SaveTeleportInHistory(currentPosition);
+
             return true;
         }
 
         public static bool MovePlayerToShipGrid(IMyPlayer player, IMyEntity ship, bool safely = true)
         {
             var destination = ship.WorldAABB.GetCorners()[0];
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
 
             if (safely)
             {
@@ -272,6 +284,10 @@ namespace midspace.adminscripts
 
             player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = ship.Physics.LinearVelocity;
             player.Controller.ControlledEntity.Entity.SetPosition(destination);
+
+            //save teleport in history
+            CommandBack.SaveTeleportInHistory(currentPosition);
+
             return true;
         }
 
@@ -280,6 +296,10 @@ namespace midspace.adminscripts
             // TODO: complete.
 
             MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function not complete. Cannot transport piloted Ship to another player.");
+
+
+            //save teleport in history
+            //CommandBack.SaveTeleportInHistory(currentPosition);
 
             return false;
         }
@@ -297,8 +317,11 @@ namespace midspace.adminscripts
 
             foreach (var grid in grids)
             {
-            //    grid.SetPosition(grid.GetPosition() + worldOffset);
+                //grid.SetPosition(grid.GetPosition() + worldOffset);
             }
+            
+            //save teleport in history
+            //CommandBack.SaveTeleportInHistory(currentPosition);
 
             return false;
         }
@@ -360,7 +383,7 @@ namespace midspace.adminscripts
 
                 // links an entity with data and geometry
                 StorageName = storageName,
-                
+
 
                 // Copy-on-write is performed on storage which is not mutable (new mutable copy is create at the time of first write)
                 MutableStorage = false,
@@ -394,9 +417,9 @@ namespace midspace.adminscripts
 
             //MyAPIGateway.Utilities.ShowMessage("Test f", string.Format("check"));
 
-            
 
-            
+
+
 
             //MyAPIGateway.Utilities.ShowMessage("Test h", string.Format("check {0}", voxelMap.Storage == null));
 
