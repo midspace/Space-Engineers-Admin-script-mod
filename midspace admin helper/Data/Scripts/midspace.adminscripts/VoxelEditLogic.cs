@@ -44,7 +44,7 @@ namespace midspace.adminscripts
         /// </summary>
         public override void UpdateAfterSimulation10()
         {
-            if (CommandVoxelClear.ActiveVoxelDeleter)
+            if (CommandAsteroidEditClear.ActiveVoxelDeleter)
             {
                 var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 var position = worldMatrix.Translation + worldMatrix.Forward * 1.6f + worldMatrix.Up * 1.35f + worldMatrix.Right * 0.1f;
@@ -82,27 +82,27 @@ namespace midspace.adminscripts
                 }
             }
 
-            if (CommandVoxelSet.ActiveVoxelSetter)
+            if (CommandAsteroidEditSet.ActiveVoxelSetter)
             {
                 var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
-                CommandVoxelSet.ActiveVoxelSetterPosition = worldMatrix.Translation + worldMatrix.Forward * 1.6f + worldMatrix.Up * 1.35f + worldMatrix.Right * 0.1f;
+                CommandAsteroidEditSet.ActiveVoxelSetterPosition = worldMatrix.Translation + worldMatrix.Forward * 1.6f + worldMatrix.Up * 1.35f + worldMatrix.Right * 0.1f;
             }
             else
             {
-                CommandVoxelSet.ActiveVoxelSetterPosition = null;
+                CommandAsteroidEditSet.ActiveVoxelSetterPosition = null;
             }
         }
 
         public override void UpdateAfterSimulation100()
         {
-            if (CommandVoxelClear.ActiveVoxelDeleter)
+            if (CommandAsteroidEditClear.ActiveVoxelDeleter)
             {
                 if (_isInRange)
                     MyAPIGateway.Utilities.ShowNotification("Voxel Clear active", 1000, MyFontEnum.Green);
                 else
                     MyAPIGateway.Utilities.ShowNotification("Voxel Clear active", 1000, MyFontEnum.Red);
             }
-            if (CommandVoxelSet.ActiveVoxelSetter)
+            if (CommandAsteroidEditSet.ActiveVoxelSetter)
             {
                 //MyAPIGateway.Utilities.ShowNotification(string.Format("Voxel setter is active [{0}]", MyWorldLogic.ActiveVoxelSetterPosition), 1000, MyFontEnum.Green);
                 MyAPIGateway.Utilities.ShowNotification("Voxel setter is active", 1000, MyFontEnum.Green);

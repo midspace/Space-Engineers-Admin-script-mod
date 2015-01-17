@@ -8,7 +8,7 @@
     using VRageMath;
     using VRage.Common.Voxels;
 
-    public class CommandVoxelSet: ChatCommand
+    public class CommandAsteroidEditSet: ChatCommand
     {
         public static bool ActiveVoxelSetter { get; private set; }
         public static Vector3? ActiveVoxelSetterPosition { get; set; }
@@ -17,7 +17,7 @@
         private static string _activeVoxelSetterNameA;
         private static string _activeVoxelSetterNameB;
 
-        public CommandVoxelSet()
+        public CommandAsteroidEditSet()
             : base(ChatCommandSecurity.Admin, "voxelset", new[] { "/voxelset" })
         {
         }

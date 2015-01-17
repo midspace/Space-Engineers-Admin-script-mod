@@ -11,14 +11,14 @@
     /// <summary>
     /// This one is broken. It may be removed in light of the new 'exploration' game feature.
     /// </summary>
-    public class CommandListVoxels : ChatCommand
+    public class CommandVoxelsList : ChatCommand
     {
         ///// <summary>
         ///// Temporary hotlist cache created when player requests a list of voxels, populated only by search results.
         ///// </summary>
         //public readonly static List<MyMwcVoxelFilesEnum> VoxelCache = new List<MyMwcVoxelFilesEnum>();
 
-        public CommandListVoxels()
+        public CommandVoxelsList()
             : base(ChatCommandSecurity.Experimental, "listvoxels", new[] { "/listvoxels" })
         {
         }

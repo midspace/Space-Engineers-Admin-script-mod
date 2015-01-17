@@ -7,9 +7,9 @@
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
 
-    public class CommandCountObjects : ChatCommand
+    public class CommandObjectsCount : ChatCommand
     {
-        public CommandCountObjects()
+        public CommandObjectsCount()
             : base(ChatCommandSecurity.Admin, "countobjects", new[] { "/countobjects" })
         {
         }

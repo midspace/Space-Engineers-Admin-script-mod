@@ -9,9 +9,9 @@
     using Sandbox.ModAPI;
     using VRageMath;
 
-    public class CommandPastePrefab : ChatCommand
+    public class CommandPrefabPaste : ChatCommand
     {
-        public CommandPastePrefab()
+        public CommandPrefabPaste()
             : base(ChatCommandSecurity.Admin, "pasteprefab", new[] { "/pasteprefab" })
         {
         }

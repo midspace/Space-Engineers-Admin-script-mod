@@ -227,7 +227,7 @@ namespace midspace.adminscripts
             player.Controller.ControlledEntity.Entity.SetPosition(position);
 
             //save teleport in history
-            CommandBack.SaveTeleportInHistory(currentPosition);
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
 
             return true;
         }
@@ -256,7 +256,7 @@ namespace midspace.adminscripts
             player.Controller.ControlledEntity.Entity.SetPosition(position);
 
             //save teleport in history
-            CommandBack.SaveTeleportInHistory(currentPosition);
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
 
             return true;
         }
@@ -286,7 +286,7 @@ namespace midspace.adminscripts
             player.Controller.ControlledEntity.Entity.SetPosition(destination);
 
             //save teleport in history
-            CommandBack.SaveTeleportInHistory(currentPosition);
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
 
             return true;
         }
@@ -319,7 +319,7 @@ namespace midspace.adminscripts
             {
                 //grid.SetPosition(grid.GetPosition() + worldOffset);
             }
-            
+
             //save teleport in history
             //CommandBack.SaveTeleportInHistory(currentPosition);
 

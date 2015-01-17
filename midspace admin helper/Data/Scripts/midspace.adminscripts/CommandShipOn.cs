@@ -8,21 +8,21 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
 
-    public class CommandOff : ChatCommand
+    public class CommandShipOn : ChatCommand
     {
-        public CommandOff()
-            : base(ChatCommandSecurity.Admin, "off", new[] { "/off" })
+        public CommandShipOn()
+            : base(ChatCommandSecurity.Admin, "on", new[] { "/on" })
         {
         }
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/off <#>", "Turns off all reactor power in the specified <#> ship.");
+            MyAPIGateway.Utilities.ShowMessage("/on <#>", "Turns on all reactor power in the specified <#> ship.");
         }
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.Equals("/off", StringComparison.InvariantCultureIgnoreCase))
+            if (messageText.Equals("/on", StringComparison.InvariantCultureIgnoreCase))
             {
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false);
                 if (entity != null)
@@ -30,16 +30,16 @@
                     var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        var count = TurnOffShip(entity);
-                        MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, string.Format("{0} Reactors turned off.", count));
+                        var count = TurnOnShip(entity);
+                        MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, string.Format("{0} Reactors turned on.", count));
                         return true;
                     }
                 }
             }
 
-            if (messageText.StartsWith("/off ", StringComparison.InvariantCultureIgnoreCase))
+            if (messageText.StartsWith("/on ", StringComparison.InvariantCultureIgnoreCase))
             {
-                var match = Regex.Match(messageText, @"/off\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+                var match = Regex.Match(messageText, @"/on\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
                     var shipName = match.Groups["Key"].Value;
@@ -56,8 +56,8 @@
                         }
                     }
 
-                    var count = TurnOffShips(currentShipList);
-                    MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, string.Format("{0} Reactors turned off.", count));
+                    var count = TurnOnShips(currentShipList);
+                    MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, string.Format("{0} Reactors turned on.", count));
                     return true;
                 }
             }
@@ -65,17 +65,17 @@
             return false;
         }
 
-        private int TurnOffShips(IEnumerable<IMyEntity> shipList)
+        private int TurnOnShips(IEnumerable<IMyEntity> shipList)
         {
             var counter = 0;
             foreach (var selectedShip in shipList)
             {
-                counter += TurnOffShip(selectedShip);
+                counter += TurnOnShip(selectedShip);
             }
             return counter;
         }
 
-        private int TurnOffShip(IMyEntity shipEntity)
+        private int TurnOnShip(IMyEntity shipEntity)
         {
             int counter = 0;
             var grids = shipEntity.GetAttachedGrids();
@@ -87,11 +87,11 @@
                     && f.FatBlock is IMyFunctionalBlock
                     && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor));
 
-                var list = blocks.Select(f => (IMyFunctionalBlock)f.FatBlock).Where(f => f.Enabled).ToArray();
+                var list = blocks.Select(f => (IMyFunctionalBlock)f.FatBlock).Where(f => !f.Enabled).ToArray();
 
                 foreach (var item in list)
                 {
-                    item.RequestEnable(false);
+                    item.RequestEnable(true);
                     counter++;
                 }
             }

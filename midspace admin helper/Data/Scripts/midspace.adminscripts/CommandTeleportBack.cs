@@ -1,20 +1,18 @@
-﻿using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using VRageMath;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
-    public class CommandBack : ChatCommand
+    using System;
+    using System.Collections.Generic;
+
+    using Sandbox.ModAPI;
+    using VRageMath;
+
+    public class CommandTeleportBack : ChatCommand
     {
 
         public static readonly List<Vector3D> TeleportHistory = new List<Vector3D>();
         private static int CurrentIndex;
 
-        public CommandBack()
+        public CommandTeleportBack()
             : base(ChatCommandSecurity.Admin, "back", new String[] { "/back" })
         {
 
@@ -36,7 +34,7 @@ namespace midspace.adminscripts
                 }
 
                 //if we havn't initialized the index yet or we reached the bottom of the history, we start again from the top
-                if (CurrentIndex == null || CurrentIndex == 0)
+                if (CurrentIndex == 0)
                     CurrentIndex = TeleportHistory.Count - 1;
                 else
                     CurrentIndex -= 1;

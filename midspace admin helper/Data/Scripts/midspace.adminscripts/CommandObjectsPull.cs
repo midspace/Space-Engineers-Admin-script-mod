@@ -5,14 +5,13 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
 
-    public class CommandPullObjects : ChatCommand
+    public class CommandObjectsPull : ChatCommand
     {
-        public CommandPullObjects()
+        public CommandObjectsPull()
             : base(ChatCommandSecurity.Admin, "pullobjects", new[] { "/pullobjects" })
         {
         }

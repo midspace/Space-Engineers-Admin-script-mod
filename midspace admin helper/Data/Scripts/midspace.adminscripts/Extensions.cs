@@ -5,11 +5,10 @@ namespace midspace.adminscripts
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.VRageData;
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
-    using Sandbox.Definitions;
-    using System;
 
     public static class Extensions
     {

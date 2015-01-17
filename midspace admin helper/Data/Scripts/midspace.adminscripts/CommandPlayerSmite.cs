@@ -8,11 +8,11 @@
     using Sandbox.ModAPI;
     using Sandbox.Common.ObjectBuilders;
 
-    public class CommandSmite : ChatCommand
+    public class CommandPlayerSmite : ChatCommand
     {
         private readonly string[] _oreNames;
 
-        public CommandSmite(string[] oreNames)
+        public CommandPlayerSmite(string[] oreNames)
             : base(ChatCommandSecurity.Admin, "smite", new[] { "/smite" })
         {
             _oreNames = oreNames;
@@ -42,10 +42,10 @@
                     }
 
                     int index;
-                    if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandStatus.IdentityCache.Count)
+                    if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
                     {
                         var listplayers = new List<IMyPlayer>();
-                        MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandStatus.IdentityCache[index - 1].PlayerId);
+                        MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
                         selectedPlayer = listplayers.FirstOrDefault();
                     }
 

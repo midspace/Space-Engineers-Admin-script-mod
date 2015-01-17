@@ -10,23 +10,23 @@
     using Sandbox.ModAPI;
     using VRageMath;
 
-    public class CommandAddPrefab : ChatCommand
+    public class CommandPrefabAddWireframe : ChatCommand
     {
-        public CommandAddPrefab()
-            : base(ChatCommandSecurity.Admin, "addprefab", new[] { "/addprefab" })
+        public CommandPrefabAddWireframe()
+            : base(ChatCommandSecurity.Admin, "addwireframe", new[] { "/addwireframe" })
         {
         }
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/addprefab <#>", "Add the specified <#> prefab. Spawns the specified a ship 2m directly in front of player.");
+            MyAPIGateway.Utilities.ShowMessage("/addwireframe <#>", "Add the specified <#> prefab as an unbuilt ship. Spawns the specified a ship 2m directly in front of player.");
         }
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.StartsWith("/addprefab ", StringComparison.InvariantCultureIgnoreCase))
+            if (messageText.StartsWith("/addwireframe ", StringComparison.InvariantCultureIgnoreCase))
             {
-                var match = Regex.Match(messageText, @"/addprefab\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+                var match = Regex.Match(messageText, @"/addwireframe\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
                     var prefabName = match.Groups["Key"].Value;
@@ -64,6 +64,13 @@
                         {
                             var gridBuilder = (MyObjectBuilder_CubeGrid)grid.Clone();
                             gridBuilder.PositionAndOrientation = new MyPositionAndOrientation(grid.PositionAndOrientation.Value.Position + offset, grid.PositionAndOrientation.Value.Forward, grid.PositionAndOrientation.Value.Up);
+
+                            foreach (var cube in gridBuilder.CubeBlocks)
+                            {
+                                cube.IntegrityPercent = 0.01f;
+                                cube.BuildPercent = 0.01f;
+                            }
+
                             tempList.Add(gridBuilder);
                         }
 

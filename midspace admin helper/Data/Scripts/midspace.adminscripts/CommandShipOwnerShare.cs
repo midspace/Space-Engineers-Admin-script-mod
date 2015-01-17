@@ -12,9 +12,9 @@
     /// however you cannot change ownership of indivual blocks currently. All blocks in an entire grid must be set all at once.
     /// This wont work if the blocks are currently owned several players, as it will rewrite all ownership.
     /// </summary>
-    public class CommandShare : ChatCommand
+    public class CommandShipOwnerShare : ChatCommand
     {
-        public CommandShare()
+        public CommandShipOwnerShare()
             : base(ChatCommandSecurity.Experimental, "share", new[] { "/share" })
         {
         }

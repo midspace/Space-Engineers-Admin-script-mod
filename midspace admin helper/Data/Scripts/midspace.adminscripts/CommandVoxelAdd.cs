@@ -12,9 +12,9 @@
     /// <summary>
     /// This doesn't work now. It was practivally one week after releasing the first APIs, that the API for adding asteroids was then removed.
     /// </summary>
-    public class CommandAddVoxel : ChatCommand
+    public class CommandVoxelAdd : ChatCommand
     {
-        public CommandAddVoxel()
+        public CommandVoxelAdd()
             : base(ChatCommandSecurity.Experimental, "addvoxel", new[] { "/addvoxel" })
         {
         }

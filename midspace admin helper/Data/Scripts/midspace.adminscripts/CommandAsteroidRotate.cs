@@ -14,9 +14,9 @@
     /// This worked by creating a new asteroid store with the new dimentions required (as the entire space is rotated).
     /// Currently it is not working, as the API for creating new a asteroid Store has been removed.
     /// </summary>
-    public class CommandRotateAsteroid : ChatCommand
+    public class CommandAsteroidRotate : ChatCommand
     {
-        public CommandRotateAsteroid()
+        public CommandAsteroidRotate()
             : base(ChatCommandSecurity.Experimental, "rotateroid", new[] { "/rotateroid" })
         {
         }
@@ -57,9 +57,9 @@
                     }
 
                     int index;
-                    if (searchName.Substring(0, 1) == "#" && Int32.TryParse(searchName.Substring(1), out index) && index > 0 && index <= CommandListAsteroids.AsteroidCache.Count)
+                    if (searchName.Substring(0, 1) == "#" && Int32.TryParse(searchName.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
                     {
-                        originalAsteroid = CommandListAsteroids.AsteroidCache[index - 1];
+                        originalAsteroid = CommandAsteroidsList.AsteroidCache[index - 1];
                     }
 
                     if (originalAsteroid != null)

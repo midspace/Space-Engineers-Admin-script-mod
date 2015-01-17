@@ -7,21 +7,21 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
 
-    public class CommandRevoke : ChatCommand
+    public class CommandShipOwnerClaim : ChatCommand
     {
-        public CommandRevoke()
-            : base(ChatCommandSecurity.Admin, "revoke", new[] { "/revoke" })
+        public CommandShipOwnerClaim()
+            : base(ChatCommandSecurity.Admin, "claim", new[] { "/claim" })
         {
         }
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/revoke <#>", "Removes ownership of all cubes in specified <#> ship.");
+            MyAPIGateway.Utilities.ShowMessage("/claim <#>", "Claims ownership of the <#> specified ship. All own-able blocks are transferred to you.");
         }
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/revoke\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/claim\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -45,7 +45,7 @@
                     var grids = selectedShip.GetAttachedGrids();
                     foreach (var grid in grids)
                     {
-                        grid.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
+                        grid.ChangeGridOwnership(MyAPIGateway.Session.Player.PlayerID, MyOwnershipShareModeEnum.All);
                     }
                 }
 

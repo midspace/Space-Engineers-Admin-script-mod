@@ -2,25 +2,25 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using Sandbox.ModAPI.Interfaces;
     using VRage.Common.Voxels;
     using VRageMath;
-    using Sandbox.Definitions;
-    using Sandbox.ModAPI.Interfaces;
 
     /// <summary>
     /// This was the beginning of an idea for an Long range Ore Scanner.
     /// Except, it takes too long to work, and can potentially pause your game for long periods.
     /// The problem is loading Store from the Voxel. At LOD 0, it takes too long.
     /// </summary>
-    public class CommandFindOre : ChatCommand
+    public class CommandAsteroidFindOre : ChatCommand
     {
         private readonly string[] _oreNames;
 
-        public CommandFindOre(string[] oreNames)
+        public CommandAsteroidFindOre(string[] oreNames)
             : base(ChatCommandSecurity.Experimental, "findore", new[] { "/findore" })
         {
             _oreNames = oreNames;

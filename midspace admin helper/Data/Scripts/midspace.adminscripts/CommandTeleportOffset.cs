@@ -55,7 +55,7 @@
                 }
 
                 //save teleport in history
-                CommandBack.SaveTeleportInHistory(currentPosition);
+                CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                 return true;
             }
 

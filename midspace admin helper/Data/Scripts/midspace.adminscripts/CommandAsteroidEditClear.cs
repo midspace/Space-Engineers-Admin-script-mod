@@ -4,11 +4,11 @@
 
     using Sandbox.ModAPI;
 
-    public class CommandVoxelClear : ChatCommand
+    public class CommandAsteroidEditClear : ChatCommand
     {
         public static bool ActiveVoxelDeleter { get; private set; }
 
-        public CommandVoxelClear()
+        public CommandAsteroidEditClear()
             : base(ChatCommandSecurity.Admin, "voxelclear", new[] { "/voxelclear" })
         {
         }

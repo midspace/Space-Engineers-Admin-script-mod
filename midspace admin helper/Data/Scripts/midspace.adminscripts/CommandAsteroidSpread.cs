@@ -7,13 +7,13 @@
     using Sandbox.ModAPI;
     using Sandbox.Common.ObjectBuilders;
 
-    public class CommandSpreadAsteroids : ChatCommand
+    public class CommandAsteroidSpread : ChatCommand
     {
         /// <summary>
         /// A grand idea to move asteroids. However the API does not support moving asteroids.
-        /// I'm not sure if the API ever will. KeenSWH may just implment the feature in game, and this will become redundant.
+        /// I'm not sure if the API ever will. KeenSWH may just implement the feature in game and then this will become redundant.
         /// </summary>
-        public CommandSpreadAsteroids()
+        public CommandAsteroidSpread()
             : base(ChatCommandSecurity.Experimental, "spreadasteroids", new[] { "/spreadasteroids" })
         {
         }

@@ -6,14 +6,14 @@
 
     using Sandbox.ModAPI;
 
-    public class CommandListAsteroids : ChatCommand
+    public class CommandAsteroidsList : ChatCommand
     {
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of in game asteroids, populated only by search results.
         /// </summary>
         public readonly static List<IMyVoxelMap> AsteroidCache = new List<IMyVoxelMap>();
 
-        public CommandListAsteroids()
+        public CommandAsteroidsList()
             : base(ChatCommandSecurity.Admin, "listasteroids", new[] { "/listasteroids" })
         {
         }

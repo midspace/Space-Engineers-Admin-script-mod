@@ -6,14 +6,14 @@
 
     using Sandbox.ModAPI;
 
-    public class CommandStatus : ChatCommand
+    public class CommandPlayerStatus : ChatCommand
     {
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of in game players, populated only by search results.
         /// </summary>
         public readonly static List<IMyIdentity> IdentityCache = new List<IMyIdentity>();
 
-        public CommandStatus()
+        public CommandPlayerStatus()
             : base(ChatCommandSecurity.User, "status", new[] { "/status" })
         {
         }

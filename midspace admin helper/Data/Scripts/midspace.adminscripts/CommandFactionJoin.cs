@@ -36,9 +36,9 @@
                 selectedPlayer = identities.FirstOrDefault();
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandStatus.IdentityCache.Count)
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
                 {
-                    selectedPlayer = CommandStatus.IdentityCache[index - 1];
+                    selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
                 }
 
                 if (playerName.Substring(0, 1) == "B" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)

@@ -15,9 +15,9 @@
     /// The IMyPlayer.Respawn() API command was removed, and no longer accessible.
     /// It was good for testing additional player bodies, especially in creative mode.
     /// </summary>
-    public class CommandRespawn : ChatCommand
+    public class CommandPlayerRespawn : ChatCommand
     {
-        public CommandRespawn()
+        public CommandPlayerRespawn()
             : base(ChatCommandSecurity.Experimental, "respawn", new[] { "/respawn" })
         {
         }
