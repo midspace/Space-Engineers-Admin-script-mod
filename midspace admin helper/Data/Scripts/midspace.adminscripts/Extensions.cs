@@ -4,6 +4,7 @@ namespace midspace.adminscripts
     using System.Linq;
 
     using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Common.ObjectBuilders.VRageData;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
@@ -251,6 +252,16 @@ namespace midspace.adminscripts
                 dictionary[key] = value;
             else
                 dictionary.Add(key, value);
+        }
+
+        /// <summary>
+        /// Deals 1000 hp of damage to player, killing them instantly.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="damageType"></param>
+        public static void KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
+        {
+            ((IMyDestroyableObject)player.Controller.ControlledEntity).DoDamage(1000f, damageType, true);
         }
     }
 }

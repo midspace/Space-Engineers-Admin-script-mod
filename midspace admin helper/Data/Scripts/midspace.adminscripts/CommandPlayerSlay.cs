@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.ModAPI;
 
     public class CommandPlayerSlay : ChatCommand
@@ -32,7 +33,7 @@
 
                 if (playerName == null)
                 {
-                    MyAPIGateway.Session.Player.Controller.ControlledEntity.Die();
+                    MyAPIGateway.Session.Player.KillPlayer(MyDamageType.Environment);
                     return true;
                 }
 
@@ -43,7 +44,7 @@
                 if (findPlayer != null)
                 {
                     MyAPIGateway.Utilities.ShowMessage("slaying", findPlayer.DisplayName);
-                    findPlayer.Controller.ControlledEntity.Die();
+                    findPlayer.KillPlayer(MyDamageType.Environment);
                     return true;
                 }
 
@@ -57,16 +58,10 @@
                     if (player != null)
                     {
                         MyAPIGateway.Utilities.ShowMessage("slaying", player.DisplayName);
-                        player.Controller.ControlledEntity.Die();
+                        player.KillPlayer(MyDamageType.Environment);
                         return true;
                     }
                 }
-
-                // methods...
-                //MyAPIGateway.Session.GameOver(); // not player specific.
-                //MyAPIGateway.Session.Player.RequestRespawn();  //doesn't kill person, only creates new instance, leaving old body.
-                //MyAPIGateway.Players.KillPlayer(MyAPIGateway.Session.Player.PlayerId); // doesn't work??
-                //MyAPIGateway.Session.Player.PlayerCharacter.Die(); // puts up confirmation dialog.
             }
 
             return false;
