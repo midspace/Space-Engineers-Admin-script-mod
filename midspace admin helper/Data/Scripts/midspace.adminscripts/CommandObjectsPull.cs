@@ -34,14 +34,12 @@
                     var destination = playerEntity.WorldAABB.Center;
                     var sphere = new BoundingSphereD(destination, range);
                     var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-                    floatingList = floatingList.Where(e => !(e is Sandbox.ModAPI.IMyCubeGrid) && !(e is Sandbox.ModAPI.IMyVoxelMap) && !(e is IMyControllableEntity)).ToList();
-                    // Need a better interface to filter out the difference between FloatingItems and Meteors here.
+                    floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject)).ToList();
 
                     foreach (var item in floatingList)
                     {
-                        // Check for null physics, as GetEntitiesInSphere returns a strange list.
-                        // The GetObjectBuilder() is thowing an exception on a lot of these dummy objects as a result.
-                        if (item.Physics != null /*&& item.GetObjectBuilder().TypeId == typeof(MyObjectBuilder_FloatingObject)*/)
+                        // Check for null physics and IsPhantom, to prevent picking up primitives.
+                        if (item.Physics != null && !item.Physics.IsPhantom)
                         {
                             var position = item.GetPosition();
                             var vector = Vector3D.Normalize(destination - position) * velocity;
