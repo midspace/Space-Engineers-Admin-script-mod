@@ -229,16 +229,12 @@ using Sandbox.ModAPI.Interfaces;
 
             MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
 
-<<<<<<< HEAD
             if (MyAPIGateway.Multiplayer.MultiplayerActive)
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
             }
 
-            if (_timer != null)
-=======
             if (_timer100 != null)
->>>>>>> 330fa1fb75663f0fe3e41aa289dd991ead3b57c7
             {
                 _timer100.Stop();
                 _timer100.Elapsed -= TimerOnElapsed100;
