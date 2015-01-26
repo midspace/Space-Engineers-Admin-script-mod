@@ -123,6 +123,7 @@
     <Compile Include="CommandSessionCreative.cs" />
     <Compile Include="CommandSessionCopyPaste.cs" />
     <Compile Include="CommandSessionCargoShips.cs" />
+    <Compile Include="CommandObjectsCollect.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />

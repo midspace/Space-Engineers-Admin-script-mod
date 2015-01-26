@@ -117,6 +117,7 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandListShips());
             ChatCommandService.Register(new CommandListShips2());
             ChatCommandService.Register(new CommandMeteor(_oreNames));
+            ChatCommandService.Register(new CommandObjectsCollect());
             ChatCommandService.Register(new CommandObjectsCount());
             ChatCommandService.Register(new CommandObjectsPull());
             ChatCommandService.Register(new CommandPlayerEject());
