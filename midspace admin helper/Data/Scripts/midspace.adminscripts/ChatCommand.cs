@@ -54,6 +54,13 @@
         }
 
         /// <summary>
+        /// Optional method that is called every 100 miliseconds Before Simulation.
+        /// </summary>
+        public virtual void UpdateBeforeSimulation100()
+        {
+        }
+
+        /// <summary>
         /// Optional method that is called every 1000 miliseconds Before Simulation.
         /// </summary>
         public virtual void UpdateBeforeSimulation1000()

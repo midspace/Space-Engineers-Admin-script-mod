@@ -32,8 +32,10 @@ namespace midspace.adminscripts
         #region fields
 
         private bool _isInitilized;
-        private Timer _timer;
+        private Timer _timer100;
+        private bool _100MsTimerElapsed;
         private bool _1000MsTimerElapsed;
+        private int _timerCounter = 0;
         private static string[] _oreNames;
         private static List<string> _ingotNames;
         private static Dictionary<MyTextsWrapperEnum, string> _resouceLookup;
@@ -54,6 +56,12 @@ namespace midspace.adminscripts
 
             if (MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
                 return;
+
+            if (_100MsTimerElapsed)
+            {
+                _100MsTimerElapsed = false;
+                ChatCommandService.UpdateBeforeSimulation100();
+            }
 
             if (_1000MsTimerElapsed)
             {
@@ -148,9 +156,9 @@ namespace midspace.adminscripts
             //ChatCommandService.Register(new CommandVoxelsList()); //not working any more
 
 
-            _timer = new Timer(1000);
-            _timer.Elapsed += TimerOnElapsed;
-            _timer.Start();
+            _timer100 = new Timer(100);
+            _timer100.Elapsed += TimerOnElapsed100;
+            _timer100.Start();
             // Attach any other events here.
 
             ChatCommandService.Init();
@@ -165,19 +173,27 @@ namespace midspace.adminscripts
 
             MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
 
-            if (_timer != null)
+            if (_timer100 != null)
             {
-                _timer.Stop();
-                _timer.Elapsed -= TimerOnElapsed;
+                _timer100.Stop();
+                _timer100.Elapsed -= TimerOnElapsed100;
             }
         }
 
-        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        private void TimerOnElapsed100(object sender, ElapsedEventArgs elapsedEventArgs)
         {
+            _timerCounter++;
+
             // Run timed events that do not affect Threading in game.
-            _1000MsTimerElapsed = true;
+            _100MsTimerElapsed = true;
+
+            if (_timerCounter % 10 == 0)
+                _1000MsTimerElapsed = true;
 
             // DO NOT SET ANY IN GAME API CALLS HERE. AT ALL!
+
+            if (_timerCounter == 100)
+                _timerCounter = 0;
         }
 
         #endregion

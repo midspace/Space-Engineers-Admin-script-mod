@@ -70,7 +70,7 @@
                 }
 
                 MyAPIGateway.Session.Factions.PromoteMember(factionBuilder.FactionId, selectedPlayer.PlayerID);
-                MyAPIGateway.Utilities.ShowMessage("promote", string.Format("{0} from normal Member to Leader.", selectedPlayer.DisplayName));
+                MyAPIGateway.Utilities.ShowMessage("promote", string.Format("{0} from Member to Leader.", selectedPlayer.DisplayName));
                 return true;
             }
 

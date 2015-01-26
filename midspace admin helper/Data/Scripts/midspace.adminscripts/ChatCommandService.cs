@@ -149,6 +149,17 @@
             }
         }
 
+        public static void UpdateBeforeSimulation100()
+        {
+            if (!_isInitialized)
+                return;
+
+            foreach (var command in Commands.Where(command => (command.Security & _userSecurity) != ChatCommandSecurity.None))
+            {
+                command.UpdateBeforeSimulation100();
+            }
+        }
+
         public static void UpdateBeforeSimulation1000()
         {
             if (!_isInitialized)
