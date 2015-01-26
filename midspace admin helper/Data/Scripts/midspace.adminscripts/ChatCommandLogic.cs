@@ -9,10 +9,12 @@ namespace midspace.adminscripts
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+using Sandbox.ModAPI.Interfaces;
+    using System.IO;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
-    /// Author: Midspace. AKA Screaming Angels.
+    /// Authors: Midspace. AKA Screaming Angels. & Sp[a]cemarine.
     /// 
     /// The main Steam workshop link to this mod is:
     /// http://steamcommunity.com/sharedfiles/filedetails/?id=316190120
@@ -29,15 +31,19 @@ namespace midspace.adminscripts
     [Sandbox.Common.MySessionComponentDescriptor(Sandbox.Common.MyUpdateOrder.BeforeSimulation)]
     public class ChatCommandLogic : Sandbox.Common.MySessionComponentBase
     {
-        #region fields
+        #region fields and constants
 
-        private bool _isInitilized;
+        public static ChatCommandLogic Instance;
+
+        private bool _isInitialized;
         private Timer _timer;
         private bool _1000MsTimerElapsed;
         private static string[] _oreNames;
         private static List<string> _ingotNames;
         private static Dictionary<MyTextsWrapperEnum, string> _resouceLookup;
         private static MyPhysicalItemDefinition[] _physicalItems;
+
+        private const string ConfigFile = "Motd.cfg";
 
         #endregion
 
@@ -47,13 +53,16 @@ namespace midspace.adminscripts
         {
             // This needs to wait until the MyAPIGateway.Session.Player is created, as running on a Dedicated server can cause issues.
             // It would be nicer to just read a property that indicates this is a dedicated server, and simply return.
-            if (!_isInitilized && MyAPIGateway.Session != null && MyAPIGateway.Session.Player != null)
+            if (!_isInitialized && MyAPIGateway.Session != null && MyAPIGateway.Session.Player != null)
                 Init();
 
-            base.UpdateBeforeSimulation();
-
-            if (MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
+            if (!_isInitialized && MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
+            {
+                InitServer();
                 return;
+            }
+
+            base.UpdateBeforeSimulation();
 
             if (_1000MsTimerElapsed)
             {
@@ -74,8 +83,9 @@ namespace midspace.adminscripts
 
         private void Init()
         {
-            _isInitilized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
+            _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
+            Instance = this;
 
             // This will populate the _oreNames, _ingotNames, ready for the ChatCommands.
             BuildResourceLookups();
@@ -108,6 +118,7 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandListPrefabs());
             ChatCommandService.Register(new CommandListShips());
             ChatCommandService.Register(new CommandListShips2());
+            ChatCommandService.Register(new CommandMessageOfTheDay());
             ChatCommandService.Register(new CommandMeteor(_oreNames));
             ChatCommandService.Register(new CommandObjectsCount());
             ChatCommandService.Register(new CommandObjectsPull());
@@ -154,6 +165,47 @@ namespace midspace.adminscripts
             // Attach any other events here.
 
             ChatCommandService.Init();
+
+            if (MyAPIGateway.Multiplayer.MultiplayerActive) //only need this in mp
+            {
+                //let the server know we are ready for connections
+                MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Client;
+                var data = new Dictionary<string, string>();
+                data.Add("connect", MyAPIGateway.Session.Player.SteamUserId.ToString());
+                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.BasicPrefix, data);
+                ConnectionHelper.SentIdRequest = true;
+                CommandMessageOfTheDay.ShowMotdOnSpawn = true;
+            }
+        }
+
+        /// <summary>
+        /// Server side initialization.
+        /// </summary>
+        private void InitServer()
+        {
+            _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
+            ConnectionHelper.ServerPrefix = ConnectionHelper.RandomString(8);
+            MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Server;
+
+            if (!MyAPIGateway.Utilities.FileExistsInGlobalStorage(ConfigFile))
+            {
+                CreateConfig();
+            }
+
+            TextReader reader = MyAPIGateway.Utilities.ReadFileInGlobalStorage(ConfigFile);
+            var text = reader.ReadToEnd();
+            if (!string.IsNullOrEmpty(text))
+                CommandMessageOfTheDay.MessageOfTheDay = text;
+        }
+
+        /// <summary>
+        /// Create cfg file
+        /// </summary>
+        private void CreateConfig()
+        {
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInGlobalStorage(ConfigFile);
+            writer.Flush();
+            writer.Close();
         }
 
         #region detaching events
@@ -161,9 +213,17 @@ namespace midspace.adminscripts
         private void DetachEvents()
         {
             if (MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
+            {
+                MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Server;
                 return;
+            }
 
             MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
+
+            if (MyAPIGateway.Multiplayer.MultiplayerActive)
+            {
+                MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
+            }
 
             if (_timer != null)
             {
@@ -219,6 +279,60 @@ namespace midspace.adminscripts
                 {
                     _ingotNames.Add(physicalItem.Id.SubtypeName);
                 }
+            }
+        }
+
+        #endregion
+
+        #region connection handling
+
+        /// <summary>
+        /// Server side processing of incoming connections
+        /// </summary>
+        /// <param name="entity"></param>
+        void Entities_OnEntityAdd_Server(IMyEntity entity)
+        {
+            if (entity is IMyCubeGrid)
+            {
+                //we use the different prefixes to prevent failures
+                if (entity.DisplayName.StartsWith(ConnectionHelper.ServerPrefix))
+                    ConnectionHelper.ProcessServerData(entity.DisplayName.Substring(8));
+                else if (entity.DisplayName.StartsWith(ConnectionHelper.BasicPrefix))
+                    ConnectionHelper.ProcessIdRequest(entity.DisplayName.Substring(8));
+            }
+        }
+
+        /// <summary>
+        /// Client side processing of incoming connections
+        /// </summary>
+        /// <param name="entity"></param>
+        void Entities_OnEntityAdd_Client(IMyEntity entity)
+        {
+            if (entity is IMyCubeGrid)
+            {
+                //if the custom prefix isnt set we assume that it's the 'first contact'
+                if (ConnectionHelper.ClientPrefix == null)
+                {
+                    //if it doesn't start with the basic prefix it's not a connection
+                    if (!entity.DisplayName.StartsWith(ConnectionHelper.BasicPrefix) || !ConnectionHelper.SentIdRequest)
+                        return;
+
+                    ConnectionHelper.ProcessIdData(entity.DisplayName.Substring(8));
+                    return;
+                }
+                //if there is a custom prefix and the displayname doesn't start with it we can stop here
+                if (!entity.DisplayName.StartsWith(ConnectionHelper.ClientPrefix))
+                        return;
+
+                ConnectionHelper.ProcessClientData(entity.DisplayName.Substring(8));
+            }
+            else if (entity is IMyCharacter && CommandMessageOfTheDay.ShowMotdOnSpawn && entity.DisplayName.Equals(MyAPIGateway.Session.Player.DisplayName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (CommandMessageOfTheDay.Received)
+                    CommandMessageOfTheDay.ShowMotd();
+                else
+                    CommandMessageOfTheDay.ShowMotdOnReceive = true;
+                CommandMessageOfTheDay.ShowMotdOnSpawn = false;
             }
         }
 

@@ -128,6 +128,12 @@
                 catch (Exception ex)
                 {
                     // Exception handling to prevent any crash in the ChatCommand's reaching the user.
+                    // Additional information for developers
+                    if ((ChatCommandSecurity.Experimental & _userSecurity) != ChatCommandSecurity.None)
+                    {
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
+                        continue;
+                    }
 
                     var message = ex.Message.Replace("\r", " ").Replace("\n", " ");
                     message = message.Substring(0, Math.Min(message.Length, 50));

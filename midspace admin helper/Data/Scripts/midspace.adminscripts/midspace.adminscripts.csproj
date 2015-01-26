@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatCommandService.cs" />
+    <Compile Include="CommandMessageOfTheDay.cs" />
     <Compile Include="CommandPrefabAdd.cs" />
     <Compile Include="CommandTeleportBack.cs" />
     <Compile Include="CommandShipOwnerClaim.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="CommandSessionCreative.cs" />
     <Compile Include="CommandSessionCopyPaste.cs" />
     <Compile Include="CommandSessionCargoShips.cs" />
+    <Compile Include="ConnectionHelper.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />
