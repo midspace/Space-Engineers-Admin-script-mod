@@ -124,6 +124,7 @@
     <Compile Include="CommandSessionCreative.cs" />
     <Compile Include="CommandSessionCopyPaste.cs" />
     <Compile Include="CommandSessionCargoShips.cs" />
+    <Compile Include="CommandObjectsCollect.cs" />
     <Compile Include="ConnectionHelper.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />

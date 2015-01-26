@@ -67,7 +67,7 @@
                 if (fm.IsLeader)
                 {
                     MyAPIGateway.Session.Factions.DemoteMember(factionBuilder.FactionId, selectedPlayer.PlayerID);
-                    MyAPIGateway.Utilities.ShowMessage("demote", string.Format("{0} from Leader to normal Member.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("demote", string.Format("{0} from Leader to Member.", selectedPlayer.DisplayName));
                     return true;
                 }
 

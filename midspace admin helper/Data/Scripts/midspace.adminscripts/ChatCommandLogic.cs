@@ -36,8 +36,10 @@ using Sandbox.ModAPI.Interfaces;
         public static ChatCommandLogic Instance;
 
         private bool _isInitialized;
-        private Timer _timer;
+        private Timer _timer100;
+        private bool _100MsTimerElapsed;
         private bool _1000MsTimerElapsed;
+        private int _timerCounter = 0;
         private static string[] _oreNames;
         private static List<string> _ingotNames;
         private static Dictionary<MyTextsWrapperEnum, string> _resouceLookup;
@@ -63,6 +65,12 @@ using Sandbox.ModAPI.Interfaces;
             }
 
             base.UpdateBeforeSimulation();
+
+            if (_100MsTimerElapsed)
+            {
+                _100MsTimerElapsed = false;
+                ChatCommandService.UpdateBeforeSimulation100();
+            }
 
             if (_1000MsTimerElapsed)
             {
@@ -120,6 +128,7 @@ using Sandbox.ModAPI.Interfaces;
             ChatCommandService.Register(new CommandListShips2());
             ChatCommandService.Register(new CommandMessageOfTheDay());
             ChatCommandService.Register(new CommandMeteor(_oreNames));
+            ChatCommandService.Register(new CommandObjectsCollect());
             ChatCommandService.Register(new CommandObjectsCount());
             ChatCommandService.Register(new CommandObjectsPull());
             ChatCommandService.Register(new CommandPlayerEject());
@@ -159,9 +168,9 @@ using Sandbox.ModAPI.Interfaces;
             //ChatCommandService.Register(new CommandVoxelsList()); //not working any more
 
 
-            _timer = new Timer(1000);
-            _timer.Elapsed += TimerOnElapsed;
-            _timer.Start();
+            _timer100 = new Timer(100);
+            _timer100.Elapsed += TimerOnElapsed100;
+            _timer100.Start();
             // Attach any other events here.
 
             ChatCommandService.Init();
@@ -220,24 +229,36 @@ using Sandbox.ModAPI.Interfaces;
 
             MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
 
+<<<<<<< HEAD
             if (MyAPIGateway.Multiplayer.MultiplayerActive)
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
             }
 
             if (_timer != null)
+=======
+            if (_timer100 != null)
+>>>>>>> 330fa1fb75663f0fe3e41aa289dd991ead3b57c7
             {
-                _timer.Stop();
-                _timer.Elapsed -= TimerOnElapsed;
+                _timer100.Stop();
+                _timer100.Elapsed -= TimerOnElapsed100;
             }
         }
 
-        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        private void TimerOnElapsed100(object sender, ElapsedEventArgs elapsedEventArgs)
         {
+            _timerCounter++;
+
             // Run timed events that do not affect Threading in game.
-            _1000MsTimerElapsed = true;
+            _100MsTimerElapsed = true;
+
+            if (_timerCounter % 10 == 0)
+                _1000MsTimerElapsed = true;
 
             // DO NOT SET ANY IN GAME API CALLS HERE. AT ALL!
+
+            if (_timerCounter == 100)
+                _timerCounter = 0;
         }
 
         #endregion
