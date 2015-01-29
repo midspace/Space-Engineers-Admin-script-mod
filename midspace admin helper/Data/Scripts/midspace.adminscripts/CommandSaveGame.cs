@@ -2,7 +2,7 @@
 {
     using System;
 
-    using Sandbox.Common.Localization;
+    using VRage.Common.Utils;
     using Sandbox.ModAPI;
 
     /// <summary>
@@ -28,7 +28,7 @@
             if (messageText.Equals("/savegame", StringComparison.InvariantCultureIgnoreCase))
             {
                 MyAPIGateway.Session.Save();
-                var msg = string.Format(MyTextsWrapper.GetString(MyTextsWrapperEnum.WorldSaved), MyAPIGateway.Session.Name);
+                var msg = MyStringId.Get("WorldSaved").GetStringFormat(MyAPIGateway.Session.Name);
                 MyAPIGateway.Utilities.ShowNotification(msg, 2500, Sandbox.Common.MyFontEnum.White);
                 return true;
             }

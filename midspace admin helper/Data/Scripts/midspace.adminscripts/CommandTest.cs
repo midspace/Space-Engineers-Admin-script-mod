@@ -6,14 +6,11 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using Sandbox.Common.Components;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.VRageData;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
-    using Sandbox.Common.Localization;
-    using Sandbox.Definitions;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -23,13 +20,9 @@
     /// </summary>
     public class CommandTest : ChatCommand
     {
-
-        Dictionary<MyTextsWrapperEnum, string> _resouceLookup;
-
-        public CommandTest(Dictionary<MyTextsWrapperEnum, string> resouceLookup)
+        public CommandTest()
             : base(ChatCommandSecurity.Experimental, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13" })
         {
-            _resouceLookup = resouceLookup;
         }
 
         public override void Help()
@@ -129,7 +122,7 @@
                 MyAPIGateway.Utilities.ShowMessage("MultiplayerActive", string.Format("{0}", MyAPIGateway.Multiplayer.MultiplayerActive));
                 MyAPIGateway.Utilities.ShowMessage("OnlineMode", string.Format("{0}", MyAPIGateway.Session.OnlineMode));
                 MyAPIGateway.Utilities.ShowMessage("IsDedicated", string.Format("{0}", MyAPIGateway.Utilities.IsDedicated));
-                MyAPIGateway.Utilities.ShowMessage("Culture", string.Format("{0}", MyTextsWrapper.Culture.IetfLanguageTag));
+                //MyAPIGateway.Utilities.ShowMessage("Culture", string.Format("{0}", MyTexts.Culture.IetfLanguageTag));
                 return true;
             }
 

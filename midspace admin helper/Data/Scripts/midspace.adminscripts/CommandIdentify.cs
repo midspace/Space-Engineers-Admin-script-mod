@@ -63,7 +63,7 @@
                                 }
 
                         var contentBox = new BoundingBoxD(voxelMap.PositionLeftBottomCorner + min, voxelMap.PositionLeftBottomCorner + max);
-                        description = string.Format("Distance: {0:N}\r\nSize: {1}\r\bCenter BoundingBox: {2}\r\nLOD1 Center Content: {3}", distance, voxelMap.Storage.Size, aabb.Center, contentBox.Center);
+                        description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: {2}\r\nLOD1 Content Center: {3}", distance, voxelMap.Storage.Size, aabb.Center, contentBox.Center);
 
                     }
                     else if (entity is IMyCubeGrid)
@@ -78,7 +78,7 @@
 
                         displayType = gridCube.IsStatic ? "Station" : gridCube.GridSizeEnum.ToString() + " Ship";
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N} m\r\nMass: {1:N} kg\r\nVector: {2}\r\nVelocity: {3:N} m/s\r\nCenter Mass: {4}\r\nSize: {5}\r\nNumber of Blocks: {6:#,##0}\r\nAttached Grids: {7:#,##0}",
+                        description = string.Format("Distance: {0:N} m\r\nMass: {1:N} kg\r\nVector: {2}\r\nVelocity: {3:N} m/s\r\nMass Center: {4}\r\nSize: {5}\r\nNumber of Blocks: {6:#,##0}\r\nAttached Grids: {7:#,##0}",
                             distance, 
                             gridCube.Physics.Mass, 
                             gridCube.Physics.LinearVelocity, 

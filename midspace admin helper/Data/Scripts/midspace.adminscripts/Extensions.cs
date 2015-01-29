@@ -10,6 +10,8 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
+    using VRage.Common.Utils;
+    using VRage.Common;
 
     public static class Extensions
     {
@@ -262,6 +264,16 @@ namespace midspace.adminscripts
         public static void KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
         {
             ((IMyDestroyableObject)player.Controller.ControlledEntity).DoDamage(1000f, damageType, true);
+        }
+
+        public static string GetString(this MyStringId stringId)
+        {
+            return MyTexts.GetString(stringId);
+        }
+
+        public static string GetStringFormat(this MyStringId stringId, params object[] args)
+        {
+            return string.Format(MyTexts.GetString(stringId), args);
         }
     }
 }

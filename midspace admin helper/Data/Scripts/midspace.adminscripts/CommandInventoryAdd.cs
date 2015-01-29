@@ -6,7 +6,6 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using Sandbox.Common.Localization;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
@@ -20,21 +19,18 @@
         private readonly MyPhysicalItemDefinition[] _physicalItems;
         private readonly string[] _physicalItemNames;
 
-        public CommandInventoryAdd(string[] oreNames, string[] ingotNames, MyPhysicalItemDefinition[] physicalItems, Dictionary<MyTextsWrapperEnum, string> resouceLookup)
+        public CommandInventoryAdd(string[] oreNames, string[] ingotNames, MyPhysicalItemDefinition[] physicalItems)
             : base(ChatCommandSecurity.Admin, "invadd", new[] { "/invadd" })
         {
             _oreNames = oreNames;
             _ingotNames = ingotNames;
             _physicalItems = physicalItems;
 
-            // take the names just as they are...
-            //_physicalItemNames = _physicalItems.Select(item => item.DisplayNameEnum.HasValue ? _resouceLookup[item.DisplayNameEnum.Value] : item.DisplayNameString).ToArray();
-
             // Make sure all Public Physical item names are unique, so they can be properly searched for.
             var names = new List<string>();
             foreach (var item in _physicalItems)
             {
-                var baseName = item.DisplayNameEnum.HasValue ? resouceLookup[item.DisplayNameEnum.Value] : item.DisplayNameString;
+                var baseName = item.DisplayNameEnum.HasValue ? item.DisplayNameEnum.Value.GetString() : item.DisplayNameString;
                 var uniqueName = baseName;
                 var index = 1;
                 while (names.Contains(uniqueName, StringComparer.InvariantCultureIgnoreCase))

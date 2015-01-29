@@ -2,15 +2,14 @@ namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Timers;
 
-    using Sandbox.Common.Localization;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-using Sandbox.ModAPI.Interfaces;
-    using System.IO;
+    using Sandbox.ModAPI.Interfaces;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
@@ -43,7 +42,6 @@ using Sandbox.ModAPI.Interfaces;
         private int _timerCounter = 0;
         private static string[] _oreNames;
         private static List<string> _ingotNames;
-        private static Dictionary<MyTextsWrapperEnum, string> _resouceLookup;
         private static MyPhysicalItemDefinition[] _physicalItems;
 
         #endregion
@@ -58,7 +56,8 @@ using Sandbox.ModAPI.Interfaces;
             if (!_isInitialized && MyAPIGateway.Session != null && MyAPIGateway.Session.Player != null)
                 Init();
 
-            if (!_isInitialized && MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Session != null && MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
+            if (!_isInitialized && MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null
+                && MyAPIGateway.Session != null && MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
             {
                 InitServer();
                 return;
@@ -117,9 +116,9 @@ using Sandbox.ModAPI.Interfaces;
             ChatCommandService.Register(new CommandHelloWorld());
             ChatCommandService.Register(new CommandHelp());
             ChatCommandService.Register(new CommandIdentify());
-            ChatCommandService.Register(new CommandInventoryAdd(_oreNames, _ingotNames.ToArray(), _physicalItems, _resouceLookup));
+            ChatCommandService.Register(new CommandInventoryAdd(_oreNames, _ingotNames.ToArray(), _physicalItems));
             ChatCommandService.Register(new CommandInventoryClear());
-            ChatCommandService.Register(new CommandInventoryDrop(_oreNames, _ingotNames.ToArray(), _physicalItems, _resouceLookup));
+            ChatCommandService.Register(new CommandInventoryDrop(_oreNames, _ingotNames.ToArray(), _physicalItems));
             ChatCommandService.Register(new CommandListBots());
             //ChatCommandService.Register(new CommandListBlueprints()); // no API currently.
             ChatCommandService.Register(new CommandListPrefabs());
@@ -160,7 +159,7 @@ using Sandbox.ModAPI.Interfaces;
             ChatCommandService.Register(new CommandTeleportSave());
             ChatCommandService.Register(new CommandTeleportToPlayer());
             ChatCommandService.Register(new CommandTeleportToShip());
-            ChatCommandService.Register(new CommandTest(_resouceLookup));
+            ChatCommandService.Register(new CommandTest());
             ChatCommandService.Register(new CommandTime());
             ChatCommandService.Register(new CommandVersion());
             //ChatCommandService.Register(new CommandVoxelAdd());  //not working any more
@@ -294,16 +293,6 @@ using Sandbox.ModAPI.Interfaces;
 
         private static void BuildResourceLookups()
         {
-            _resouceLookup = new Dictionary<MyTextsWrapperEnum, string>();
-            var textEnums = (MyTextsWrapperEnum[])Enum.GetValues(typeof(MyTextsWrapperEnum));
-
-            foreach (var textEnum in textEnums)
-            {
-                // This will be fixed against the current Localization Sandbox.Common.Localization.MyTextsWrapper.Culture.
-                var value = MyTextsWrapper.GetString(textEnum);
-                _resouceLookup.Add(textEnum, value);
-            }
-
             MyDefinitionManager.Static.GetOreTypeNames(out _oreNames);
             var physicalItems = MyDefinitionManager.Static.GetPhysicalItemDefinitions();
             _physicalItems = physicalItems.Where(item => item.Public).ToArray();  // Limit to public items.  This will remove the CubePlacer. :)
@@ -358,7 +347,7 @@ using Sandbox.ModAPI.Interfaces;
                 }
                 //if there is a custom prefix and the displayname doesn't start with it we can stop here
                 if (!entity.DisplayName.StartsWith(ConnectionHelper.ClientPrefix))
-                        return;
+                    return;
 
                 ConnectionHelper.ProcessClientData(entity.DisplayName.Substring(8));
             }
