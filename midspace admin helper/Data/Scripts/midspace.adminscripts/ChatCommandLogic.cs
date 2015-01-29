@@ -206,6 +206,9 @@ namespace midspace.adminscripts
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
             {
                 CreateMotdConfig(file);
+
+                while (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
+                    ;
             }
 
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(file, typeof(ChatCommandLogic));
