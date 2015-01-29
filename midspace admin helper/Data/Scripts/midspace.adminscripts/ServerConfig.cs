@@ -38,7 +38,12 @@ namespace midspace.adminscripts
             FileName = string.Format(FileNameFormat, MyAPIGateway.Session.WorldID);
 
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(FileName, typeof(ServerConfig)))
+            {
                 CreateConfig();
+                //wait until file is present - try for quickfix
+                while (!MyAPIGateway.Utilities.FileExistsInLocalStorage(FileName, typeof(ServerConfig)))
+                    ;
+            }
 
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(FileName, typeof(ServerConfig));
             string line;
@@ -72,7 +77,7 @@ namespace midspace.adminscripts
             writer.WriteLine("");
             //message of the day headline
             writer.WriteLine("//With this setting you can specify what the header of your message of the day says.");
-            writer.WriteLine("//I don't recommand unsing more than about 40 characters.");
+            writer.WriteLine("//I don't recommend using more than about 40 characters.");
             writer.WriteLine("//Since the textfield is not unlimited, depending on the size and number of the characters, they will overflow left and right if you use too many.");
             writer.WriteLine("motdheadline=");
             writer.WriteLine("");

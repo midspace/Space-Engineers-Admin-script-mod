@@ -205,7 +205,7 @@ namespace midspace.adminscripts
 
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
             {
-                CreateConfig(file);
+                CreateMotdConfig(file);
             }
 
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(file, typeof(ChatCommandLogic));
@@ -228,7 +228,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Create cfg file
         /// </summary>
-        private void CreateConfig(string file)
+        private void CreateMotdConfig(string file)
         {
             TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(file, typeof(ChatCommandLogic));
             writer.Flush();
