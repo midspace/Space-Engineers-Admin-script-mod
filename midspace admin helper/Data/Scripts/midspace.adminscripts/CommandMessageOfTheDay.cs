@@ -14,6 +14,11 @@ namespace midspace.adminscripts
         public static string MessageOfTheDay;
 
         /// <summary>
+        /// The header in the mission screen (currentObjective)
+        /// </summary>
+        public static string HeadLine;
+
+        /// <summary>
         /// If true, on the next character spawn, the motd will be shown. False by default.
         /// </summary>
         public static bool ShowMotdOnSpawn = false;
@@ -51,7 +56,8 @@ namespace midspace.adminscripts
 
         public static void ShowMotd()
         {
-            MyAPIGateway.Utilities.ShowMissionScreen("Message Of The Day", "Server: ", MyAPIGateway.Session.Name, MessageOfTheDay, null, "Close");
+            string headLine = HeadLine;
+            MyAPIGateway.Utilities.ShowMissionScreen("Message Of The Day", "", headLine, MessageOfTheDay, null, "Close");
         }
     }
 }

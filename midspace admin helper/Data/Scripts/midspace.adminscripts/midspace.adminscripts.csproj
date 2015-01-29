@@ -129,6 +129,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="ServerConfig.cs" />
     <Compile Include="VoxelEditLogic.cs" />
     <Compile Include="ChatCommandLogic.cs" />
     <Compile Include="Support.cs" />

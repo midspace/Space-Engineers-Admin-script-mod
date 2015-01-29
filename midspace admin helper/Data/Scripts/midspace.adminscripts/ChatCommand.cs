@@ -66,5 +66,10 @@
         public virtual void UpdateBeforeSimulation1000()
         {
         }
+
+        public void UpdateSecurity(ChatCommandSecurity security)
+        {
+            Security = security;
+        }
     }
 }

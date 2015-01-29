@@ -177,6 +177,16 @@
             }
         }
 
+        public static void UpdateSecurity(string commandName, ChatCommandSecurity security)
+        {
+            if (!CommandShortcuts.ContainsKey(commandName))
+                return;
+
+            var command = CommandShortcuts[commandName];
+            command.UpdateSecurity(security);
+            return;
+        }
+
         #endregion
     }
 }

@@ -265,6 +265,9 @@ namespace midspace.adminscripts
                     case "serverid":
                         ServerPrefix = entry.Value;
                         break;
+                    case "motdhl":
+                        CommandMessageOfTheDay.HeadLine = entry.Value;
+                        break;
                     case "motd":
                         CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
                         CommandMessageOfTheDay.Received = true;
@@ -342,14 +345,43 @@ namespace midspace.adminscripts
                             data.Add("serverid", ServerPrefix);
                             //only send the motd if there is one
                             if (!string.IsNullOrEmpty(CommandMessageOfTheDay.MessageOfTheDay))
-                                data.Add("motd", CommandMessageOfTheDay.MessageOfTheDay);
+                            {
+                                //the header must be initialized before the motd otherwise it won't show
+                                if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))
+                                    data.Add("motdhl", CommandMessageOfTheDay.HeadLine);
 
+                                data.Add("motd", CommandMessageOfTheDay.MessageOfTheDay);
+                            }
+                            //only send the command permission if it is set disabled by now
+                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
+                                data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);
                             var firstContact = CreateConnectionEntity(BasicPrefix, data);
                             SendConnectionEntity(firstContact);
                         }
                         break;
                 }
             }
+        }
+
+        private static void PerformSecurityChanges(string commandSecurityPair)
+        {
+            var pair = commandSecurityPair.Split(':');
+            if (pair.Length < 2)
+                return;
+            var commandName = pair[0].ToLowerInvariant();
+            ChatCommandSecurity security = ChatCommandSecurity.None;
+            switch (pair[1].ToLowerInvariant())
+            {
+                case "admin":
+                    security = ChatCommandSecurity.Admin;
+                    break;
+                case "user":
+                    security = ChatCommandSecurity.User;
+                    break;
+            }
+            if (security.Equals(ChatCommandSecurity.None))
+                return;
+            ChatCommandService.UpdateSecurity(commandName, security);
         }
     }
 }

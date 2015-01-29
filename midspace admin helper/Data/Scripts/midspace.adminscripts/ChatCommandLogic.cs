@@ -34,6 +34,7 @@ using Sandbox.ModAPI.Interfaces;
         #region fields and constants
 
         public static ChatCommandLogic Instance;
+        public ServerConfig ServerCfg;
 
         private bool _isInitialized;
         private Timer _timer100;
@@ -45,20 +46,19 @@ using Sandbox.ModAPI.Interfaces;
         private static Dictionary<MyTextsWrapperEnum, string> _resouceLookup;
         private static MyPhysicalItemDefinition[] _physicalItems;
 
-        private const string ConfigFile = "Motd.cfg";
-
         #endregion
 
         #region attaching events and wiring up
 
         public override void UpdateBeforeSimulation()
         {
+            Instance = this;
             // This needs to wait until the MyAPIGateway.Session.Player is created, as running on a Dedicated server can cause issues.
             // It would be nicer to just read a property that indicates this is a dedicated server, and simply return.
             if (!_isInitialized && MyAPIGateway.Session != null && MyAPIGateway.Session.Player != null)
                 Init();
 
-            if (!_isInitialized && MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
+            if (!_isInitialized && MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Session != null && MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
             {
                 InitServer();
                 return;
@@ -93,7 +93,6 @@ using Sandbox.ModAPI.Interfaces;
         {
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
-            Instance = this;
 
             // This will populate the _oreNames, _ingotNames, ready for the ChatCommands.
             BuildResourceLookups();
@@ -196,23 +195,43 @@ using Sandbox.ModAPI.Interfaces;
             ConnectionHelper.ServerPrefix = ConnectionHelper.RandomString(8);
             MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Server;
 
-            if (!MyAPIGateway.Utilities.FileExistsInGlobalStorage(ConfigFile))
+            MyAPIGateway.Utilities.ConfigDedicated.Load();
+            //just to prevent it from being null
+            while (MyAPIGateway.Utilities.ConfigDedicated == null)
+                ;
+
+            ServerCfg = new ServerConfig();
+
+            var file = string.Format("Motd_{0}.txt", ServerCfg.MotdFileSuffix);
+
+            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
             {
-                CreateConfig();
+                CreateConfig(file);
             }
 
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInGlobalStorage(ConfigFile);
+            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(file, typeof(ChatCommandLogic));
             var text = reader.ReadToEnd();
             if (!string.IsNullOrEmpty(text))
+            {
+                //prepare MOTD, replace variables
+                var dedicatedConfig = MyAPIGateway.Utilities.ConfigDedicated;
+
+
+                text = text.Replace("%SERVER_NAME%", dedicatedConfig.ServerName);
+                text = text.Replace("%WORLD_NAME%", dedicatedConfig.WorldName);
+                //text = text.Replace("%SERVER_IP%", dedicatedConfig.IP); returns the 'listen ip' default: 0.0.0.0
+                text = text.Replace("%SERVER_PORT%", dedicatedConfig.ServerPort.ToString());
+
                 CommandMessageOfTheDay.MessageOfTheDay = text;
+            }
         }
 
         /// <summary>
         /// Create cfg file
         /// </summary>
-        private void CreateConfig()
+        private void CreateConfig(string file)
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInGlobalStorage(ConfigFile);
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(file, typeof(ChatCommandLogic));
             writer.Flush();
             writer.Close();
         }
