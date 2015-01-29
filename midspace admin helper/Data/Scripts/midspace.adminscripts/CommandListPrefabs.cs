@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     using Sandbox.Definitions;
@@ -41,15 +42,16 @@
                     list = list.Where(kvp => kvp.Key.IndexOf(prefabName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
                 PrefabCache.Clear();
-
-                MyAPIGateway.Utilities.ShowMessage("Count", list.Count().ToString());
+                var description = new StringBuilder();
+                var prefix = string.Format("Count: {0}", list.Count);
                 var index = 1;
-                foreach (var kvp in list)
+                foreach (var kvp in list.OrderBy(s => s.Key))
                 {
                     PrefabCache.Add(kvp.Value);
-                    MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), kvp.Key);
+                    description.AppendFormat("#{0} {1}\r\n", index++, kvp.Key);
                 }
 
+                MyAPIGateway.Utilities.ShowMissionScreen("Prefabs", prefix, " ", description.ToString(), null, "OK");
                 return true;
             }
 

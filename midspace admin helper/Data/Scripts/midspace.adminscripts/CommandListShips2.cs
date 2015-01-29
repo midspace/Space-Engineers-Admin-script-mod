@@ -1,6 +1,9 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
@@ -32,17 +35,18 @@
                 var position = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
                 CommandListShips.ShipCache.Clear();
-                MyAPIGateway.Utilities.ShowMessage("Count", currentShipList.Count.ToString());
+                var description = new StringBuilder();
+                var prefix = string.Format("Count: {0}", currentShipList.Count);
                 var index = 1;
-                foreach (var ship in currentShipList)
+                foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
                 {
                     CommandListShips.ShipCache.Add(ship);
-
                     var pos = ship.WorldAABB.Center;
                     var distance = Math.Sqrt((position - pos).LengthSquared());
-                    MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), string.Format("{0} ({1:N}|{2:N}|{3:N}) {4:N}m", ship.DisplayName, pos.X, pos.Y, pos.Z, distance));
+                    description.AppendFormat("#{0} {1} ({2:N}|{3:N}|{4:N}) {5:N}m\r\n", index++, ship.DisplayName, pos.X, pos.Y, pos.Z, distance);
                 }
 
+                MyAPIGateway.Utilities.ShowMissionScreen("List Ships", prefix, " ", description.ToString(), null, "OK");
                 return true;
             }
 

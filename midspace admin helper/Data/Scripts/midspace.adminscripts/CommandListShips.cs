@@ -1,6 +1,7 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
@@ -39,7 +40,7 @@
                 ShipCache.Clear();
                 MyAPIGateway.Utilities.ShowMessage("Count", currentShipList.Count.ToString());
                 var index = 1;
-                foreach (var ship in currentShipList)
+                foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
                 {
                     ShipCache.Add(ship);
                     MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), ship.DisplayName);
