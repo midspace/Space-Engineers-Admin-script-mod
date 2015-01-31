@@ -200,42 +200,6 @@ namespace midspace.adminscripts
                 ;
 
             ServerCfg = new ServerConfig();
-
-            var file = string.Format("Motd_{0}.txt", ServerCfg.MotdFileSuffix);
-
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
-            {
-                CreateMotdConfig(file);
-
-                while (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
-                    ;
-            }
-
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(file, typeof(ChatCommandLogic));
-            var text = reader.ReadToEnd();
-            if (!string.IsNullOrEmpty(text))
-            {
-                //prepare MOTD, replace variables
-                var dedicatedConfig = MyAPIGateway.Utilities.ConfigDedicated;
-
-
-                text = text.Replace("%SERVER_NAME%", dedicatedConfig.ServerName);
-                text = text.Replace("%WORLD_NAME%", dedicatedConfig.WorldName);
-                //text = text.Replace("%SERVER_IP%", dedicatedConfig.IP); returns the 'listen ip' default: 0.0.0.0
-                text = text.Replace("%SERVER_PORT%", dedicatedConfig.ServerPort.ToString());
-
-                CommandMessageOfTheDay.MessageOfTheDay = text;
-            }
-        }
-
-        /// <summary>
-        /// Create cfg file
-        /// </summary>
-        private void CreateMotdConfig(string file)
-        {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(file, typeof(ChatCommandLogic));
-            writer.Flush();
-            writer.Close();
         }
 
         #region detaching events

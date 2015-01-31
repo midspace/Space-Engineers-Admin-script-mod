@@ -12,15 +12,16 @@ namespace midspace.adminscripts
         /// <summary>
         /// The format of the config file name.
         /// </summary>
-        private const string FileNameFormat = "Config_{0}.cfg";
+        private const string ConfigFileNameFormat = "Config_{0}.cfg";
+        private const string MotdFileNameFormat = "Motd_{0}.txt";
 
-        private string FileName;
+        private string ConfigFileName;
         private StringBuilder Content = new StringBuilder();
 
         /// <summary>
         /// The suffix for the motd file. For a better identification.
         /// </summary>
-        public string MotdFileSuffix = MyAPIGateway.Session.Name;
+        public string MotdFileSuffix;
         public string MotdHeadLine;
         
         /// <summary>
@@ -30,22 +31,19 @@ namespace midspace.adminscripts
 
         public ServerConfig()
         {
+            MotdFileSuffix = ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName);
             LoadOrCreateConfig();
+            LoadOrCreateMotdFile();
         }
 
         private void LoadOrCreateConfig()
         {
-            FileName = string.Format(FileNameFormat, MyAPIGateway.Session.WorldID);
+            ConfigFileName = string.Format(ConfigFileNameFormat, MyAPIGateway.Session.WorldID);
 
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(FileName, typeof(ServerConfig)))
-            {
+            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(ConfigFileName, typeof(ServerConfig)))
                 CreateConfig();
-                //wait until file is present - try for quickfix
-                while (!MyAPIGateway.Utilities.FileExistsInLocalStorage(FileName, typeof(ServerConfig)))
-                    ;
-            }
 
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(FileName, typeof(ServerConfig));
+            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(ConfigFileName, typeof(ServerConfig));
             string line;
             while ((line = reader.ReadLine()) != null)
             {
@@ -60,7 +58,7 @@ namespace midspace.adminscripts
 
         private void CreateConfig()
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(FileName, typeof(ServerConfig));
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(ConfigFileName, typeof(ServerConfig));
             //general description
             writer.WriteLine(string.Format("//This config file originally refers to the savegame located in '{0}'", MyAPIGateway.Utilities.ConfigDedicated.LoadWorld));
             writer.WriteLine("//This file contains settings for the Admin helper commands. There are several keys and values below. You recognize them by the '=' after a certain keyword.");
@@ -73,7 +71,8 @@ namespace midspace.adminscripts
             //message of the day suffix
             writer.WriteLine("//The setting below refers to the 'message of the day' file that will be loaded for this server. It will be named 'Motd_<Suffix>.cfg' while '<Suffix>' is the name you have set.");
             writer.WriteLine("//By default it is the name of your world. If you change it and not file can be found with that suffix, a new file will be created.");
-            writer.WriteLine(string.Format("motdsuffix={0}", MyAPIGateway.Utilities.ConfigDedicated.WorldName));
+            writer.WriteLine("//The value must not contain any of the following characters: \\ / : * ? \" < > |");
+            writer.WriteLine(string.Format("motdsuffix={0}", ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName)));
             writer.WriteLine("");
             //message of the day headline
             writer.WriteLine("//With this setting you can specify what the header of your message of the day says.");
@@ -88,6 +87,40 @@ namespace midspace.adminscripts
             writer.WriteLine("//There are two permission levels available by now: 'user' and 'admin'. 'User' will allow anyone to use this command, 'Admin' will allow nobody but the admins to use it.");
             writer.WriteLine("// The order is irrelevant unless you set the permission for a command twice. If you do, the last one will be valid. ");
             writer.WriteLine("cmdperm=");*/
+            writer.Flush();
+            writer.Close();
+        }
+
+        private void LoadOrCreateMotdFile()
+        {
+            var file = string.Format(MotdFileNameFormat, MotdFileSuffix);
+
+            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
+                CreateMotdConfig(file);
+
+            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(file, typeof(ChatCommandLogic));
+            var text = reader.ReadToEnd();
+            if (!string.IsNullOrEmpty(text))
+            {
+                //prepare MOTD, replace variables
+                var dedicatedConfig = MyAPIGateway.Utilities.ConfigDedicated;
+
+
+                text = text.Replace("%SERVER_NAME%", dedicatedConfig.ServerName);
+                text = text.Replace("%WORLD_NAME%", dedicatedConfig.WorldName);
+                //text = text.Replace("%SERVER_IP%", dedicatedConfig.IP); returns the 'listen ip' default: 0.0.0.0
+                text = text.Replace("%SERVER_PORT%", dedicatedConfig.ServerPort.ToString());
+
+                CommandMessageOfTheDay.MessageOfTheDay = text;
+            }
+        }
+
+        /// <summary>
+        /// Create motd file
+        /// </summary>
+        private void CreateMotdConfig(string file)
+        {
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(file, typeof(ChatCommandLogic));
             writer.Flush();
             writer.Close();
         }
@@ -113,6 +146,27 @@ namespace midspace.adminscripts
                     //CommandPermissions = value.Trim();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Replaces the chars from the given string that aren't allowed for a filename with a whitespace.
+        /// </summary>
+        /// <param name="originalText"></param>
+        /// <returns></returns>
+        private string ReplaceForbiddenChars(string originalText)
+        {
+            //could be done in one single line but like this we have a better overview
+            var convertedText = originalText.Replace('\\', ' ');
+            convertedText = convertedText.Replace('/', ' ');
+            convertedText = convertedText.Replace(':', ' ');
+            convertedText = convertedText.Replace('*', ' ');
+            convertedText = convertedText.Replace('?', ' ');
+            convertedText = convertedText.Replace('"', ' ');
+            convertedText = convertedText.Replace('<', ' ');
+            convertedText = convertedText.Replace('>', ' ');
+            convertedText = convertedText.Replace('|', ' ');
+
+            return convertedText;
         }
     }
 }
