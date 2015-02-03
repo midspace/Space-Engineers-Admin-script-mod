@@ -268,6 +268,13 @@ namespace midspace.adminscripts
                     case "motdhl":
                         CommandMessageOfTheDay.HeadLine = entry.Value;
                         break;
+                    case "motdsic":
+                        bool showInChat = CommandMessageOfTheDay.ShowInChat;
+                        if (bool.TryParse(entry.Value, out showInChat)) 
+                        {
+                            CommandMessageOfTheDay.ShowInChat = showInChat;
+                        }
+                        break;
                     case "motd":
                         CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
                         CommandMessageOfTheDay.Received = true;
@@ -350,11 +357,14 @@ namespace midspace.adminscripts
                                 if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))
                                     data.Add("motdhl", CommandMessageOfTheDay.HeadLine);
 
+                                if (CommandMessageOfTheDay.ShowInChat)
+                                    data.Add("motdsic", CommandMessageOfTheDay.ShowInChat.ToString());
+
                                 data.Add("motd", CommandMessageOfTheDay.MessageOfTheDay);
                             }
                             //only send the command permission if it is set disabled by now
-                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
-                                data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);
+                            /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
+                                data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
                             var firstContact = CreateConnectionEntity(BasicPrefix, data);
                             SendConnectionEntity(firstContact);
                         }

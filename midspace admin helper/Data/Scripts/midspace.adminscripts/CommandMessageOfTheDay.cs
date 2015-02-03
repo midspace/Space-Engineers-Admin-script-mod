@@ -33,6 +33,11 @@ namespace midspace.adminscripts
         /// </summary>
         public static bool Received =  false;
 
+        /// <summary>
+        /// If set to true the motd will show in chat instead of a mission screen.
+        /// </summary>
+        public static bool ShowInChat = false;
+
         public CommandMessageOfTheDay()
             : base(ChatCommandSecurity.User, "motd", new[] { "/motd" })
         {
@@ -57,7 +62,10 @@ namespace midspace.adminscripts
         public static void ShowMotd()
         {
             string headLine = HeadLine;
-            MyAPIGateway.Utilities.ShowMissionScreen("Message Of The Day", "", headLine, MessageOfTheDay, null, "Close");
+            if (!ShowInChat)
+                MyAPIGateway.Utilities.ShowMissionScreen("Message Of The Day", "", headLine, MessageOfTheDay, null, "Close");
+            else
+                MyAPIGateway.Utilities.ShowMessage("Motd", MessageOfTheDay);
         }
     }
 }
