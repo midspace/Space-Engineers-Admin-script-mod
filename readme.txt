@@ -31,10 +31,14 @@ A copy of the game is required to work with or develop the script mod.
 
 Working on the github repository.
 The best way to work on this mod and test in Space Engineers is to create a Symbolic 
-link from your repository directory to the Space Engineers mods folder, like so.
+link from your Git repository directory to the Space Engineers mods folder.
+Run a command prompt as Administrator, and then run the following line.
 
 mklink /J "C:\Users\%USERNAME%\AppData\Roaming\SpaceEngineers\Mods\midspace admin helper" "C:\Users\%USERNAME%\Documents\GitHub\Space-Engineers-Admin-script-mod\midspace admin helper"
 
 The Symbolic link directory can be simply deleted through Windows Explorer like a normal directory.
+
+The Space Engineers references can be established with the following Symbolic link. 
+mklink /J "C:\Program Files\Reference Assemblies\SpaceEngineers" "C:\Program Files (x86)\Steam\SteamApps\common\SpaceEngineers\Bin64"
 
 ======================
