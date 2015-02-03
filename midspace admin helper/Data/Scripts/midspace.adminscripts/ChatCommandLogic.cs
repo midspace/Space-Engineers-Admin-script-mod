@@ -99,8 +99,8 @@ namespace midspace.adminscripts
             // New command classes must be added in here.
 
             //ChatCommandService.Register(new CommandAsteroidFindOre(_oreNames));
-            ChatCommandService.Register(new CommandAsteroidEditClear());
-            ChatCommandService.Register(new CommandAsteroidEditSet());
+            //ChatCommandService.Register(new CommandAsteroidEditClear());
+            //ChatCommandService.Register(new CommandAsteroidEditSet());
             ChatCommandService.Register(new CommandAsteroidsList());
             //ChatCommandService.Register(new CommandAsteroidRotate());  //not working any more
             //ChatCommandService.Register(new CommandAsteroidSpread());  //not working
