@@ -34,6 +34,7 @@ namespace midspace.adminscripts
 
         public static ChatCommandLogic Instance;
         public ServerConfig ServerCfg;
+        public string AdminNotification;
 
         private bool _isInitialized;
         private Timer _timer100;
@@ -321,9 +322,13 @@ namespace midspace.adminscripts
             else if (entity is IMyCharacter && CommandMessageOfTheDay.ShowMotdOnSpawn && entity.DisplayName.Equals(MyAPIGateway.Session.Player.DisplayName, StringComparison.InvariantCultureIgnoreCase))
             {
                 if (CommandMessageOfTheDay.Received)
+                {
                     CommandMessageOfTheDay.ShowMotd();
+                    if (!string.IsNullOrEmpty(AdminNotification))
+                        MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
+                }
                 else
-                    CommandMessageOfTheDay.ShowMotdOnReceive = true;
+                    CommandMessageOfTheDay.ShowOnReceive = true;
                 CommandMessageOfTheDay.ShowMotdOnSpawn = false;
             }
         }

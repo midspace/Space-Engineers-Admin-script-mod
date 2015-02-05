@@ -26,7 +26,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// If true the motd could not be shown on the character spawn, so that it will be shown when the client receives the data. Mostly used in creative sessions. False by default.
         /// </summary>
-        public static bool ShowMotdOnReceive = false;
+        public static bool ShowOnReceive = false;
 
         /// <summary>
         /// True if the motd was received.

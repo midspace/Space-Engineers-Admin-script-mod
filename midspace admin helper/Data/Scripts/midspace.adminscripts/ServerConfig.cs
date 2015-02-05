@@ -29,7 +29,7 @@ namespace midspace.adminscripts
             {
                 //init default values
                 WorldLocation = MyAPIGateway.Utilities.ConfigDedicated.LoadWorld,
-                MotdFileSuffix = ServerConfig.ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName),
+                MotdFileSuffix = ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName),
                 MotdHeadLine = "",
                 MotdShowInChat = false,
             };
@@ -62,8 +62,20 @@ namespace midspace.adminscripts
 
             if (string.IsNullOrWhiteSpace(xmlText))
                 return;
-            
-            Config = MyAPIGateway.Utilities.SerializeFromXML<ServerConfigurationStruct>(xmlText);
+
+            try
+            {
+                Config = MyAPIGateway.Utilities.SerializeFromXML<ServerConfigurationStruct>(xmlText);
+            }
+            catch (Exception ex)
+            {
+                ChatCommandLogic.Instance.AdminNotification = string.Format(@"There is an error in the config file. It couldn't be read. The server was started with default settings.
+
+Message:
+{0}
+
+If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message);
+            }
 
             CommandMessageOfTheDay.HeadLine = Config.MotdHeadLine;
             CommandMessageOfTheDay.ShowInChat = Config.MotdShowInChat;
@@ -71,7 +83,7 @@ namespace midspace.adminscripts
 
         private void LoadOrCreateMotdFile()
         {
-            var file = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
+            var file = string.Format(MotdFileNameFormat, ReplaceForbiddenChars(Config.MotdFileSuffix));
 
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(file, typeof(ChatCommandLogic)))
                 CreateMotdConfig(file);
@@ -145,14 +157,6 @@ namespace midspace.adminscripts
         /// The permissions in string form. No need to initialize the permissions on the server since it is transmitted as a string anyway.
         /// </summary>
         //public string CommandPermissions = "";
-        /*
-        public ServerConfigurationStruct()
-        {
-            WorldLocation = MyAPIGateway.Utilities.ConfigDedicated.LoadWorld;
-            MotdFileSuffix = ServerConfig.ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName);
-            MotdHeadLine = "";
-            MotdShowInChat = false;
-            CommandPermissions = "";
-        }*/
+
     }
 }

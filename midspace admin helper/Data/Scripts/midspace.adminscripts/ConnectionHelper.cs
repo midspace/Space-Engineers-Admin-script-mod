@@ -278,8 +278,13 @@ namespace midspace.adminscripts
                     case "motd":
                         CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
                         CommandMessageOfTheDay.Received = true;
-                        if (CommandMessageOfTheDay.ShowMotdOnReceive)
+                        if (CommandMessageOfTheDay.ShowOnReceive)
                             CommandMessageOfTheDay.ShowMotd();
+                        break;
+                    case "adminnot":
+                        ChatCommandLogic.Instance.AdminNotification = entry.Value;
+                        if (CommandMessageOfTheDay.ShowOnReceive)
+                            MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
                         break;
                     case "cmd":
                         //TODO restrict/extend the permissions
@@ -361,8 +366,11 @@ namespace midspace.adminscripts
                                     data.Add("motdsic", CommandMessageOfTheDay.ShowInChat.ToString());
 
                                 data.Add("motd", CommandMessageOfTheDay.MessageOfTheDay);
+
+                                if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(entry.Value))
+                                    data.Add("adminnot", ChatCommandLogic.Instance.AdminNotification);
                             }
-                            //only send the command permission if it is set disabled by now
+                            //only send the command permission if it is, set disabled by now
                             /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
                                 data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
                             var firstContact = CreateConnectionEntity(BasicPrefix, data);
