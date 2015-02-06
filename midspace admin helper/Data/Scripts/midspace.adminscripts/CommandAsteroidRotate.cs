@@ -6,13 +6,11 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
     using VRageMath;
     using VRage.Common.Voxels;
 
     /// <summary>
     /// This worked by creating a new asteroid store with the new dimentions required (as the entire space is rotated).
-    /// Currently it is not working, as the API for creating new a asteroid Store has been removed.
     /// </summary>
     public class CommandAsteroidRotate : ChatCommand
     {
@@ -62,69 +60,53 @@
                         originalAsteroid = CommandAsteroidsList.AsteroidCache[index - 1];
                     }
 
-                    if (originalAsteroid != null)
+                    if (originalAsteroid == null)
                     {
-                        //MyAPIGateway.Utilities.ShowMessage("check", string.Format("{0} {1},{2},{3}", asteroidName, rotateVector.X, rotateVector.Y, rotateVector.Z));
-                        var quaternion = Quaternion.CreateFromYawPitchRoll(rotateVector.X / (180 / MathHelper.Pi), rotateVector.Y / (180 / MathHelper.Pi), rotateVector.Z / (180 / MathHelper.Pi));
-
-                        //currentAsteroidList.Clear();
-                        //MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(asteroidName, StringComparison.InvariantCultureIgnoreCase));
-                        //var originalAsteroid = currentAsteroidList[0];
-
-                        //var storages = new List<IMyStorage>();
-                        //MyAPIGateway.Session.VoxelMaps.GetStorages(storages, s => s.Name == asteroidName);
-                        //var oldStorage = storages[0];
-                        var oldStorage = originalAsteroid.Storage;
-
-                        //MyAPIGateway.Utilities.ShowMessage("Test1", "check");
-
-                        var oldCache = new MyStorageDataCache();
-                        oldCache.Resize(oldStorage.Size);
-                        oldStorage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, (int)VRageRender.MyLodTypeEnum.LOD0, Vector3I.Zero, oldStorage.Size - 1);
-
-                        //MyAPIGateway.Utilities.ShowMessage("Test2", "check");
-
-                        var transSize = Vector3I.Transform(oldStorage.Size, quaternion);
-                        var size = Vector3I.Abs(transSize);
-
-                        //MyAPIGateway.Utilities.ShowMessage("Test3", "check");
-
-                        var newName = Support.CreateUniqueStorageName(originalAsteroid.StorageName);
-
-                        var newStorage = Support.CreateNewAsteroid(newName, size, originalAsteroid.PositionLeftBottomCorner);
-
-                        // Names are screwed around with bad.
-                        //MyAPIGateway.Utilities.ShowMessage("name", string.Format("{0} {1}", newName, newStorage));
-
-                        var cache = new MyStorageDataCache();
-                        var min = Vector3I.Zero;
-                        var max = size - 1;
-                        cache.Resize(min, max);
-
-                        MyAPIGateway.Utilities.ShowMessage("Test6", "check");
-
-                        Vector3I p;
-                        for (p.Z = 0; p.Z < oldStorage.Size.Z; ++p.Z)
-                            for (p.Y = 0; p.Y < oldStorage.Size.Y; ++p.Y)
-                                for (p.X = 0; p.X < oldStorage.Size.X; ++p.X)
-                                {
-                                    var content = oldCache.Content(ref p);
-                                    var material = oldCache.Material(ref p);
-
-                                    var newP = Vector3I.Transform(p, quaternion);
-                                    // readjust the points, as rotation occurs arround 0,0,0.
-                                    newP.X = newP.X < 0 ? newP.X - transSize.X : newP.X;
-                                    newP.Y = newP.Y < 0 ? newP.Y - transSize.Y : newP.Y;
-                                    newP.Z = newP.Z < 0 ? newP.Z - transSize.Z : newP.Z;
-
-                                    cache.Content(ref newP, content);
-                                    cache.Material(ref newP, material);
-                                }
-
-                        newStorage.WriteRange(cache, MyStorageDataTypeFlags.ContentAndMaterial, min, max);
-                        MyAPIGateway.Entities.RemoveEntity((IMyEntity)originalAsteroid);
+                        MyAPIGateway.Utilities.ShowMessage("Cannot find asteroid", string.Format("'{0}'", searchName));
                         return true;
                     }
+
+                    var quaternion = Quaternion.CreateFromYawPitchRoll(rotateVector.X / (180 / MathHelper.Pi), rotateVector.Y / (180 / MathHelper.Pi), rotateVector.Z / (180 / MathHelper.Pi));
+                    var oldStorage = originalAsteroid.Storage;
+
+                    var oldCache = new MyStorageDataCache();
+                    oldCache.Resize(oldStorage.Size);
+                    oldStorage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, Vector3I.Zero, oldStorage.Size - 1);
+
+                    var transSize = Vector3I.Transform(oldStorage.Size, quaternion);
+                    var newSize = Vector3I.Abs(transSize);
+                    var newName = Support.CreateUniqueStorageName(originalAsteroid.StorageName);
+                    var newVoxelMap = Support.CreateNewAsteroid(newName, newSize, originalAsteroid.PositionLeftBottomCorner);
+
+                    var cache = new MyStorageDataCache();
+                    var min = Vector3I.Zero;
+                    var max = newSize - 1;
+                    cache.Resize(min, max);
+
+                    Vector3I p;
+                    for (p.Z = 0; p.Z < oldStorage.Size.Z; ++p.Z)
+                        for (p.Y = 0; p.Y < oldStorage.Size.Y; ++p.Y)
+                            for (p.X = 0; p.X < oldStorage.Size.X; ++p.X)
+                            {
+                                var content = oldCache.Content(ref p);
+                                var material = oldCache.Material(ref p);
+
+                                var newP = Vector3I.Transform(p, quaternion);
+                                // readjust the points, as rotation occurs arround 0,0,0.
+                                newP.X = newP.X < 0 ? newP.X - transSize.X - 1 : newP.X;
+                                newP.Y = newP.Y < 0 ? newP.Y - transSize.Y - 1 : newP.Y;
+                                newP.Z = newP.Z < 0 ? newP.Z - transSize.Z - 1 : newP.Z;
+
+                                cache.Content(ref newP, content);
+                                cache.Material(ref newP, material);
+                            }
+
+                    newVoxelMap.Storage.WriteRange(cache, MyStorageDataTypeFlags.ContentAndMaterial, min, max);
+                    MyAPIGateway.Entities.RemoveEntity((IMyEntity)originalAsteroid);
+
+                    // Invalidate the cache, to force user to select again to prevent possible corruption by using an old cache.
+                    CommandAsteroidsList.AsteroidCache.Clear();
+                    return true;
                 }
             }
 

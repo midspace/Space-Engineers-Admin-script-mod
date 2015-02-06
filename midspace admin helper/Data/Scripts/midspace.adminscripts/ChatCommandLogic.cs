@@ -102,8 +102,9 @@ namespace midspace.adminscripts
             //ChatCommandService.Register(new CommandAsteroidFindOre(_oreNames));
             //ChatCommandService.Register(new CommandAsteroidEditClear());
             //ChatCommandService.Register(new CommandAsteroidEditSet());
+            ChatCommandService.Register(new CommandAsteroidCreate());
             ChatCommandService.Register(new CommandAsteroidsList());
-            //ChatCommandService.Register(new CommandAsteroidRotate());  //not working any more
+            ChatCommandService.Register(new CommandAsteroidRotate());
             //ChatCommandService.Register(new CommandAsteroidSpread());  //not working
             ChatCommandService.Register(new CommandDate());
             ChatCommandService.Register(new CommandFactionDemote());

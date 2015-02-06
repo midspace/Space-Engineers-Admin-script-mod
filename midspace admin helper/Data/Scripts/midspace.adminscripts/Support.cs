@@ -1,15 +1,15 @@
 namespace midspace.adminscripts
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Voxels;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
-    using VRageMath;
+    using System;
     using VRage.Common.Voxels;
+    using VRageMath;
 
     public static class Support
     {
@@ -181,9 +181,16 @@ namespace midspace.adminscripts
 
         public static string CreateUniqueStorageName(string baseName)
         {
-            int index = 0;
-            var uniqueName = string.Format("{0}{1}", baseName, index);
+            long index = 0;
+            var match = Regex.Match(baseName, @"^(?<Key>.+?)(?<Value>(\d+?))$", RegexOptions.IgnoreCase);
 
+            if (match.Success)
+            {
+                baseName = match.Groups["Key"].Captures[0].Value;
+                long.TryParse(match.Groups["Value"].Captures[0].Value, out index);
+            }
+
+            var uniqueName = string.Format("{0}{1}", baseName, index);
             var currentAsteroidList = new List<IMyVoxelMap>();
             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v != null);
 
@@ -332,17 +339,13 @@ namespace midspace.adminscripts
         /// <param name="name"></param>
         /// <param name="size">Currently the size must be multiple of 64, eg. 128x64x256</param>
         /// <param name="position"></param>
-        public static IMyStorage CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
+        public static IMyVoxelMap CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
         {
             var cache = new MyStorageDataCache();
-
-            MyAPIGateway.Utilities.ShowMessage("Test a", "check");
 
             // new storage is created completely full
             // no geometry will be created because that requires full-empty transition
             var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
-
-            MyAPIGateway.Utilities.ShowMessage("Test b", "check");
 
             // always ensure cache is large enough for whatever you plan to load into it
             cache.Resize(size);
@@ -354,77 +357,14 @@ namespace midspace.adminscripts
             // should pass in min = [8,8,8], max = [15,15,15]
             // For LOD, you should only use LOD0 or LOD1
             // When you write data inside cache back to storage, you always write to LOD0 (the most detailed LOD), LOD1 can only be read from.
-            storage.ReadRange(cache, MyStorageDataTypeFlags.All, (int)VRageRender.MyLodTypeEnum.LOD0, Vector3I.Zero, size - 1);
-
-            MyAPIGateway.Utilities.ShowMessage("Test c", "check");
+            storage.ReadRange(cache, MyStorageDataTypeFlags.All, 0, Vector3I.Zero, size - 1);
 
             // resets all loaded content to empty
             cache.ClearContent(0);
 
             // write new data back to the storage
             storage.WriteRange(cache, MyStorageDataTypeFlags.Content, Vector3I.Zero, size - 1);
-
-            MyAPIGateway.Utilities.ShowMessage("Test d", "check");
-
-            //var controlledEntity = MyAPIGateway.Session.ControlledObject.Entity;
-            var builder = new MyObjectBuilder_VoxelMap
-            {
-                PositionAndOrientation = new MyPositionAndOrientation
-                {
-                    Position = position,
-                    // voxel maps cannot be rotated as of right now, so use default orientation
-                    Forward = Vector3.Forward,
-                    Up = Vector3.Up,
-                },
-                PersistentFlags = MyPersistentEntityFlags2.InScene | MyPersistentEntityFlags2.Enabled | MyPersistentEntityFlags2.CastShadows,
-
-                Name = storageName,
-                Filename = storageName,
-
-                // links an entity with data and geometry
-                StorageName = storageName,
-
-
-                // Copy-on-write is performed on storage which is not mutable (new mutable copy is create at the time of first write)
-                MutableStorage = false,
-            };
-
-            MyAPIGateway.Utilities.ShowMessage("Test e", "check");
-
-
-            //var tempList = new List<MyObjectBuilder_EntityBase> { builder };
-            //MyAPIGateway.Entities.RemapObjectBuilderCollection(tempList);
-            //tempList.ForEach(grid => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid));
-            //MyAPIGateway.Multiplayer.SendEntitiesCreated(tempList);
-
-
-            //var currentAsteroidList = new List<IMyVoxelMap>();
-            //IMyVoxelMap originalAsteroid = null;
-            //MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(storageName, StringComparison.InvariantCultureIgnoreCase));
-
-            //MyAPIGateway.Utilities.ShowMessage("Test z", string.Format("check {0}", currentAsteroidList.Count));
-
-            //return currentAsteroidList[0].Storage;
-
-            MyAPIGateway.Entities.RemapObjectBuilder(builder);
-            var voxelMapEntity = MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(builder);
-            MyAPIGateway.Utilities.ShowMessage("Test f", string.Format("check {0}", voxelMapEntity == null));
-
-            var voxelMap = (IMyVoxelMap)voxelMapEntity;
-
-            MyAPIGateway.Utilities.ShowMessage("Test g", string.Format("check {0}", voxelMap == null));
-
-
-            //MyAPIGateway.Utilities.ShowMessage("Test f", string.Format("check"));
-
-
-
-
-
-            //MyAPIGateway.Utilities.ShowMessage("Test h", string.Format("check {0}", voxelMap.Storage == null));
-
-            return voxelMap.Storage;
-            return null;
+            return MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storageName, storage, position, 0);
         }
     }
 }
