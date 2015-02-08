@@ -9,7 +9,6 @@ namespace midspace.adminscripts
 {
     public class ServerConfig
     {
-
         /// <summary>
         /// The format of the config file name.
         /// </summary>
@@ -23,6 +22,8 @@ namespace midspace.adminscripts
         /// </summary>
         private ServerConfigurationStruct Config;
 
+        public List<BannedPlayer> ForceBannedPlayer { get { return Config.ForceBannedPlayers; } }
+
         public ServerConfig()
         {
             Config = new ServerConfigurationStruct()
@@ -32,10 +33,17 @@ namespace midspace.adminscripts
                 MotdFileSuffix = ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName),
                 MotdHeadLine = "",
                 MotdShowInChat = false,
+                ForceBannedPlayers = new List<BannedPlayer>(),
             };
             ConfigFileName = string.Format(ConfigFileNameFormat, MyAPIGateway.Session.WorldID);
             LoadOrCreateConfig();
             LoadOrCreateMotdFile();
+        }
+
+        public void Save()
+        {
+            Config.WorldLocation = MyAPIGateway.Utilities.ConfigDedicated.LoadWorld;
+            WriteConfig();
         }
 
         private void LoadOrCreateConfig()
@@ -152,11 +160,17 @@ If you can't find the error, simply delete the file. The server will create a ne
         public string MotdFileSuffix;
         public string MotdHeadLine;
         public bool MotdShowInChat;
-
+        public List<BannedPlayer> ForceBannedPlayers;
         /// <summary>
         /// The permissions in string form. No need to initialize the permissions on the server since it is transmitted as a string anyway.
         /// </summary>
         //public string CommandPermissions = "";
 
+    }
+
+    public struct BannedPlayer
+    {
+        public ulong SteamId;
+        public string PlayerName;
     }
 }

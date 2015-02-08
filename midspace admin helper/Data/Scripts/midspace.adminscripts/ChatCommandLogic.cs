@@ -112,6 +112,8 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandFactionKick());
             ChatCommandService.Register(new CommandFactionPromote());
             ChatCommandService.Register(new CommandFactionRemove());
+            ChatCommandService.Register(new CommandForceBan());
+            ChatCommandService.Register(new CommandForceKick());
             ChatCommandService.Register(new CommandFlyTo());
             ChatCommandService.Register(new CommandGameName());
             ChatCommandService.Register(new CommandHeading());
@@ -131,6 +133,7 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandObjectsCollect());
             ChatCommandService.Register(new CommandObjectsCount());
             ChatCommandService.Register(new CommandObjectsPull());
+            ChatCommandService.Register(new CommandPardon());
             ChatCommandService.Register(new CommandPlayerEject());
             ChatCommandService.Register(new CommandPlayerSlay());
             ChatCommandService.Register(new CommandPlayerSmite(_oreNames));
@@ -180,7 +183,7 @@ namespace midspace.adminscripts
                 //let the server know we are ready for connections
                 MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Client;
                 var data = new Dictionary<string, string>();
-                data.Add("connect", MyAPIGateway.Session.Player.SteamUserId.ToString());
+                data.Add(ConnectionHelper.ConnectionKeys.ConnectionRequest, MyAPIGateway.Session.Player.SteamUserId.ToString());
                 ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.BasicPrefix, data);
                 ConnectionHelper.SentIdRequest = true;
                 CommandMessageOfTheDay.ShowMotdOnSpawn = true;
@@ -210,6 +213,7 @@ namespace midspace.adminscripts
         {
             if (MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
             {
+                ServerCfg.Save();
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Server;
                 return;
             }

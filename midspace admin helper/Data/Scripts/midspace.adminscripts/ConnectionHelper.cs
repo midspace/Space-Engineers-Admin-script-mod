@@ -1,4 +1,5 @@
-﻿using Sandbox.Common.ObjectBuilders;
+﻿using A8DB07281BA741DFB48BE151DDBFE24F;
+using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
 using System;
@@ -39,6 +40,31 @@ namespace midspace.adminscripts
         /// </summary>
         public static bool SentIdRequest = false;
 
+        #region connections to server
+
+        /// <summary>
+        /// Creates and sends an entity with the given information for the server.
+        /// </summary>
+        public static void CreateAndSendConnectionEntity(string key, string value)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add(key, value);
+            CreateAndSendConnectionEntity(ServerPrefix, data);
+        }
+
+        /// <summary>
+        /// Creates and sends an entity with the given information for the server.
+        /// </summary>
+        /// <param name="content"></param>
+        public static void CreateAndSendConnectionEntity(Dictionary<string, string> content)
+        {
+            CreateAndSendConnectionEntity(ServerPrefix, content);
+        }
+
+        #endregion
+
+        #region connections to clients
+
         /// <summary>
         /// Creates and sends an entity with the given information.
         /// </summary>
@@ -50,13 +76,45 @@ namespace midspace.adminscripts
         }
 
         /// <summary>
+        /// Creates and sends an entity with the given information.
+        /// </summary>
+        /// <param name="player">The player who gets the information</param>
+        /// <param name="content">The information that will be send to the player</param>
+        public static void CreateAndSendConnectionEntity(ulong steamId, Dictionary<string, string> content)
+        {
+            CreateAndSendConnectionEntity(PlayerConnections[steamId], content);
+        }
+
+        /// <summary>
+        /// Creates and sends an entity with the given information.
+        /// </summary>
+        public static void CreateAndSendConnectionEntity(IMyPlayer player, string key, string value)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add(key, value);
+            CreateAndSendConnectionEntity(player, data);
+        }
+
+        /// <summary>
+        /// Creates and sends an entity with the given information.
+        /// </summary>
+        public static void CreateAndSendConnectionEntity(ulong steamId, string key, string value)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add(key, value);
+            CreateAndSendConnectionEntity(steamId, data);
+        }
+
+        # endregion
+        
+        /// <summary>
         /// Creates and sends an entity.
         /// </summary>
-        /// <param name="id">The id of the client that gets the information</param>
+        /// <param name="connectionId">The id of the client that gets the information</param>
         /// <param name="content">The information that will be send to the player</param>
-        public static void CreateAndSendConnectionEntity(string id, Dictionary<string, string> content)
+        public static void CreateAndSendConnectionEntity(string connectionId, Dictionary<string, string> content)
         {
-           SendConnectionEntity(CreateConnectionEntity(id, content));
+           SendConnectionEntity(CreateConnectionEntity(connectionId, content));
         }
 
         /// <summary>
@@ -117,6 +175,8 @@ namespace midspace.adminscripts
 
             return new string(buffer);
         }
+
+        #region Converting and parsing
 
         /// <summary>
         /// Converts the data into a parsable string
@@ -223,6 +283,10 @@ namespace midspace.adminscripts
             return data;
         }
 
+        #endregion
+
+        #region Client side processing
+
         /// <summary>
         /// Client side execution of the actions defined in the data
         /// </summary>
@@ -234,15 +298,21 @@ namespace midspace.adminscripts
             {
                 switch (entry.Key)
                 {
-                    case "motd":
+                    case ConnectionKeys.MessageOfTheDay:
                         CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
                         CommandMessageOfTheDay.ShowMotd();
                         break;
-                    case "msg":
+                    case ConnectionKeys.PrivateMessage:
                         //TODO create private message command
                         break;
-                    case "cmd":
+                    case ConnectionKeys.Command:
                         //TODO restrict/extend the permissions
+                        break;
+                    case ConnectionKeys.ForceKick:
+                        MyAPIGateway.Utilities.ShowMessage("Process", "Receive Data");
+                        ulong steamId;
+                        if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
+                            PlayerTerminal.DropPlayer = true;
                         break;
                 }
             }
@@ -259,39 +329,48 @@ namespace midspace.adminscripts
             {
                 switch (entry.Key)
                 {
-                    case "id":
+                    case ConnectionKeys.ClientId:
                         ClientPrefix = entry.Value;
                         break;
-                    case "serverid":
+                    case ConnectionKeys.ServerId:
                         ServerPrefix = entry.Value;
                         break;
-                    case "motdhl":
+                    case ConnectionKeys.MotdHeadLine:
                         CommandMessageOfTheDay.HeadLine = entry.Value;
                         break;
-                    case "motdsic":
+                    case ConnectionKeys.MotdShowInChat:
                         bool showInChat = CommandMessageOfTheDay.ShowInChat;
                         if (bool.TryParse(entry.Value, out showInChat)) 
                         {
                             CommandMessageOfTheDay.ShowInChat = showInChat;
                         }
                         break;
-                    case "motd":
+                    case ConnectionKeys.MessageOfTheDay:
                         CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
                         CommandMessageOfTheDay.Received = true;
                         if (CommandMessageOfTheDay.ShowOnReceive)
                             CommandMessageOfTheDay.ShowMotd();
                         break;
-                    case "adminnot":
+                    case ConnectionKeys.AdminNotification:
                         ChatCommandLogic.Instance.AdminNotification = entry.Value;
                         if (CommandMessageOfTheDay.ShowOnReceive)
                             MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
                         break;
-                    case "cmd":
+                    case ConnectionKeys.Command:
                         //TODO restrict/extend the permissions
+                        break;
+                    case ConnectionKeys.ForceKick:
+                        ulong steamId;
+                        if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
+                            PlayerTerminal.DropPlayer = true;
                         break;
                 }
             }
         }
+
+        #endregion
+
+        #region Server side processing
 
         /// <summary>
         /// Server side execution of the actions defined in the data.
@@ -304,22 +383,47 @@ namespace midspace.adminscripts
             {
                 switch (entry.Key)
                 {
-                    case "motd":
+                    case ConnectionKeys.MessageOfTheDay:
                         CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
                         //TODO send it to the connected clients and save it
                         break;
-                    case "save":
+                    case ConnectionKeys.Save:
                         if (string.IsNullOrEmpty(entry.Value))
                             MyAPIGateway.Session.Save();
                         else
                             MyAPIGateway.Session.Save(entry.Value);
                         //TODO implement a command that uses this
                         break;
-                    case "msg":
+                    case ConnectionKeys.PrivateMessage:
                         //TODO create private message command
                         break;
-                    case "cmd":
+                    case ConnectionKeys.Command:
                         //TODO restrict/extend the command security
+                        break;
+                    case ConnectionKeys.ForceKick:
+                        string[] values = entry.Value.Split(':');
+                        bool ban = false;
+                        ulong steamId;
+                        if (ulong.TryParse(values[0], out steamId) && !MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(entry.Value))
+                        {
+                            if (values.Length > 1 && bool.TryParse(values[1], out ban) && ban)
+                            {
+                                var players = new List<IMyPlayer>();
+                                MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
+                                IMyPlayer player = players.FirstOrDefault();
+                                ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Add(new BannedPlayer()
+                                {
+                                    SteamId = steamId,
+                                    PlayerName = player.DisplayName
+                                });
+                            }
+                            CreateAndSendConnectionEntity(steamId, ConnectionKeys.ForceKick, steamId.ToString());
+                        }
+                        break;
+                    case ConnectionKeys.Pardon:
+                        BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.PlayerName.Equals(entry.Value, StringComparison.InvariantCultureIgnoreCase));
+                        if (bannedPlayer.SteamId != 0)
+                            ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Remove(bannedPlayer);
                         break;
                 }
             }
@@ -336,7 +440,7 @@ namespace midspace.adminscripts
             {
                 switch (entry.Key)
                 {
-                    case "connect":
+                    case ConnectionKeys.ConnectionRequest:
                         ulong steamId;
                         if (ulong.TryParse(entry.Value, out steamId))
                         {
@@ -353,24 +457,27 @@ namespace midspace.adminscripts
                             }
 
                             var data = new Dictionary<string, string>();
-                            data.Add("id", PlayerConnections[steamId]);
-                            data.Add("serverid", ServerPrefix);
+                            data.Add(ConnectionKeys.ClientId, PlayerConnections[steamId]);
+                            data.Add(ConnectionKeys.ServerId, ServerPrefix);
                             //only send the motd if there is one
                             if (!string.IsNullOrEmpty(CommandMessageOfTheDay.MessageOfTheDay))
                             {
                                 //the header must be initialized before the motd otherwise it won't show
                                 if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))
-                                    data.Add("motdhl", CommandMessageOfTheDay.HeadLine);
+                                    data.Add(ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
 
                                 if (CommandMessageOfTheDay.ShowInChat)
-                                    data.Add("motdsic", CommandMessageOfTheDay.ShowInChat.ToString());
+                                    data.Add(ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
 
-                                data.Add("motd", CommandMessageOfTheDay.MessageOfTheDay);
+                                data.Add(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.MessageOfTheDay);
 
-                                if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(entry.Value))
-                                    data.Add("adminnot", ChatCommandLogic.Instance.AdminNotification);
                             }
-                            //only send the command permission if it is, set disabled by now
+                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(entry.Value))
+                                data.Add(ConnectionKeys.AdminNotification, ChatCommandLogic.Instance.AdminNotification);
+                            BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == steamId);
+                            if (bannedPlayer.SteamId != 0 && !MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(bannedPlayer.SteamId.ToString()))
+                                data.Add(ConnectionKeys.ForceKick, bannedPlayer.SteamId.ToString());
+                            //only send the command permission if it is set, disabled by now
                             /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
                                 data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
                             var firstContact = CreateConnectionEntity(BasicPrefix, data);
@@ -380,6 +487,8 @@ namespace midspace.adminscripts
                 }
             }
         }
+
+        #endregion
 
         private static void PerformSecurityChanges(string commandSecurityPair)
         {
@@ -400,6 +509,22 @@ namespace midspace.adminscripts
             if (security.Equals(ChatCommandSecurity.None))
                 return;
             ChatCommandService.UpdateSecurity(commandName, security);
+        }
+
+        public static class ConnectionKeys
+        {
+            public const string ConnectionRequest = "connect";
+            public const string ClientId = "id";
+            public const string ServerId =  "serverId";
+            public const string MessageOfTheDay = "motd";
+            public const string MotdHeadLine = "motdhl";
+            public const string MotdShowInChat = "motdsic";
+            public const string AdminNotification = "adminnot";
+            public const string ForceKick = "forcekick";
+            public const string PrivateMessage = "pm";
+            public const string Command = "cmd";
+            public const string Save = "save";
+            public const string Pardon = "pard";
         }
     }
 }
