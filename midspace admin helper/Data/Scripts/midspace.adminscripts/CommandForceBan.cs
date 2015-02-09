@@ -46,7 +46,6 @@ namespace midspace.adminscripts
                     ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.ForceKick, string.Format("{0}:true", findPlayer.SteamUserId.ToString()));
                     return true;
                 }
-                return true;
 
                 int index;
                 if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
