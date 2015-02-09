@@ -45,6 +45,11 @@ namespace midspace.adminscripts
         private static List<string> _ingotNames;
         private static MyPhysicalItemDefinition[] _physicalItems;
 
+        /// <summary>
+        /// Set manually to true for testing purposes. No need for this function in general.
+        /// </summary>
+        public bool Debug = false;
+
         #endregion
 
         #region attaching events and wiring up
@@ -55,8 +60,11 @@ namespace midspace.adminscripts
             // This needs to wait until the MyAPIGateway.Session.Player is created, as running on a Dedicated server can cause issues.
             // It would be nicer to just read a property that indicates this is a dedicated server, and simply return.
             if (!_isInitialized && MyAPIGateway.Session != null && MyAPIGateway.Session.Player != null)
+            {
+                if (!MyAPIGateway.Session.OnlineMode.Equals(MyOnlineModeEnum.OFFLINE) && MyAPIGateway.Multiplayer.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                    InitServer();
                 Init();
-
+            }
             if (!_isInitialized && MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null
                 && MyAPIGateway.Session != null && MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
             {
@@ -84,6 +92,8 @@ namespace midspace.adminscripts
         protected override void UnloadData()
         {
             DetachEvents();
+            Logger.Debug("Closing...");
+            Logger.Terminate();
             base.UnloadData();
         }
 
@@ -92,7 +102,9 @@ namespace midspace.adminscripts
         private void Init()
         {
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
+            Logger.Init();
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
+            Logger.Debug("Attach MessageEntered");
 
             // This will populate the _oreNames, _ingotNames, ready for the ChatCommands.
             BuildResourceLookups();
@@ -178,10 +190,12 @@ namespace midspace.adminscripts
 
             ChatCommandService.Init();
 
-            if (MyAPIGateway.Multiplayer.MultiplayerActive) //only need this in mp
+            //MultiplayerActive is false when initializing host... extreamly weird
+            if (MyAPIGateway.Multiplayer.MultiplayerActive || ServerCfg != null) //only need this in mp
             {
                 //let the server know we are ready for connections
                 MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Client;
+                Logger.Debug("Attach OnEntityAdd_Client");
                 var data = new Dictionary<string, string>();
                 data.Add(ConnectionHelper.ConnectionKeys.ConnectionRequest, MyAPIGateway.Session.Player.SteamUserId.ToString());
                 ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.BasicPrefix, data);
@@ -196,13 +210,11 @@ namespace midspace.adminscripts
         private void InitServer()
         {
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
-            ConnectionHelper.ServerPrefix = ConnectionHelper.RandomString(8);
+            Logger.Init();
             MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Server;
+            Logger.Debug("Attach OnEntityAdd_Server");
 
-            MyAPIGateway.Utilities.ConfigDedicated.Load();
-            //just to prevent it from being null
-            while (MyAPIGateway.Utilities.ConfigDedicated == null)
-                ;
+            ConnectionHelper.ServerPrefix = ConnectionHelper.RandomString(8);
 
             ServerCfg = new ServerConfig();
         }
@@ -211,18 +223,23 @@ namespace midspace.adminscripts
 
         private void DetachEvents()
         {
-            if (MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Multiplayer.IsServer)
+            if (ServerCfg != null) //only for clients it is null
             {
                 ServerCfg.Save();
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Server;
-                return;
+                Logger.Debug("Detach OnEntityAdd_Server");
             }
 
-            MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
+            if (MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
+                return;
 
-            if (MyAPIGateway.Multiplayer.MultiplayerActive)
+            MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
+            Logger.Debug("Detach MessageEntered");
+
+            if (MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerCfg.ServerIsClient))
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
+                Logger.Debug("Detach OnEntityAdd_Client");
             }
 
             if (_timer100 != null)
@@ -290,6 +307,8 @@ namespace midspace.adminscripts
         /// <param name="entity"></param>
         void Entities_OnEntityAdd_Server(IMyEntity entity)
         {
+            if (entity == null || entity.DisplayName == null)
+                return;
             if (entity is IMyCubeGrid)
             {
                 //we use the different prefixes to prevent failures
@@ -306,6 +325,8 @@ namespace midspace.adminscripts
         /// <param name="entity"></param>
         void Entities_OnEntityAdd_Client(IMyEntity entity)
         {
+            if (entity == null || entity.DisplayName == null)
+                return;
             if (entity is IMyCubeGrid)
             {
                 //if the custom prefix isnt set we assume that it's the 'first contact'

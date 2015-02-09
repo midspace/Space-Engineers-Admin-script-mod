@@ -309,7 +309,6 @@ namespace midspace.adminscripts
                         //TODO restrict/extend the permissions
                         break;
                     case ConnectionKeys.ForceKick:
-                        MyAPIGateway.Utilities.ShowMessage("Process", "Receive Data");
                         ulong steamId;
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
                             PlayerTerminal.DropPlayer = true;
@@ -388,6 +387,9 @@ namespace midspace.adminscripts
                         //TODO send it to the connected clients and save it
                         break;
                     case ConnectionKeys.Save:
+                        if (ChatCommandLogic.Instance.ServerCfg.ServerIsClient)
+                            break; //no one should be able to do that
+
                         if (string.IsNullOrEmpty(entry.Value))
                             MyAPIGateway.Session.Save();
                         else
@@ -404,7 +406,7 @@ namespace midspace.adminscripts
                         string[] values = entry.Value.Split(':');
                         bool ban = false;
                         ulong steamId;
-                        if (ulong.TryParse(values[0], out steamId) && !MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(entry.Value))
+                        if (ulong.TryParse(values[0], out steamId) && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
                         {
                             if (values.Length > 1 && bool.TryParse(values[1], out ban) && ban)
                             {
@@ -472,14 +474,20 @@ namespace midspace.adminscripts
                                 data.Add(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.MessageOfTheDay);
 
                             }
-                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(entry.Value))
+                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
                                 data.Add(ConnectionKeys.AdminNotification, ChatCommandLogic.Instance.AdminNotification);
                             BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == steamId);
-                            if (bannedPlayer.SteamId != 0 && !MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(bannedPlayer.SteamId.ToString()))
+                            if (bannedPlayer.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
                                 data.Add(ConnectionKeys.ForceKick, bannedPlayer.SteamId.ToString());
                             //only send the command permission if it is set, disabled by now
                             /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
                                 data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
+                            //cant send an request through EntityAdd since it wont be noticed until the player is spawned
+                            if (ChatCommandLogic.Instance.ServerCfg.ServerIsClient && steamId == MyAPIGateway.Session.Player.SteamUserId)
+                            {
+                                ProcessIdData(ConvertData(data));
+                                break;
+                            }
                             var firstContact = CreateConnectionEntity(BasicPrefix, data);
                             SendConnectionEntity(firstContact);
                         }

@@ -22,15 +22,22 @@ namespace midspace.adminscripts
         /// </summary>
         private ServerConfigurationStruct Config;
 
+        /// <summary>
+        /// True for listen server
+        /// </summary>
+        public bool ServerIsClient = true;
         public List<BannedPlayer> ForceBannedPlayer { get { return Config.ForceBannedPlayers; } }
 
         public ServerConfig()
         {
+            if (MyAPIGateway.Utilities.IsDedicated)
+                ServerIsClient = false;
+
             Config = new ServerConfigurationStruct()
             {
                 //init default values
-                WorldLocation = MyAPIGateway.Utilities.ConfigDedicated.LoadWorld,
-                MotdFileSuffix = ReplaceForbiddenChars(MyAPIGateway.Utilities.ConfigDedicated.WorldName),
+                WorldLocation = MyAPIGateway.Session.CurrentPath,
+                MotdFileSuffix = ReplaceForbiddenChars(MyAPIGateway.Session.Name),
                 MotdHeadLine = "",
                 MotdShowInChat = false,
                 ForceBannedPlayers = new List<BannedPlayer>(),
@@ -42,7 +49,7 @@ namespace midspace.adminscripts
 
         public void Save()
         {
-            Config.WorldLocation = MyAPIGateway.Utilities.ConfigDedicated.LoadWorld;
+            Config.WorldLocation = MyAPIGateway.Session.CurrentPath;
             WriteConfig();
         }
 
@@ -98,17 +105,25 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(file, typeof(ChatCommandLogic));
             var text = reader.ReadToEnd();
+
             if (!string.IsNullOrEmpty(text))
             {
                 //prepare MOTD, replace variables
-                var dedicatedConfig = MyAPIGateway.Utilities.ConfigDedicated;
 
-
-                text = text.Replace("%SERVER_NAME%", dedicatedConfig.ServerName);
-                text = text.Replace("%WORLD_NAME%", dedicatedConfig.WorldName);
+                text = text.Replace("%WORLD_NAME%", MyAPIGateway.Session.Name);
                 //text = text.Replace("%SERVER_IP%", dedicatedConfig.IP); returns the 'listen ip' default: 0.0.0.0
-                text = text.Replace("%SERVER_PORT%", dedicatedConfig.ServerPort.ToString());
 
+                //only for DS
+                if (!ServerIsClient)
+                {
+                    var dedicatedConfig = MyAPIGateway.Utilities.ConfigDedicated;
+                    dedicatedConfig.Load();
+                    while (dedicatedConfig == null)
+                        ;
+
+                    text = text.Replace("%SERVER_NAME%", dedicatedConfig.ServerName);
+                    text = text.Replace("%SERVER_PORT%", dedicatedConfig.ServerPort.ToString());
+                }
                 CommandMessageOfTheDay.MessageOfTheDay = text;
                 CommandMessageOfTheDay.ShowInChat = Config.MotdShowInChat;
             }
@@ -132,6 +147,9 @@ If you can't find the error, simply delete the file. The server will create a ne
         /// <returns></returns>
         public static string ReplaceForbiddenChars(string originalText)
         {
+            if (string.IsNullOrWhiteSpace(originalText))
+                return originalText;
+
             //could be done in one single line but like this we have a better overview
             var convertedText = originalText.Replace('\\', ' ');
             convertedText = convertedText.Replace('/', ' ');
@@ -144,6 +162,21 @@ If you can't find the error, simply delete the file. The server will create a ne
             convertedText = convertedText.Replace('|', ' ');
 
             return convertedText;
+        }
+
+        public bool IsServerAdmin(ulong steamId)
+        {
+            List<IMyPlayer> players = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(players, p => p != null);
+            IMyPlayer player = players.FirstOrDefault(p => p.SteamUserId == steamId);
+
+            if (player == null)
+                return false;
+
+            if (ServerIsClient)
+                return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
+            else
+                return MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(player.SteamUserId.ToString());
         }
     }
 
