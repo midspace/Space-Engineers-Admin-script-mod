@@ -15,7 +15,7 @@
     public class CommandAsteroidRotate : ChatCommand
     {
         public CommandAsteroidRotate()
-            : base(ChatCommandSecurity.Experimental, "rotateroid", new[] { "/rotateroid" })
+            : base(ChatCommandSecurity.Admin, "rotateroid", new[] { "/rotateroid" })
         {
         }
 

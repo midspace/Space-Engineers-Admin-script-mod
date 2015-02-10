@@ -12,7 +12,7 @@
 
         public static void Init()
         {
-            if (!isInitialized)
+            if (ChatCommandLogic.Instance.Debug && !isInitialized)
             {
                 Writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(Logger));
                 isInitialized = true;
@@ -30,8 +30,11 @@
 
         public static void Terminate()
         {
-            Writer.Flush();
-            Writer.Close();
+            if (Writer != null)
+            {
+                Writer.Flush();
+                Writer.Close();
+            }
             isInitialized = false;
         }
     }

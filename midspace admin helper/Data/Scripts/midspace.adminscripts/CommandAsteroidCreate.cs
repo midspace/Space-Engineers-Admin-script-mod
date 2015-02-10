@@ -10,7 +10,7 @@
     public class CommandAsteroidCreate : ChatCommand
     {
         public CommandAsteroidCreate()
-            : base(ChatCommandSecurity.Experimental, "createasteroid", new[] { "/createasteroid" })
+            : base(ChatCommandSecurity.Admin, "createasteroid", new[] { "/createasteroid" })
         {
         }
 

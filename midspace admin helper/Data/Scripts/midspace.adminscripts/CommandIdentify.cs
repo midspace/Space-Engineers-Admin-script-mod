@@ -84,7 +84,7 @@
                             gridCube.Physics.LinearVelocity, 
                             gridCube.Physics.LinearVelocity.Length(),
                             gridCube.Physics.CenterOfMassWorld,
-                            gridCube.LocalAABB.Size(),
+                            "disabled for release ", //gridCube.LocalAABB.Size(), // breaking change for 01.069 .Size() -> .Size 
                             blocks.Count,
                             attachedGrids.Count
                             );

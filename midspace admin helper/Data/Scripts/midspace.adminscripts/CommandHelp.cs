@@ -8,7 +8,7 @@
     public class CommandHelp : ChatCommand
     {
         public CommandHelp()
-            : base(ChatCommandSecurity.User, "help", new[] { "/help" })
+            : base(ChatCommandSecurity.User, "help", new[] { "/help", "/?" })
         {
         }
 
@@ -19,35 +19,46 @@
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.StartsWith("/help", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var match = Regex.Match(messageText, @"/help\s{1,}(?<Key>[^\s]+)", RegexOptions.IgnoreCase);
+            var brief = messageText.StartsWith("/?", StringComparison.InvariantCultureIgnoreCase);
 
-                if (!match.Success)
+            var match = Regex.Match(messageText, @"(/help|/?)\s{1,}(?<Key>[^\s]+)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                var ret = ChatCommandService.Help(match.Groups["Key"].Value);
+                if (!ret)
+                    MyAPIGateway.Utilities.ShowMessage("help", "could not find specified command.");
+                return true;
+            }
+
+            if (ChatCommandService.UserSecurity == ChatCommandSecurity.User)
+            {
+                // Split help details. Regular users, get one list.
+                var commands = ChatCommandService.GetListCommands();
+                if (brief)
+                    MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", commands));
+                else
+                    MyAPIGateway.Utilities.ShowMissionScreen("Help", "commands", " ", String.Join(", ", commands), null, "OK");
+            }
+            else
+            {
+                // Split help details. Admins users, get two lists.
+                var commands = ChatCommandService.GetUserListCommands();
+                var adminCommands = ChatCommandService.GetNonUserListCommands();
+
+                if (brief)
                 {
-                    if (ChatCommandService.UserSecurity == ChatCommandSecurity.User)
-                    {
-                        // Split help details. Regular users, get one list.
-                        var commands = ChatCommandService.GetListCommands();
-                        MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", commands));
-                    }
-                    else
-                    {
-                        // Split help details. Admins users, get two lists.
-                        var commands = ChatCommandService.GetUserListCommands();
-                        MyAPIGateway.Utilities.ShowMessage("user help", String.Join(", ", commands));
-                        commands = ChatCommandService.GetNonUserListCommands();
-                        MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", commands));
-                    }
-                    return true;
+                    MyAPIGateway.Utilities.ShowMessage("user help", String.Join(", ", commands));
+                    MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", adminCommands));
                 }
                 else
                 {
-                    return ChatCommandService.Help(match.Groups["Key"].Value);
+                    MyAPIGateway.Utilities.ShowMissionScreen("Help", "Available commands", " ",
+                        string.Format("User commands:\r\n{0}\r\n\r\nAdmin commands:\r\n{1}", String.Join(", ", commands), String.Join(", ", adminCommands))
+                        , null, "OK");
                 }
             }
 
-            return false;
+            return true;
         }
     }
 }
