@@ -1,19 +1,14 @@
-﻿using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using Sandbox.ModAPI;
+    using System;
+    using System.Text.RegularExpressions;
+
     public class CommandPardon : ChatCommand
     {
-
         public CommandPardon()
             : base(ChatCommandSecurity.Admin, "pardon", new string[] { "/pardon" })
         {
-
         }
 
         public override void Help()
@@ -26,20 +21,17 @@ namespace midspace.adminscripts
             if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 return false;
 
-            if (messageText.StartsWith("/pardon", StringComparison.InvariantCultureIgnoreCase))
+            var match = Regex.Match(messageText, @"/pardon\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            if (match.Success)
             {
-                string playerName = null;
-                var match = Regex.Match(messageText, @"/pardon\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    playerName = match.Groups["Key"].Value;
-                }
+                var playerName = match.Groups["Key"].Value;
                 ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.Pardon, playerName);
                 MyAPIGateway.Utilities.ShowMessage("Pardoning", playerName);
                 return true;
             }
 
-            return false;
+            MyAPIGateway.Utilities.ShowMessage("Pardoning", "Please supply name to pardon from Ban.");
+            return true;
         }
     }
 }

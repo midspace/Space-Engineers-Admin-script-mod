@@ -1,5 +1,4 @@
-﻿using A8DB07281BA741DFB48BE151DDBFE24F;
-using Sandbox.Common.ObjectBuilders;
+﻿using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
 using System;
@@ -72,7 +71,8 @@ namespace midspace.adminscripts
         /// <param name="content">The information that will be send to the player</param>
         public static void CreateAndSendConnectionEntity(IMyPlayer player, Dictionary<string, string> content)
         {
-            CreateAndSendConnectionEntity(PlayerConnections[player.SteamUserId], content);
+            if (PlayerConnections.ContainsKey(player.SteamUserId)) // may not have completed connection as yet.
+                CreateAndSendConnectionEntity(PlayerConnections[player.SteamUserId], content);
         }
 
         /// <summary>
@@ -82,7 +82,8 @@ namespace midspace.adminscripts
         /// <param name="content">The information that will be send to the player</param>
         public static void CreateAndSendConnectionEntity(ulong steamId, Dictionary<string, string> content)
         {
-            CreateAndSendConnectionEntity(PlayerConnections[steamId], content);
+            if (PlayerConnections.ContainsKey(steamId)) // may not have completed connection as yet.
+                CreateAndSendConnectionEntity(PlayerConnections[steamId], content);
         }
 
         /// <summary>
@@ -311,7 +312,7 @@ namespace midspace.adminscripts
                     case ConnectionKeys.ForceKick:
                         ulong steamId;
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
-                            PlayerTerminal.DropPlayer = true;
+                            CommandForceKick.DropPlayer = true;
                         break;
                 }
             }
@@ -361,7 +362,7 @@ namespace midspace.adminscripts
                     case ConnectionKeys.ForceKick:
                         ulong steamId;
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
-                            PlayerTerminal.DropPlayer = true;
+                            CommandForceKick.DropPlayer = true;
                         break;
                 }
             }

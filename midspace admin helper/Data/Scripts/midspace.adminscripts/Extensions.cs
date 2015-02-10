@@ -275,5 +275,10 @@ namespace midspace.adminscripts
         {
             return string.Format(MyTexts.GetString(stringId), args);
         }
+
+        public static void ShowMessage(this IMyUtilities utilities, string sender, string messageText, params object[] args)
+        {
+            utilities.ShowMessage(sender, string.Format(messageText, args));
+        }
     }
 }

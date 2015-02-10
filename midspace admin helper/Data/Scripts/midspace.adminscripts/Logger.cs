@@ -1,23 +1,20 @@
-﻿using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using Sandbox.ModAPI;
+    using System;
+    using System.IO;
+
     public static class Logger
     {
-        const string FileName = "AdminHelperCommands.log";
-        static TextWriter Writer;
-        static bool isInitialized = false;
+        private readonly static string fileName = string.Format("AdminHelperCommands_{0}.log", MyAPIGateway.Session.WorldID);
+        private static TextWriter Writer;
+        private static bool isInitialized = false;
 
         public static void Init()
         {
             if (!isInitialized)
             {
-                Writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(FileName, typeof(Logger));
+                Writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(Logger));
                 isInitialized = true;
             }
         }
