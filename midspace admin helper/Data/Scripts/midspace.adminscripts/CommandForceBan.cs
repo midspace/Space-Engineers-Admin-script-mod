@@ -52,7 +52,7 @@
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("ForceBan", selectedPlayer.DisplayName);
-                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.ForceKick, string.Format("{0}:true", findPlayer.SteamUserId.ToString()));
+                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.ForceKick, string.Format("{0}:true", selectedPlayer.SteamUserId.ToString()));
                 return true;
             }
 
