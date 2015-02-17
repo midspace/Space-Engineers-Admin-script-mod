@@ -230,13 +230,16 @@ namespace midspace.adminscripts
                 Logger.Debug("Detach OnEntityAdd_Server");
             }
 
-            if (MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
+            if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null &&
+                MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
                 return;
 
-            MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
+            if (MyAPIGateway.Utilities != null)
+                MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
             Logger.Debug("Detach MessageEntered");
 
-            if (MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerCfg.ServerIsClient))
+            if ((MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive)
+                || (ServerCfg != null && ServerCfg.ServerIsClient))
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
                 Logger.Debug("Detach OnEntityAdd_Client");

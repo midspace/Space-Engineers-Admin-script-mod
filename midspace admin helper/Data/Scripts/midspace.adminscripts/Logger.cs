@@ -6,9 +6,17 @@
 
     public static class Logger
     {
-        private readonly static string fileName = string.Format("AdminHelperCommands_{0}.log", MyAPIGateway.Session.WorldID);
+        private readonly static string fileName;
         private static TextWriter Writer;
         private static bool isInitialized = false;
+
+        static Logger()
+        {
+            if (MyAPIGateway.Session != null)
+                fileName = string.Format("AdminHelperCommands_{0}.log", MyAPIGateway.Session.WorldID);
+            else
+                fileName = string.Format("AdminHelperCommands_{0}.log", 0);
+        }
 
         public static void Init()
         {
@@ -21,7 +29,7 @@
 
         public static void Debug(string text)
         {
-            if (!ChatCommandLogic.Instance.Debug || Writer == null)
+            if (Writer == null || !isInitialized || !ChatCommandLogic.Instance.Debug)
                 return;
 
             Writer.WriteLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss:fff}] Debug - {1}", DateTime.Now, text));
@@ -34,6 +42,7 @@
             {
                 Writer.Flush();
                 Writer.Close();
+                Writer = null;
             }
             isInitialized = false;
         }
