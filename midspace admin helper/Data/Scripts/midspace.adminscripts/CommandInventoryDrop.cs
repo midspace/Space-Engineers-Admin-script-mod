@@ -181,10 +181,7 @@
                         Up = worldMatrix.Up.ToSerializableVector3(),
                     };
 
-                    var tempList = new List<MyObjectBuilder_EntityBase> { floatingBuilder };
-                    MyAPIGateway.Entities.RemapObjectBuilderCollection(tempList);
-                    tempList.ForEach(grid => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid));
-                    MyAPIGateway.Multiplayer.SendEntitiesCreated(tempList);
+                    floatingBuilder.CreateAndSyncEntity();
                     return true;
                 }
             }

@@ -58,10 +58,7 @@
                     Integrity = 100,
                 };
 
-                var tempList = new List<MyObjectBuilder_EntityBase> { meteorBuilder };
-                MyAPIGateway.Entities.RemapObjectBuilderCollection(tempList);
-                tempList.ForEach(grid => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid));
-                MyAPIGateway.Multiplayer.SendEntitiesCreated(tempList);
+                meteorBuilder.CreateAndSyncEntity();
                 return true;
             }
 

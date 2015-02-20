@@ -280,5 +280,25 @@ namespace midspace.adminscripts
         {
             utilities.ShowMessage(sender, string.Format(messageText, args));
         }
+
+        /// <summary>
+        /// Creates the objectbuilder in game, and syncs it to the server and all clients.
+        /// </summary>
+        /// <param name="entity"></param>
+        public static void CreateAndSyncEntity(this MyObjectBuilder_EntityBase entity)
+        {
+            CreateAndSyncEntities(new List<MyObjectBuilder_EntityBase> { entity });
+        }
+
+        /// <summary>
+        /// Creates the objectbuilders in game, and syncs it to the server and all clients.
+        /// </summary>
+        /// <param name="entities"></param>
+        public static void CreateAndSyncEntities(this List<MyObjectBuilder_EntityBase> entities)
+        {
+            MyAPIGateway.Entities.RemapObjectBuilderCollection(entities);
+            entities.ForEach(item => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(item));
+            MyAPIGateway.Multiplayer.SendEntitiesCreated(entities);
+        }
     }
 }

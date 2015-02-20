@@ -59,7 +59,7 @@
 
                 var maxspeed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed * 1.25f;
 
-                var meteor = new MyObjectBuilder_Meteor
+                var meteorBuilder = new MyObjectBuilder_Meteor
                 {
                     Item = new MyObjectBuilder_InventoryItem { Amount = 1, Content = new MyObjectBuilder_Ore { SubtypeName = _oreNames[0] } },
                     PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
@@ -74,8 +74,7 @@
                     Integrity = 1
                 };
 
-                MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(meteor);
-
+                meteorBuilder.CreateAndSyncEntity();
                 return true;
             }
 
