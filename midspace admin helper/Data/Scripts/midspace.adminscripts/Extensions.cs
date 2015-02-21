@@ -262,9 +262,14 @@ namespace midspace.adminscripts
         /// </summary>
         /// <param name="player"></param>
         /// <param name="damageType"></param>
-        public static void KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
+        public static bool KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
         {
-            ((IMyDestroyableObject)player.Controller.ControlledEntity).DoDamage(1000f, damageType, true);
+            var destroyable = player.Controller.ControlledEntity as IMyDestroyableObject;
+            if (destroyable == null)
+                return false;
+
+            destroyable.DoDamage(1000f, damageType, true);
+            return true;
         }
 
         public static string GetString(this MyStringId stringId)
@@ -308,6 +313,58 @@ namespace midspace.adminscripts
             player = players.FirstOrDefault(p => p.SteamUserId == steamId);
             if (player == null)
                 return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Creates the objectbuilder in game, and syncs it to the server and all clients.
+        /// </summary>
+        /// <param name="entity"></param>
+        public static void CreateAndSyncEntity(this MyObjectBuilder_EntityBase entity)
+        {
+            CreateAndSyncEntities(new List<MyObjectBuilder_EntityBase> { entity });
+        }
+
+        /// <summary>
+        /// Creates the objectbuilders in game, and syncs it to the server and all clients.
+        /// </summary>
+        /// <param name="entities"></param>
+        public static void CreateAndSyncEntities(this List<MyObjectBuilder_EntityBase> entities)
+        {
+            MyAPIGateway.Entities.RemapObjectBuilderCollection(entities);
+            entities.ForEach(item => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(item));
+            MyAPIGateway.Multiplayer.SendEntitiesCreated(entities);
+        }
+
+        public static bool StopShip(this IMyEntity shipEntity)
+        {
+            var grids = shipEntity.GetAttachedGrids();
+
+            foreach (var grid in grids)
+            {
+                var shipCubeGrid = grid.GetObjectBuilder(false) as MyObjectBuilder_CubeGrid;
+
+                if (shipCubeGrid.IsStatic)
+                    continue;
+
+                var cockPits = grid.FindWorkingCockpits();
+
+                if (!shipCubeGrid.DampenersEnabled && cockPits.Length > 0)
+                {
+                    cockPits[0].SwitchDamping();
+                }
+
+                foreach (var cockPit in cockPits)
+                {
+                    cockPit.MoveAndRotateStopped();
+                }
+
+                grid.Physics.ClearSpeed();
+
+                // TODO : may need to iterate through thrusters and turn off any thrust override.
+                // 01.064.010 requires using the Action("DecreaseOverride") repeatbly until override is 0.
+            }
 
             return true;
         }
