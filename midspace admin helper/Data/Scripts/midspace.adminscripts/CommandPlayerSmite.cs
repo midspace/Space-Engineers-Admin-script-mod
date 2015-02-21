@@ -11,12 +11,12 @@
 
     public class CommandPlayerSmite : ChatCommand
     {
-        private readonly string[] _oreNames;
+        private readonly string _defaultOreName;
 
-        public CommandPlayerSmite(string[] oreNames)
+        public CommandPlayerSmite(string defaultOreName)
             : base(ChatCommandSecurity.Admin, "smite", new[] { "/smite" })
         {
-            _oreNames = oreNames;
+            _defaultOreName = defaultOreName;
         }
 
         public override void Help()
@@ -60,7 +60,7 @@
 
                 var meteorBuilder = new MyObjectBuilder_Meteor
                 {
-                    Item = new MyObjectBuilder_InventoryItem { Amount = 1, Content = new MyObjectBuilder_Ore { SubtypeName = _oreNames[0] } },
+                    Item = new MyObjectBuilder_InventoryItem { Amount = 1, Content = new MyObjectBuilder_Ore { SubtypeName = _defaultOreName } },
                     PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
                     PositionAndOrientation = new MyPositionAndOrientation
                     {

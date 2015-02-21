@@ -9,12 +9,12 @@
 
     public class CommandMeteor : ChatCommand
     {
-        private readonly string[] _oreNames;
+        private readonly string _defaultOreName;
 
-        public CommandMeteor(string[] oreNames)
+        public CommandMeteor(string defaultOreName)
             : base(ChatCommandSecurity.Admin, "meteor", new[] { "/meteor" })
         {
-            _oreNames = oreNames;
+            _defaultOreName = defaultOreName;
         }
 
         public override void Help()
@@ -45,7 +45,7 @@
                     Item = new MyObjectBuilder_InventoryItem()
                     {
                         Amount = 10000,
-                        Content = new MyObjectBuilder_Ore() { SubtypeName = _oreNames[0] }
+                        Content = new MyObjectBuilder_Ore() { SubtypeName = _defaultOreName }
                     },
                     PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
                     PositionAndOrientation = new MyPositionAndOrientation()

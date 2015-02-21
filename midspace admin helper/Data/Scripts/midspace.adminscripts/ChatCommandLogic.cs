@@ -141,14 +141,14 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandListShips());
             ChatCommandService.Register(new CommandListShips2());
             ChatCommandService.Register(new CommandMessageOfTheDay());
-            ChatCommandService.Register(new CommandMeteor(_oreNames));
+            ChatCommandService.Register(new CommandMeteor(_oreNames[0]));
             ChatCommandService.Register(new CommandObjectsCollect());
             ChatCommandService.Register(new CommandObjectsCount());
             ChatCommandService.Register(new CommandObjectsPull());
             ChatCommandService.Register(new CommandPardon());
             ChatCommandService.Register(new CommandPlayerEject());
             ChatCommandService.Register(new CommandPlayerSlay());
-            ChatCommandService.Register(new CommandPlayerSmite(_oreNames));
+            ChatCommandService.Register(new CommandPlayerSmite(_oreNames[0]));
             //ChatCommandService.Register(new CommandPlayerRespawn());  //not working any more
             ChatCommandService.Register(new CommandPlayerStatus());
             ChatCommandService.Register(new CommandPosition());
@@ -166,6 +166,7 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandShipOwnerRevoke());
             //ChatCommandService.Register(new CommandShipOwnerShare());  //not working
             ChatCommandService.Register(new CommandStop());
+            ChatCommandService.Register(new CommandStopAll());
             ChatCommandService.Register(new CommandTeleport());
             ChatCommandService.Register(new CommandTeleportBack());
             ChatCommandService.Register(new CommandTeleportDelete());

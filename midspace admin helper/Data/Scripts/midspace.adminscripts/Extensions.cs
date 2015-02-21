@@ -305,5 +305,37 @@ namespace midspace.adminscripts
             entities.ForEach(item => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(item));
             MyAPIGateway.Multiplayer.SendEntitiesCreated(entities);
         }
+
+        public static bool StopShip(this IMyEntity shipEntity)
+        {
+            var grids = shipEntity.GetAttachedGrids();
+
+            foreach (var grid in grids)
+            {
+                var shipCubeGrid = grid.GetObjectBuilder(false) as MyObjectBuilder_CubeGrid;
+
+                if (shipCubeGrid.IsStatic)
+                    continue;
+
+                var cockPits = grid.FindWorkingCockpits();
+
+                if (!shipCubeGrid.DampenersEnabled && cockPits.Length > 0)
+                {
+                    cockPits[0].SwitchDamping();
+                }
+
+                foreach (var cockPit in cockPits)
+                {
+                    cockPit.MoveAndRotateStopped();
+                }
+
+                grid.Physics.ClearSpeed();
+
+                // TODO : may need to iterate through thrusters and turn off any thrust override.
+                // 01.064.010 requires using the Action("DecreaseOverride") repeatbly until override is 0.
+            }
+
+            return true;
+        }
     }
 }
