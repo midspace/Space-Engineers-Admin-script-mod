@@ -130,6 +130,7 @@
     <Compile Include="CommandObjectsCollect.cs" />
     <Compile Include="ConnectionHelper.cs" />
     <Compile Include="CommandAsteroidCreate.cs" />
+    <Compile Include="CommandStopAll.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />
