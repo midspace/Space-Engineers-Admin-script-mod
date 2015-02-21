@@ -5,9 +5,7 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
-    using VRageMath;
 
     public class CommandStop : ChatCommand
     {
@@ -31,7 +29,7 @@
                     var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        var ret = StopShip(entity);
+                        var ret = entity.StopShip();
                         MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
                         return ret;
                     }
@@ -71,43 +69,9 @@
             var ret = false;
             foreach (var selectedShip in shipList)
             {
-                ret |= StopShip(selectedShip);
+                ret |= selectedShip.StopShip();
             }
             return ret;
-        }
-
-        private bool StopShip(IMyEntity shipEntity)
-        {
-            var grids = shipEntity.GetAttachedGrids();
-
-            foreach (var grid in grids)
-            {
-                var shipCubeGrid = grid.GetObjectBuilder(false) as MyObjectBuilder_CubeGrid;
-
-                if (shipCubeGrid.IsStatic)
-                    continue;
-
-                var cockPits = grid.FindWorkingCockpits();
-
-                if (!shipCubeGrid.DampenersEnabled && cockPits.Length > 0)
-                {
-                    cockPits[0].SwitchDamping();
-                }
-
-                foreach (var cockPit in cockPits)
-                {
-                    cockPit.MoveAndRotateStopped();
-                }
-
-                //grid.Physics.AngularVelocity = Vector3.Zero;
-                //grid.Physics.LinearVelocity = Vector3.Zero;
-                grid.Physics.ClearSpeed(); // Same as above.
-
-                // TODO : may need to iterate through thrusters and turn off any thrust override.
-                // 01.064.010 requires using the Action("DecreaseOverride") repeatbly until override is 0.
-            }
-
-            return true;
         }
     }
 }

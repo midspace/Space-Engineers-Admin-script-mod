@@ -67,10 +67,7 @@
                             tempList.Add(gridBuilder);
                         }
 
-                        MyAPIGateway.Entities.RemapObjectBuilderCollection(tempList);
-                        tempList.ForEach(grid => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid));
-                        MyAPIGateway.Multiplayer.SendEntitiesCreated(tempList);
-
+                        tempList.CreateAndSyncEntities();
                         return true;
                     }
                 }
