@@ -18,7 +18,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/spreadasteroids <distance>", "Will spread all asteroids out the specified <distance> from origin (0,0,0). + or - to move out or in.");
         }

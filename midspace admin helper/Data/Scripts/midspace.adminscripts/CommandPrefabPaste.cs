@@ -16,7 +16,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pasteprefab <#>", "Pastes the specified <#> prefab from clipboard (Works only in Creative mode, ignores disabled Copy/Paste.)");
         }

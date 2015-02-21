@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/fd <#>", "Demotes the specified <#> player one level within their faction.");
         }

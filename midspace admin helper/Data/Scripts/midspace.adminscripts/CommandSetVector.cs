@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/setvector <X> <Y> <Z>", "Set player or piloted ship flying on the specified vector <X Y Z>");
         }

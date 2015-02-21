@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/eject <#>", "The specified <#> player is removed from control of any ship.");
         }

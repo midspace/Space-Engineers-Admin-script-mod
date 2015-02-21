@@ -19,7 +19,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/collectobjects <range>", "Collects any floating objects in <range> of the player to player's location.");
         }

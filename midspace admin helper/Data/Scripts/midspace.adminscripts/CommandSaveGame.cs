@@ -18,7 +18,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/savegame", "Saves the active game to the local computer.");
         }

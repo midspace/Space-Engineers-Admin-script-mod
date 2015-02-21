@@ -92,11 +92,11 @@
             return Commands.Where(c => (c.Security ^ _userSecurity) != ChatCommandSecurity.None && (c.Security & _userSecurity) != ChatCommandSecurity.User).Select(c => c.Name).ToArray();
         }
 
-        public static bool Help(string commandName)
+        public static bool Help(string commandName, bool brief)
         {
             foreach (var command in Commands.Where(command => (command.Security & _userSecurity) != ChatCommandSecurity.None && command.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
             {
-                command.Help();
+                command.Help(brief);
                 return true;
             }
 

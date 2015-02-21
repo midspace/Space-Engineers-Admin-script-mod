@@ -17,7 +17,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pullobjects <range> <speed>", "Draws any floating objects in <range> of the player at specified <speed>. Negative speed will push objects. Zero speed will stop objects.");
         }

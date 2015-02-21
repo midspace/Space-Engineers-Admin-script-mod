@@ -21,7 +21,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/listprefabs <filter>", "List ships in the Prefabs. Optional <filter> to refine your search by name.");
         }

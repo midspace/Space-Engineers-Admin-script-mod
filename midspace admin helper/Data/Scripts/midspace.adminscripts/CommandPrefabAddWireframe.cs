@@ -17,7 +17,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/addwireframe <#>", "Add the specified <#> prefab as an unbuilt ship. Spawns the specified a ship 2m directly in front of player.");
         }

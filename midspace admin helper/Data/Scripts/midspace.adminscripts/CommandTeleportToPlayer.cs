@@ -20,7 +20,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tpp <#>", "Teleport you to the specified player <#>.");
         }

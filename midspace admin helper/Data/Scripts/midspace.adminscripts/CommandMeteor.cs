@@ -17,7 +17,7 @@
             _oreNames = oreNames;
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/meteor", "Throws a meteor in the direction you face");
         }

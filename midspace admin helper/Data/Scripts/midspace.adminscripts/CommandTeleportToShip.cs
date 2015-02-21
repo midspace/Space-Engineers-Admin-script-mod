@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tps <#>", "Teleport player to the specified ship <#>.");
         }

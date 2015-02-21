@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/creative <on|off>", "Turns creative mode on or off for you.");
 

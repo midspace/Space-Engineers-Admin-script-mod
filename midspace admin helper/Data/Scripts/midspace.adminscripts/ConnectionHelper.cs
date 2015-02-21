@@ -15,167 +15,84 @@ namespace midspace.adminscripts
     public static class ConnectionHelper
     {
         /// <summary>
-        /// Used when no other prefix is set in other words for the 'first contact'.
+        /// Id for messages.
         /// </summary>
-        public const string BasicPrefix = @"\x7FbY2k";
-
-        /// <summary>
-        /// Prefix for validation of created entity. Not initialized on server. Used to contact a specific client.
-        /// </summary>
-        public static string ClientPrefix;
-
-        /// <summary>
-        /// Prefix of the server instance. Used to send orders to the server.
-        /// </summary>
-        public static string ServerPrefix;
-
-        /// <summary>
-        /// ´Contains already connected palyers with their steam id and connection id
-        /// </summary>
-        public static Dictionary<ulong, string> PlayerConnections = new Dictionary<ulong, string>();
+        public const ushort StandardClientId = 16103;
+        public const ushort StandardServerId = StandardClientId + 1;
 
         /// <summary>
         /// True if an id request was sent otherwise false.
         /// </summary>
-        public static bool SentIdRequest = false;
+        public static bool ReceivedInitialRequest;
 
         #region connections to server
 
         /// <summary>
-        /// Creates and sends an entity with the given information for the server.
+        /// Creates and sends an entity with the given information for the server. Never call this on DS instance!
         /// </summary>
-        public static void CreateAndSendConnectionEntity(string key, string value)
+        public static void SendMessageToServer(string key, string value)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add(key, value);
-            CreateAndSendConnectionEntity(ServerPrefix, data);
+            SendMessageToServer(data);
         }
 
         /// <summary>
-        /// Creates and sends an entity with the given information for the server.
+        /// Creates and sends an entity with the given information for the server. Never call this on DS instance!
         /// </summary>
         /// <param name="content"></param>
-        public static void CreateAndSendConnectionEntity(Dictionary<string, string> content)
+        public static void SendMessageToServer(Dictionary<string, string> content)
         {
-            CreateAndSendConnectionEntity(ServerPrefix, content);
+            content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
+            MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content)));
         }
 
         #endregion
 
         #region connections to clients
 
-        /// <summary>
-        /// Creates and sends an entity with the given information.
-        /// </summary>
-        /// <param name="player">The player who gets the information</param>
-        /// <param name="content">The information that will be send to the player</param>
-        public static void CreateAndSendConnectionEntity(IMyPlayer player, Dictionary<string, string> content)
+
+        public static void SendMessageToPlayer(IMyPlayer player, Dictionary<string, string> content)
         {
-            if (PlayerConnections.ContainsKey(player.SteamUserId)) // may not have completed connection as yet.
-                CreateAndSendConnectionEntity(PlayerConnections[player.SteamUserId], content);
+            SendMessageToPlayer(player.SteamUserId, content);
         }
 
-        /// <summary>
-        /// Creates and sends an entity with the given information.
-        /// </summary>
-        /// <param name="player">The player who gets the information</param>
-        /// <param name="content">The information that will be send to the player</param>
-        public static void CreateAndSendConnectionEntity(ulong steamId, Dictionary<string, string> content)
+        public static void SendMessageToPlayer(ulong steamId, Dictionary<string, string> content)
         {
-            if (PlayerConnections.ContainsKey(steamId)) // may not have completed connection as yet.
-                CreateAndSendConnectionEntity(PlayerConnections[steamId], content);
+            MyAPIGateway.Multiplayer.SendMessageTo(StandardClientId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content)), steamId);
         }
 
-        /// <summary>
-        /// Creates and sends an entity with the given information.
-        /// </summary>
-        public static void CreateAndSendConnectionEntity(IMyPlayer player, string key, string value)
+        public static void SendMessageToPlayer(IMyPlayer player, string key, string value)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add(key, value);
-            CreateAndSendConnectionEntity(player, data);
+            SendMessageToPlayer(player, data);
         }
 
-        /// <summary>
-        /// Creates and sends an entity with the given information.
-        /// </summary>
-        public static void CreateAndSendConnectionEntity(ulong steamId, string key, string value)
+        public static void SendMessageToPlayer(ulong steamId, string key, string value)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add(key, value);
-            CreateAndSendConnectionEntity(steamId, data);
+            SendMessageToPlayer(steamId, data);
+        }
+
+        public static void SendMessageToAllPlayers(Dictionary<string, string> content)
+        {
+            //MyAPIGateway.Multiplayer.SendMessageToOthers(StandardClientId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content))); <- does not work as expected ... so it doesn't work at all?
+            List<IMyPlayer> players = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(players, p => p != null);
+            foreach (IMyPlayer player in players)
+                SendMessageToPlayer(player, content);
+        }
+
+        public static void SendMessageToAllPlayers(string key, string value)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add(key, value);
+            SendMessageToAllPlayers(data);
         }
 
         # endregion
-        
-        /// <summary>
-        /// Creates and sends an entity.
-        /// </summary>
-        /// <param name="connectionId">The id of the client that gets the information</param>
-        /// <param name="content">The information that will be send to the player</param>
-        public static void CreateAndSendConnectionEntity(string connectionId, Dictionary<string, string> content)
-        {
-           SendConnectionEntity(CreateConnectionEntity(connectionId, content));
-        }
-
-        /// <summary>
-        /// Creates an entity with the given information.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="content"></param>
-        /// <returns></returns>
-        public static MyObjectBuilder_CubeGrid CreateConnectionEntity(string id, Dictionary<string, string> content)
-        {
-            MyObjectBuilder_CubeGrid cubeGrid = new MyObjectBuilder_CubeGrid();
-            cubeGrid.PersistentFlags = MyPersistentEntityFlags2.None;
-            cubeGrid.IsStatic = true;
-            cubeGrid.PositionAndOrientation = new MyPositionAndOrientation()
-            {
-                Position = Vector3D.Zero,
-                Forward = Vector3.Forward,
-                Up = Vector3.Up,
-            };
-
-            var str = new StringBuilder();
-            str.AppendLine(id);
-            str.Append(ConvertData(content));
-            cubeGrid.DisplayName = str.ToString();
-
-            return cubeGrid;
-        }
-
-        /// <summary>
-        /// Sends an entity to the other clients
-        /// </summary>
-        /// <param name="cubeGrid"></param>
-        public static void SendConnectionEntity(MyObjectBuilder_CubeGrid cubeGrid)
-        {
-            var tempList = new List<MyObjectBuilder_EntityBase> { cubeGrid };
-            MyAPIGateway.Entities.RemapObjectBuilderCollection(tempList);
-            tempList.ForEach(grid => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(grid));
-            MyAPIGateway.Multiplayer.SendEntitiesCreated(tempList);
-        }
-
-        /// <summary>
-        /// Creates a random string with the given length
-        /// </summary>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static string RandomString(int length)
-        {
-            //some chars for a string
-            string chars = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!§$%&/()=[]{}ß@€|<>^°,;.:-_öäü+*#'";
-            System.Random rnd = new System.Random();
-
-            char[] buffer = new char[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                buffer[i] = chars[rnd.Next(chars.Length)];
-            }
-
-            return new string(buffer);
-        }
 
         #region Converting and parsing
 
@@ -297,14 +214,55 @@ namespace midspace.adminscripts
             var parsedData = Parse(dataString);
             foreach (KeyValuePair<string, string> entry in parsedData)
             {
+                Logger.Debug(string.Format("[Client]Processing KeyValuePair - Key: {0}, Value: {1}", entry.Key, entry.Value));
                 switch (entry.Key)
                 {
-                    case ConnectionKeys.MessageOfTheDay:
-                        CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
-                        CommandMessageOfTheDay.ShowMotd();
+                    case ConnectionKeys.MotdHeadLine:
+                        CommandMessageOfTheDay.HeadLine = entry.Value;
                         break;
-                    case ConnectionKeys.PrivateMessage:
-                        //TODO create private message command
+                    case ConnectionKeys.MotdShowInChat:
+                        bool showInChat = CommandMessageOfTheDay.ShowInChat;
+                        if (bool.TryParse(entry.Value, out showInChat))
+                        {
+                            CommandMessageOfTheDay.ShowInChat = showInChat;
+                        }
+                        break;
+                    case ConnectionKeys.MessageOfTheDay: //motd
+                        CommandMessageOfTheDay.Content = entry.Value;
+                        MyAPIGateway.Utilities.ShowMessage("Motd", "The message of the day was updated just now. To see what is new use '/motd'.");
+                        break;
+                    case ConnectionKeys.PrivateMessage: //pm
+                        IMyPlayer sender = null;
+                        string senderName = null;
+                        string message = null;
+                        foreach (KeyValuePair<string, string> pmEntry in Parse(entry.Value))
+                        {
+                            Logger.Debug(string.Format("[Client]Processing PM KeyValuePair - Key: {0}, Value: {1}", pmEntry.Key, pmEntry.Value));
+                            switch (pmEntry.Key)
+                            {
+                                case ConnectionKeys.PmSender:
+                                    ulong senderSteamId;
+                                    if (ulong.TryParse(pmEntry.Value, out senderSteamId) && senderSteamId != 0)
+                                    {
+                                        MyAPIGateway.Players.TryGetPlayer(senderSteamId, out sender);
+                                    }
+                                    break;
+                                case ConnectionKeys.PmSenderName:
+                                    senderName = pmEntry.Value;
+                                    break;
+                                case ConnectionKeys.PmMessage:
+                                    message = pmEntry.Value;
+                                    break;
+                            }
+                        }
+
+                        if (sender != null)
+                        {
+                            senderName = sender.DisplayName;
+                            CommandPrivateMessage.LastWhisperId = sender.SteamUserId;
+                        }
+
+                        MyAPIGateway.Utilities.ShowMessage(string.Format("{0}{1}", senderName, senderName.Equals("Server") ? "" : " whispers"), message);
                         break;
                     case ConnectionKeys.Command:
                         //TODO restrict/extend the permissions
@@ -315,26 +273,27 @@ namespace midspace.adminscripts
                             CommandForceKick.DropPlayer = true;
                         break;
                 }
+                Logger.Debug(string.Format("[Client]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
+        }
+
+        public static void ProcessClientData(byte[] rawData)
+        {
+            ProcessClientData(System.Text.Encoding.Unicode.GetString(rawData));
         }
 
         /// <summary>
         /// Client side. Process the ids sent from the server.
         /// </summary>
         /// <param name="dataString"></param>
-        public static void ProcessIdData(string dataString)
+        public static void ProcessInitialData(string dataString)
         {
+            Logger.Debug("[Client]Processing Initital Data...");
             var parsedData = Parse(dataString);
             foreach (KeyValuePair<string, string> entry in parsedData)
             {
                 switch (entry.Key)
                 {
-                    case ConnectionKeys.ClientId:
-                        ClientPrefix = entry.Value;
-                        break;
-                    case ConnectionKeys.ServerId:
-                        ServerPrefix = entry.Value;
-                        break;
                     case ConnectionKeys.MotdHeadLine:
                         CommandMessageOfTheDay.HeadLine = entry.Value;
                         break;
@@ -346,7 +305,7 @@ namespace midspace.adminscripts
                         }
                         break;
                     case ConnectionKeys.MessageOfTheDay:
-                        CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
+                        CommandMessageOfTheDay.Content = entry.Value;
                         CommandMessageOfTheDay.Received = true;
                         if (CommandMessageOfTheDay.ShowOnReceive)
                             CommandMessageOfTheDay.ShowMotd();
@@ -364,8 +323,19 @@ namespace midspace.adminscripts
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
                             CommandForceKick.DropPlayer = true;
                         break;
+                    case ConnectionKeys.LogPrivateMessages:
+                        bool logPms;
+                        if (bool.TryParse(entry.Value, out logPms))
+                            CommandPrivateMessage.LogPrivateMessages = logPms;
+                        break;
                 }
             }
+            Logger.Debug("[Client]Finished processing Initital Data");
+        }
+
+        public static void ProcessInitialData(byte[] rawData)
+        {
+            ProcessInitialData(System.Text.Encoding.Unicode.GetString(rawData));
         }
 
         #endregion
@@ -379,13 +349,33 @@ namespace midspace.adminscripts
         public static void ProcessServerData(string dataString)
         {
             var parsedData = Parse(dataString);
+            string senderIdString = parsedData[ConnectionKeys.Sender];
+            ulong senderSteamId;
+            if (ulong.TryParse(senderIdString, out senderSteamId))
+                parsedData.Remove(ConnectionKeys.Sender);
+            else
+                return; //if we don't know who sent the request, we don't execute it
+
             foreach (KeyValuePair<string, string> entry in parsedData)
             {
+                Logger.Debug(string.Format("[Server]Processing KeyValuePair - Key: {0}, Value: {1}", entry.Key, entry.Value));
                 switch (entry.Key)
                 {
                     case ConnectionKeys.MessageOfTheDay:
-                        CommandMessageOfTheDay.MessageOfTheDay = entry.Value;
-                        //TODO send it to the connected clients and save it
+                        ChatCommandLogic.Instance.ServerCfg.SetMessageOfTheDay(entry.Value);
+                        SendMessageToAllPlayers(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
+                        break;
+                    case ConnectionKeys.MotdHeadLine:
+                        CommandMessageOfTheDay.HeadLine = entry.Value;
+                        SendMessageToAllPlayers(ConnectionKeys.MotdHeadLine, entry.Value);
+                        break;
+                    case ConnectionKeys.MotdShowInChat:
+                        bool motdsic;
+                        if (bool.TryParse(entry.Value, out motdsic))
+                        {
+                            CommandMessageOfTheDay.ShowInChat = motdsic;
+                            SendMessageToAllPlayers(ConnectionKeys.MotdShowInChat, entry.Value);
+                        }
                         break;
                     case ConnectionKeys.Save:
                         if (ChatCommandLogic.Instance.ServerCfg.ServerIsClient)
@@ -398,7 +388,27 @@ namespace midspace.adminscripts
                         //TODO implement a command that uses this
                         break;
                     case ConnectionKeys.PrivateMessage:
-                        //TODO create private message command
+                        string message = "";
+                        ulong receiverSteamId = 0;
+                        foreach (KeyValuePair<string, string> pmEntry in Parse(entry.Value))
+                        {
+                            switch (pmEntry.Key) 
+                            {
+                                case ConnectionKeys.PmReceiver:
+                                if (ulong.TryParse(pmEntry.Value, out receiverSteamId))
+                                {
+                                    SendMessageToPlayer(receiverSteamId, ConnectionKeys.PrivateMessage, entry.Value);
+                                }
+                                break;
+                                case ConnectionKeys.PmMessage:
+                                    message = pmEntry.Value;
+                                    break;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(message) && receiverSteamId != 0)
+                            ChatCommandLogic.Instance.ServerCfg.LogPrivateMessage(senderSteamId, receiverSteamId, message);
+                        else
+                            Logger.Debug("Could not log private message");
                         break;
                     case ConnectionKeys.Command:
                         //TODO restrict/extend the command security
@@ -409,61 +419,47 @@ namespace midspace.adminscripts
                         ulong steamId;
                         if (ulong.TryParse(values[0], out steamId) && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
                         {
+                            var players = new List<IMyPlayer>();
+                            MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
+                            IMyPlayer player = players.FirstOrDefault();
                             if (values.Length > 1 && bool.TryParse(values[1], out ban) && ban)
                             {
-                                var players = new List<IMyPlayer>();
-                                MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
-                                IMyPlayer player = players.FirstOrDefault();
                                 ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Add(new BannedPlayer()
                                 {
                                     SteamId = steamId,
                                     PlayerName = player.DisplayName
                                 });
                             }
-                            CreateAndSendConnectionEntity(steamId, ConnectionKeys.ForceKick, steamId.ToString());
+                            SendMessageToPlayer(steamId, ConnectionKeys.ForceKick, steamId.ToString());
+                            SendChatMessage(senderSteamId, string.Format("{0} player {1}.", ban ? "Forcebanned" : "Forcekicked" , player.DisplayName));
                         }
                         break;
                     case ConnectionKeys.Pardon:
                         BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.PlayerName.Equals(entry.Value, StringComparison.InvariantCultureIgnoreCase));
                         if (bannedPlayer.SteamId != 0)
-                            ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Remove(bannedPlayer);
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Server side. Sends the requested ids to the client.
-        /// </summary>
-        /// <param name="dataString"></param>
-        public static void ProcessIdRequest(string dataString)
-        {
-            var parsedData = Parse(dataString);
-            foreach (KeyValuePair<string, string> entry in parsedData)
-            {
-                switch (entry.Key)
-                {
-                    case ConnectionKeys.ConnectionRequest:
-                        ulong steamId;
-                        if (ulong.TryParse(entry.Value, out steamId))
                         {
-                            //only register unregistred players
-                            if (!PlayerConnections.ContainsKey(steamId))
-                            {
-                                var connectionId = RandomString(8);
-
-                                //in case we gernerate the same value two times (very unrealistic)
-                                while (PlayerConnections.ContainsValue(connectionId))
-                                    connectionId = RandomString(8);
-
-                                PlayerConnections.Add(steamId, connectionId);
-                            }
-
+                            ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Remove(bannedPlayer);
+                            SendChatMessage(senderSteamId, string.Format("Pardoned player {0}", bannedPlayer.PlayerName));
+                        }
+                        break;
+                    case ConnectionKeys.ConfigSave:
+                        ChatCommandLogic.Instance.ServerCfg.Save();
+                        SendChatMessage(senderSteamId, "Config saved.");
+                        break;
+                    case ConnectionKeys.ConfigReload:
+                        ChatCommandLogic.Instance.ServerCfg.Load();
+                        SendChatMessage(senderSteamId, "Config reloaded.");
+                        break;
+                    case ConnectionKeys.GlobalMessage:
+                        ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(senderSteamId, entry.Value);
+                        break;
+                    case ConnectionKeys.ConnectionRequest:
+                        ulong steamId1;
+                        if (ulong.TryParse(entry.Value, out steamId1))
+                        {
                             var data = new Dictionary<string, string>();
-                            data.Add(ConnectionKeys.ClientId, PlayerConnections[steamId]);
-                            data.Add(ConnectionKeys.ServerId, ServerPrefix);
                             //only send the motd if there is one
-                            if (!string.IsNullOrEmpty(CommandMessageOfTheDay.MessageOfTheDay))
+                            if (!string.IsNullOrEmpty(CommandMessageOfTheDay.Content))
                             {
                                 //the header must be initialized before the motd otherwise it won't show
                                 if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))
@@ -472,33 +468,55 @@ namespace midspace.adminscripts
                                 if (CommandMessageOfTheDay.ShowInChat)
                                     data.Add(ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
 
-                                data.Add(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.MessageOfTheDay);
-
+                                data.Add(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
                             }
-                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
+
+                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId1))
                                 data.Add(ConnectionKeys.AdminNotification, ChatCommandLogic.Instance.AdminNotification);
-                            BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == steamId);
-                            if (bannedPlayer.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
-                                data.Add(ConnectionKeys.ForceKick, bannedPlayer.SteamId.ToString());
+                            BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == steamId1);
+                            if (bannedPlayer1.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId1))
+                                data.Add(ConnectionKeys.ForceKick, bannedPlayer1.SteamId.ToString());
                             //only send the command permission if it is set, disabled by now
                             /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
                                 data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
-                            //cant send an request through EntityAdd since it wont be noticed until the player is spawned
-                            if (ChatCommandLogic.Instance.ServerCfg.ServerIsClient && steamId == MyAPIGateway.Session.Player.SteamUserId)
-                            {
-                                ProcessIdData(ConvertData(data));
-                                break;
-                            }
-                            var firstContact = CreateConnectionEntity(BasicPrefix, data);
-                            SendConnectionEntity(firstContact);
+                            data.Add(ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
+                            SendMessageToPlayer(steamId1, data);
                         }
                         break;
                 }
+                Logger.Debug(string.Format("[Server]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
+        }
+
+
+        public static void ProcessServerData(byte[] rawData)
+        {
+            ProcessServerData(System.Text.Encoding.Unicode.GetString(rawData));
         }
 
         #endregion
 
+        public static void SendChatMessage(IMyPlayer receiver, string message)
+        {
+            SendChatMessage(receiver.SteamUserId, message);
+        }
+
+        public static void SendChatMessage(ulong steamId, string message)
+        {
+            if (steamId == 0)
+                return;
+
+            var data = new Dictionary<string, string>();
+            data.Add(ConnectionHelper.ConnectionKeys.PmReceiver, steamId.ToString());
+            data.Add(ConnectionHelper.ConnectionKeys.PmSender, "0");
+            data.Add(ConnectionHelper.ConnectionKeys.PmSenderName, "Server");
+            data.Add(ConnectionHelper.ConnectionKeys.PmMessage, message);
+            string messageData = ConnectionHelper.ConvertData(data);
+
+            SendMessageToPlayer(steamId, ConnectionKeys.PrivateMessage, ConvertData(data));
+        }
+        
+        
         private static void PerformSecurityChanges(string commandSecurityPair)
         {
             var pair = commandSecurityPair.Split(':');
@@ -523,8 +541,6 @@ namespace midspace.adminscripts
         public static class ConnectionKeys
         {
             public const string ConnectionRequest = "connect";
-            public const string ClientId = "id";
-            public const string ServerId =  "serverId";
             public const string MessageOfTheDay = "motd";
             public const string MotdHeadLine = "motdhl";
             public const string MotdShowInChat = "motdsic";
@@ -534,6 +550,17 @@ namespace midspace.adminscripts
             public const string Command = "cmd";
             public const string Save = "save";
             public const string Pardon = "pard";
+            public const string ConfigSave = "cfgsave";
+            public const string ConfigReload = "cfgrl";
+            public const string Sender = "sender";
+            public const string LogPrivateMessages = "logpm";
+            public const string GlobalMessage = "glmsg";
+
+            //pm subkeys
+            public const string PmMessage = "msg";
+            public const string PmSender = "sender";
+            public const string PmSenderName = "sendername";
+            public const string PmReceiver = "receiver";
         }
     }
 }

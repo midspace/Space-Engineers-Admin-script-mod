@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/flyto <X> <Y> <Z> <Velocity>", "Sends player or piloted ship flying to position <X Y Z> at speed <Velocity>");
         }

@@ -11,7 +11,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tpfav <name>", "Teleport player or piloted ship to the previously saved location named <name>.");
         }

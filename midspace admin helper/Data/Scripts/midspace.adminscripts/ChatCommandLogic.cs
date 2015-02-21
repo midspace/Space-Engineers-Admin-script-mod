@@ -45,6 +45,9 @@ namespace midspace.adminscripts
         private static List<string> _ingotNames;
         private static MyPhysicalItemDefinition[] _physicalItems;
 
+        private Action<byte[]> MessageHandler_Client = new Action<byte[]>(HandleMessage_Client);
+        private Action<byte[]> MessageHandler_Server = new Action<byte[]>(HandleMessage_Server);
+
         /// <summary>
         /// Set manually to true for testing purposes. No need for this function in general.
         /// </summary>
@@ -118,6 +121,7 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandAsteroidsList());
             ChatCommandService.Register(new CommandAsteroidRotate());
             //ChatCommandService.Register(new CommandAsteroidSpread());  //not working
+            ChatCommandService.Register(new CommandConfig());
             ChatCommandService.Register(new CommandDate());
             ChatCommandService.Register(new CommandFactionDemote());
             ChatCommandService.Register(new CommandFactionJoin());
@@ -155,6 +159,7 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandPrefabAdd());
             ChatCommandService.Register(new CommandPrefabAddWireframe());
             ChatCommandService.Register(new CommandPrefabPaste());
+            ChatCommandService.Register(new CommandPrivateMessage());
             ChatCommandService.Register(new CommandSaveGame());
             ChatCommandService.Register(new CommandSessionCargoShips());
             ChatCommandService.Register(new CommandSessionCopyPaste());
@@ -193,13 +198,14 @@ namespace midspace.adminscripts
             //MultiplayerActive is false when initializing host... extreamly weird
             if (MyAPIGateway.Multiplayer.MultiplayerActive || ServerCfg != null) //only need this in mp
             {
-                //let the server know we are ready for connections
                 MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Client;
-                Logger.Debug("Attach OnEntityAdd_Client");
+                MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
+                Logger.Debug("Registered ProcessMessage_Client");
                 var data = new Dictionary<string, string>();
                 data.Add(ConnectionHelper.ConnectionKeys.ConnectionRequest, MyAPIGateway.Session.Player.SteamUserId.ToString());
-                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.BasicPrefix, data);
-                ConnectionHelper.SentIdRequest = true;
+                //let the server know we are ready for connections
+                ConnectionHelper.ReceivedInitialRequest = false;
+                ConnectionHelper.SendMessageToServer(data);
                 CommandMessageOfTheDay.ShowMotdOnSpawn = true;
             }
         }
@@ -211,10 +217,8 @@ namespace midspace.adminscripts
         {
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
-            MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Server;
-            Logger.Debug("Attach OnEntityAdd_Server");
-
-            ConnectionHelper.ServerPrefix = ConnectionHelper.RandomString(8);
+            MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
+            Logger.Debug("Registered ProcessMessage_Server");
 
             ServerCfg = new ServerConfig();
         }
@@ -223,24 +227,26 @@ namespace midspace.adminscripts
 
         private void DetachEvents()
         {
-            if (ServerCfg != null) //only for clients it is null
-            {
+            if (ServerCfg != null)
+            { //only for clients it is null
                 ServerCfg.Save();
-                MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Server;
-                Logger.Debug("Detach OnEntityAdd_Server");
+                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
+                Logger.Debug("Uregistered MessageHandler Server");
             }
 
-            if (MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
+            if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
                 return;
 
-            MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
-            Logger.Debug("Detach MessageEntered");
-
-            if (MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerCfg.ServerIsClient))
+            if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive  || (ServerCfg != null && ServerCfg.ServerIsClient))
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
-                Logger.Debug("Detach OnEntityAdd_Client");
+                Logger.Debug("Detached Entities_OnEntityAdd_Client");
+                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
+                Logger.Debug("Uregistered MessageHandler Client");
             }
+
+            MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
+            Logger.Debug("Detached MessageEntered");
 
             if (_timer100 != null)
             {
@@ -275,6 +281,9 @@ namespace midspace.adminscripts
             {
                 sendToOthers = false;
             }
+
+            if (sendToOthers)
+                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GlobalMessage, messageText);
         }
 
         #endregion
@@ -299,64 +308,39 @@ namespace midspace.adminscripts
 
         #endregion
 
-        #region connection handling
-
-        /// <summary>
-        /// Server side processing of incoming connections
-        /// </summary>
-        /// <param name="entity"></param>
-        void Entities_OnEntityAdd_Server(IMyEntity entity)
-        {
-            if (entity == null || entity.DisplayName == null)
-                return;
-            if (entity is IMyCubeGrid)
-            {
-                //we use the different prefixes to prevent failures
-                if (entity.DisplayName.StartsWith(ConnectionHelper.ServerPrefix))
-                    ConnectionHelper.ProcessServerData(entity.DisplayName.Substring(8));
-                else if (entity.DisplayName.StartsWith(ConnectionHelper.BasicPrefix))
-                    ConnectionHelper.ProcessIdRequest(entity.DisplayName.Substring(8));
-            }
-        }
-
-        /// <summary>
-        /// Client side processing of incoming connections
-        /// </summary>
-        /// <param name="entity"></param>
         void Entities_OnEntityAdd_Client(IMyEntity entity)
         {
-            if (entity == null || entity.DisplayName == null)
-                return;
-            if (entity is IMyCubeGrid)
-            {
-                //if the custom prefix isnt set we assume that it's the 'first contact'
-                if (ConnectionHelper.ClientPrefix == null)
-                {
-                    //if it doesn't start with the basic prefix it's not a connection
-                    if (!entity.DisplayName.StartsWith(ConnectionHelper.BasicPrefix) || !ConnectionHelper.SentIdRequest)
-                        return;
-
-                    ConnectionHelper.ProcessIdData(entity.DisplayName.Substring(8));
-                    return;
-                }
-                //if there is a custom prefix and the displayname doesn't start with it we can stop here
-                if (!entity.DisplayName.StartsWith(ConnectionHelper.ClientPrefix))
-                    return;
-
-                ConnectionHelper.ProcessClientData(entity.DisplayName.Substring(8));
-            }
-            else if (entity is IMyCharacter && CommandMessageOfTheDay.ShowMotdOnSpawn && entity.DisplayName.Equals(MyAPIGateway.Session.Player.DisplayName, StringComparison.InvariantCultureIgnoreCase))
+            if (entity is IMyCharacter && CommandMessageOfTheDay.ShowMotdOnSpawn && entity.DisplayName.Equals(MyAPIGateway.Session.Player.DisplayName, StringComparison.InvariantCultureIgnoreCase))
             {
                 if (CommandMessageOfTheDay.Received)
                 {
                     CommandMessageOfTheDay.ShowMotd();
                     if (!string.IsNullOrEmpty(AdminNotification))
-                        MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
+                        MyAPIGateway.Utilities.ShowMissionScreen("Admin Notification System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
                 }
                 else
                     CommandMessageOfTheDay.ShowOnReceive = true;
                 CommandMessageOfTheDay.ShowMotdOnSpawn = false;
             }
+        }
+
+        #region connection handling
+
+        private static void HandleMessage_Client(byte[] message)
+        {
+            Logger.Debug(string.Format("HandleMessage - {0}", System.Text.Encoding.Unicode.GetString(message)));
+            if (!ConnectionHelper.ReceivedInitialRequest)
+            {
+                ConnectionHelper.ReceivedInitialRequest = true;
+                ConnectionHelper.ProcessInitialData(message);
+            }
+            else
+                ConnectionHelper.ProcessClientData(message);
+        }
+
+        private static void HandleMessage_Server(byte[] message)
+        {
+            ConnectionHelper.ProcessServerData(message);
         }
 
         #endregion

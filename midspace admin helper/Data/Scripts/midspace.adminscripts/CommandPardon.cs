@@ -11,7 +11,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pardon <#>", "Pardons the specified player <#> if he has been forcebanned.");
         }
@@ -25,7 +25,7 @@
             if (match.Success)
             {
                 var playerName = match.Groups["Key"].Value;
-                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.Pardon, playerName);
+                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Pardon, playerName);
                 MyAPIGateway.Utilities.ShowMessage("Pardoning", playerName);
                 return true;
             }

@@ -19,7 +19,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/listships <filter>", "List in-game ships/stations. Optional <filter> to refine your search by ship name or antenna/beacon name.");
         }

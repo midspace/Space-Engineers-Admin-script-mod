@@ -18,7 +18,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/status", "Displays the current players and steam Ids.");
         }

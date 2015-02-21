@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/CargoShips <on|off>", "Turns spawning of Cargo ships and Exploration ships mode on or off.");
 

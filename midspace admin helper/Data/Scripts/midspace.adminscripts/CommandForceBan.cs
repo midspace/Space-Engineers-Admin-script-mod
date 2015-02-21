@@ -13,7 +13,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/forceban <#>", "Forces the specified player <#> to disconnect and bans him. Only use this if normal ban does not work.");
         }
@@ -52,7 +52,7 @@
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("ForceBan", selectedPlayer.DisplayName);
-                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.ForceKick, string.Format("{0}:true", selectedPlayer.SteamUserId.ToString()));
+                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.ForceKick, string.Format("{0}:true", selectedPlayer.SteamUserId.ToString()));
                 return true;
             }
 

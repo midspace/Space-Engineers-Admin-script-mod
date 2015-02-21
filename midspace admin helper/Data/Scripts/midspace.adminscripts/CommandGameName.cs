@@ -17,7 +17,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/gamename <name>", "Displays or changes the game name permanently to <name>.");
         }

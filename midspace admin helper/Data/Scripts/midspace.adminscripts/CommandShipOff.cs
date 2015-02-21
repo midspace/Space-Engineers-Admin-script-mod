@@ -15,7 +15,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/off <#>", "Turns off all reactor power in the specified <#> ship.");
         }

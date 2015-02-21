@@ -15,7 +15,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/invclear <#>", "The specified <#> player is cleared of all inventory.");
         }

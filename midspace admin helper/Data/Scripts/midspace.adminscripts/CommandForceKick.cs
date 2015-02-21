@@ -15,7 +15,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/forcekick <#>", "Forces the specified player <#> to disconnect. Only use this if normal kick does not work.");
         }
@@ -54,7 +54,7 @@
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("ForceKick", selectedPlayer.DisplayName);
-                ConnectionHelper.CreateAndSendConnectionEntity(ConnectionHelper.ConnectionKeys.ForceKick, selectedPlayer.SteamUserId.ToString());
+                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.ForceKick, selectedPlayer.SteamUserId.ToString());
                 return true;
             }
 

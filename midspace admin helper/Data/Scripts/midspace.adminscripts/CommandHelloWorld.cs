@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/hello", "A simple Hello World test.");
         }

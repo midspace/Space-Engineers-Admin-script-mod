@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/createasteroid <X> <Y> <Z> <Sx> <Sy> <Sz> <Name>", "Creates an empty Asteroid space at location <X,Y,Z> of size <Sx,Sy,Sz>. The size must be multiple of 64.");
         }

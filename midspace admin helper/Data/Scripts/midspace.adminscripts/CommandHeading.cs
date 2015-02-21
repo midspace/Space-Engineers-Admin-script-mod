@@ -15,7 +15,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/head", "Displays your heading.");
             MyAPIGateway.Utilities.ShowMessage("/head <on|off>", "Turn <on> to continue displaying your heading (Elevation and Azimuth), updating once a second.");

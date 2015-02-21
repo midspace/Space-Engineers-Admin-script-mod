@@ -27,7 +27,7 @@
             LoadPoints();
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tplist <filter>", "List the current favorite save points. Optional <filter> to refine your search name.");
         }

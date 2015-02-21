@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/help <name>", "Displays help on the specified command <name>.");
         }
@@ -24,7 +24,7 @@
             var match = Regex.Match(messageText, @"(/help|/?)\s{1,}(?<Key>[^\s]+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                var ret = ChatCommandService.Help(match.Groups["Key"].Value);
+                var ret = ChatCommandService.Help(match.Groups["Key"].Value, brief);
                 if (!ret)
                     MyAPIGateway.Utilities.ShowMessage("help", "could not find specified command.");
                 return true;

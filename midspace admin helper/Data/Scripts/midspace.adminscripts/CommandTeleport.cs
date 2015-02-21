@@ -13,7 +13,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tp <X> <Y> <Z>", "Teleport player or piloted ship to the specified location <X Y Z>. Includes rotors and pistons!");
         }

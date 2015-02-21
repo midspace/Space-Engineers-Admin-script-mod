@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tpsave <name>", "Saves the current position under the <name> for later teleporting to with command /tpfav.");
         }

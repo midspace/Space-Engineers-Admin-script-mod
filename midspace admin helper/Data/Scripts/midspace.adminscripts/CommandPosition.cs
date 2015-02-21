@@ -14,7 +14,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pos", "Displays your position.");
             MyAPIGateway.Utilities.ShowMessage("/pos <on|off>", "Turn <on> to continue displaying your position, updating once a second.");

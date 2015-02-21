@@ -13,7 +13,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/voxelclear [on|off]", "Voxel cell clearing, will remove single voxel cells that the tip of the hand drill touches.");
         }

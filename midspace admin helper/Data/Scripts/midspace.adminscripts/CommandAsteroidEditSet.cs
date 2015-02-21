@@ -22,7 +22,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/voxelset [on|off|A|B|Clear|Fill]", "Voxel editing. Will clear/fill blocks of voxel cells. Select hand drill. [on] to turn on. [A] to set point A. [B]. to set point B. [C] to clear between points A and B. [F] to fill between points A and B. [off] to turn off.");
         }

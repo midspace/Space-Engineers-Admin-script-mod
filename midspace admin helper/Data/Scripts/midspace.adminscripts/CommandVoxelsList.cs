@@ -23,7 +23,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/listvoxels <filter>", "List stock voxels that can be placed. Optional <filter> to refine your search by name.");
         }

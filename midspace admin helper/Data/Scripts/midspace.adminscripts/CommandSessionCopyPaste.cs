@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/copypaste <on|off>", "Turns Copy Paste mode on or off for you.");
 

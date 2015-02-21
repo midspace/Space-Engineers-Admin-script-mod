@@ -13,7 +13,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/to <X> <Y> <Z>", "Teleport Offset a player or piloted ship, thus moving them by the specified values <X Y Z>. Includes rotors and pistons!");
         }

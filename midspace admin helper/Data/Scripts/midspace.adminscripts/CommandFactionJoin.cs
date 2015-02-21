@@ -16,7 +16,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/fj <faction> <#|B>", "The specified <#> player or <B> bot joins <faction>.");
         }

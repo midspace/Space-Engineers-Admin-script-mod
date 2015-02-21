@@ -13,7 +13,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/fr <faction>", "The specified <faction> is removed.");
         }

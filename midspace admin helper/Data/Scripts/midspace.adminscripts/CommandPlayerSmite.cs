@@ -18,7 +18,7 @@
             _oreNames = oreNames;
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/smite <#>", "Drops meteor on the specified <#> player. Instant death in Survival mode. Cockpits do pretect a little, but can become collateral damage.");
         }

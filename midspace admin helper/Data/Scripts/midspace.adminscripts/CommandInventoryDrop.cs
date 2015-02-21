@@ -43,7 +43,7 @@
             _physicalItemNames = names.ToArray();
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/drop <type name|name> <amount>", "Drop a specified item (ore, ingot, or item), <name>, <amount>. ie, \"ore gold 98.23\", \"steel plate 25\"");
         }

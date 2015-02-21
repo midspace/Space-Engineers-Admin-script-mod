@@ -18,7 +18,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/listasteroids <filter>", "List in-game asteroids. Optional <filter> to refine your search by name.");
         }

@@ -11,7 +11,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// The motd
         /// </summary>
-        public static string MessageOfTheDay;
+        public static string Content;
 
         /// <summary>
         /// The header in the mission screen (currentObjective)
@@ -44,7 +44,7 @@ namespace midspace.adminscripts
 
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("Motd", "Displays the message of the day.");
         }
@@ -52,7 +52,7 @@ namespace midspace.adminscripts
         public override bool Invoke(string messageText)
         {
             //TODO set the motd
-            if (!string.IsNullOrEmpty(MessageOfTheDay))
+            if (!string.IsNullOrEmpty(Content))
                 ShowMotd();
             else
                 MyAPIGateway.Utilities.ShowMessage("Motd", "Message of the day not available.");
@@ -63,9 +63,9 @@ namespace midspace.adminscripts
         {
             string headLine = HeadLine;
             if (!ShowInChat)
-                MyAPIGateway.Utilities.ShowMissionScreen("Message Of The Day", "", headLine, MessageOfTheDay, null, "Close");
+                MyAPIGateway.Utilities.ShowMissionScreen("Message Of The Day", "", headLine, Content, null, "Close");
             else
-                MyAPIGateway.Utilities.ShowMessage("Motd", MessageOfTheDay);
+                MyAPIGateway.Utilities.ShowMessage("Motd", Content);
         }
     }
 }

@@ -15,7 +15,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/slay <#>", "Kills your player or the specified <#> player. (Only in survival mode, with prompts.)");
         }

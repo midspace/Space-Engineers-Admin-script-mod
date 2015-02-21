@@ -22,7 +22,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/respawn", "Respawns the player");
         }

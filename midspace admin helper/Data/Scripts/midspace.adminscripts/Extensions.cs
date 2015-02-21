@@ -12,6 +12,7 @@ namespace midspace.adminscripts
     using VRageMath;
     using VRage.Common.Utils;
     using VRage.Common;
+    using System;
 
     public static class Extensions
     {
@@ -279,6 +280,36 @@ namespace midspace.adminscripts
         public static void ShowMessage(this IMyUtilities utilities, string sender, string messageText, params object[] args)
         {
             utilities.ShowMessage(sender, string.Format(messageText, args));
+        }
+
+        public static bool TryGetPlayer(this IMyPlayerCollection collection, string name, out IMyPlayer player)
+        {
+            player = null;
+            if (string.IsNullOrEmpty(name))
+                return false;
+            var players = new List<IMyPlayer>();
+            collection.GetPlayers(players, p => p != null);
+
+            player = players.FirstOrDefault(p => p.DisplayName.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            if (player == null)
+                return false;
+
+            return true;
+        }
+
+        public static bool TryGetPlayer(this IMyPlayerCollection collection, ulong steamId, out IMyPlayer player)
+        {
+            player = null;
+            if (steamId == null)
+                return false;
+            var players = new List<IMyPlayer>();
+            collection.GetPlayers(players, p => p != null);
+
+            player = players.FirstOrDefault(p => p.SteamUserId == steamId);
+            if (player == null)
+                return false;
+
+            return true;
         }
     }
 }

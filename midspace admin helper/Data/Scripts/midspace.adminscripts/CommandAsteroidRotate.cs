@@ -19,7 +19,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/rotateroid <name> <yaw> <pitch> <roll>", "Rotates the specified Asteroid <name> about <yaw> <pitch> <roll>. ie, \"rotateroid baseasteroid1 -90 180 0\"");
         }

@@ -12,7 +12,7 @@
         {
         }
 
-        public override void Help()
+        public override void Help(bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/j <Distance>", "Teleport player or piloted ship +<Distance> forward or -<Distance> Backward. (A simpler version of /to) Includes rotors and pistons!");
         }

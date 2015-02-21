@@ -36,8 +36,7 @@
         /// <summary>
         /// Runs the Chat command's specific help.
         /// </summary>
-        /// <returns>Returns true if help was processed.</returns>
-        public abstract void Help();
+        public abstract void Help(bool brief);
 
         /// <summary>
         /// Tests the Chat command for validility, and executes its content.
