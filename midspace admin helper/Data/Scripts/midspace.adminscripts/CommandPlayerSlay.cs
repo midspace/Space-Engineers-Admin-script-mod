@@ -17,35 +17,23 @@
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/slay <#>", "Kills your player or the specified <#> player. (Only in survival mode, with prompts.)");
+            MyAPIGateway.Utilities.ShowMessage("/slay <#>", "Kills the specified <#> player. Instant death in Survival mode. Cannot slay pilots.");
         }
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.StartsWith("/slay", StringComparison.InvariantCultureIgnoreCase))
+            var match = Regex.Match(messageText, @"/slay\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            if (match.Success)
             {
-                string playerName = null;
-                var match = Regex.Match(messageText, @"/slay\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    playerName = match.Groups["Key"].Value;
-                }
-
-                if (playerName == null)
-                {
-                    MyAPIGateway.Session.Player.KillPlayer(MyDamageType.Environment);
-                    return true;
-                }
-
+                var playerName = match.Groups["Key"].Value;
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null);
+                IMyPlayer selectedPlayer = null;
 
                 var findPlayer = players.FirstOrDefault(p => p.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
                 if (findPlayer != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("slaying", findPlayer.DisplayName);
-                    findPlayer.KillPlayer(MyDamageType.Environment);
-                    return true;
+                    selectedPlayer = findPlayer;
                 }
 
                 int index;
@@ -53,15 +41,20 @@
                 {
                     var listplayers = new List<IMyPlayer>();
                     MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
-                    var player = listplayers.FirstOrDefault();
-
-                    if (player != null)
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("slaying", player.DisplayName);
-                        player.KillPlayer(MyDamageType.Environment);
-                        return true;
-                    }
+                    selectedPlayer = listplayers.FirstOrDefault();
                 }
+
+                if (selectedPlayer == null)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Slay", string.Format("No player named {0} found.", playerName));
+                    return true;
+                }
+
+                if (selectedPlayer.KillPlayer(MyDamageType.Environment))
+                    MyAPIGateway.Utilities.ShowMessage("slaying", selectedPlayer.DisplayName);
+                else
+                    MyAPIGateway.Utilities.ShowMessage("could not slay", "{0} as player is Pilot. Use /eject first.", selectedPlayer.DisplayName);
+                return true;
             }
 
             return false;

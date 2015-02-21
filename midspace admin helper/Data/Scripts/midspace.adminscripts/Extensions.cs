@@ -261,9 +261,14 @@ namespace midspace.adminscripts
         /// </summary>
         /// <param name="player"></param>
         /// <param name="damageType"></param>
-        public static void KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
+        public static bool KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
         {
-            ((IMyDestroyableObject)player.Controller.ControlledEntity).DoDamage(1000f, damageType, true);
+            var destroyable = player.Controller.ControlledEntity as IMyDestroyableObject;
+            if (destroyable == null)
+                return false;
+
+            destroyable.DoDamage(1000f, damageType, true);
+            return true;
         }
 
         public static string GetString(this MyStringId stringId)

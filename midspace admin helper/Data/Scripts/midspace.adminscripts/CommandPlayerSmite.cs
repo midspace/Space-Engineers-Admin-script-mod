@@ -5,9 +5,9 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using Sandbox.ModAPI;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
+    using Sandbox.ModAPI;
 
     public class CommandPlayerSmite : ChatCommand
     {
@@ -21,7 +21,7 @@
 
         public override void Help()
         {
-            MyAPIGateway.Utilities.ShowMessage("/smite <#>", "Drops meteor on the specified <#> player. Instant death in Survival mode. Cockpits do pretect a little, but can become collateral damage.");
+            MyAPIGateway.Utilities.ShowMessage("/smite <#>", "Drops meteor on the specified <#> player. Instant death in Survival mode. Cockpits do protect a little, but can become collateral damage.");
         }
 
         public override bool Invoke(string messageText)
@@ -56,7 +56,6 @@
 
                 MyAPIGateway.Utilities.ShowMessage("smiting", selectedPlayer.DisplayName);
                 var worldMatrix = selectedPlayer.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
-
                 var maxspeed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed * 1.25f;
 
                 var meteorBuilder = new MyObjectBuilder_Meteor
