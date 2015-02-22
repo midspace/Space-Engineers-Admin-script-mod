@@ -30,12 +30,12 @@ namespace midspace.adminscripts
                 StringBuilder description = new StringBuilder();
                 description.AppendFormat(
 @"This command is used for private communication. Beware that it can be logged on the server. It can only be used in multiplayer.
-If you can't type a name, e.g. because it contains symbols, use /status to create a hotlist. 
+If you can't type a name, e.g. because it contains symbols, use /status to create a player hotlist. 
 There are several enhancements in this command to make private communication easier. Here is a list of all commands and their funcitons:
 
   /msg <player> <message>
 Aliases: /tell, @
-To use an alias just replace the command name with the alias. '/tell {0}' Hello and '@ {0} Hello' is the same as '/msg {0} Hello'
+To use an alias just replace the command name with the alias. '/tell {0} Hello' and '@ {0} Hello' is the same as '/msg {0} Hello'
 Function: Sends the specified <player> a private <message>.
 
   @@ <message>
@@ -78,7 +78,7 @@ The logging of private messages is {1}.
                 return true;
             }
 
-            var match1 = Regex.Match(messageText, @"@@@@(\s+(?<Key>.+)|)", RegexOptions.IgnoreCase);
+            var match1 = Regex.Match(messageText, @"@@@@\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match1.Success)
             {
                 string message = match1.Groups["Key"].Value;
@@ -96,7 +96,7 @@ The logging of private messages is {1}.
                 return true;
             }
 
-            var match2 = Regex.Match(messageText, @"@@@\s+((?<Player>[^\s]+)\s+(?<Message>.+)|(?<Player>.+))", RegexOptions.IgnoreCase);
+            var match2 = Regex.Match(messageText, @"@@@\s+((?<Player>[^\s]+)\s+(?<Message>.*)|(?<Player>.+))", RegexOptions.IgnoreCase);
             if (match2.Success)
             {
                 var playerName = match2.Groups["Player"].Value;
