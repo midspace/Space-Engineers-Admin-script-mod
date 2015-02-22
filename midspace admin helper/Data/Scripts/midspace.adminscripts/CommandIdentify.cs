@@ -2,7 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
 
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage.Common.Voxels;
     using VRageMath;
@@ -62,6 +65,8 @@
                         //var cockpits = entity.FindWorkingCockpits(); // TODO: determine if any cockpits are occupied.
                         //gridCube.BigOwners
                         //gridCube.SmallOwners
+                        //damage
+                        //complete.
 
                         displayType = gridCube.IsStatic ? "Station" : gridCube.GridSizeEnum.ToString() + " Ship";
                         displayName = entity.DisplayName;
@@ -100,6 +105,7 @@
             Vector3I min = Vector3I.MaxValue;
             Vector3I max = Vector3I.MinValue;
             Vector3I block;
+            Dictionary<byte, long> assetCount = new Dictionary<byte, long>();
 
             // read the asteroid in chunks of 64 to avoid the Arithmetic overflow issue.
             for (block.Z = 0; block.Z < voxelMap.Storage.Size.Z; block.Z += 64)
@@ -110,7 +116,7 @@
                         var oldCache = new MyStorageDataCache();
                         oldCache.Resize(size);
                         // LOD1 is not detailed enough for content information on asteroids.
-                        voxelMap.Storage.ReadRange(oldCache, MyStorageDataTypeFlags.Content, 0, block, block + size - 1);
+                        voxelMap.Storage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, block, block + size - 1);
 
                         Vector3I p;
                         for (p.Z = 0; p.Z < size.Z; ++p.Z)
@@ -122,16 +128,46 @@
                                     {
                                         min = Vector3I.Min(min, p + block);
                                         max = Vector3I.Max(max, p + block + 1);
+
+                                        var material = oldCache.Material(ref p);
+                                        if (assetCount.ContainsKey(material))
+                                            assetCount[material] += content;
+                                        else
+                                            assetCount.Add(material, content);
                                     }
                                 }
                     }
 
+            var assetNameCount = new Dictionary<string, long>();
+
+            foreach (var kvp in assetCount)
+            {
+                var name = MyDefinitionManager.Static.GetVoxelMaterialDefinition(kvp.Key).Id.SubtypeName;
+
+                if (assetNameCount.ContainsKey(name))
+                {
+                    assetNameCount[name] += kvp.Value;
+                }
+                else
+                {
+                    assetNameCount.Add(name, kvp.Value);
+                }
+            }
+
+            var sum = assetNameCount.Values.Sum();
+
+            var ores = new StringBuilder();
+            foreach (var kvp in assetNameCount)
+                ores.AppendFormat("{0}  {1:N}  {2:P}\r\n", kvp.Key, (double)kvp.Value / 255, (double)kvp.Value / (double)sum);
+
             var contentBox = new BoundingBoxD(voxelMap.PositionLeftBottomCorner + min, voxelMap.PositionLeftBottomCorner + max);
-            var description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nContent Size:{5}\r\nLOD0 Content Center: [X:{6:N} Y:{7:N} Z:{8:N}]",
+            var description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nContent Size:{5}\r\nLOD0 Content Center: [X:{6:N} Y:{7:N} Z:{8:N}]\r\n\r\nMaterial  Mass  Percent\r\n{9}",
                 distance, voxelMap.Storage.Size,
                 aabb.Center.X, aabb.Center.Y, aabb.Center.Z,
                 max - min,
-                contentBox.Center.X, contentBox.Center.Y, contentBox.Center.Z);
+                contentBox.Center.X, contentBox.Center.Y, contentBox.Center.Z,
+                ores);
+
             MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
         }
     }
