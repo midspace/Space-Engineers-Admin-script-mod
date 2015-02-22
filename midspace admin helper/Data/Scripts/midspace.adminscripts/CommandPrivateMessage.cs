@@ -78,7 +78,7 @@ The logging of private messages is {1}.
                 return true;
             }
 
-            var match1 = Regex.Match(messageText, @"@@@@\s+(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match1 = Regex.Match(messageText, @"@@@@(\s+(?<Key>.+)|)", RegexOptions.IgnoreCase);
             if (match1.Success)
             {
                 string message = match1.Groups["Key"].Value;
