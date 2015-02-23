@@ -11,6 +11,7 @@
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
+    using VRage.Common;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -114,15 +115,16 @@
             if (messageText.Equals("/test3", StringComparison.InvariantCultureIgnoreCase))
             {
                 // for testing things.
-                MyAPIGateway.Utilities.ShowMessage("MyId", string.Format("{0}", MyAPIGateway.Multiplayer.MyId));
-                MyAPIGateway.Utilities.ShowMessage("SteamId", string.Format("{0}", MyAPIGateway.Session.Player.SteamUserId));
-                MyAPIGateway.Utilities.ShowMessage("MyName", string.Format("{0}", MyAPIGateway.Multiplayer.MyName));
-                MyAPIGateway.Utilities.ShowMessage("IsServer", string.Format("{0}", MyAPIGateway.Multiplayer.IsServer));
-                MyAPIGateway.Utilities.ShowMessage("IsServerPlayer", string.Format("{0}", MyAPIGateway.Multiplayer.IsServerPlayer(MyAPIGateway.Session.Player.Client)));
-                MyAPIGateway.Utilities.ShowMessage("MultiplayerActive", string.Format("{0}", MyAPIGateway.Multiplayer.MultiplayerActive));
-                MyAPIGateway.Utilities.ShowMessage("OnlineMode", string.Format("{0}", MyAPIGateway.Session.OnlineMode));
-                MyAPIGateway.Utilities.ShowMessage("IsDedicated", string.Format("{0}", MyAPIGateway.Utilities.IsDedicated));
-                //MyAPIGateway.Utilities.ShowMessage("Culture", string.Format("{0}", MyTexts.Culture.IetfLanguageTag));
+                MyAPIGateway.Utilities.ShowMessage("MyId", "{0}", MyAPIGateway.Multiplayer.MyId);
+                MyAPIGateway.Utilities.ShowMessage("SteamId", "{0}", MyAPIGateway.Session.Player.SteamUserId);
+                MyAPIGateway.Utilities.ShowMessage("MyName", "{0}", MyAPIGateway.Multiplayer.MyName);
+                MyAPIGateway.Utilities.ShowMessage("IsServer", "{0}", MyAPIGateway.Multiplayer.IsServer);
+                MyAPIGateway.Utilities.ShowMessage("IsServerPlayer", "{0}", MyAPIGateway.Multiplayer.IsServerPlayer(MyAPIGateway.Session.Player.Client));
+                MyAPIGateway.Utilities.ShowMessage("MultiplayerActive", "{0}", MyAPIGateway.Multiplayer.MultiplayerActive);
+                MyAPIGateway.Utilities.ShowMessage("OnlineMode", "{0}", MyAPIGateway.Session.OnlineMode);
+                MyAPIGateway.Utilities.ShowMessage("IsDedicated", "{0}", MyAPIGateway.Utilities.IsDedicated);
+                //MyAPIGateway.Utilities.ShowMessage("Culture", "{0}", MyTexts.Culture.IetfLanguageTag);
+                MyAPIGateway.Utilities.ShowMessage("Culture", "{0} {1}", CultureInfo.CurrentUICulture, CultureInfo.CurrentUICulture.IetfLanguageTag);
                 return true;
             }
 
@@ -132,6 +134,45 @@
 
             if (messageText.Equals("/test4", StringComparison.InvariantCultureIgnoreCase))
             {
+                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Ingame.IMyCockpit)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Player", "in cockpit.");
+                }
+                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Ingame.IMyRemoteControl)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Player", "remoting.");
+                }
+                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Ingame.IMyCameraBlock)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Player", "camera.");
+                }
+                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Interfaces.IMyCameraController)
+                {
+                    var controller = (Sandbox.ModAPI.Interfaces.IMyCameraController)MyAPIGateway.Session.ControlledObject;
+                    MyAPIGateway.Utilities.ShowMessage("Player", "camera controller 1. {0}", controller.IsInFirstPersonView);
+                }
+                if (MyAPIGateway.Session.ControlledObject.Entity is Sandbox.ModAPI.Interfaces.IMyCameraController)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Player", "camera controller 2.");
+                }
+
+                //MyAPIGateway.Utilities.ShowMessage("Player", "Spectator1. {0}", VRage.Common.MySpectator.Static.IsInFirstPersonView);
+
+                //System.Windows.Forms.Clipboard.SetText("hello");
+
+                if (MyAPIGateway.Session.ControlledObject is MySpectator)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Player", "Spectator1.");
+                }
+                if (MyAPIGateway.Session.ControlledObject.Entity is MySpectator)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Player", "Spectator2.");
+                }
+                //else
+                //{
+                //    MyAPIGateway.Utilities.ShowMessage("Player", "other.");
+                //} 
+                
                 var playerMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 var playerPosition = playerMatrix.Translation + playerMatrix.Forward * 0.5f + playerMatrix.Up * 1.0f;
                 MyAPIGateway.Utilities.ShowMessage("Pos", string.Format("x={0:N},y={1:N},z={2:N}  x={3:N},y={4:N},z={5:N}", playerPosition.X, playerPosition.Y, playerPosition.Z, playerMatrix.Forward.X, playerMatrix.Forward.Y, playerMatrix.Forward.Z));
@@ -153,6 +194,7 @@
                 //Sandbox.ModAPI.Interfaces.IMyCameraController
                 //Sandbox.ModAPI.Interfaces.IMyControllableEntity
 
+           
 
                 // The CameraController.GetViewMatrix appears warped at the moment.
                 //var position = ((IMyEntity)MyAPIGateway.Session.CameraController).GetPosition();

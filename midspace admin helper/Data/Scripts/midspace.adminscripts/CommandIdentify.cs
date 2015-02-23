@@ -63,23 +63,74 @@
                         var blocks = new List<IMySlimBlock>();
                         gridCube.GetBlocks(blocks);
                         //var cockpits = entity.FindWorkingCockpits(); // TODO: determine if any cockpits are occupied.
-                        //gridCube.BigOwners
-                        //gridCube.SmallOwners
-                        //damage
-                        //complete.
+
+
+                        var identities = new List<IMyIdentity>();
+                        MyAPIGateway.Players.GetAllIdentites(identities);
+                        var ownerCounts = new Dictionary<long, long>();
+
+                        foreach (var block in blocks.Where(f => f.FatBlock != null && f.FatBlock.OwnerId != 0))
+                        {
+                            if (ownerCounts.ContainsKey(block.FatBlock.OwnerId))
+                                ownerCounts[block.FatBlock.OwnerId]++;
+                            else
+                                ownerCounts.Add(block.FatBlock.OwnerId, 1);
+                        }
+
+                        var ownerList = new List<string>();
+                        foreach (var ownerKvp in ownerCounts)
+                        {
+                            var owner = identities.FirstOrDefault(p => p.PlayerId == ownerKvp.Key);
+                            if (owner == null)
+                                continue;
+                            ownerList.Add(string.Format("{0} [{1}]", owner.DisplayName, ownerKvp.Value));
+                        }
+
+                        //var damage = new StringBuilder();
+                        //var buildComplete = new StringBuilder();
+                        var incompleteBlocks = 0;
+
+                        foreach (var block in blocks)
+                        {
+                            //damage.    cube.IntegrityPercent <= cube.BuildPercent;
+                            //complete.    cube.BuildPercent;
+
+                            // This information does not appear to work.
+                            // Unsure if the API is broken, incomplete , or a temporary bug under 01.070.
+                            //damage.AppendFormat("D={0:N} ", block.DamageRatio);  
+                            //damage.AppendFormat("A={0:N} ", block.AccumulatedDamage);
+
+                            if (!block.IsFullIntegrity)
+                            {
+                                incompleteBlocks++;
+                                //buildComplete.AppendFormat("B={0:N} ", block.BuildLevelRatio);
+                                //buildComplete.AppendFormat("I={0:N} ", block.BuildIntegrity);
+                                //buildComplete.AppendFormat("M={0:N} ", block.MaxIntegrity);
+                            }
+                        }
 
                         displayType = gridCube.IsStatic ? "Station" : gridCube.GridSizeEnum.ToString() + " Ship";
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N} m\r\nMass: {1:N} kg\r\nVector: {2}\r\nVelocity: {3:N} m/s\r\nMass Center: {4}\r\nSize: {5}\r\nNumber of Blocks: {6:#,##0}\r\nAttached Grids: {7:#,##0}",
-                            distance,
-                            gridCube.Physics.Mass,
-                            gridCube.Physics.LinearVelocity,
-                            gridCube.Physics.LinearVelocity.Length(),
-                            gridCube.Physics.CenterOfMassWorld,
+
+                        description = string.Format("Distance: {0:N} m\r\n",
+                            distance);
+
+                        if (gridCube.Physics == null)
+                            description += string.Format("Projection has no physics characteristics.\r\n");
+                        else
+                            description += string.Format("Mass: {0:N} kg\r\nVector: {1}\r\nVelocity: {2:N} m/s\r\nMass Center: {3}\r\n",
+                                gridCube.Physics.Mass,
+                                gridCube.Physics.LinearVelocity,
+                                gridCube.Physics.LinearVelocity.Length(),
+                                gridCube.Physics.CenterOfMassWorld);
+
+                        description += string.Format("Size: {0}\r\nNumber of Blocks: {1:#,##0}\r\nAttached Grids: {2:#,##0} (including this one).\r\nOwners: {3}\r\nBuild: {4} blocks incomplete.",
                             gridCube.LocalAABB.Size,
                             blocks.Count,
-                            attachedGrids.Count
-                            );
+                            attachedGrids.Count,
+                            String.Join(", ", ownerList),
+                            incompleteBlocks);
+
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
                     else
