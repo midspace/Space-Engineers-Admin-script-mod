@@ -368,7 +368,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return false;
 
             if (ServerIsClient)
-                return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
+                return player.IsHost();
             else
                 return MyAPIGateway.Utilities.ConfigDedicated.Administrators.Contains(player.SteamUserId.ToString());
         }

@@ -12,10 +12,12 @@
     public class CommandPlayerSmite : ChatCommand
     {
         private readonly string _defaultOreName;
+        public static CommandPlayerSmite Instance;
 
         public CommandPlayerSmite(string defaultOreName)
             : base(ChatCommandSecurity.Admin, "smite", new[] { "/smite" })
         {
+            Instance = this;
             _defaultOreName = defaultOreName;
         }
 
@@ -55,29 +57,40 @@
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("smiting", selectedPlayer.DisplayName);
-                var worldMatrix = selectedPlayer.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
-                var maxspeed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed * 1.25f;
 
-                var meteorBuilder = new MyObjectBuilder_Meteor
-                {
-                    Item = new MyObjectBuilder_InventoryItem { Amount = 1, Content = new MyObjectBuilder_Ore { SubtypeName = _defaultOreName } },
-                    PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
-                    PositionAndOrientation = new MyPositionAndOrientation
-                    {
-                        Position = (worldMatrix.Translation + worldMatrix.Up * -0.5f).ToSerializableVector3D(),
-                        Forward = worldMatrix.Forward.ToSerializableVector3(),
-                        Up = worldMatrix.Up.ToSerializableVector3(),
-                    },
-                    LinearVelocity = worldMatrix.Down * -maxspeed, // has to be faster than JetPack speed, otherwise it could be avoided.
-                    // Update 01.052 seemed to have flipped the direction. It's Up instead of Down???
-                    Integrity = 1
-                };
+                if (!MyAPIGateway.Multiplayer.MultiplayerActive && !selectedPlayer.Equals(MyAPIGateway.Session.Player))
+                    Smite(selectedPlayer);
+                else
+                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Smite, selectedPlayer.SteamUserId.ToString());
 
-                meteorBuilder.CreateAndSyncEntity();
                 return true;
             }
 
             return false;
+        }
+
+        public static void Smite(IMyPlayer selectedPlayer)
+        {
+
+            var worldMatrix = selectedPlayer.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
+            var maxspeed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed * 1.25f;
+
+            var meteorBuilder = new MyObjectBuilder_Meteor
+            {
+                Item = new MyObjectBuilder_InventoryItem { Amount = 1, Content = new MyObjectBuilder_Ore { SubtypeName = CommandPlayerSmite.Instance._defaultOreName } },
+                PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
+                PositionAndOrientation = new MyPositionAndOrientation
+                {
+                    Position = (worldMatrix.Translation + worldMatrix.Up * -0.5f).ToSerializableVector3D(),
+                    Forward = worldMatrix.Forward.ToSerializableVector3(),
+                    Up = worldMatrix.Up.ToSerializableVector3(),
+                },
+                LinearVelocity = worldMatrix.Down * -maxspeed, // has to be faster than JetPack speed, otherwise it could be avoided.
+                // Update 01.052 seemed to have flipped the direction. It's Up instead of Down???
+                Integrity = 1
+            };
+
+            meteorBuilder.CreateAndSyncEntity();
         }
     }
 }

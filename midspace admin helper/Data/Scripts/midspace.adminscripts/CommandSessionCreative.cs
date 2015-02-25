@@ -36,6 +36,11 @@
                 {
                     if (strings[1].Equals("on", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("1", StringComparison.InvariantCultureIgnoreCase))
                     {
+                        if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Creative, bool.TrueString);
+                            return true;
+                        }
                         MyAPIGateway.Session.GetCheckpoint("null").GameMode = MyGameModeEnum.Creative;
                         MyAPIGateway.Utilities.ShowMessage("Creative", "On");
                         return true;
@@ -43,6 +48,11 @@
 
                     if (strings[1].Equals("off", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("0", StringComparison.InvariantCultureIgnoreCase))
                     {
+                        if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Creative, bool.FalseString);
+                            return true;
+                        }
                         MyAPIGateway.Session.GetCheckpoint("null").GameMode = MyGameModeEnum.Survival;
                         MyAPIGateway.Utilities.ShowMessage("Creative", "Off");
                         return true;

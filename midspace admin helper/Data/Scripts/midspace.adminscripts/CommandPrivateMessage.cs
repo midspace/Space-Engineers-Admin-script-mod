@@ -35,7 +35,7 @@ There are several enhancements in this command to make private communication eas
 
   /msg <player> <message>
 Aliases: /tell, @
-To use an alias just replace the command name with the alias. '/tell {0} Hello' and '@ {0} Hello' is the same as '/msg {0} Hello'
+To use an alias just replace the command name with the alias. '/tell {0} Hello' and '@ {0} Hello' is the same as '/msg {0} Hello'.
 Function: Sends the specified <player> a private <message>.
 
   @@ <message>
@@ -51,7 +51,7 @@ Function: Sets your 'whisperpartner' to the last player who whispered to you and
 Function: Sends a private <message> to the last player who whispered to you.
 
   @?
-Function: Shows you the name of your whisperpartner.
+Function: Shows you the name of your 'whisperpartner'.
 
 The logging of private messages is {1}.
 ", MyAPIGateway.Session.Player.DisplayName, pmLogging); // add empty line at the end -> looks better.

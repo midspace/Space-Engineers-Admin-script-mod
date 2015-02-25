@@ -272,10 +272,49 @@ namespace midspace.adminscripts
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
                             CommandForceKick.DropPlayer = true;
                         break;
+                    case ConnectionKeys.Smite:
+                        CommandPlayerSmite.Smite(MyAPIGateway.Session.Player);
+                        break;
+                    case ConnectionKeys.CargoShips:
+                        bool enableCargoShips;
+                        if (bool.TryParse(entry.Value, out enableCargoShips))
+                        {
+                            //already set by server
+                            if (!MyAPIGateway.Session.Player.IsHost())
+                                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCargoShips;
+                            if (MyAPIGateway.Session.Player.IsAdmin())
+                                MyAPIGateway.Utilities.ShowMessage("CargoShips", enableCargoShips ? "On" : "Off");
+                        }
+                        break;
+                    case ConnectionKeys.CopyPaste:
+                        bool enableCopyPaste;
+                        if (bool.TryParse(entry.Value, out enableCopyPaste))
+                        {
+                            if (!MyAPIGateway.Session.Player.IsHost())
+                                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
+                            if (MyAPIGateway.Session.Player.IsAdmin())
+                                MyAPIGateway.Utilities.ShowMessage("CopyPaste", enableCopyPaste ? "On" : "Off");
+                        }
+                        break;
+                    case ConnectionKeys.Creative:
+                        bool enableCreative;
+                        if (bool.TryParse(entry.Value, out enableCreative))
+                        {
+                            if (!MyAPIGateway.Session.Player.IsHost())
+                            {
+                                MyGameModeEnum gameMode = enableCreative ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
+                                MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
+                            }
+                            if (MyAPIGateway.Session.Player.IsAdmin())
+                                MyAPIGateway.Utilities.ShowMessage("Creative", enableCreative ? "On" : "Off");
+                        }
+                        break;
                 }
                 Logger.Debug(string.Format("[Client]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
         }
+
+        #region initial data
 
         public static void ProcessClientData(byte[] rawData)
         {
@@ -337,6 +376,8 @@ namespace midspace.adminscripts
         {
             ProcessInitialData(System.Text.Encoding.Unicode.GetString(rawData));
         }
+
+        #endregion
 
         #endregion
 
@@ -453,6 +494,37 @@ namespace midspace.adminscripts
                     case ConnectionKeys.GlobalMessage:
                         ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(senderSteamId, entry.Value);
                         break;
+                    case ConnectionKeys.Smite:
+                        ulong smitePlayerSteamId;
+                        if (ulong.TryParse(entry.Value, out smitePlayerSteamId)) 
+                            SendMessageToPlayer(smitePlayerSteamId ,ConnectionKeys.Smite, "Smite yourself :D");
+                        break;
+                    case ConnectionKeys.CargoShips:
+                        bool enableCargoShips;
+                        if (bool.TryParse(entry.Value, out enableCargoShips))
+                        {
+                            MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
+                        }
+                        SendMessageToAllPlayers(ConnectionKeys.CargoShips, entry.Value);
+                        break;
+                    case ConnectionKeys.CopyPaste:
+                        bool enableCopyPaste;
+                        if (bool.TryParse(entry.Value, out enableCopyPaste))
+                        {
+                            MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
+                        }
+                        SendMessageToAllPlayers(ConnectionKeys.CopyPaste, entry.Value);
+                        break;
+                    case ConnectionKeys.Creative:
+                        bool enableCreative;
+                        if (bool.TryParse(entry.Value, out enableCreative))
+                        {
+                            MyGameModeEnum gameMode = enableCreative ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
+                            MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
+                        }
+                        SendMessageToAllPlayers(ConnectionKeys.Creative, entry.Value);
+                        break;
+                    #region connection request
                     case ConnectionKeys.ConnectionRequest:
                         ulong steamId1;
                         if (ulong.TryParse(entry.Value, out steamId1))
@@ -483,6 +555,7 @@ namespace midspace.adminscripts
                             SendMessageToPlayer(steamId1, data);
                         }
                         break;
+                    #endregion
                 }
                 Logger.Debug(string.Format("[Server]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
@@ -555,6 +628,10 @@ namespace midspace.adminscripts
             public const string Sender = "sender";
             public const string LogPrivateMessages = "logpm";
             public const string GlobalMessage = "glmsg";
+            public const string Smite = "smite";
+            public const string Creative = "creative";
+            public const string CargoShips = "cargoships";
+            public const string CopyPaste = "copypaste";
 
             //pm subkeys
             public const string PmMessage = "msg";

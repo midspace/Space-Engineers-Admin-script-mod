@@ -177,7 +177,7 @@ namespace midspace.adminscripts
             }
 
             // Hosted game, and the player is hosting the server.
-            if (MyAPIGateway.Multiplayer.IsServerPlayer(player.Client))
+            if (player.IsHost())
             {
                 return true;
             }
@@ -367,6 +367,11 @@ namespace midspace.adminscripts
             }
 
             return true;
+        }
+
+        public static bool IsHost(this IMyPlayer player)
+        {
+            return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
         }
     }
 }
