@@ -163,16 +163,16 @@
                 for (block.Y = 0; block.Y < voxelMap.Storage.Size.Y; block.Y += 64)
                     for (block.X = 0; block.X < voxelMap.Storage.Size.X; block.X += 64)
                     {
-                        var size = new Vector3I(64);
+                        var cacheSize = new Vector3I(64);
                         var oldCache = new MyStorageDataCache();
-                        oldCache.Resize(size);
+                        oldCache.Resize(cacheSize);
                         // LOD1 is not detailed enough for content information on asteroids.
-                        voxelMap.Storage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, block, block + size - 1);
+                        voxelMap.Storage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, block, block + cacheSize - 1);
 
                         Vector3I p;
-                        for (p.Z = 0; p.Z < size.Z; ++p.Z)
-                            for (p.Y = 0; p.Y < size.Y; ++p.Y)
-                                for (p.X = 0; p.X < size.X; ++p.X)
+                        for (p.Z = 0; p.Z < cacheSize.Z; ++p.Z)
+                            for (p.Y = 0; p.Y < cacheSize.Y; ++p.Y)
+                                for (p.X = 0; p.X < cacheSize.X; ++p.X)
                                 {
                                     var content = oldCache.Content(ref p);
                                     if (content > 0)

@@ -18,7 +18,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/eject <#>", "The specified <#> player is removed from control of any ship.");
+            MyAPIGateway.Utilities.ShowMessage("/eject <#>", "The specified <#> player is removed from control of any ship. This includes Remote Control and cockpits, thus ejecting them into space.");
         }
 
         public override bool Invoke(string messageText)

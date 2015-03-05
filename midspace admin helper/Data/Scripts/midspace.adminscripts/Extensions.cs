@@ -1,5 +1,6 @@
 namespace midspace.adminscripts
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -12,7 +13,6 @@ namespace midspace.adminscripts
     using VRageMath;
     using VRage.Common.Utils;
     using VRage.Common;
-    using System;
 
     public static class Extensions
     {
@@ -372,6 +372,11 @@ namespace midspace.adminscripts
         public static bool IsHost(this IMyPlayer player)
         {
             return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
+        }
+
+        public static double RoundUpToNearest(this double value, int scale)
+        {
+            return Math.Ceiling(value / scale) * scale;
         }
     }
 }

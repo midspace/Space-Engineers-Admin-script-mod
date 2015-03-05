@@ -10,18 +10,18 @@
     public class CommandAsteroidCreate : ChatCommand
     {
         public CommandAsteroidCreate()
-            : base(ChatCommandSecurity.Admin, "createasteroid", new[] { "/createasteroid" })
+            : base(ChatCommandSecurity.Admin, "createroid", new[] { "/createroid" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/createasteroid <X> <Y> <Z> <Sx> <Sy> <Sz> <Name>", "Creates an empty Asteroid space at location <X,Y,Z> of size <Sx,Sy,Sz>. The size must be multiple of 64.");
+            MyAPIGateway.Utilities.ShowMessage("/createroid <X> <Y> <Z> <Size> <Name>", "Creates an empty Asteroid space at location <X,Y,Z> of cubic <Size>. The size must be multiple of 64.");
         }
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/createasteroid\s{1,}(?<X>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s{1,}(?<Y>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s{1,}(?<Z>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s{1,}(?<SX>(\d+?))\s{1,}(?<SY>(\d+?))\s{1,}(?<SZ>(\d+?))\s{1,}(?<Name>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/createroid\s+(?<X>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Size>(\d+?))\s+(?<Name>.+)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -30,29 +30,23 @@
                     double.Parse(match.Groups["Y"].Value, CultureInfo.InvariantCulture),
                     double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
 
-                var size = new Vector3I(
-                    int.Parse(match.Groups["SX"].Value, CultureInfo.InvariantCulture),
-                    int.Parse(match.Groups["SY"].Value, CultureInfo.InvariantCulture),
-                    int.Parse(match.Groups["SZ"].Value, CultureInfo.InvariantCulture));
+                var length = int.Parse(match.Groups["Size"].Value, CultureInfo.InvariantCulture);
+                if (length < 1 || length % 64 != 0)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Invalid", "Size specified.");
+                    return true;
+                }
 
+                var size = new Vector3I(length, length, length);
                 var name = match.Groups["Name"].Value;
 
                 if (Vector3D.IsValid(position) && Vector3D.IsValid(size))
                 {
-
-                    if (size.X < 1 || size.Y < 1 || size.Z < 1 ||
-                        size.X % 64 != 0 || size.Y % 64 != 0 || size.Z % 64 != 0)
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Invalid", "Size specified.");
-                        return true;
-                    }
-
                     MyAPIGateway.Utilities.ShowMessage("Size", size.ToString());
-
                     var newName = Support.CreateUniqueStorageName(name);
 
-                    // It appears that MyAPIGateway.Session.VoxelMaps.CreateVoxelMap will always create a square shaped asteroid.
-                    // Need to confirm with KeenSWH if this is a bug or by design. The interface can be simplified if this is by design.
+                    // MyAPIGateway.Session.VoxelMaps.CreateVoxelMap will always create a square shaped asteroid.
+                    // This is by design within the API itself and cannot be altered.
                     var newVoxelMap = Support.CreateNewAsteroid(newName, size, position);
                     return true;
                 }

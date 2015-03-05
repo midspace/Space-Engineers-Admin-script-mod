@@ -347,6 +347,8 @@ namespace midspace.adminscripts
             // no geometry will be created because that requires full-empty transition
             var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
 
+            // midspace's Note: The following steps appear redundant, as the storage space is created empty.
+            /*
             // always ensure cache is large enough for whatever you plan to load into it
             cache.Resize(size);
 
@@ -364,6 +366,8 @@ namespace midspace.adminscripts
 
             // write new data back to the storage
             storage.WriteRange(cache, MyStorageDataTypeFlags.Content, Vector3I.Zero, size - 1);
+            */
+
             return MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storageName, storage, position, 0);
         }
     }

@@ -118,6 +118,7 @@ namespace midspace.adminscripts
             //ChatCommandService.Register(new CommandAsteroidEditClear());
             //ChatCommandService.Register(new CommandAsteroidEditSet());
             ChatCommandService.Register(new CommandAsteroidCreate());
+            ChatCommandService.Register(new CommandAsteroidCreateSphere());
             ChatCommandService.Register(new CommandAsteroidsList());
             ChatCommandService.Register(new CommandAsteroidRotate());
             //ChatCommandService.Register(new CommandAsteroidSpread());  //not working
