@@ -17,7 +17,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/off <#>", "Turns off all reactor power in the specified <#> ship.");
+            MyAPIGateway.Utilities.ShowMessage("/off <#>", "Turns off all reactor and battery power in the specified <#> ship.");
         }
 
         public override bool Invoke(string messageText)
@@ -30,54 +30,60 @@
                     var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        var count = TurnOffShip(entity);
-                        MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, string.Format("{0} Reactors turned off.", count));
+                        int reactors;
+                        int batteries;
+                        TurnOffShip(entity, out reactors, out batteries);
+                        MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, "{0} Reactors, {1} Batteries turned off.", reactors, batteries);
                         return true;
                     }
                 }
             }
 
-            if (messageText.StartsWith("/off ", StringComparison.InvariantCultureIgnoreCase))
+            var match = Regex.Match(messageText, @"/off\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            if (match.Success)
             {
-                var match = Regex.Match(messageText, @"/off\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
+                var shipName = match.Groups["Key"].Value;
+
+                var currentShipList = new HashSet<IMyEntity>();
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (currentShipList.Count == 0)
                 {
-                    var shipName = match.Groups["Key"].Value;
-
-                    var currentShipList = new HashSet<IMyEntity>();
-                    MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
-
-                    if (currentShipList.Count == 0)
+                    int index;
+                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count)
                     {
-                        int index;
-                        if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count)
-                        {
-                            currentShipList = new HashSet<IMyEntity> { CommandListShips.ShipCache[index - 1] };
-                        }
+                        currentShipList = new HashSet<IMyEntity> { CommandListShips.ShipCache[index - 1] };
                     }
-
-                    var count = TurnOffShips(currentShipList);
-                    MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, string.Format("{0} Reactors turned off.", count));
-                    return true;
                 }
+
+                int reactors;
+                int batteries;
+                TurnOffShips(currentShipList, out reactors, out batteries);
+                MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, "{0} Reactors, {1} Batteries turned off.", reactors, batteries);
+                return true;
             }
 
             return false;
         }
 
-        private int TurnOffShips(IEnumerable<IMyEntity> shipList)
+        private void TurnOffShips(IEnumerable<IMyEntity> shipList, out int reactorCounter, out int batteryCounter)
         {
-            var counter = 0;
+            reactorCounter = 0;
+            batteryCounter = 0;
             foreach (var selectedShip in shipList)
             {
-                counter += TurnOffShip(selectedShip);
+                int reactors;
+                int batteries;
+                TurnOffShip(selectedShip, out reactors, out batteries);
+                reactorCounter += reactors;
+                batteryCounter += batteries;
             }
-            return counter;
         }
 
-        private int TurnOffShip(IMyEntity shipEntity)
+        private void TurnOffShip(IMyEntity shipEntity, out int reactorCounter, out int batteryCounter)
         {
-            int counter = 0;
+            reactorCounter = 0;
+            batteryCounter = 0;
             var grids = shipEntity.GetAttachedGrids();
 
             foreach (var cubeGrid in grids)
@@ -85,18 +91,21 @@
                 var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, f => f.FatBlock != null
                     && f.FatBlock is IMyFunctionalBlock
-                    && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor));
+                    && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor)
+                      || f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_BatteryBlock)));
 
                 var list = blocks.Select(f => (IMyFunctionalBlock)f.FatBlock).Where(f => f.Enabled).ToArray();
 
                 foreach (var item in list)
                 {
                     item.RequestEnable(false);
-                    counter++;
+
+                    if (item.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor))
+                        reactorCounter++;
+                    else
+                        batteryCounter++;
                 }
             }
-
-            return counter;
         }
     }
 }
