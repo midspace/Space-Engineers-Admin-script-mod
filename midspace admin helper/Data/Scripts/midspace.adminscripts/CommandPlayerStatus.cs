@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     using Sandbox.ModAPI;
 
@@ -35,7 +36,10 @@
                 MyAPIGateway.Players.GetAllIdentites(identities);
                 var clients = MyAPIGateway.Session.GetCheckpoint("null").Clients;
 
-                foreach (var identity in identities)
+                var description = new StringBuilder();
+                var count = 0;
+
+                foreach (var identity in identities.OrderBy(i => i.DisplayName))
                 {
                     var status = "Player";
 
@@ -49,12 +53,17 @@
                         if (steamPlayer.IsAdmin())
                             status = "Admin";
 
-                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), string.Format("{0} {1} '{2}'", status, steamPlayer.SteamUserId, identity.DisplayName));
+                        description.AppendFormat("#{0} {1} {2} '{3}'\r\n", index++, status, steamPlayer.SteamUserId, identity.DisplayName);
                         IdentityCache.Add(identity);
+                        count++;
                     }
                 }
+
+                var prefix = string.Format("Count: {0}", count);
+                MyAPIGateway.Utilities.ShowMissionScreen("List Players", prefix, " ", description.ToString(), null, "OK");
                 return true;
             }
+
             return false;
         }
     }
