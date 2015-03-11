@@ -56,7 +56,8 @@
                 }
             }
 
-            return false;
+            MyAPIGateway.Utilities.ShowMessage("CargoShips", MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled ? "On" : "Off");
+            return true;
         }
     }
 }

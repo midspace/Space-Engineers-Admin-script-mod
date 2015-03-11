@@ -37,7 +37,7 @@
                 if (brief)
                     MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", commands));
                 else
-                    MyAPIGateway.Utilities.ShowMissionScreen("Help", "commands", " ", String.Join(", ", commands), null, "OK");
+                    MyAPIGateway.Utilities.ShowMissionScreen("Help", "Available commands", " ", "Commands: " + String.Join(", ", commands), null, "OK");
             }
             else
             {
