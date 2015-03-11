@@ -4,99 +4,229 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
+    using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRageMath;
-    using VRage.Common.Voxels;
-    using Sandbox.ModAPI.Interfaces;
 
     public class CommandAsteroidCreateSphere : ChatCommand
     {
-        //private Queue<Action> _workQueue = new Queue<Action>();
-
         public CommandAsteroidCreateSphere()
-            : base(ChatCommandSecurity.Experimental, "createroidsphere", new[] { "/createroidsphere" })
+            : base(ChatCommandSecurity.Admin, "createroidsphere", new[] { "/createroidsphere" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/createroidsphere <X> <Y> <Z> <Diameter> <Shell> <Material> <Name>", "Creates an Sphere Asteroid space at location <X,Y,Z> of <Diameter>, with a <Shell> thickness. Specify a shell of 0 for no shell.");
+            if (brief)
+            {
+                MyAPIGateway.Utilities.ShowMessage("/createroidsphere <Name> <X> <Y> <Z> <Parts> <Material> <Diameter>", "Creates an Sphere Asteroid in <Parts> at location <X,Y,Z> with the <Material> of <Diameter>.");
+            }
+            else
+            {
+                var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
+                var materialNames = String.Join(", ", validMaterials);
+
+                var description = new StringBuilder();
+                description.AppendFormat(@"This command is used to generate a sphere asteroid at the exact center of the specified co-ordinates, with multiple layers.
+/createroidsphere <Name> <X> <Y> <Z> <Parts> <Material1> <Diameter1> <Material2> <Diameter2> <Material3> <Diameter3> ....
+
+  <Name> - the base name of the asteroid file. A number will be added if it already exists.
+  <X> <Y> <Z> - the center coordinate of where to place the asteroid.
+  <Parts> - specify to break the sphere down into smaller chunks. Either 1=whole sphere, 2=hemispheres, 4 or 8 parts.
+  <Material> - the material of the layer. An empty layer can be specified with 'none'. The following materials are available: {0}
+  <Diameter> - the diameter of the layer.
+  ... - Additional material and diameters can be specified for additional layers.
+
+Note:
+The larger the asteroid, the longer it will take to generate. More than 2000m can as much as an hour on some computers.
+The flat faces on the inside of the multi part asteroids will seem to become invisible at a distance.
+
+Examples:
+  /createroidsphere sphere_solid_stone 1000 1000 1000 1 Stone_01 100
+
+  /createroidsphere sphere_hollow_stone 2000 2000 2000 8 Stone_01 200 none 180
+
+  /createroidsphere sphere_3_tricky_layers 3000 3000 3000 2 Stone_01 200 none 180 Stone_01 160 none 140 Stone_01 120 none 100 
+
+  /createroidsphere sphere_layers 8000 8000 8000 2 Stone_01 200 Iron_01 180 Nickel_01 100 Cobalt_01 90 Magnesium_01 80 Silicon_01 70 
+
+", materialNames);
+                MyAPIGateway.Utilities.ShowMissionScreen("Create Asteroid Sphere:", null, " ", description.ToString(), null, "OK");
+            }
 
 
             // As Asteroid volumes are cubic octrees, they are sized in 64, 128, 256, 512, 1024, 2048
 
-            // Sample calls...
-            //  /createroidsphere 200 200 200 50 0 Gold_01 test
-            //  /createroidsphere 200 200 200 500 0 Uranium_01 test
+            /*
+            Sample calls...
+            /createroidsphere 200 200 200 50 0 Gold_01 test
+            
+            /createroidsphere sphere_solid_xx_stone_01a 2000 2000 2000 2 Stone_01 200 none 100
+            /createroidsphere sphere_solid_xx_stone_01a 2000 2000 2000 2 Stone_01 200 Iron_01 180 Nickel_01 100 Cobalt_01 90 Magnesium_01 80 Silicon_01 70 Silver_01 60 Gold_01 50 Platinum_01 40 Uraninite_01 30
+            /createroidsphere sphere_solid_xx_stone_01a 2000 2000 2000 4 Stone_01 200 Iron_02 190 Nickel_01 145 Cobalt_01 130 Magnesium_01 115 Silicon_01 100 Silver_01 85 Gold_01 70 Platinum_01 55 Uraninite_01 40
+             
+            344m, 38s.
+            This call takes 58 seconds, for a 344 diameter sphere, with no freeze.
+            /createroidsphere 200 200 200 344 0 1 Nickel_01 test 
+             
+            http://steamcommunity.com/sharedfiles/filedetails/?id=399791753
+             
+            This call takes, with a frozen game, and wont work if floating items occupy space.
+            344m, 13s.
+            400m, 20s.
+            500m, 40s.
+            600m, 1:06s.
+            1000m, 4:53s.
+            2000m, 40-50min.
+            2700m, 1:36:50s.
+            */
         }
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/createroidsphere\s+(?<X>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Diameter>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Shell>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Material>.+)\s+(?<Name>.+)", RegexOptions.IgnoreCase);
+            if (MyAPIGateway.Session.OnlineMode != MyOnlineModeEnum.OFFLINE)
+            {
+                MyAPIGateway.Utilities.ShowMessage("Warning", "This command must be carried out in an 'Offline' game, as it is too processor intensive to run in a multiplayer game.");
+                return true;
+            }
+
+            var match = Regex.Match(messageText, @"/createroidsphere\s+(?<Name>[^\s]+)\s+(?<X>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Grid>(\d+?))(?:\s+(?<Material>[^\s]+)\s+(?<Diameter>[+-]?((\d+(\.\d*)?)|(\.\d+))))+", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
+                StringBuilder description;
+
                 var position = new Vector3D(
                     double.Parse(match.Groups["X"].Value, CultureInfo.InvariantCulture),
                     double.Parse(match.Groups["Y"].Value, CultureInfo.InvariantCulture),
                     double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
 
-                var diameter = double.Parse(match.Groups["Diameter"].Value, CultureInfo.InvariantCulture);
-                if (diameter < 3 || diameter > 5000)
+                var grid = int.Parse(match.Groups["Grid"].Value, CultureInfo.InvariantCulture);
+                if (grid <= 1)
+                    grid = 1;
+                else if (grid <= 2)
+                    grid = 2;
+                else if (grid <= 4)
+                    grid = 4;
+                else
+                    grid = 8;
+
+                var layers = new List<AsteroidSphereLayer>();
+                double maxDiameter = 0;
+
+                for (var i = 0; i < match.Groups["Material"].Captures.Count; i++)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Invalid", "Diamater specified. Between 3 and 5000");
-                    return true;
+                    byte material = 0;
+                    var checkName = match.Groups["Material"].Captures[i].Value;
+                    var materialName = checkName;
+
+                    if (checkName.Equals("none", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        material = 255;
+                    }
+                    else
+                    {
+                        var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(k => k.Id.SubtypeName.IndexOf(checkName, StringComparison.InvariantCultureIgnoreCase) >= 0).Select(k => k.Id.SubtypeName).ToArray();
+                        if (validMaterials.Length == 0)
+                        {
+                            validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
+                            var materialNames = String.Join(", ", validMaterials);
+                            MyAPIGateway.Utilities.ShowMessage("Invalid", "Material specified. Cannot find the material '{0}'.\r\nTry the following: {1}", checkName, materialNames);
+                            return true;
+                        }
+                        if (validMaterials.Length > 1)
+                        {
+                            var materialNames = String.Join(", ", validMaterials);
+                            MyAPIGateway.Utilities.ShowMessage("Invalid", "Material specified. Did you mean {0} ?", materialNames);
+                            return true;
+                        }
+                        materialName = validMaterials[0];
+                        material = MyDefinitionManager.Static.GetVoxelMaterialDefinition(materialName).Index;
+                    }
+
+                    var diameter = double.Parse(match.Groups["Diameter"].Captures[i].Value, CultureInfo.InvariantCulture);
+                    if (diameter < 4 || diameter > 5000)
+                    {
+                        MyAPIGateway.Utilities.ShowMessage("Invalid", "Diamater specified. Between 4 and 5000");
+                        return true;
+                    }
+
+                    maxDiameter = Math.Max(maxDiameter, diameter);
+                    layers.Add(new AsteroidSphereLayer() { Diameter = diameter, Material = material, MaterialName = materialName });
                 }
 
-                var shellWidth = double.Parse(match.Groups["Shell"].Value, CultureInfo.InvariantCulture);
-                if (shellWidth > diameter / 2)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("Invalid", "Shell specified. Must be less than radius.");
-                    return true;
-                }
-
-                var checkName = match.Groups["Material"].Value;
-                var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(k => k.Id.SubtypeName.IndexOf(checkName, StringComparison.InvariantCultureIgnoreCase) >= 0).Select(k => k.Id.SubtypeName).ToArray();
-                if (validMaterials.Length == 0)
-                {
-                    validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
-                    var materialNames = String.Join(", ", validMaterials);
-                    MyAPIGateway.Utilities.ShowMessage("Invalid", "Material specified. Cannot find the material.\r\nTry the following: {0}", materialNames);
-                    return true;
-                }
-                if (validMaterials.Length > 1)
-                {
-                    var materialNames = String.Join(", ", validMaterials);
-                    MyAPIGateway.Utilities.ShowMessage("Invalid", "Material specified. Did you mean {0} ?", materialNames);
-                    return true;
-                }
-                var material = MyDefinitionManager.Static.GetVoxelMaterialDefinition(validMaterials[0]).Index;
-
-                var length = (int)(diameter + 4).RoundUpToNearest(64);
+                var length = (int)(maxDiameter + 4).RoundUpToNearest(64);
                 var size = new Vector3I(length, length, length);
                 var name = match.Groups["Name"].Value;
 
                 if (Vector3D.IsValid(position) && Vector3D.IsValid(size))
                 {
+                    var boundingSphere = new BoundingSphereD(position, (maxDiameter + 2) / 2);
+                    var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref boundingSphere);
+                    floatingList = floatingList.Where(e =>
+                        (e is Sandbox.ModAPI.IMyCubeGrid && ((Sandbox.ModAPI.IMyCubeGrid)e).IsStatic == false)
+                        || (e is Sandbox.ModAPI.IMyCubeBlock && ((Sandbox.ModAPI.IMyCubeGrid)((Sandbox.ModAPI.IMyCubeBlock)e).Parent).IsStatic == false)
+                        || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
+
+                    if (floatingList.Count > 0)
+                    {
+                        description = new StringBuilder();
+                        description.AppendFormat(@"{0} items were found floating in the specified location.
+The asteroid cannot be generated until this area is cleared of ships and players.", floatingList.Count);
+                        MyAPIGateway.Utilities.ShowMissionScreen("Cannot generate Asteroid:", null, " ", description.ToString(), null, "OK");
+                        return true;
+                    }
+
                     var origin = new Vector3I(size.X / 2, size.Y / 2, size.Z / 2);
-                    var asteroidName = Support.CreateUniqueStorageName(name);
+                    var start = DateTime.Now;
 
-                    // Cannot be processed on seperate thread.
-                    var voxelMap = Support.CreateNewAsteroid(asteroidName, size, position - (Vector3D)origin);
-                    voxelMap.Physics.Enabled = false;
+                    layers = layers.OrderByDescending(e => e.Diameter).ToList();
 
-                    MyAPIGateway.Parallel.StartBackground(delegate()
+                    switch (grid)
                     {
-                        ProcessAsteroid(voxelMap.Storage, position, origin, diameter, shellWidth, material);
-                    },
-                    delegate()
-                    {
-                        voxelMap.Physics.Enabled = true;
-                    });
+                        case 1:
+                            ProcessAsteroid2(name, size, position, Vector3D.Zero, origin, layers);
+                            break;
+                        case 2:
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, 0, 0), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, 0, 0), origin, layers);
+                            break;
+                        case 4:
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, 0), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, 0), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, 0), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, 0), origin, layers);
+                            break;
+                        case 8:
+                            // downsize the Asteroid store.
+                            length = (int)((maxDiameter / 2) + 4).RoundUpToNearest(64);
+                            size = new Vector3I(length, length, length);
+                            origin = new Vector3I(size.X / 2, size.Y / 2, size.Z / 2);
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, -origin.Z + 2), origin, layers);
+                            break;
+                    }
 
+                    var end = DateTime.Now;
+                    description = new StringBuilder();
+                    description.AppendFormat("Time taken: {0}\r\n{1} asteroids generated.\r\n", end - start, grid);
+                    description.AppendFormat("\r\nLayers: {0}\r\n", layers.Count);
+                    foreach (var layer in layers)
+                    {
+                        description.AppendFormat("{0}: {1}m\r\n", layer.MaterialName, layer.Diameter);
+                    }
+
+                    MyAPIGateway.Utilities.ShowMissionScreen("Asteroid generated:", name, " ", description.ToString(), null, "OK");
                     return true;
                 }
             }
@@ -104,92 +234,49 @@
             return false;
         }
 
-        private void ProcessAsteroid(IMyStorage storage, Vector3D position, Vector3I origin, double diamater, double shellWidth, byte material)
+        private string ProcessAsteroid2(string asteroidName, Vector3I size, Vector3D position, Vector3D offset, Vector3I origin, List<AsteroidSphereLayer> layers)
         {
-            var partCount = Math.Pow(storage.Size.X / 64, 3);
-            var partCounter = 0;
-            Vector3I block;
-            var radius = diamater / 2;
-            var hollow = shellWidth > 0.5f;
+            var storeName = Support.CreateUniqueStorageName(asteroidName);
+            var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
+            var voxelMap = MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storeName, storage, position - (Vector3D)origin - offset, 0);
+            
+            if (layers.Count > 0)
+                voxelMap.Storage.OverwriteAllMaterials(layers[0].Material);
 
-            MyAPIGateway.Utilities.ShowMessage("Asteroid", "Generating {0}m diameter sphere.", diamater);
-            //_workQueue.Enqueue(delegate() { MyAPIGateway.Utilities.ShowMessage("Asteroid", "Generating {0}m diameter sphere.", diamater); });
+            bool isEmpty = true;
 
-            // read the asteroid in chunks of 64 to avoid the Arithmetic overflow issue.
-            for (block.Z = 0; block.Z < storage.Size.Z; block.Z += 64)
-                for (block.Y = 0; block.Y < storage.Size.Y; block.Y += 64)
-                    for (block.X = 0; block.X < storage.Size.X; block.X += 64)
-                    {
-                        //MyAPIGateway.Utilities.ShowMessage("Asteroid", "Generating {0}m diameter sphere. {1}/{2}", diamater, partCount, ++partCounter);
-                        var message = string.Format("Generating part {0}/{1}", ++partCounter, partCount);
-                        MyAPIGateway.Utilities.ShowMessage("Asteroid", message);
-                        //_workQueue.Enqueue(delegate() { MyAPIGateway.Utilities.ShowMessage("Asteroid", message); });
+            foreach (var layer in layers)
+            {
+                var radius = (float)(layer.Diameter - 2) / 2f;
+                IMyVoxelShapeSphere sphereShape = MyAPIGateway.Session.VoxelMaps.GetSphereVoxelHand();
+                sphereShape.Center = position;
+                sphereShape.Radius = radius;
 
-                        ProcessVolume(storage, block, origin, radius, hollow, shellWidth, material);
-                    }
+                if (layer.Material == 255)
+                {
+                    MyAPIGateway.Session.VoxelMaps.CutOutShape(voxelMap, sphereShape);
+                    isEmpty = true;
+                }
+                else if (isEmpty)
+                {
+                    MyAPIGateway.Session.VoxelMaps.FillInShape(voxelMap, sphereShape, layer.Material);
+                    isEmpty = false;
+                }
+                else
+                {
+                    MyAPIGateway.Session.VoxelMaps.PaintInShape(voxelMap, sphereShape, layer.Material);
+                }
+            }
 
-            //_workQueue.Enqueue(delegate() { MyAPIGateway.Utilities.ShowMessage("Asteroid", "Sphere completed generation."); });
-            MyAPIGateway.Utilities.ShowMessage("Asteroid", "{0}m diameter sphere completed generation.", diamater);
+            return storeName;
         }
 
-        private void ProcessVolume(IMyStorage storage, Vector3I block, Vector3I origin, double radius, bool hollow, double shellWidth, byte material)
+        class AsteroidSphereLayer
         {
-            var cacheSize = new Vector3I(64);
-            var cache = new MyStorageDataCache();
-            cache.Resize(cacheSize);
-
-            Vector3I p;
-            for (p.Z = 0; p.Z < cache.Size3D.Z; ++p.Z)
-                for (p.Y = 0; p.Y < cache.Size3D.Y; ++p.Y)
-                    for (p.X = 0; p.X < cache.Size3D.X; ++p.X)
-                    {
-                        var coord = p + block;
-                        byte volumne = 0;
-
-                        var dist =
-                            Math.Sqrt(Math.Abs(Math.Pow(coord.X - origin.X, 2)) +
-                            Math.Abs(Math.Pow(coord.Y - origin.Y, 2)) +
-                            Math.Abs(Math.Pow(coord.Z - origin.Z, 2)));
-
-                        if (dist >= radius)
-                        {
-                            volumne = 0x00;
-                        }
-                        else if (dist > radius - 1)
-                        {
-                            volumne = (byte)((radius - dist) * 255);
-                        }
-                        else if (hollow && (radius - shellWidth) < dist)
-                        {
-                            volumne = 0xFF;
-                        }
-                        else if (hollow && (radius - shellWidth - 1) < dist)
-                        {
-                            volumne = (byte)((1 - ((radius - shellWidth) - dist)) * 255);
-                        }
-                        else if (hollow)
-                        {
-                            volumne = 0x00;
-                        }
-                        else //if (!hollow)
-                        {
-                            volumne = 0xFF;
-                        }
-
-                        cache.Set(MyStorageDataTypeEnum.Content, ref p, volumne);
-                        cache.Set(MyStorageDataTypeEnum.Material, ref p, material);
-                    }
-
-            storage.WriteRange(cache, MyStorageDataTypeFlags.ContentAndMaterial, block, block + cacheSize - 1);
+            public int Index { get; set; }
+            public string MaterialName { get; set; }
+            public byte Material { get; set; }
+            public double Diameter { get; set; }
         }
-
-        //public override void UpdateBeforeSimulation()
-        //{
-        //    if (_workQueue.Count > 0)
-        //    {
-        //        var action = _workQueue.Dequeue();
-        //        action.Invoke();
-        //    }
-        //}
     }
 }
