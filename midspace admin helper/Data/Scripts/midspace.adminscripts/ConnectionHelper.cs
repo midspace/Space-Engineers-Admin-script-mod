@@ -309,6 +309,20 @@ namespace midspace.adminscripts
                                 MyAPIGateway.Utilities.ShowMessage("Creative", enableCreative ? "On" : "Off");
                         }
                         break;
+
+                    case ConnectionKeys.Spectator:
+                        bool enableSpectator;
+                        if (bool.TryParse(entry.Value, out enableSpectator))
+                        {
+                            if (!MyAPIGateway.Session.Player.IsHost())
+                            {
+                                MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
+                            }
+                            if (MyAPIGateway.Session.Player.IsAdmin())
+                                MyAPIGateway.Utilities.ShowMessage("Spectator", enableSpectator ? "On" : "Off");
+                        }
+                        break;
+
                 }
                 Logger.Debug(string.Format("[Client]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
@@ -524,6 +538,14 @@ namespace midspace.adminscripts
                         }
                         SendMessageToAllPlayers(ConnectionKeys.Creative, entry.Value);
                         break;
+                    case ConnectionKeys.Spectator:
+                        bool enableSpectator;
+                        if (bool.TryParse(entry.Value, out enableSpectator))
+                        {
+                            MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
+                        }
+                        SendMessageToAllPlayers(ConnectionKeys.Spectator, entry.Value);
+                        break;
                     #region connection request
                     case ConnectionKeys.ConnectionRequest:
                         ulong steamId1;
@@ -632,6 +654,7 @@ namespace midspace.adminscripts
             public const string Creative = "creative";
             public const string CargoShips = "cargoships";
             public const string CopyPaste = "copypaste";
+            public const string Spectator = "spectator";
 
             //pm subkeys
             public const string PmMessage = "msg";

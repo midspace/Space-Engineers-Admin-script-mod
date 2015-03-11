@@ -134,6 +134,7 @@
     <Compile Include="CommandAsteroidCreate.cs" />
     <Compile Include="CommandStopAll.cs" />
     <Compile Include="CommandAsteroidCreateSphere.cs" />
+    <Compile Include="CommandSessionSpectator.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />

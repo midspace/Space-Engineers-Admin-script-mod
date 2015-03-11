@@ -55,7 +55,8 @@
                 }
             }
 
-            return false;
+            MyAPIGateway.Utilities.ShowMessage("CopyPaste", MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste ? "On" : "Off");
+            return true;
         }
     }
 }
