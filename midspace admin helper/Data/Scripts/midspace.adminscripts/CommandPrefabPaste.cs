@@ -45,6 +45,17 @@
                 if (prefab != null && prefab.CubeGrids.Count() != 0)
                 {
                     var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
+                    
+                    // Use the cubeGrid BoundingBox to determine distance to place.
+                    Vector3I min = Vector3I.MaxValue;
+                    Vector3I max = Vector3I.MinValue;
+                    foreach (var b in prefab.CubeGrids[0].CubeBlocks)
+                    {
+                        min = Vector3I.Min(b.Min, min);
+                        max = Vector3I.Max(b.Min, max);
+                    }
+                    var size = new Vector3(max - min);
+                    var distance = (float)(Math.Sqrt(size.LengthSquared()) * prefab.CubeGrids[0].GridSizeEnum.ToGridLength() / 2) + 5;
                     var position = worldMatrix.Translation;
                     var offset = position - prefab.CubeGrids[0].PositionAndOrientation.Value.Position;
 
@@ -55,7 +66,7 @@
                     }
 
                     // only works in Creative mode, both Single and Server (even with paste disabled).
-                    MyAPIGateway.CubeBuilder.ActivateShipCreationClipboard(prefab.CubeGrids, new Vector3(), 10f);
+                    MyAPIGateway.CubeBuilder.ActivateShipCreationClipboard(prefab.CubeGrids, worldMatrix.Forward, distance);
 
                     return true;
                 }
