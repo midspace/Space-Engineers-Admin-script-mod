@@ -281,7 +281,7 @@ namespace midspace.adminscripts
                         {
                             //already set by server
                             if (!MyAPIGateway.Session.Player.IsHost())
-                                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCargoShips;
+                                MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
                             if (MyAPIGateway.Session.Player.IsAdmin())
                                 MyAPIGateway.Utilities.ShowMessage("CargoShips", enableCargoShips ? "On" : "Off");
                         }

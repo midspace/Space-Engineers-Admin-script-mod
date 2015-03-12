@@ -25,6 +25,9 @@
             // * remove any block instantly as per normal.
             // * drop a line or grid of blocks, these will be 100% constructed unlike single blocks.
             // * allows you to have copypaste.
+
+            // Note, that in the Join Game Screen, which is the Game Lobby, the game mode name will not change, 
+            // as this is part of the Steam Game registration when the server is started.
         }
 
         public override bool Invoke(string messageText)
