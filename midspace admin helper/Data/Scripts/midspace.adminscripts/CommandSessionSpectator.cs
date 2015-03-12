@@ -13,7 +13,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/spectator <on|off>", "Turns creative mode on or off for you.");
+            MyAPIGateway.Utilities.ShowMessage("/spectator <on|off>", "Turns creative mode on or off for all players.");
 
             // Allows you to change the Spectator mode.
 

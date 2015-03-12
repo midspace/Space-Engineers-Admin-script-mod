@@ -14,7 +14,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/copypaste <on|off>", "Turns Copy Paste mode on or off for you.");
+            MyAPIGateway.Utilities.ShowMessage("/copypaste <on|off>", "Turns Copy Paste mode on or off for all players.");
 
             // Requires GameMode to be changed to Creative first.
             // On Single player, these changes are permanent to you game.
