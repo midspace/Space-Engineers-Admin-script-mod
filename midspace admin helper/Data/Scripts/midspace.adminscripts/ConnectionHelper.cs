@@ -283,7 +283,7 @@ namespace midspace.adminscripts
                             if (!MyAPIGateway.Session.Player.IsHost())
                                 MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
                             if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("CargoShips", enableCargoShips ? "On" : "Off");
+                                MyAPIGateway.Utilities.ShowMessage("Server CargoShips", enableCargoShips ? "On" : "Off");
                         }
                         break;
                     case ConnectionKeys.CopyPaste:
@@ -293,7 +293,7 @@ namespace midspace.adminscripts
                             if (!MyAPIGateway.Session.Player.IsHost())
                                 MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
                             if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("CopyPaste", enableCopyPaste ? "On" : "Off");
+                                MyAPIGateway.Utilities.ShowMessage("Server CopyPaste", enableCopyPaste ? "On" : "Off");
                         }
                         break;
                     case ConnectionKeys.Creative:
@@ -306,10 +306,9 @@ namespace midspace.adminscripts
                                 MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
                             }
                             if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Creative", enableCreative ? "On" : "Off");
+                                MyAPIGateway.Utilities.ShowMessage("Server Creative", enableCreative ? "On" : "Off");
                         }
                         break;
-
                     case ConnectionKeys.Spectator:
                         bool enableSpectator;
                         if (bool.TryParse(entry.Value, out enableSpectator))
@@ -319,10 +318,22 @@ namespace midspace.adminscripts
                                 MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
                             }
                             if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Spectator", enableSpectator ? "On" : "Off");
+                                MyAPIGateway.Utilities.ShowMessage("Server Spectator", enableSpectator ? "On" : "Off");
                         }
                         break;
 
+                    case ConnectionKeys.Weapons:
+                        bool enableWeapons;
+                        if (bool.TryParse(entry.Value, out enableWeapons))
+                        {
+                            if (!MyAPIGateway.Session.Player.IsHost())
+                            {
+                                MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = enableWeapons;
+                            }
+                            if (MyAPIGateway.Session.Player.IsAdmin())
+                                MyAPIGateway.Utilities.ShowMessage("Server Weapons", enableWeapons ? "On" : "Off");
+                        }
+                        break;
                 }
                 Logger.Debug(string.Format("[Client]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
@@ -546,6 +557,14 @@ namespace midspace.adminscripts
                         }
                         SendMessageToAllPlayers(ConnectionKeys.Spectator, entry.Value);
                         break;
+                    case ConnectionKeys.Weapons:
+                        bool enableWeapons;
+                        if (bool.TryParse(entry.Value, out enableWeapons))
+                        {
+                            MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = enableWeapons;
+                        }
+                        SendMessageToAllPlayers(ConnectionKeys.Weapons, entry.Value);
+                        break;
                     #region connection request
                     case ConnectionKeys.ConnectionRequest:
                         ulong steamId1;
@@ -655,6 +674,7 @@ namespace midspace.adminscripts
             public const string CargoShips = "cargoships";
             public const string CopyPaste = "copypaste";
             public const string Spectator = "spectator";
+            public const string Weapons = "weapons";
 
             //pm subkeys
             public const string PmMessage = "msg";

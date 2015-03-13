@@ -165,6 +165,8 @@ namespace midspace.adminscripts
             ChatCommandService.Register(new CommandSessionCargoShips());
             ChatCommandService.Register(new CommandSessionCopyPaste());
             ChatCommandService.Register(new CommandSessionCreative());
+            ChatCommandService.Register(new CommandSessionSpectator());
+            ChatCommandService.Register(new CommandSessionWeapons());
             ChatCommandService.Register(new CommandSetVector());
             ChatCommandService.Register(new CommandShipOff());
             ChatCommandService.Register(new CommandShipOn());

@@ -1,6 +1,7 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
+    using System.Linq;
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
@@ -14,7 +15,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/creative <on|off>", "Turns creative mode on or off for all players.");
+            MyAPIGateway.Utilities.ShowMessage("/creative <on|off> [private]", "Turns creative mode on or off for all players. Add the word \"private\" for you only.");
 
             // Allows you to change the game mode to Creative.
 
@@ -33,33 +34,28 @@
         public override bool Invoke(string messageText)
         {
             var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (strings.Length > 1)
-            {
-                if (strings[1].Equals("on", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("1", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                    {
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Creative, bool.TrueString);
-                        return true;
-                    }
-                    MyAPIGateway.Session.GetCheckpoint("null").GameMode = MyGameModeEnum.Creative;
-                    MyAPIGateway.Utilities.ShowMessage("Creative", "On");
-                    return true;
-                }
+            var priv = strings.Contains("private", StringComparer.InvariantCultureIgnoreCase);
+            bool? state = null;
 
-                if (strings[1].Equals("off", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("0", StringComparison.InvariantCultureIgnoreCase))
+            if (strings.Contains("on", StringComparer.InvariantCultureIgnoreCase)
+                    || strings.Contains("1", StringComparer.InvariantCultureIgnoreCase))
+                state = true;
+
+            if (strings.Contains("off", StringComparer.InvariantCultureIgnoreCase)
+                || strings.Contains("0", StringComparer.InvariantCultureIgnoreCase))
+                state = false;
+
+            if (state.HasValue)
+            {
+                if (!priv && MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                    {
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Creative, bool.FalseString);
-                        return true;
-                    }
-                    MyAPIGateway.Session.GetCheckpoint("null").GameMode = MyGameModeEnum.Survival;
-                    MyAPIGateway.Utilities.ShowMessage("Creative", "Off");
+                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Creative, state.Value.ToString());
                     return true;
                 }
+                MyAPIGateway.Session.GetCheckpoint("null").GameMode = state.Value ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
             }
 
+            // Display the current state.
             MyAPIGateway.Utilities.ShowMessage("Creative", MyAPIGateway.Session.GetCheckpoint("null").GameMode == MyGameModeEnum.Creative ? "On" : "Off");
             return true;
         }

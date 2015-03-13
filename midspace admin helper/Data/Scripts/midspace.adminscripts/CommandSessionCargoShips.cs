@@ -1,8 +1,8 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
+    using System.Linq;
 
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
 
     public class CommandSessionCargoShips : ChatCommand
@@ -14,7 +14,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/CargoShips <on|off>", "Turns spawning of Cargo ships and Exploration ships mode on or off.");
+            MyAPIGateway.Utilities.ShowMessage("/CargoShips <on|off> [private]", "Turns spawning of Cargo ships and Exploration ships mode on or off.");
 
             // Turns on spawning of Cargo ships and Exploration ships.
 
@@ -25,37 +25,29 @@
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.StartsWith("/cargoships ", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (strings.Length > 1)
-                {
-                    if (strings[1].Equals("on", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("1", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                        {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CargoShips, bool.TrueString);
-                            return true;
-                        }
-                        MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = true;
-                        MyAPIGateway.Utilities.ShowMessage("CargoShips", "On");
-                        return true;
-                    }
+            var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var priv = strings.Contains("private", StringComparer.InvariantCultureIgnoreCase);
+            bool? state = null;
 
-                    if (strings[1].Equals("off", StringComparison.InvariantCultureIgnoreCase) || strings[1].Equals("0", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                        {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CargoShips, bool.FalseString);
-                            return true;
-                        }
-                        MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = false;
-                        MyAPIGateway.Utilities.ShowMessage("CargoShips", "Off");
-                        return true;
-                    }
+            if (strings.Contains("on", StringComparer.InvariantCultureIgnoreCase)
+                    || strings.Contains("1", StringComparer.InvariantCultureIgnoreCase))
+                state = true;
+
+            if (strings.Contains("off", StringComparer.InvariantCultureIgnoreCase)
+                || strings.Contains("0", StringComparer.InvariantCultureIgnoreCase))
+                state = false;
+
+            if (state.HasValue)
+            {
+                if (!priv && MyAPIGateway.Multiplayer.MultiplayerActive)
+                {
+                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CargoShips, state.Value.ToString());
+                    return true;
                 }
+                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = state.Value;
             }
 
+            // Display the current state.
             MyAPIGateway.Utilities.ShowMessage("CargoShips", MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled ? "On" : "Off");
             return true;
         }
