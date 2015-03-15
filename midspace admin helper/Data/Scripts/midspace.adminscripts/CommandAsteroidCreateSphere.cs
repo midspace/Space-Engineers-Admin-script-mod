@@ -14,6 +14,11 @@
 
     public class CommandAsteroidCreateSphere : ChatCommand
     {
+        private bool _displayMessage;
+        private DateTime _startTime;
+        private string _message;
+        private string _asteroidName;
+
         public CommandAsteroidCreateSphere()
             : base(ChatCommandSecurity.Admin, "createroidsphere", new[] { "/createroidsphere" })
         {
@@ -182,59 +187,61 @@ The asteroid cannot be generated until this area is cleared of ships and players
                     }
 
                     var origin = new Vector3I(size.X / 2, size.Y / 2, size.Z / 2);
-                    var start = DateTime.Now;
+                    _startTime = DateTime.Now;
 
                     layers = layers.OrderByDescending(e => e.Diameter).ToList();
 
                     switch (grid)
                     {
                         case 1:
-                            ProcessAsteroid2(name, size, position, Vector3D.Zero, origin, layers);
+                            ProcessAsteroid(name, size, position, Vector3D.Zero, origin, layers);
                             break;
                         case 2:
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, 0, 0), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, 0, 0), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, 0, 0), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, 0, 0), origin, layers);
                             break;
                         case 4:
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, 0), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, 0), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, 0), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, 0), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, 0), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, 0), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, 0), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, 0), origin, layers);
                             break;
                         case 8:
                             // downsize the Asteroid store.
                             length = (int)((maxDiameter / 2) + 4).RoundUpToNearest(64);
                             size = new Vector3I(length, length, length);
                             origin = new Vector3I(size.X / 2, size.Y / 2, size.Z / 2);
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, origin.Z - 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, origin.Z - 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, origin.Z - 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, origin.Z - 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, -origin.Z + 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, -origin.Z + 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, -origin.Z + 2), origin, layers);
-                            ProcessAsteroid2(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, origin.Z - 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, origin.Y - 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, -origin.Y + 2, -origin.Z + 2), origin, layers);
+                            ProcessAsteroid(name, size, position, new Vector3D(-origin.X + 2, -origin.Y + 2, -origin.Z + 2), origin, layers);
                             break;
                     }
 
                     var end = DateTime.Now;
                     description = new StringBuilder();
-                    description.AppendFormat("Time taken: {0}\r\n{1} asteroids generated.\r\n", end - start, grid);
-                    description.AppendFormat("\r\nLayers: {0}\r\n", layers.Count);
+                    description.AppendFormat("{0} asteroids generated.\r\n\r\nLayers: {1}\r\n", grid, layers.Count);
                     foreach (var layer in layers)
                     {
                         description.AppendFormat("{0}: {1}m\r\n", layer.MaterialName, layer.Diameter);
                     }
 
-                    MyAPIGateway.Utilities.ShowMissionScreen("Asteroid generated:", name, " ", description.ToString(), null, "OK");
+                    _asteroidName = name;
+                    _message = description.ToString();
+                    _displayMessage = true;
                     return true;
                 }
             }
 
-            return false;
+            Help(true);
+            return true;
         }
 
-        private string ProcessAsteroid2(string asteroidName, Vector3I size, Vector3D position, Vector3D offset, Vector3I origin, List<AsteroidSphereLayer> layers)
+        private string ProcessAsteroid(string asteroidName, Vector3I size, Vector3D position, Vector3D offset, Vector3I origin, List<AsteroidSphereLayer> layers)
         {
             var storeName = Support.CreateUniqueStorageName(asteroidName);
             var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
@@ -277,6 +284,17 @@ The asteroid cannot be generated until this area is cleared of ships and players
             public string MaterialName { get; set; }
             public byte Material { get; set; }
             public double Diameter { get; set; }
+        }
+
+        public override void UpdateBeforeSimulation100()
+        {
+            if (_displayMessage)
+            {
+                // Process the end message several frames later, as asteroid process can be instantanious, but the game engine takes MUCH longer to create the asteroid and render it. 
+                _displayMessage = false;
+                var timeProcessing = DateTime.Now - _startTime;
+                MyAPIGateway.Utilities.ShowMissionScreen("Asteroid generated:", _asteroidName, " ", string.Format("Time taken: {0}\r\n", timeProcessing) + _message, null, "OK");
+            }
         }
     }
 }
