@@ -31,7 +31,7 @@
                     double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
                 var velocity = double.Parse(match.Groups["V"].Value, CultureInfo.InvariantCulture);
 
-                if (Vector3.IsValid(destination))
+                if (destination.IsValid())
                 {
                     var entity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
                     if (entity is IMyCubeBlock) entity = entity.Parent;

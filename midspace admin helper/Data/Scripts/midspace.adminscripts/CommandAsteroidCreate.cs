@@ -40,7 +40,7 @@
                 var size = new Vector3I(length, length, length);
                 var name = match.Groups["Name"].Value;
 
-                if (Vector3D.IsValid(position) && Vector3D.IsValid(size))
+                if (position.IsValid() && ((Vector3D)size).IsValid())
                 {
                     MyAPIGateway.Utilities.ShowMessage("Size", size.ToString());
                     var newName = Support.CreateUniqueStorageName(name);

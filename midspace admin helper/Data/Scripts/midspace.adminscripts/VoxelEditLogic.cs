@@ -7,7 +7,7 @@ namespace midspace.adminscripts
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRageMath;
-    using VRage.Common.Voxels;
+    using VRage.Voxels;
 
     /// <summary>
     /// For editing Voxels.

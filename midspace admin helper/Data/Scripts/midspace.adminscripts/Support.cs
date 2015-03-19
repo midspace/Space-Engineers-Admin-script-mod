@@ -8,7 +8,7 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using System;
-    using VRage.Common.Voxels;
+    using VRage.Voxels;
     using VRageMath;
 
     public static class Support
@@ -203,11 +203,25 @@ namespace midspace.adminscripts
             return uniqueName;
         }
 
-        public static bool MovePlayerToPlayer(IMyPlayer player, IMyPlayer targetPlayer, bool safely = true)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="targetPlayer"></param>
+        /// <param name="safely">Attempts to find a safe location not inside of a wall.</param>
+        /// <param name="agressivePosition">Places the player behind the targetPlayer, otherwise face to face.</param>
+        /// <returns></returns>
+        public static bool MovePlayerToPlayer(IMyPlayer player, IMyPlayer targetPlayer, bool safely = true, bool agressivePosition = true)
         {
             var worldMatrix = targetPlayer.Controller.ControlledEntity.Entity.WorldMatrix;
 
-            var position = worldMatrix.Translation + worldMatrix.Forward * -2.5d;
+            Vector3D position;
+            MatrixD matrix;
+
+            if (agressivePosition)
+                position = worldMatrix.Translation + worldMatrix.Forward * -2.5d;
+            else
+                position = worldMatrix.Translation + worldMatrix.Forward * 2.5d;
 
             var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
 
@@ -226,7 +240,11 @@ namespace midspace.adminscripts
                 position = freePos.Value - offset;
             }
 
-            var matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
+            if (agressivePosition)
+                matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
+            else
+                matrix = MatrixD.CreateWorld(position, worldMatrix.Backward, worldMatrix.Up);
+
             var linearVelocity = targetPlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity;
 
             player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;

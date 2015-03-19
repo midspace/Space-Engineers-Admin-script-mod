@@ -6,7 +6,7 @@
     using Sandbox.Common;
     using Sandbox.ModAPI;
     using VRageMath;
-    using VRage.Common.Voxels;
+    using VRage.Voxels;
 
     public class CommandAsteroidEditSet: ChatCommand
     {

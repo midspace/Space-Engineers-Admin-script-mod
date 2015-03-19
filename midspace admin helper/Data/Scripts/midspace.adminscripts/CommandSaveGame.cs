@@ -2,7 +2,7 @@
 {
     using System;
 
-    using VRage.Common.Utils;
+    using VRage.Utils;
     using Sandbox.ModAPI;
 
     /// <summary>

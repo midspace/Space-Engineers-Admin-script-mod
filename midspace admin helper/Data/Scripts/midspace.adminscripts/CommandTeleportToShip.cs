@@ -39,7 +39,7 @@
                     }
                 }
 
-                var ship = currentShipList.GetFirstElement();
+                var ship = currentShipList.FirstElement();
 
                 if (ship == null)
                 {

@@ -11,7 +11,9 @@
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
-    using VRage.Common;
+    using VRage;
+    using Sandbox.Common.ObjectBuilders.Definitions;
+    using Sandbox.Definitions;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -125,6 +127,10 @@
                 MyAPIGateway.Utilities.ShowMessage("IsDedicated", "{0}", MyAPIGateway.Utilities.IsDedicated);
                 //MyAPIGateway.Utilities.ShowMessage("Culture", "{0}", MyTexts.Culture.IetfLanguageTag);
                 MyAPIGateway.Utilities.ShowMessage("Culture", "{0} {1}", CultureInfo.CurrentUICulture, CultureInfo.CurrentUICulture.IetfLanguageTag);
+
+                var ed = ((MyObjectBuilder_EnvironmentDefinition)MyDefinitionManager.Static.EnvironmentDefinition.GetObjectBuilder());
+                MyAPIGateway.Utilities.ShowMessage("LargeShipMaxSpeed", "{0}", ed.LargeShipMaxSpeed);
+                MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1} {2}", ed.SunDirection.X, ed.SunDirection.Y, ed.SunDirection.Z);
                 return true;
             }
 

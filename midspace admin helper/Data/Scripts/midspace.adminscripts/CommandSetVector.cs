@@ -30,7 +30,7 @@
                     double.Parse(match.Groups["Y"].Value, CultureInfo.InvariantCulture),
                     double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
 
-                if (Vector3D.IsValid(targetVector))
+                if (targetVector.IsValid())
                 {
                     var entity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
                     if (entity is IMyCubeBlock) entity = entity.Parent;

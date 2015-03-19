@@ -7,7 +7,7 @@
 
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using VRage.Common.Voxels;
+    using VRage.Voxels;
     using VRageMath;
 
     public class CommandIdentify : ChatCommand

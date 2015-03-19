@@ -168,7 +168,7 @@ Examples:
                 var size = new Vector3I(length, length, length);
                 var name = match.Groups["Name"].Value;
 
-                if (Vector3D.IsValid(position) && Vector3D.IsValid(size))
+                if (position.IsValid() && ((Vector3D)size).IsValid())
                 {
                     var boundingSphere = new BoundingSphereD(position, (maxDiameter + 2) / 2);
                     var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref boundingSphere);

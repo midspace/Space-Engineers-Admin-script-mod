@@ -7,7 +7,7 @@
 
     using Sandbox.ModAPI;
     using VRageMath;
-    using VRage.Common.Voxels;
+    using VRage.Voxels;
 
     /// <summary>
     /// This worked by creating a new asteroid store with the new dimentions required (as the entire space is rotated).
