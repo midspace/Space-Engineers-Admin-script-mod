@@ -26,7 +26,7 @@ namespace midspace.adminscripts
         /// <param name="security">Allowed level of access to this command</param>
         /// <param name="name">Name that appears in the help listing</param>
         /// <param name="commands">Command text</param>
-        protected ChatCommand(uint security, string name, string[] commands, ChatCommandFlag flag)
+        protected ChatCommand(uint security, ChatCommandFlag flag, string name, string[] commands)
         {
             Name = name;
             Security = security;

@@ -14,7 +14,7 @@
         /// I'm not sure if the API ever will. KeenSWH may just implement the feature in game and then this will become redundant.
         /// </summary>
         public CommandAsteroidSpread()
-            : base(ChatCommandSecurity.Admin, "spreadasteroids", new[] { "/spreadasteroids" }, ChatCommandFlag.Experimental)
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "spreadasteroids", new[] { "/spreadasteroids" })
         {
         }
 

@@ -18,7 +18,7 @@
     public class CommandPlayerRespawn : ChatCommand
     {
         public CommandPlayerRespawn()
-            : base(ChatCommandSecurity.Admin, "respawn", new[] { "/respawn" }, ChatCommandFlag.Experimental)
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "respawn", new[] { "/respawn" })
         {
         }
 

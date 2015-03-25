@@ -24,7 +24,7 @@
     public class CommandTest : ChatCommand
     {
         public CommandTest()
-            : base(ChatCommandSecurity.Admin, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13" }, ChatCommandFlag.Experimental)
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13" })
         {
         }
 

@@ -13,7 +13,7 @@
     public class CommandGameName : ChatCommand
     {
         public CommandGameName()
-            : base(ChatCommandSecurity.Admin, "gamename", new[] { "/gamename" }, ChatCommandFlag.Experimental)
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "gamename", new[] { "/gamename" })
         {
         }
 

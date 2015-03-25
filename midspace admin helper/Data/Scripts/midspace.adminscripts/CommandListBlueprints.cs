@@ -20,7 +20,7 @@
         public readonly static List<MyDefinitionBase> BlueprintCache = new List<MyDefinitionBase>();
 
         public CommandListBlueprints()
-            : base(ChatCommandSecurity.Admin, "listblueprints", new[] { "/listblueprints" }, ChatCommandFlag.Experimental)
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "listblueprints", new[] { "/listblueprints" })
         {
         }
 
