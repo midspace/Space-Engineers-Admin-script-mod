@@ -15,7 +15,7 @@
     public class CommandVoxelAdd : ChatCommand
     {
         public CommandVoxelAdd()
-            : base(ChatCommandSecurity.Experimental, "addvoxel", new[] { "/addvoxel" })
+            : base(ChatCommandSecurity.Admin, "addvoxel", new[] { "/addvoxel" }, ChatCommandFlag.Experimental)
         {
         }
 

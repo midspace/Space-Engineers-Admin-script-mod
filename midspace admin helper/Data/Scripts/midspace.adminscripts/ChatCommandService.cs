@@ -5,6 +5,7 @@
     using System.Linq;
 
     using Sandbox.ModAPI;
+    using Sandbox.Common.ObjectBuilders;
 
     /// <summary>
     /// The Chat command service does most of the heavy work in organising and processing the ChatCommands.
@@ -15,10 +16,10 @@
 
         private static readonly Dictionary<string, ChatCommand> CommandShortcuts = new Dictionary<string, ChatCommand>();
         private static readonly HashSet<ChatCommand> Commands = new HashSet<ChatCommand>();
-        private static ChatCommandSecurity _userSecurity;
+        private static uint _userSecurity;
         private static bool _isInitialized;
 
-        public static ChatCommandSecurity UserSecurity
+        public static uint UserSecurity
         {
             get { return _userSecurity; }
         }
@@ -36,11 +37,13 @@
             var session = MyAPIGateway.Session;
             _userSecurity = ChatCommandSecurity.User;
 
-            if (session.Player.IsAdmin())
-                _userSecurity |= ChatCommandSecurity.Admin;
-            if (session.Player.IsExperimentalCreator())
-                _userSecurity |= ChatCommandSecurity.Experimental;
-
+            //only set this in sp, in mp we need to wait until the server sends us our level. On LS this will be read in during the creation of the server cfg.
+            if (session.Player.IsAdmin() /*&& session.SessionSettings.OnlineMode.Equals(MyOnlineModeEnum.OFFLINE)*/)
+                _userSecurity = ChatCommandSecurity.Admin;
+            /*
+            if (ChatCommandLogic.Instance.ServerCfg != null)
+                ; // TODO set userSecurity to the read in value.
+            */
             _isInitialized = true;
         }
 
@@ -75,7 +78,7 @@
         /// <returns></returns>
         public static string[] GetUserListCommands()
         {
-            return Commands.Where(c => (c.Security & ChatCommandSecurity.User) != ChatCommandSecurity.None).Select(c => c.Name).ToArray();
+            return Commands.Where(c => HasRight(c) && c.Security == ChatCommandSecurity.User).Select(c => c.Name).ToArray();
         }
 
         /// <summary>
@@ -84,17 +87,17 @@
         /// <returns></returns>
         public static string[] GetListCommands()
         {
-            return Commands.Where(c => (c.Security & _userSecurity) != ChatCommandSecurity.None).Select(c => c.Name).ToArray();
+            return Commands.Where(c => HasRight(c)).Select(c => c.Name).ToArray();
         }
 
         public static string[] GetNonUserListCommands()
         {
-            return Commands.Where(c => (c.Security ^ _userSecurity) != ChatCommandSecurity.None && (c.Security & _userSecurity) != ChatCommandSecurity.User).Select(c => c.Name).ToArray();
+            return Commands.Where(c => HasRight(c) && c.Security > ChatCommandSecurity.User).Select(c => c.Name).ToArray();
         }
 
         public static bool Help(string commandName, bool brief)
         {
-            foreach (var command in Commands.Where(command => (command.Security & _userSecurity) != ChatCommandSecurity.None && command.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
+            foreach (var command in Commands.Where(command => HasRight(command) && command.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 command.Help(brief);
                 return true;
@@ -118,7 +121,7 @@
                 return false;
 
             var comandList = CommandShortcuts.Where(k => k.Key.Equals(commands[0], StringComparison.InvariantCultureIgnoreCase));
-            foreach (var command in comandList.Where(command => (command.Value.Security & _userSecurity) != ChatCommandSecurity.None))
+            foreach (var command in comandList.Where(command => HasRight(command.Value)))
             {
                 try
                 {
@@ -129,7 +132,7 @@
                 {
                     // Exception handling to prevent any crash in the ChatCommand's reaching the user.
                     // Additional information for developers
-                    if ((ChatCommandSecurity.Experimental & _userSecurity) != ChatCommandSecurity.None)
+                    if (MyAPIGateway.Session.Player.IsExperimentalCreator())
                     {
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
                         continue;
@@ -149,7 +152,7 @@
             if (!_isInitialized)
                 return;
 
-            foreach (var command in Commands.Where(command => (command.Security & _userSecurity) != ChatCommandSecurity.None))
+            foreach (var command in Commands.Where(command => HasRight(command)))
             {
                 command.UpdateBeforeSimulation();
             }
@@ -160,7 +163,7 @@
             if (!_isInitialized)
                 return;
 
-            foreach (var command in Commands.Where(command => (command.Security & _userSecurity) != ChatCommandSecurity.None))
+            foreach (var command in Commands.Where(command => HasRight(command)))
             {
                 command.UpdateBeforeSimulation100();
             }
@@ -171,20 +174,18 @@
             if (!_isInitialized)
                 return;
 
-            foreach (var command in Commands.Where(command => (command.Security & _userSecurity) != ChatCommandSecurity.None))
+            foreach (var command in Commands.Where(command => HasRight(command)))
             {
                 command.UpdateBeforeSimulation1000();
             }
         }
 
-        public static void UpdateSecurity(string commandName, ChatCommandSecurity security)
+        public static bool HasRight(ChatCommand command)
         {
-            if (!CommandShortcuts.ContainsKey(commandName))
-                return;
+            if (command.HasFlag(ChatCommandFlag.Experimental))
+                return MyAPIGateway.Session.Player.IsExperimentalCreator() && command.Security <= _userSecurity;
 
-            var command = CommandShortcuts[commandName];
-            command.UpdateSecurity(security);
-            return;
+            return command.Security <= _userSecurity;
         }
 
         #endregion

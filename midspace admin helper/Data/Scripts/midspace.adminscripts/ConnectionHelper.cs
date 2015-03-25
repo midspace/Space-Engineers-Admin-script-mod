@@ -229,6 +229,13 @@ namespace midspace.adminscripts
                         break;
                     case ConnectionKeys.MessageOfTheDay: //motd
                         CommandMessageOfTheDay.Content = entry.Value;
+                        if (!CommandMessageOfTheDay.Received)
+                        {
+                            CommandMessageOfTheDay.Received = true;
+                            if (CommandMessageOfTheDay.ShowOnReceive)
+                                CommandMessageOfTheDay.ShowMotd();
+                            break;
+                        }
                         MyAPIGateway.Utilities.ShowMessage("Motd", "The message of the day was updated just now. To see what is new use '/motd'.");
                         break;
                     case ConnectionKeys.PrivateMessage: //pm
@@ -339,12 +346,12 @@ namespace midspace.adminscripts
             }
         }
 
-        #region initial data
-
         public static void ProcessClientData(byte[] rawData)
         {
             ProcessClientData(System.Text.Encoding.Unicode.GetString(rawData));
         }
+
+        #region initial data
 
         /// <summary>
         /// Client side. Process the ids sent from the server.
@@ -358,22 +365,6 @@ namespace midspace.adminscripts
             {
                 switch (entry.Key)
                 {
-                    case ConnectionKeys.MotdHeadLine:
-                        CommandMessageOfTheDay.HeadLine = entry.Value;
-                        break;
-                    case ConnectionKeys.MotdShowInChat:
-                        bool showInChat = CommandMessageOfTheDay.ShowInChat;
-                        if (bool.TryParse(entry.Value, out showInChat)) 
-                        {
-                            CommandMessageOfTheDay.ShowInChat = showInChat;
-                        }
-                        break;
-                    case ConnectionKeys.MessageOfTheDay:
-                        CommandMessageOfTheDay.Content = entry.Value;
-                        CommandMessageOfTheDay.Received = true;
-                        if (CommandMessageOfTheDay.ShowOnReceive)
-                            CommandMessageOfTheDay.ShowMotd();
-                        break;
                     case ConnectionKeys.AdminNotification:
                         ChatCommandLogic.Instance.AdminNotification = entry.Value;
                         if (CommandMessageOfTheDay.ShowOnReceive)
@@ -567,33 +558,32 @@ namespace midspace.adminscripts
                         break;
                     #region connection request
                     case ConnectionKeys.ConnectionRequest:
-                        ulong steamId1;
-                        if (ulong.TryParse(entry.Value, out steamId1))
+                        ulong newClientSteamId;
+                        if (ulong.TryParse(entry.Value, out newClientSteamId))
                         {
                             var data = new Dictionary<string, string>();
-                            //only send the motd if there is one
-                            if (!string.IsNullOrEmpty(CommandMessageOfTheDay.Content))
-                            {
-                                //the header must be initialized before the motd otherwise it won't show
-                                if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))
-                                    data.Add(ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
-
-                                if (CommandMessageOfTheDay.ShowInChat)
-                                    data.Add(ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
-
-                                data.Add(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
-                            }
-
-                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId1))
+                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.AdminNotification, ChatCommandLogic.Instance.AdminNotification);
-                            BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == steamId1);
-                            if (bannedPlayer1.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId1))
+                            BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == newClientSteamId);
+                            if (bannedPlayer1.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.ForceKick, bannedPlayer1.SteamId.ToString());
                             //only send the command permission if it is set, disabled by now
                             /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
                                 data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
                             data.Add(ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
-                            SendMessageToPlayer(steamId1, data);
+                            SendMessageToPlayer(newClientSteamId, data);
+
+                            if (CommandMessageOfTheDay.Content != null)
+                            {
+                                //the header must be initialized before the motd otherwise it won't show
+                                if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))
+                                    SendMessageToPlayer(newClientSteamId, ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
+
+                                if (CommandMessageOfTheDay.ShowInChat)
+                                    SendMessageToPlayer(newClientSteamId, ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
+
+                                SendMessageToPlayer(newClientSteamId, ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
+                            }
                         }
                         break;
                     #endregion
@@ -628,28 +618,6 @@ namespace midspace.adminscripts
             string messageData = ConnectionHelper.ConvertData(data);
 
             SendMessageToPlayer(steamId, ConnectionKeys.PrivateMessage, ConvertData(data));
-        }
-        
-        
-        private static void PerformSecurityChanges(string commandSecurityPair)
-        {
-            var pair = commandSecurityPair.Split(':');
-            if (pair.Length < 2)
-                return;
-            var commandName = pair[0].ToLowerInvariant();
-            ChatCommandSecurity security = ChatCommandSecurity.None;
-            switch (pair[1].ToLowerInvariant())
-            {
-                case "admin":
-                    security = ChatCommandSecurity.Admin;
-                    break;
-                case "user":
-                    security = ChatCommandSecurity.User;
-                    break;
-            }
-            if (security.Equals(ChatCommandSecurity.None))
-                return;
-            ChatCommandService.UpdateSecurity(commandName, security);
         }
 
         public static class ConnectionKeys

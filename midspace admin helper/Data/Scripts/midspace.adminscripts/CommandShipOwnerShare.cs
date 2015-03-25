@@ -15,7 +15,7 @@
     public class CommandShipOwnerShare : ChatCommand
     {
         public CommandShipOwnerShare()
-            : base(ChatCommandSecurity.Experimental, "share", new[] { "/share" })
+            : base(ChatCommandSecurity.Admin, "share", new[] { "/share" }, ChatCommandFlag.Experimental)
         {
         }
 

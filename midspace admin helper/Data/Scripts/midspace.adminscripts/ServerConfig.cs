@@ -1,4 +1,5 @@
-﻿using Sandbox.ModAPI;
+﻿using ProtoBuf;
+using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,13 +17,15 @@ namespace midspace.adminscripts
         private const string MotdFileNameFormat = "Motd_{0}.txt";
         private const string PmLogFileNameFormat = "PrivateMessageLog_{0}.xml";
         private const string GcLogFileNameFormat = "GlobalChatLog_{0}.xml";
+        private const string PermissionFileNameFormat = "Permissions_{0}.xml";
 
         private string ConfigFileName;
         private string MotdFileName;
         private string PmLogFileName;
         private string GcLogFileName;
+        private string PermissionFileName;
 
-        private TextWriter GlobalChatLogger;
+        private List<ChatCommand> ChatCommands;
         private List<ChatMessage> ChatMessages = new List<ChatMessage>();
 
         private List<PrivateConversation> PrivateConversations = new List<PrivateConversation>();
@@ -31,6 +34,7 @@ namespace midspace.adminscripts
         /// Used for saving and loading things.
         /// </summary>
         private ServerConfigurationStruct Config;
+        private Permissions Permissions;
 
         /// <summary>
         /// True for listen server
@@ -39,8 +43,10 @@ namespace midspace.adminscripts
 
         public List<BannedPlayer> ForceBannedPlayer { get { return Config.ForceBannedPlayers; } }
 
-        public ServerConfig()
+        public ServerConfig(List<ChatCommand> commands)
         {
+            //ChatCommands = commands;
+
             if (MyAPIGateway.Utilities.IsDedicated)
                 ServerIsClient = false;
 
@@ -60,6 +66,7 @@ namespace midspace.adminscripts
             LoadOrCreateMotdFile();
             GcLogFileName = string.Format(GcLogFileNameFormat, MyAPIGateway.Session.WorldID);
             LoadOrCreateChatLog();
+            PermissionFileName = string.Format(PermissionFileNameFormat, MyAPIGateway.Session.WorldID);
             if (Config.LogPrivateMessages)
             {
                 PmLogFileName = string.Format(PmLogFileNameFormat, MyAPIGateway.Session.WorldID);
@@ -334,6 +341,30 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         #endregion
 
+        #region permissions
+
+        private void LoadOrCreatePermissionFile()
+        {
+            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(PermissionFileName, typeof(ServerConfig)))
+                return;
+
+            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(PermissionFileName, typeof(ServerConfig));
+            var text = reader.ReadToEnd();
+            reader.Close();
+
+            Permissions = MyAPIGateway.Utilities.SerializeFromXML<Permissions>(text);
+        }
+
+        private void SavePermissionFile()
+        {
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(PermissionFileName, typeof(ServerConfig));
+            writer.Write(MyAPIGateway.Utilities.SerializeToXML<Permissions>(Permissions));
+            writer.Flush();
+            writer.Close();
+        }
+
+        #endregion
+
         /// <summary>
         /// Replaces the chars from the given string that aren't allowed for a filename with a whitespace.
         /// </summary>
@@ -395,24 +426,6 @@ If you can't find the error, simply delete the file. The server will create a ne
         //public string CommandPermissions = "";
     }
 
-    public struct OldServerConfigurationStruct
-    {
-        public string WorldLocation;
-
-        /// <summary>
-        /// The suffix for the motd file. For a better identification.
-        /// </summary>
-        public string MotdFileSuffix;
-        public string MotdHeadLine;
-        public bool MotdShowInChat;
-        public bool LogPrivateMessages;
-        public List<BannedPlayer> ForceBannedPlayers;
-        /// <summary>
-        /// The permissions in string form. No need to initialize the permissions on the server since it is transmitted as a string anyway.
-        /// </summary>
-        //public string CommandPermissions = "";
-    }
-
     //Need to change this to Player... Don't know how without breaking the downward compatibility because forcebanned players are saved as 'BannedPlayer'.
     //They would not be read in if they are 'Player'
     public struct BannedPlayer
@@ -446,5 +459,24 @@ If you can't find the error, simply delete the file. The server will create a ne
         public Player Sender;
         public DateTime Date;
         public string Message;
+    }
+
+    public struct Permissions
+    {
+        List<CommandStruct> Commands;
+        List<PermissionGroup> Groups;
+    }
+
+    public struct PermissionGroup
+    {
+        string GroupName;
+        uint Level;
+        List<Player> Members;
+    }
+
+    public struct CommandStruct
+    {
+        public string Name;
+        public uint NeededLevel;
     }
 }

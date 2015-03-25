@@ -51,7 +51,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Set manually to true for testing purposes. No need for this function in general.
         /// </summary>
-        public bool Debug = false;
+        public bool Debug = true;
 
         #endregion
 
@@ -109,88 +109,8 @@ namespace midspace.adminscripts
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
             Logger.Debug("Attach MessageEntered");
 
-            // This will populate the _oreNames, _ingotNames, ready for the ChatCommands.
-            BuildResourceLookups();
-
-            // New command classes must be added in here.
-
-            //ChatCommandService.Register(new CommandAsteroidFindOre(_oreNames));
-            //ChatCommandService.Register(new CommandAsteroidEditClear());
-            //ChatCommandService.Register(new CommandAsteroidEditSet());
-            ChatCommandService.Register(new CommandAsteroidCreate());
-            ChatCommandService.Register(new CommandAsteroidCreateSphere());
-            ChatCommandService.Register(new CommandAsteroidsList());
-            ChatCommandService.Register(new CommandAsteroidRotate());
-            //ChatCommandService.Register(new CommandAsteroidSpread());  //not working
-            ChatCommandService.Register(new CommandConfig());
-            ChatCommandService.Register(new CommandDate());
-            ChatCommandService.Register(new CommandFactionDemote());
-            ChatCommandService.Register(new CommandFactionJoin());
-            ChatCommandService.Register(new CommandFactionKick());
-            ChatCommandService.Register(new CommandFactionPromote());
-            ChatCommandService.Register(new CommandFactionRemove());
-            ChatCommandService.Register(new CommandForceBan());
-            ChatCommandService.Register(new CommandForceKick());
-            ChatCommandService.Register(new CommandFlyTo());
-            ChatCommandService.Register(new CommandGameName());
-            ChatCommandService.Register(new CommandHeading());
-            ChatCommandService.Register(new CommandHelloWorld());
-            ChatCommandService.Register(new CommandHelp());
-            ChatCommandService.Register(new CommandIdentify());
-            ChatCommandService.Register(new CommandInventoryAdd(_oreNames, _ingotNames.ToArray(), _physicalItems));
-            ChatCommandService.Register(new CommandInventoryClear());
-            ChatCommandService.Register(new CommandInventoryDrop(_oreNames, _ingotNames.ToArray(), _physicalItems));
-            ChatCommandService.Register(new CommandListBots());
-            //ChatCommandService.Register(new CommandListBlueprints()); // no API currently.
-            ChatCommandService.Register(new CommandListPrefabs());
-            ChatCommandService.Register(new CommandListShips());
-            ChatCommandService.Register(new CommandListShips2());
-            ChatCommandService.Register(new CommandMessageOfTheDay());
-            ChatCommandService.Register(new CommandMeteor(_oreNames[0]));
-            ChatCommandService.Register(new CommandObjectsCollect());
-            ChatCommandService.Register(new CommandObjectsCount());
-            ChatCommandService.Register(new CommandObjectsPull());
-            ChatCommandService.Register(new CommandPardon());
-            ChatCommandService.Register(new CommandPlayerEject());
-            ChatCommandService.Register(new CommandPlayerSlay());
-            ChatCommandService.Register(new CommandPlayerSmite(_oreNames[0]));
-            //ChatCommandService.Register(new CommandPlayerRespawn());  //not working any more
-            ChatCommandService.Register(new CommandPlayerStatus());
-            ChatCommandService.Register(new CommandPosition());
-            ChatCommandService.Register(new CommandPrefabAdd());
-            ChatCommandService.Register(new CommandPrefabAddWireframe());
-            ChatCommandService.Register(new CommandPrefabPaste());
-            ChatCommandService.Register(new CommandPrivateMessage());
-            ChatCommandService.Register(new CommandSaveGame());
-            ChatCommandService.Register(new CommandSessionCargoShips());
-            ChatCommandService.Register(new CommandSessionCopyPaste());
-            ChatCommandService.Register(new CommandSessionCreative());
-            ChatCommandService.Register(new CommandSessionSpectator());
-            ChatCommandService.Register(new CommandSessionWeapons());
-            ChatCommandService.Register(new CommandSetVector());
-            ChatCommandService.Register(new CommandShipOff());
-            ChatCommandService.Register(new CommandShipOn());
-            ChatCommandService.Register(new CommandShipOwnerClaim());
-            ChatCommandService.Register(new CommandShipOwnerRevoke());
-            //ChatCommandService.Register(new CommandShipOwnerShare());  //not working
-            ChatCommandService.Register(new CommandStop());
-            ChatCommandService.Register(new CommandStopAll());
-            ChatCommandService.Register(new CommandTeleport());
-            ChatCommandService.Register(new CommandTeleportBack());
-            ChatCommandService.Register(new CommandTeleportDelete());
-            ChatCommandService.Register(new CommandTeleportFavorite());
-            ChatCommandService.Register(new CommandTeleportJump());
-            ChatCommandService.Register(new CommandTeleportList());
-            ChatCommandService.Register(new CommandTeleportOffset());
-            ChatCommandService.Register(new CommandTeleportSave());
-            ChatCommandService.Register(new CommandTeleportToPlayer());
-            ChatCommandService.Register(new CommandTeleportToShip());
-            ChatCommandService.Register(new CommandTest());
-            ChatCommandService.Register(new CommandTime());
-            ChatCommandService.Register(new CommandVersion());
-            //ChatCommandService.Register(new CommandVoxelAdd());  //not working any more
-            //ChatCommandService.Register(new CommandVoxelsList()); //not working any more
-
+            foreach (ChatCommand command in GetAllChatCommands())
+                ChatCommandService.Register(command);
 
             _timer100 = new Timer(100);
             _timer100.Elapsed += TimerOnElapsed100;
@@ -224,7 +144,94 @@ namespace midspace.adminscripts
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
             Logger.Debug("Registered ProcessMessage_Server");
 
-            ServerCfg = new ServerConfig();
+            ServerCfg = new ServerConfig(GetAllChatCommands());
+        }
+        private List<ChatCommand> GetAllChatCommands()
+        {
+            // This will populate the _oreNames, _ingotNames, ready for the ChatCommands.
+            BuildResourceLookups();
+
+            List<ChatCommand> commands = new List<ChatCommand>();
+            // New command classes must be added in here.
+
+            //commands.Add(new CommandAsteroidFindOre(_oreNames));
+            //commands.Add(new CommandAsteroidEditClear());
+            //commands.Add(new CommandAsteroidEditSet());
+            commands.Add(new CommandAsteroidCreate());
+            commands.Add(new CommandAsteroidCreateSphere());
+            commands.Add(new CommandAsteroidsList());
+            commands.Add(new CommandAsteroidRotate());
+            //commands.Add(new CommandAsteroidSpread());  //not working
+            commands.Add(new CommandConfig());
+            commands.Add(new CommandDate());
+            commands.Add(new CommandFactionDemote());
+            commands.Add(new CommandFactionJoin());
+            commands.Add(new CommandFactionKick());
+            commands.Add(new CommandFactionPromote());
+            commands.Add(new CommandFactionRemove());
+            commands.Add(new CommandForceBan());
+            commands.Add(new CommandForceKick());
+            commands.Add(new CommandFlyTo());
+            commands.Add(new CommandGameName());
+            commands.Add(new CommandHeading());
+            commands.Add(new CommandHelloWorld());
+            commands.Add(new CommandHelp());
+            commands.Add(new CommandIdentify());
+            commands.Add(new CommandInventoryAdd(_oreNames, _ingotNames.ToArray(), _physicalItems));
+            commands.Add(new CommandInventoryClear());
+            commands.Add(new CommandInventoryDrop(_oreNames, _ingotNames.ToArray(), _physicalItems));
+            commands.Add(new CommandListBots());
+            //commands.Add(new CommandListBlueprints()); // no API currently.
+            commands.Add(new CommandListPrefabs());
+            commands.Add(new CommandListShips());
+            commands.Add(new CommandListShips2());
+            commands.Add(new CommandMessageOfTheDay());
+            commands.Add(new CommandMeteor(_oreNames[0]));
+            commands.Add(new CommandObjectsCollect());
+            commands.Add(new CommandObjectsCount());
+            commands.Add(new CommandObjectsPull());
+            commands.Add(new CommandPardon());
+            commands.Add(new CommandPlayerEject());
+            commands.Add(new CommandPlayerSlay());
+            commands.Add(new CommandPlayerSmite(_oreNames[0]));
+            //commands.Add(new CommandPlayerRespawn());  //not working any more
+            commands.Add(new CommandPlayerStatus());
+            commands.Add(new CommandPosition());
+            commands.Add(new CommandPrefabAdd());
+            commands.Add(new CommandPrefabAddWireframe());
+            commands.Add(new CommandPrefabPaste());
+            commands.Add(new CommandPrivateMessage());
+            commands.Add(new CommandSaveGame());
+            commands.Add(new CommandSessionCargoShips());
+            commands.Add(new CommandSessionCopyPaste());
+            commands.Add(new CommandSessionCreative());
+            commands.Add(new CommandSessionSpectator());
+            commands.Add(new CommandSessionWeapons());
+            commands.Add(new CommandSetVector());
+            commands.Add(new CommandShipOff());
+            commands.Add(new CommandShipOn());
+            commands.Add(new CommandShipOwnerClaim());
+            commands.Add(new CommandShipOwnerRevoke());
+            //commands.Add(new CommandShipOwnerShare());  //not working
+            commands.Add(new CommandStop());
+            commands.Add(new CommandStopAll());
+            commands.Add(new CommandTeleport());
+            commands.Add(new CommandTeleportBack());
+            commands.Add(new CommandTeleportDelete());
+            commands.Add(new CommandTeleportFavorite());
+            commands.Add(new CommandTeleportJump());
+            commands.Add(new CommandTeleportList());
+            commands.Add(new CommandTeleportOffset());
+            commands.Add(new CommandTeleportSave());
+            commands.Add(new CommandTeleportToPlayer());
+            commands.Add(new CommandTeleportToShip());
+            commands.Add(new CommandTest());
+            commands.Add(new CommandTime());
+            commands.Add(new CommandVersion());
+            //commands.Add(new CommandVoxelAdd());  //not working any more
+            //commands.Add(new CommandVoxelsList()); //not working any more
+
+            return commands;
         }
 
         #region detaching events

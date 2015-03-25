@@ -1,4 +1,5 @@
-﻿namespace midspace.adminscripts
+﻿using System;
+namespace midspace.adminscripts
 {
     /// <summary>
     /// Defines the base for all ChatCommands.
@@ -11,11 +12,26 @@
         /// <param name="security">Allowed level of access to this command</param>
         /// <param name="name">Name that appears in the help listing</param>
         /// <param name="commands">Command text</param>
-        protected ChatCommand(ChatCommandSecurity security, string name, string[] commands)
+        protected ChatCommand(uint security, string name, string[] commands)
         {
             Name = name;
             Security = security;
             Commands = commands;
+            Flag = ChatCommandFlag.None;
+        }
+
+        /// <summary>
+        /// The constructor defines the basics of chat command, and security access.
+        /// </summary>
+        /// <param name="security">Allowed level of access to this command</param>
+        /// <param name="name">Name that appears in the help listing</param>
+        /// <param name="commands">Command text</param>
+        protected ChatCommand(uint security, string name, string[] commands, ChatCommandFlag flag)
+        {
+            Name = name;
+            Security = security;
+            Commands = commands;
+            Flag = flag;
         }
 
         /// <summary>
@@ -31,7 +47,12 @@
         /// <summary>
         /// Required access level of a player to see and use this ChatCommand.
         /// </summary>
-        public ChatCommandSecurity Security { get; private set; }
+        public uint Security { get; private set; }
+
+        /// <summary>
+        /// Required access level of a player to see and use this ChatCommand.
+        /// </summary>
+        public ChatCommandFlag Flag { get; private set; }
 
         /// <summary>
         /// Runs the Chat command's specific help.
@@ -66,9 +87,28 @@
         {
         }
 
-        public void UpdateSecurity(ChatCommandSecurity security)
+        /// <summary>
+        /// Determins if the command has the given flag.
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <returns>Returns true if the command has the given flag.</returns>
+        public bool HasFlag(ChatCommandFlag flag)
         {
-            Security = security;
+            return Flag.Equals(flag);
         }
+    }
+
+    [Flags]
+    public enum ChatCommandFlag
+    {
+        /// <summary>
+        /// No flag set for this command.
+        /// </summary>
+        None = 0x0,
+
+        /// <summary>
+        /// Shows that this command is not ready for use, thus only accessible for experimental users.
+        /// </summary>
+        Experimental = 0x1
     }
 }

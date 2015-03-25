@@ -19,7 +19,7 @@
         //public readonly static List<MyMwcVoxelFilesEnum> VoxelCache = new List<MyMwcVoxelFilesEnum>();
 
         public CommandVoxelsList()
-            : base(ChatCommandSecurity.Experimental, "listvoxels", new[] { "/listvoxels" })
+            : base(ChatCommandSecurity.Admin, "listvoxels", new[] { "/listvoxels" }, ChatCommandFlag.Experimental)
         {
         }
 

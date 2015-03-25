@@ -8,7 +8,7 @@
     public class CommandSessionCargoShips : ChatCommand
     {
         public CommandSessionCargoShips()
-            : base(ChatCommandSecurity.Experimental, "cargoships", new[] { "/cargoships" })
+            : base(ChatCommandSecurity.Admin, "cargoships", new[] { "/cargoships" }, ChatCommandFlag.Experimental)
         {
         }
 

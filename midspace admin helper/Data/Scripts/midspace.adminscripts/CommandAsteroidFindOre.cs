@@ -21,7 +21,7 @@
         private readonly string[] _oreNames;
 
         public CommandAsteroidFindOre(string[] oreNames)
-            : base(ChatCommandSecurity.Experimental, "findore", new[] { "/findore" })
+            : base(ChatCommandSecurity.Admin, "findore", new[] { "/findore" }, ChatCommandFlag.Experimental)
         {
             _oreNames = oreNames;
         }
