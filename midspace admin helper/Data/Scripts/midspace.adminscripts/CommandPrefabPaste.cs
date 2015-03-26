@@ -42,8 +42,17 @@
                     prefab = CommandListPrefabs.PrefabCache[index - 1];
                 }
 
-                if (prefab != null && prefab.CubeGrids.Count() != 0)
+                if (prefab != null)
                 {
+                    if (prefab.CubeGrids == null)
+                    {
+                        MyDefinitionManager.Static.ReloadPrefabsFromFile(prefab.PrefabPath);
+                        prefab = MyDefinitionManager.Static.GetPrefabDefinition(prefab.Id.SubtypeName);
+                    }
+
+                    if (prefab.CubeGrids.Count() == 0)
+                        return true;
+
                     var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                     
                     // Use the cubeGrid BoundingBox to determine distance to place.

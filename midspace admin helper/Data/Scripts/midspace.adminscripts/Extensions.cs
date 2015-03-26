@@ -11,8 +11,8 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
-    using VRage.Utils;
     using VRage;
+    using VRage.Library.Utils;
 
     public static class Extensions
     {
