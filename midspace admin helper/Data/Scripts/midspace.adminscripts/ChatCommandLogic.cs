@@ -35,6 +35,7 @@ namespace midspace.adminscripts
         public static ChatCommandLogic Instance;
         public ServerConfig ServerCfg;
         public string AdminNotification;
+        public bool BlockCommandExecution = false;
 
         private bool _isInitialized;
         private Timer _timer100;
@@ -129,8 +130,9 @@ namespace midspace.adminscripts
                 data.Add(ConnectionHelper.ConnectionKeys.ConnectionRequest, MyAPIGateway.Session.Player.SteamUserId.ToString());
                 //let the server know we are ready for connections
                 ConnectionHelper.ReceivedInitialRequest = false;
-                ConnectionHelper.SendMessageToServer(data);
                 CommandMessageOfTheDay.ShowMotdOnSpawn = true;
+                BlockCommandExecution = true;
+                ConnectionHelper.SendMessageToServer(data);
             }
         }
 

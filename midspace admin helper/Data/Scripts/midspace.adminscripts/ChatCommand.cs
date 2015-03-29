@@ -47,7 +47,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Required access level of a player to see and use this ChatCommand.
         /// </summary>
-        public uint Security { get; private set; }
+        public uint Security { get; set; }
 
         /// <summary>
         /// Required access level of a player to see and use this ChatCommand.

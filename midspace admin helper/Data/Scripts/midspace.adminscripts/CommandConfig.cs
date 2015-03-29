@@ -55,7 +55,10 @@ Examples:
         public override bool Invoke(string messageText)
         {
             if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                return false;
+            {
+                MyAPIGateway.Utilities.ShowMessage("Config", "Command disabled in offline mode.");
+                return true;
+            }
 
             var match = Regex.Match(messageText, @"(/config|/cfg)\s+(?<Key>[^\s]+)((\s+(?<Value>.+))|)", RegexOptions.IgnoreCase); 
             if (match.Success)

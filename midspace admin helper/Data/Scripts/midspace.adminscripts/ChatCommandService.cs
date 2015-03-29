@@ -14,14 +14,14 @@
     {
         #region fields and properties
 
-        private static readonly Dictionary<string, ChatCommand> CommandShortcuts = new Dictionary<string, ChatCommand>();
-        private static readonly HashSet<ChatCommand> Commands = new HashSet<ChatCommand>();
+        private static readonly Dictionary<string, ChatCommand> Commands = new Dictionary<string, ChatCommand>();
         private static uint _userSecurity;
         private static bool _isInitialized;
 
         public static uint UserSecurity
         {
             get { return _userSecurity; }
+            set { _userSecurity = value; }
         }
 
         #endregion
@@ -38,12 +38,9 @@
             _userSecurity = ChatCommandSecurity.User;
 
             //only set this in sp, in mp we need to wait until the server sends us our level. On LS this will be read in during the creation of the server cfg.
-            if (session.Player.IsAdmin() /*&& session.SessionSettings.OnlineMode.Equals(MyOnlineModeEnum.OFFLINE)*/)
+            if (session.Player.IsAdmin() && session.SessionSettings.OnlineMode.Equals(MyOnlineModeEnum.OFFLINE))
                 _userSecurity = ChatCommandSecurity.Admin;
-            /*
-            if (ChatCommandLogic.Instance.ServerCfg != null)
-                ; // TODO set userSecurity to the read in value.
-            */
+
             _isInitialized = true;
         }
 
@@ -59,17 +56,15 @@
             // As this will occur during the loading of the World, instead of during gameplay.
             // This is to prevent coders to adding duplicate ChatCommands.
 
-            if (Commands.Any(c => c.GetType() == typeof(T)))
+            if (Commands.Any(c => c.GetType() == typeof(T)) || Commands.ContainsKey(chatCommand.Name))
                 throw new Exception(string.Format("ChatCommand Type {0} is already registered", typeof(T)));
 
-            Commands.Add(chatCommand);
-            foreach (var command in chatCommand.Commands)
-            {
-                if (CommandShortcuts.Any(c => c.Key.Equals(command, StringComparison.InvariantCultureIgnoreCase)))
+            foreach (string command in chatCommand.Commands)
+                if (Commands.Any(pair => pair.Value.Commands.Any(s => s.Equals(command))))
                     throw new Exception(string.Format("ChatCommand '{0}' already registered", command));
 
-                CommandShortcuts.Add(command, chatCommand);
-            }
+            Commands.Add(chatCommand.Name, chatCommand);
+
         }
 
         /// <summary>
@@ -78,7 +73,7 @@
         /// <returns></returns>
         public static string[] GetUserListCommands()
         {
-            return Commands.Where(c => HasRight(c) && c.Security == ChatCommandSecurity.User).Select(c => c.Name).ToArray();
+            return Commands.Where(c => HasRight(c.Value) && c.Value.Security == ChatCommandSecurity.User).Select(c => c.Key).ToArray();
         }
 
         /// <summary>
@@ -87,19 +82,19 @@
         /// <returns></returns>
         public static string[] GetListCommands()
         {
-            return Commands.Where(c => HasRight(c)).Select(c => c.Name).ToArray();
+            return Commands.Where(c => HasRight(c.Value)).Select(c => c.Key).ToArray();
         }
 
         public static string[] GetNonUserListCommands()
         {
-            return Commands.Where(c => HasRight(c) && c.Security > ChatCommandSecurity.User).Select(c => c.Name).ToArray();
+            return Commands.Where(c => HasRight(c.Value) && c.Value.Security > ChatCommandSecurity.User).Select(c => c.Key).ToArray();
         }
 
         public static bool Help(string commandName, bool brief)
         {
-            foreach (var command in Commands.Where(command => HasRight(command) && command.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
+            foreach (var command in Commands.Where(command => HasRight(command.Value) && command.Key.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
             {
-                command.Help(brief);
+                command.Value.Help(brief);
                 return true;
             }
 
@@ -120,13 +115,32 @@
             if (commands.Length == 0)
                 return false;
 
-            var comandList = CommandShortcuts.Where(k => k.Key.Equals(commands[0], StringComparison.InvariantCultureIgnoreCase));
-            foreach (var command in comandList.Where(command => HasRight(command.Value)))
+
+            var comandList = Commands.Where(k => k.Value.Commands.Any(a => a.Equals(commands[0], StringComparison.InvariantCultureIgnoreCase)));
+            foreach (var command in comandList)
             {
+                if (ChatCommandLogic.Instance.BlockCommandExecution)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Permission", "Loading permissions... Please try again later.");
+                    return true;
+                }
+
+                if (!HasRight(command.Value))
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Permission", "You do not have the permission to use this command.");
+                    return true;
+                }
+
                 try
                 {
                     if (command.Value.Invoke(messageText))
                         return true;
+                    else
+                    {
+                        MyAPIGateway.Utilities.ShowMessage("Command failed", string.Format("Execution of command {0} failed. Use '/help {0}' for receiving a detailed instruction.", command.Value.Name));
+                        command.Value.Help(true);
+                        return true;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -152,9 +166,9 @@
             if (!_isInitialized)
                 return;
 
-            foreach (var command in Commands.Where(command => HasRight(command)))
+            foreach (var command in Commands.Where(command => HasRight(command.Value)))
             {
-                command.UpdateBeforeSimulation();
+                command.Value.UpdateBeforeSimulation();
             }
         }
 
@@ -163,9 +177,9 @@
             if (!_isInitialized)
                 return;
 
-            foreach (var command in Commands.Where(command => HasRight(command)))
+            foreach (var command in Commands.Where(command => HasRight(command.Value)))
             {
-                command.UpdateBeforeSimulation100();
+                command.Value.UpdateBeforeSimulation100();
             }
         }
 
@@ -174,9 +188,9 @@
             if (!_isInitialized)
                 return;
 
-            foreach (var command in Commands.Where(command => HasRight(command)))
+            foreach (var command in Commands.Where(command => HasRight(command.Value)))
             {
-                command.UpdateBeforeSimulation1000();
+                command.Value.UpdateBeforeSimulation1000();
             }
         }
 
@@ -186,6 +200,21 @@
                 return MyAPIGateway.Session.Player.IsExperimentalCreator() && command.Security <= _userSecurity;
 
             return command.Security <= _userSecurity;
+        }
+
+        public static bool UpdateCommandSecurity(string commandName, uint newSecurity)
+        {
+            if (!Commands.ContainsKey(commandName))
+                return false;
+
+            bool changed;
+
+            if (changed = Commands[commandName].Security != newSecurity)
+            {
+                Commands[commandName].Security = newSecurity;
+            }
+
+            return changed;
         }
 
         #endregion

@@ -62,7 +62,11 @@ The logging of private messages is {1}.
         public override bool Invoke(string messageText)
         {
             if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                return false;
+            {
+                MyAPIGateway.Utilities.ShowMessage("PM System", "Command disabled in offline mode.");
+                return true;
+            }
+
             //TODO: matching playernames
             var match = Regex.Match(messageText, @"@@@@@\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)

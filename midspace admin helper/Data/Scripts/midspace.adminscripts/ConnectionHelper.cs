@@ -272,7 +272,22 @@ namespace midspace.adminscripts
                         MyAPIGateway.Utilities.ShowMessage(string.Format("{0}{1}", senderName, senderName.Equals("Server") ? "" : " whispers"), message);
                         break;
                     case ConnectionKeys.Command:
-                        //TODO restrict/extend the permissions
+                        uint level;
+                        string[] values = entry.Value.Split(':');
+                        
+                        if (values.Length < 2)
+                            break;
+
+                        if (uint.TryParse(values[1], out level))
+                        {
+                            ChatCommandService.UpdateCommandSecurity(values[0], level);
+                        }
+                        break;
+                    case ConnectionKeys.PlayerLevel:
+                        uint newUserSecurity;
+                        if (uint.TryParse(entry.Value, out newUserSecurity))
+                            ChatCommandService.UserSecurity = newUserSecurity;
+                        ChatCommandLogic.Instance.BlockCommandExecution = false;
                         break;
                     case ConnectionKeys.ForceKick:
                         ulong steamId;
@@ -354,7 +369,7 @@ namespace midspace.adminscripts
         #region initial data
 
         /// <summary>
-        /// Client side. Process the ids sent from the server.
+        /// Client side. Process the initial data sent from the server.
         /// </summary>
         /// <param name="dataString"></param>
         public static void ProcessInitialData(string dataString)
@@ -369,9 +384,6 @@ namespace midspace.adminscripts
                         ChatCommandLogic.Instance.AdminNotification = entry.Value;
                         if (CommandMessageOfTheDay.ShowOnReceive)
                             MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
-                        break;
-                    case ConnectionKeys.Command:
-                        //TODO restrict/extend the permissions
                         break;
                     case ConnectionKeys.ForceKick:
                         ulong steamId;
@@ -571,7 +583,10 @@ namespace midspace.adminscripts
                             /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
                                 data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
                             data.Add(ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
+                            //first connection!
                             SendMessageToPlayer(newClientSteamId, data);
+
+                            ChatCommandLogic.Instance.ServerCfg.SendPermissions(newClientSteamId);
 
                             if (CommandMessageOfTheDay.Content != null)
                             {
@@ -643,6 +658,7 @@ namespace midspace.adminscripts
             public const string CopyPaste = "copypaste";
             public const string Spectator = "spectator";
             public const string Weapons = "weapons";
+            public const string PlayerLevel = "plvl";
 
             //pm subkeys
             public const string PmMessage = "msg";

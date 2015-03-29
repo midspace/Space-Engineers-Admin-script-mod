@@ -45,28 +45,26 @@ namespace midspace.adminscripts
 
         public ServerConfig(List<ChatCommand> commands)
         {
-            //ChatCommands = commands;
+            ChatCommands = commands;
 
             if (MyAPIGateway.Utilities.IsDedicated)
                 ServerIsClient = false;
 
-            Config = new ServerConfigurationStruct()
-            {
-                //init default values
-                WorldLocation = MyAPIGateway.Session.CurrentPath,
-                MotdFileSuffix = ReplaceForbiddenChars(MyAPIGateway.Session.Name),
-                MotdHeadLine = "",
-                MotdShowInChat = false,
-                LogPrivateMessages = true,
-                ForceBannedPlayers = new List<BannedPlayer>(),
-            };
+            Config = new ServerConfigurationStruct();
+
+            //cfg
             ConfigFileName = string.Format(ConfigFileNameFormat, MyAPIGateway.Session.WorldID);
             LoadOrCreateConfig();
+            //motd
             MotdFileName = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
             LoadOrCreateMotdFile();
+            //chat log
             GcLogFileName = string.Format(GcLogFileNameFormat, MyAPIGateway.Session.WorldID);
             LoadOrCreateChatLog();
+            //permissions
             PermissionFileName = string.Format(PermissionFileNameFormat, MyAPIGateway.Session.WorldID);
+            LoadOrCreatePermissionFile();
+            //pm log
             if (Config.LogPrivateMessages)
             {
                 PmLogFileName = string.Format(PmLogFileNameFormat, MyAPIGateway.Session.WorldID);
@@ -164,7 +162,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(MotdFileName, typeof(ChatCommandLogic)))
                 CreateMotdConfig();
-            
+
             LoadMotd();
         }
 
@@ -251,7 +249,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
 
             List<PrivateConversation> senderConversations = PrivateConversations.FindAll(c => c.Participants.Exists(p => p.SteamId == sender));
-            
+
             var pm = new PrivateMessage()
                 {
                     Sender = sender,
@@ -268,7 +266,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             else
             {
                 List<IMyPlayer> players = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(players, p => p!= null);
+                MyAPIGateway.Players.GetPlayers(players, p => p != null);
                 var senderPlayer = players.FirstOrDefault(p => p.SteamUserId == sender);
                 var receiverPlayer = players.FirstOrDefault(p => p.SteamUserId == receiver);
 
@@ -346,13 +344,62 @@ If you can't find the error, simply delete the file. The server will create a ne
         private void LoadOrCreatePermissionFile()
         {
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(PermissionFileName, typeof(ServerConfig)))
+            {
+                Permissions = new Permissions()
+                {
+                    Commands = new List<CommandStruct>(),
+                    Groups = new List<PermissionGroup>(),
+                    Players = new List<PlayerPermission>()
+                };
+
+                foreach (ChatCommand command in ChatCommands)
+                {
+                    Permissions.Commands.Add(new CommandStruct()
+                    {
+                        Name = command.Name,
+                        NeededLevel = command.Security
+                    });
+                }
+
+                SavePermissionFile();
                 return;
+            }
 
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(PermissionFileName, typeof(ServerConfig));
             var text = reader.ReadToEnd();
             reader.Close();
 
             Permissions = MyAPIGateway.Utilities.SerializeFromXML<Permissions>(text);
+
+            //create a copy of the commands in the file
+            var invalidCommands = new List<CommandStruct>(Permissions.Commands);
+
+            foreach (ChatCommand command in ChatCommands)
+            {
+                if (!Permissions.Commands.Any(c => c.Name.Equals(command.Name)))
+                {
+                    //add a command if it does not exist
+                    Permissions.Commands.Add(new CommandStruct()
+                    {
+                        Name = command.Name,
+                        NeededLevel = command.Security
+                    });
+                }
+                else
+                {
+                    //remove all commands from the list, that are valid
+                    invalidCommands.Remove(Permissions.Commands.First(c => c.Name.Equals(command.Name)));
+                }
+            }
+
+            foreach (CommandStruct cmdStruct in invalidCommands)
+            {
+                //remove all invalid commands
+                Permissions.Commands.Remove(cmdStruct);
+            }
+
+            SavePermissionFile();
+            return;
         }
 
         private void SavePermissionFile()
@@ -361,6 +408,77 @@ If you can't find the error, simply delete the file. The server will create a ne
             writer.Write(MyAPIGateway.Utilities.SerializeToXML<Permissions>(Permissions));
             writer.Flush();
             writer.Close();
+        }
+
+        public void SendPermissions(ulong steamId)
+        {
+            uint playerLevel = 0;
+
+            playerLevel = GetPlayerLevel(steamId);
+
+            var playerPermissions = new List<CommandStruct>(Permissions.Commands);
+
+            if (Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
+            {
+                var extendedPermissions = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId)).Extensions;
+                foreach (CommandStruct commandStruct in new List<CommandStruct>(extendedPermissions))
+                {
+                    if (!playerPermissions.Any(c => c.Name.Equals(commandStruct.Name)))
+                    {
+                        //just cleaning up invalid commands
+                        extendedPermissions.Remove(commandStruct);
+                        continue;
+                    }
+
+                    playerPermissions.Remove(playerPermissions.FirstOrDefault(c => c.Name.Equals(commandStruct.Name)));
+                    SendPermissionChange(steamId, commandStruct);
+                }
+
+                var restrictedPermissions = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId)).Restrictions;
+                foreach (CommandStruct commandStruct in new List<CommandStruct>(restrictedPermissions))
+                {
+                    if (!playerPermissions.Any(c => c.Name.Equals(commandStruct.Name)))
+                    {
+                        restrictedPermissions.Remove(commandStruct);
+                        continue;
+                    }
+
+                    playerPermissions.Remove(playerPermissions.FirstOrDefault(c => c.Name.Equals(commandStruct.Name)));
+                    SendPermissionChange(steamId, commandStruct);
+                }
+            }
+
+            foreach (CommandStruct commandStruct in playerPermissions)
+            {
+                SendPermissionChange(steamId, commandStruct);
+            }
+
+            ConnectionHelper.SendMessageToPlayer(steamId, ConnectionHelper.ConnectionKeys.PlayerLevel, playerLevel.ToString());
+        }
+
+        public void SendPermissionChange(ulong steamId, CommandStruct commandStruct)
+        {
+            ConnectionHelper.SendMessageToPlayer(steamId, ConnectionHelper.ConnectionKeys.Command, string.Format("{0}:{1}", commandStruct.Name, commandStruct.NeededLevel));
+        }
+
+        public uint GetPlayerLevel(ulong steamId)
+        {
+            uint playerLevel = 0;
+
+            IMyPlayer player;
+            if (MyAPIGateway.Players.TryGetPlayer(steamId, out player) && player.IsAdmin())
+                playerLevel = Config.AdminLevel;
+
+            if (Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
+            {
+                playerLevel = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId)).Level;
+            }
+            else if (Permissions.Groups.Any(g => g.Members.Any(p => p.SteamId.Equals(steamId))))
+            {
+                playerLevel = Permissions.Groups.First(g => g.Members.Any(p => p.SteamId.Equals(steamId))).Level;
+            }
+
+            return playerLevel;
         }
 
         #endregion
@@ -405,10 +523,12 @@ If you can't find the error, simply delete the file. The server will create a ne
         }
     }
 
+    #region XMLStructs
     /// <summary>
     /// Contains the settings from the file.
     /// </summary>
-    public struct ServerConfigurationStruct
+    //must be a class otherwise we can't define a ctor without parameters
+    public class ServerConfigurationStruct 
     {
         public string WorldLocation;
 
@@ -420,10 +540,19 @@ If you can't find the error, simply delete the file. The server will create a ne
         public bool MotdShowInChat;
         public bool LogPrivateMessages;
         public List<BannedPlayer> ForceBannedPlayers;
-        /// <summary>
-        /// The permissions in string form. No need to initialize the permissions on the server since it is transmitted as a string anyway.
-        /// </summary>
-        //public string CommandPermissions = "";
+        public uint AdminLevel;
+
+        public ServerConfigurationStruct()
+        {
+            //init default values
+            WorldLocation = MyAPIGateway.Session.CurrentPath;
+            MotdFileSuffix = ServerConfig.ReplaceForbiddenChars(MyAPIGateway.Session.Name);
+            MotdHeadLine = "";
+            MotdShowInChat = false;
+            LogPrivateMessages = true;
+            ForceBannedPlayers = new List<BannedPlayer>();
+            AdminLevel = ChatCommandSecurity.Admin;
+        }
     }
 
     //Need to change this to Player... Don't know how without breaking the downward compatibility because forcebanned players are saved as 'BannedPlayer'.
@@ -463,15 +592,16 @@ If you can't find the error, simply delete the file. The server will create a ne
 
     public struct Permissions
     {
-        List<CommandStruct> Commands;
-        List<PermissionGroup> Groups;
+        public List<CommandStruct> Commands;
+        public List<PermissionGroup> Groups;
+        public List<PlayerPermission> Players;
     }
 
     public struct PermissionGroup
     {
-        string GroupName;
-        uint Level;
-        List<Player> Members;
+        public string GroupName;
+        public uint Level;
+        public List<Player> Members;
     }
 
     public struct CommandStruct
@@ -479,4 +609,13 @@ If you can't find the error, simply delete the file. The server will create a ne
         public string Name;
         public uint NeededLevel;
     }
+
+    public struct PlayerPermission
+    {
+        public Player Player;
+        public uint Level;
+        public List<CommandStruct> Extensions;
+        public List<CommandStruct> Restrictions;
+    }
+    #endregion
 }
