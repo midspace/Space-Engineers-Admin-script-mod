@@ -62,10 +62,17 @@
                                     continue;
                             }
 
-                            item.Physics.ClearSpeed();
-                            // Need queue the objects, and relocate them over a number of frames, otherwise if they 
-                            // are all moved simultaneously to the same point in space, they will become stuck.
-                            _workQueue.Enqueue(delegate() { item.SetPosition(destination); });
+                            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                            {
+                                item.Physics.ClearSpeed();
+                                // Need queue the objects, and relocate them over a number of frames, otherwise if they 
+                                // are all moved simultaneously to the same point in space, they will become stuck.
+                                _workQueue.Enqueue(delegate() { item.SetPosition(destination); });
+                            }
+                            else
+                            {
+                                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
+                            }
                         }
                     }
 

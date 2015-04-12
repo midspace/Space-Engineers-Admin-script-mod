@@ -337,6 +337,21 @@ namespace midspace.adminscripts
             MyAPIGateway.Multiplayer.SendEntitiesCreated(entities);
         }
 
+        public static bool Stop(this IMyEntity entity)
+        {
+            if (entity is IMyCubeGrid)
+            {
+                return entity.StopShip();
+            }
+            else if (entity.Physics != null)
+            {
+                entity.Physics.ClearSpeed();
+                entity.Physics.UpdateAccelerations();
+                return true;
+            }
+            return false;
+        }
+
         public static bool StopShip(this IMyEntity shipEntity)
         {
             var grids = shipEntity.GetAttachedGrids();
