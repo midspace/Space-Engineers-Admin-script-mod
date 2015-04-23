@@ -105,6 +105,7 @@ Function: Teleport the specified ship to the location.
                             double.Parse(match.Groups["Z1"].Value, CultureInfo.InvariantCulture));
 
                         MovePlayerPilotToPosition(player, position);
+                        CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                         return true;
                     }
                     if (player1)
@@ -114,6 +115,7 @@ Function: Teleport the specified ship to the location.
                         {
                             IMyIdentity selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
                             MovePlayerPilotToPlayer(player, selectedPlayer, true);
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                             return true;
                         }
                     }
@@ -125,6 +127,7 @@ Function: Teleport the specified ship to the location.
                             var currentShipList = new HashSet<IMyEntity> { CommandListShips.ShipCache[index - 1] };
                             var ship = currentShipList.FirstElement();
                             MovePlayerPilotToShip(player, ship);
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                             return true;
                         }
                     }
@@ -146,12 +149,14 @@ Function: Teleport the specified ship to the location.
                         if (players.Count == 0 && currentShipList.Count == 1)
                         {
                             MovePlayerPilotToShip(player, currentShipList.FirstElement());
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                             return true;
                         }
 
                         if (players.Count == 1 && currentShipList.Count == 0)
                         {
                             MovePlayerPilotToPlayer(player, players[0], true);
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                             return true;
                         }
 

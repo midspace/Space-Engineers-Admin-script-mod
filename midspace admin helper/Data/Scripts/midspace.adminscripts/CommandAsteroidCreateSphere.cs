@@ -288,6 +288,7 @@ The asteroid cannot be generated until this area is cleared of ships and players
 
         public override void UpdateBeforeSimulation100()
         {
+            // TODO: extra loop to make sure 100ms has past.
             if (_displayMessage)
             {
                 // Process the end message several frames later, as asteroid process can be instantanious, but the game engine takes MUCH longer to create the asteroid and render it. 
