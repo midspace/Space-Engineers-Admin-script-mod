@@ -13,7 +13,7 @@
         static Logger()
         {
             if (MyAPIGateway.Session != null)
-                fileName = string.Format("AdminHelperCommands_{0}.log", MyAPIGateway.Session.WorldID);
+                fileName = string.Format("AdminHelperCommands_{0}.log", Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
             else
                 fileName = string.Format("AdminHelperCommands_{0}.log", 0);
         }

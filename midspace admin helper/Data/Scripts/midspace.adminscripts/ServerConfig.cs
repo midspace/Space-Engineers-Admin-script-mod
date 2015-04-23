@@ -53,21 +53,21 @@ namespace midspace.adminscripts
             Config = new ServerConfigurationStruct();
 
             //cfg
-            ConfigFileName = string.Format(ConfigFileNameFormat, MyAPIGateway.Session.WorldID);
+            ConfigFileName = string.Format(ConfigFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
             LoadOrCreateConfig();
             //motd
             MotdFileName = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
             LoadOrCreateMotdFile();
             //chat log
-            GcLogFileName = string.Format(GcLogFileNameFormat, MyAPIGateway.Session.WorldID);
+            GcLogFileName = string.Format(GcLogFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
             LoadOrCreateChatLog();
             //permissions
-            PermissionFileName = string.Format(PermissionFileNameFormat, MyAPIGateway.Session.WorldID);
+            PermissionFileName = string.Format(PermissionFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
             LoadOrCreatePermissionFile();
             //pm log
             if (Config.LogPrivateMessages)
             {
-                PmLogFileName = string.Format(PmLogFileNameFormat, MyAPIGateway.Session.WorldID);
+                PmLogFileName = string.Format(PmLogFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
                 LoadOrCreatePmLog();
             }
             Logger.Debug("Config loaded.");

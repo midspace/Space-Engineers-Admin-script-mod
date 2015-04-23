@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -19,7 +20,7 @@
         /// Filename where the position details will be stored. It uses the WorldID, so even 
         /// if the game name changes, your positions will remain intact and not be confused with another game of the same name.
         /// </summary>
-        public readonly static string saveFile = string.Format("Position_{0}.bin", MyAPIGateway.Session.WorldID);
+        public readonly static string saveFile = string.Format("Position_{0}.bin", Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
 
         public CommandTeleportList()
             : base(ChatCommandSecurity.Admin, "tplist", new[] { "/tplist" })
