@@ -508,6 +508,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
+            commandName = commandStruct.Name;
+
             //update security first
             var i = Permissions.Commands.IndexOf(commandStruct);
             commandStruct.NeededLevel = level;
@@ -545,6 +547,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             PlayerPermission player;
             if (TryGetPlayerPermission(playerName, out player))
             {
+                playerName = player.Player.PlayerName;
+
                 //change level
                 var i = Permissions.Players.IndexOf(player);
                 player.Level = level;
@@ -569,6 +573,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             PlayerPermission playerPermission;
             if (TryGetPlayerPermission(playerName, out playerPermission))
             {
+                playerName = playerPermission.Player.PlayerName;
+
                 var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
@@ -612,6 +618,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             PlayerPermission playerPermission;
             if (TryGetPlayerPermission(playerName, out playerPermission))
             {
+                playerName = playerPermission.Player.PlayerName;
+
                 var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
@@ -655,6 +663,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             PlayerPermission playerPermission;
             if (TryGetPlayerPermission(playerName, out playerPermission))
             {
+                playerName = playerPermission.Player.PlayerName;
+
                 var i = Permissions.Players.IndexOf(playerPermission);
                 playerPermission.UsePlayerLevel = usePlayerLevel;
                 Permissions.Players[i] = playerPermission;
@@ -700,6 +710,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+            groupName = group.GroupName;
+
             var i = Permissions.Groups.IndexOf(group);
             group.Level = level;
             Permissions.Groups[i] = group;
@@ -724,6 +736,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+            groupName = group.GroupName;
+
             var i = Permissions.Groups.IndexOf(group);
             group.GroupName = newName;
             Permissions.Groups[i] = group;
@@ -742,10 +756,18 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+            groupName = group.GroupName;
 
             PlayerPermission playerPermission;
             if (TryGetPlayerPermission(playerName, out playerPermission))
             {
+                playerName = playerPermission.Player.PlayerName;
+                if (group.Members.Contains(playerPermission.Player.SteamId))
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is already a member of group {1}.", playerName, groupName));
+                    return;
+                }
+
                 var i = Permissions.Groups.IndexOf(group);
                 group.Members.Add(playerPermission.Player.SteamId);
                 Permissions.Groups[i] = group;
@@ -770,10 +792,18 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+            groupName = group.GroupName;
 
             PlayerPermission playerPermission;
             if (TryGetPlayerPermission(playerName, out playerPermission))
             {
+                playerName = playerPermission.Player.PlayerName;
+                if (!group.Members.Contains(playerPermission.Player.SteamId))
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is not a member of group {1}.", playerName, groupName));
+                    return;
+                }
+
                 var i = Permissions.Groups.IndexOf(group);
                 group.Members.Remove(playerPermission.Player.SteamId);
                 Permissions.Groups[i] = group;
@@ -798,6 +828,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+            groupName = group.GroupName;
             Permissions.Groups.Remove(group);
 
             ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} has been deleted.", groupName));
