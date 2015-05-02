@@ -271,7 +271,7 @@ namespace midspace.adminscripts
 
                         MyAPIGateway.Utilities.ShowMessage(string.Format("{0}{1}", senderName, senderName.Equals("Server") ? "" : " whispers"), message);
                         break;
-                    case ConnectionKeys.Command:
+                    case ConnectionKeys.CommandLevel:
                         uint level;
                         string[] values = entry.Value.Split(':');
                         
@@ -479,9 +479,6 @@ namespace midspace.adminscripts
                         else
                             Logger.Debug("Could not log private message");
                         break;
-                    case ConnectionKeys.Command:
-                        //TODO restrict/extend the command security
-                        break;
                     case ConnectionKeys.ForceKick:
                         string[] values = entry.Value.Split(':');
                         bool ban = false;
@@ -527,6 +524,7 @@ namespace midspace.adminscripts
                         if (ulong.TryParse(entry.Value, out smitePlayerSteamId)) 
                             SendMessageToPlayer(smitePlayerSteamId ,ConnectionKeys.Smite, "Smite yourself :D");
                         break;
+                    #region Session settings
                     case ConnectionKeys.CargoShips:
                         bool enableCargoShips;
                         if (bool.TryParse(entry.Value, out enableCargoShips))
@@ -568,6 +566,92 @@ namespace midspace.adminscripts
                         }
                         SendMessageToAllPlayers(ConnectionKeys.Weapons, entry.Value);
                         break;
+                    #endregion
+                    #region permissions
+                    case ConnectionKeys.CommandLevel:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            uint level;
+                            if (uint.TryParse(pair.Value, out level))
+                                ChatCommandLogic.Instance.ServerCfg.UpdateCommandSecurity(pair.Key, level, senderSteamId);
+                            else
+                                SendChatMessage(senderSteamId, "Error in performing changes.");
+                        }
+                        break;
+                    case ConnectionKeys.PlayerLevel:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            uint level;
+                            if (uint.TryParse(pair.Value, out level))
+                                ChatCommandLogic.Instance.ServerCfg.SetPlayerLevel(pair.Key, level, senderSteamId);
+                            else
+                                SendChatMessage(senderSteamId, "Error in performing changes.");
+                        }
+                        break;
+                    case ConnectionKeys.PlayerExtend:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            ChatCommandLogic.Instance.ServerCfg.ExtendRights(pair.Key, pair.Value, senderSteamId);
+                        }
+                        break;
+                    case ConnectionKeys.PlayerRestrict:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            ChatCommandLogic.Instance.ServerCfg.RestrictRights(pair.Key, pair.Value, senderSteamId);
+                        }
+                        break;
+                    case ConnectionKeys.UsePlayerLevel:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            bool usePlayerLevel;
+                            if (bool.TryParse(pair.Value, out usePlayerLevel))
+                                ChatCommandLogic.Instance.ServerCfg.UsePlayerLevel(pair.Key, usePlayerLevel, senderSteamId);
+                            else
+                                SendChatMessage(senderSteamId, "Error in performing changes.");
+                        }
+                        break;
+                    case ConnectionKeys.GroupLevel:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            uint level;
+                            if (uint.TryParse(pair.Value, out level))
+                                ChatCommandLogic.Instance.ServerCfg.SetGroupLevel(pair.Key, level, senderSteamId);
+                            else
+                                SendChatMessage(senderSteamId, "Error in performing changes.");
+                        }
+                        break;
+                    case ConnectionKeys.GroupName:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            ChatCommandLogic.Instance.ServerCfg.SetGroupName(pair.Key, pair.Value, senderSteamId);
+                        }
+                        break;
+                    case ConnectionKeys.GroupAddPlayer:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            ChatCommandLogic.Instance.ServerCfg.AddPlayerToGroup(pair.Key, pair.Value, senderSteamId);
+                        }
+                        break;
+                    case ConnectionKeys.GroupRemovePlayer:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            ChatCommandLogic.Instance.ServerCfg.RemovePlayerFromGroup(pair.Key, pair.Value, senderSteamId);
+                        }
+                        break;
+                    case ConnectionKeys.GroupCreate:
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            uint level;
+                            if (uint.TryParse(pair.Value, out level))
+                                ChatCommandLogic.Instance.ServerCfg.CreateGroup(pair.Key, level, senderSteamId);
+                            else
+                                SendChatMessage(senderSteamId, "Error in performing changes.");
+                        }
+                        break;
+                    case ConnectionKeys.GroupDelete:
+                        ChatCommandLogic.Instance.ServerCfg.DeleteGroup(entry.Value, senderSteamId);
+                        break;
+                    #endregion
                     #region connection request
                     case ConnectionKeys.ConnectionRequest:
                         ulong newClientSteamId;
@@ -637,34 +721,48 @@ namespace midspace.adminscripts
 
         public static class ConnectionKeys
         {
+            //misc
+            public const string AdminNotification = "adminnot";
+            public const string ConfigReload = "cfgrl";
+            public const string ConfigSave = "cfgsave";
             public const string ConnectionRequest = "connect";
+            public const string ForceKick = "forcekick";
+            public const string GlobalMessage = "glmsg";
+            public const string LogPrivateMessages = "logpm";
             public const string MessageOfTheDay = "motd";
             public const string MotdHeadLine = "motdhl";
             public const string MotdShowInChat = "motdsic";
-            public const string AdminNotification = "adminnot";
-            public const string ForceKick = "forcekick";
-            public const string PrivateMessage = "pm";
-            public const string Command = "cmd";
-            public const string Save = "save";
             public const string Pardon = "pard";
-            public const string ConfigSave = "cfgsave";
-            public const string ConfigReload = "cfgrl";
+            public const string PrivateMessage = "pm";
+            public const string Save = "save";
             public const string Sender = "sender";
-            public const string LogPrivateMessages = "logpm";
-            public const string GlobalMessage = "glmsg";
             public const string Smite = "smite";
-            public const string Creative = "creative";
-            public const string CargoShips = "cargoships";
-            public const string CopyPaste = "copypaste";
-            public const string Spectator = "spectator";
-            public const string Weapons = "weapons";
-            public const string PlayerLevel = "plvl";
+
+            //permissions
+            public const string CommandLevel = "cpermlvl";
+            public const string PlayerLevel = "ppermlvl";
+            public const string PlayerExtend = "ppermext";
+            public const string PlayerRestrict = "ppermres";
+            public const string UsePlayerLevel = "ppermupl";
+            public const string GroupLevel = "gpermlvl";
+            public const string GroupName = "gpermnam";
+            public const string GroupAddPlayer = "gpermadd";
+            public const string GroupRemovePlayer = "gpermrem";
+            public const string GroupCreate = "gpermcre";
+            public const string GroupDelete = "gpermdel";
 
             //pm subkeys
             public const string PmMessage = "msg";
             public const string PmSender = "sender";
             public const string PmSenderName = "sendername";
             public const string PmReceiver = "receiver";
+
+            //session settings
+            public const string Creative = "creative";
+            public const string CargoShips = "cargoships";
+            public const string CopyPaste = "copypaste";
+            public const string Spectator = "spectator";
+            public const string Weapons = "weapons";
         }
     }
 }

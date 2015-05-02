@@ -217,6 +217,11 @@
             return changed;
         }
 
+        public static bool IsCommandRegistered(string commandName)
+        {
+            return Commands.Any(pair => pair.Value.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         #endregion
     }
 }

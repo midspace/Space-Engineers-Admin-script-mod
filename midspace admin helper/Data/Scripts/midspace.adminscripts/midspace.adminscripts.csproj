@@ -60,6 +60,7 @@
     <Compile Include="CommandConfig.cs" />
     <Compile Include="CommandForceBan.cs" />
     <Compile Include="CommandForceKick.cs" />
+    <Compile Include="CommandPermission.cs" />
     <Compile Include="CommandPrivateMessage.cs" />
     <Compile Include="CommandPardon.cs" />
     <Compile Include="CommandMessageOfTheDay.cs" />

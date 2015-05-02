@@ -13,8 +13,6 @@ namespace midspace.adminscripts
         public static ulong LastWhisperId;
         public static bool LogPrivateMessages = false;
 
-        Action<ResultEnum> confirmEvent; //for confirmation of playername
-
         public CommandPrivateMessage()
             : base(ChatCommandSecurity.User, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
         {

@@ -193,6 +193,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandObjectsCount());
             commands.Add(new CommandObjectsPull());
             commands.Add(new CommandPardon());
+            commands.Add(new CommandPermission());
             commands.Add(new CommandPlayerEject());
             commands.Add(new CommandPlayerSlay());
             commands.Add(new CommandPlayerSmite(_oreNames[0]));
