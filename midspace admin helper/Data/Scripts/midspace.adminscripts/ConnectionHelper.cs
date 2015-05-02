@@ -217,6 +217,7 @@ namespace midspace.adminscripts
                 Logger.Debug(string.Format("[Client]Processing KeyValuePair - Key: {0}, Value: {1}", entry.Key, entry.Value));
                 switch (entry.Key)
                 {
+                    #region motd
                     case ConnectionKeys.MotdHeadLine:
                         CommandMessageOfTheDay.HeadLine = entry.Value;
                         break;
@@ -238,6 +239,9 @@ namespace midspace.adminscripts
                         }
                         MyAPIGateway.Utilities.ShowMessage("Motd", "The message of the day was updated just now. To see what is new use '/motd'.");
                         break;
+                    #endregion
+
+                    #region misc
                     case ConnectionKeys.PrivateMessage: //pm
                         IMyPlayer sender = null;
                         string senderName = null;
@@ -271,32 +275,14 @@ namespace midspace.adminscripts
 
                         MyAPIGateway.Utilities.ShowMessage(string.Format("{0}{1}", senderName, senderName.Equals("Server") ? "" : " whispers"), message);
                         break;
-                    case ConnectionKeys.CommandLevel:
-                        uint level;
-                        string[] values = entry.Value.Split(':');
-
-                        if (values.Length < 2)
-                            break;
-
-                        if (uint.TryParse(values[1], out level))
-                        {
-                            ChatCommandService.UpdateCommandSecurity(values[0], level);
-                        }
-                        break;
-                    case ConnectionKeys.PlayerLevel:
-                        uint newUserSecurity;
-                        if (uint.TryParse(entry.Value, out newUserSecurity))
-                            ChatCommandService.UserSecurity = newUserSecurity;
-                        ChatCommandLogic.Instance.BlockCommandExecution = false;
-                        break;
                     case ConnectionKeys.ForceKick:
                         ulong steamId;
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
                             CommandForceKick.DropPlayer = true;
                         break;
-                    case ConnectionKeys.Smite:
-                        CommandPlayerSmite.Smite(MyAPIGateway.Session.Player);
-                        break;
+                    #endregion
+
+                    #region session settings
                     case ConnectionKeys.CargoShips:
                         bool enableCargoShips;
                         if (bool.TryParse(entry.Value, out enableCargoShips))
@@ -355,6 +341,34 @@ namespace midspace.adminscripts
                                 MyAPIGateway.Utilities.ShowMessage("Server Weapons", enableWeapons ? "On" : "Off");
                         }
                         break;
+                    #endregion
+
+                    #region permissions
+                    case ConnectionKeys.CommandLevel:
+                        uint level;
+                        string[] values = entry.Value.Split(':');
+
+                        if (values.Length < 2)
+                            break;
+
+                        if (uint.TryParse(values[1], out level))
+                        {
+                            ChatCommandService.UpdateCommandSecurity(values[0], level);
+                        }
+                        break;
+                    case ConnectionKeys.PlayerLevel:
+                        uint newUserSecurity;
+                        if (uint.TryParse(entry.Value, out newUserSecurity))
+                            ChatCommandService.UserSecurity = newUserSecurity;
+                        ChatCommandLogic.Instance.BlockCommandExecution = false;
+                        break;
+                    #endregion
+
+                    #region sync
+                    case ConnectionKeys.Smite:
+                        CommandPlayerSmite.Smite(MyAPIGateway.Session.Player);
+                        break;
+                    #endregion
                 }
                 Logger.Debug(string.Format("[Client]Finished processing KeyValuePair for Key: {0}", entry.Key));
             }
@@ -429,6 +443,7 @@ namespace midspace.adminscripts
                 Logger.Debug(string.Format("[Server]Processing KeyValuePair - Key: {0}, Value: {1}", entry.Key, entry.Value));
                 switch (entry.Key)
                 {
+                    #region motd
                     case ConnectionKeys.MessageOfTheDay:
                         ChatCommandLogic.Instance.ServerCfg.SetMessageOfTheDay(entry.Value);
                         SendMessageToAllPlayers(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
@@ -445,6 +460,9 @@ namespace midspace.adminscripts
                             SendMessageToAllPlayers(ConnectionKeys.MotdShowInChat, entry.Value);
                         }
                         break;
+                    #endregion
+
+                    #region misc
                     case ConnectionKeys.Save:
                         if (ChatCommandLogic.Instance.ServerCfg.ServerIsClient)
                             break; //no one should be able to do that
@@ -477,6 +495,9 @@ namespace midspace.adminscripts
                             ChatCommandLogic.Instance.ServerCfg.LogPrivateMessage(senderSteamId, receiverSteamId, message);
                         else
                             Logger.Debug("Could not log private message");
+                        break;
+                    case ConnectionKeys.GlobalMessage:
+                        ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(senderSteamId, entry.Value);
                         break;
                     case ConnectionKeys.ForceKick:
                         {
@@ -517,14 +538,7 @@ namespace midspace.adminscripts
                         ChatCommandLogic.Instance.ServerCfg.Load();
                         SendChatMessage(senderSteamId, "Config reloaded.");
                         break;
-                    case ConnectionKeys.GlobalMessage:
-                        ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(senderSteamId, entry.Value);
-                        break;
-                    case ConnectionKeys.Smite:
-                        ulong smitePlayerSteamId;
-                        if (ulong.TryParse(entry.Value, out smitePlayerSteamId))
-                            SendMessageToPlayer(smitePlayerSteamId, ConnectionKeys.Smite, "Smite yourself :D");
-                        break;
+                    #endregion
 
                     #region Session settings
                     case ConnectionKeys.CargoShips:
@@ -656,6 +670,12 @@ namespace midspace.adminscripts
                         break;
                     #endregion
 
+                    #region sync
+                    case ConnectionKeys.Smite:
+                        ulong smitePlayerSteamId;
+                        if (ulong.TryParse(entry.Value, out smitePlayerSteamId))
+                            SendMessageToPlayer(smitePlayerSteamId, ConnectionKeys.Smite, "Smite yourself :D");
+                        break;
                     case ConnectionKeys.Stop:
                         {
                             long entityId;
@@ -719,6 +739,8 @@ namespace midspace.adminscripts
                             }
                         }
                         break;
+                    #endregion
+
                     #region connection request
                     case ConnectionKeys.ConnectionRequest:
                         ulong newClientSteamId;
@@ -817,9 +839,10 @@ namespace midspace.adminscripts
             public const string GroupCreate = "gpermcre";
             public const string GroupDelete = "gpermdel";
 
+            //sync
+            public const string Claim = "claim";
             public const string Stop = "stop";
             public const string StopAndMove = "stopmove";
-            public const string Claim = "claim";
             public const string Revoke = "revoke";
 
             //pm subkeys
