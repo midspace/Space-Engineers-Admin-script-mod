@@ -29,9 +29,18 @@
                     var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        var ret = entity.StopShip();
-                        MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
-                        return ret;
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            var ret = entity.StopShip();
+                            MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
+                            return ret;
+                        }
+                        else
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Stop, shipEntity.EntityId.ToString());
+                            MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, "Is stopping.");
+                            return true;
+                        }
                     }
                 }
             }
@@ -55,9 +64,21 @@
                         }
                     }
 
-                    var ret = StopShips(currentShipList);
-                    MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
-                    return ret;
+                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                    {
+                        var ret = StopShips(currentShipList);
+                        MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
+                        return ret;
+                    }
+                    else
+                    {
+                        foreach (var selectedShip in currentShipList)
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Stop, selectedShip.EntityId.ToString());
+                        }
+                        MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, "Is stopping.");
+                        return true;
+                    }
                 }
             }
 

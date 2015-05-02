@@ -45,7 +45,14 @@
                     var grids = selectedShip.GetAttachedGrids();
                     foreach (var grid in grids)
                     {
-                        grid.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            grid.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
+                        }
+                        else
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Revoke, grid.EntityId.ToString());
+                        }
                     }
                 }
 

@@ -1,6 +1,7 @@
-﻿using System;
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+
     /// <summary>
     /// Defines the base for all ChatCommands.
     /// </summary>

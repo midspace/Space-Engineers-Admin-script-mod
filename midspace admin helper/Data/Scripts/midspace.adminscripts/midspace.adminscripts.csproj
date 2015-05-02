@@ -65,6 +65,9 @@
     <Compile Include="CommandPardon.cs" />
     <Compile Include="CommandMessageOfTheDay.cs" />
     <Compile Include="CommandPrefabAdd.cs" />
+    <Compile Include="CommandShipDelete.cs" />
+    <Compile Include="CommandShipScaleUp.cs" />
+    <Compile Include="CommandShipScaleDown.cs" />
     <Compile Include="CommandTeleportBack.cs" />
     <Compile Include="CommandShipOwnerClaim.cs" />
     <Compile Include="CommandDate.cs" />

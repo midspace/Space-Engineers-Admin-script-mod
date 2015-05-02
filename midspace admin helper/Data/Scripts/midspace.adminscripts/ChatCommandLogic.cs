@@ -215,6 +215,9 @@ namespace midspace.adminscripts
             commands.Add(new CommandShipOn());
             commands.Add(new CommandShipOwnerClaim());
             commands.Add(new CommandShipOwnerRevoke());
+            commands.Add(new CommandShipDelete());
+            commands.Add(new CommandShipScaleDown());
+            commands.Add(new CommandShipScaleUp());
             //commands.Add(new CommandShipOwnerShare());  //not working
             commands.Add(new CommandStop());
             commands.Add(new CommandStopAll());

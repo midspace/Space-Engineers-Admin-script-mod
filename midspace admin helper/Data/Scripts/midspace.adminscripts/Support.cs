@@ -1,13 +1,14 @@
 namespace midspace.adminscripts
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
 
     using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
-    using System;
     using VRage.Voxels;
     using VRageMath;
 
@@ -387,6 +388,137 @@ namespace midspace.adminscripts
             */
 
             return MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storageName, storage, position, 0);
+        }
+
+        /// <summary>
+        /// Find the physical object of the specified name or partial name.
+        /// </summary>
+        /// <param name="itemName">The name of the physical object to find.</param>
+        /// <param name="objectBuilder">The object builder of the physical object, ready for use.</param>
+        /// <param name="options">Returns a list of potential matches if there was more than one of the same or partial name.</param>
+        /// <returns>Returns true if a single exact match was found.</returns>
+        public static bool FindPhysicalParts(string[] _oreNames, string[] _ingotNames, string[] _physicalItemNames, MyPhysicalItemDefinition[] _physicalItems, string itemName, out MyObjectBuilder_Base objectBuilder, out string[] options)
+        {
+            var itemNames = itemName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // prefix the search term with 'ore' to find this ore name.
+            if (itemNames.Length > 1 && itemNames[0].Equals("ore", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var findName = itemName.Substring(4).Trim();
+
+                var exactMatchOres = _oreNames.Where(ore => ore.Equals(findName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+                if (exactMatchOres.Length == 1)
+                {
+                    objectBuilder = new MyObjectBuilder_Ore() { SubtypeName = exactMatchOres[0] };
+                    options = new string[0];
+                    return true;
+                }
+                else if (exactMatchOres.Length > 1)
+                {
+                    objectBuilder = null;
+                    options = exactMatchOres;
+                    return false;
+                }
+
+                var partialMatchOres = _oreNames.Where(ore => ore.IndexOf(findName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToArray() ;
+                if (partialMatchOres.Length == 1)
+                {
+                    objectBuilder = new MyObjectBuilder_Ore() { SubtypeName = partialMatchOres[0] };
+                    options = new string[0];
+                    return true;
+                }
+                else if (partialMatchOres.Length > 1)
+                {
+                    objectBuilder = null;
+                    options = partialMatchOres;
+                    return false;
+                }
+
+                objectBuilder = null;
+                options = new string[0];
+                return false;
+            }
+
+            // prefix the search term with 'ingot' to find this ingot name.
+            if (itemNames.Length > 0 && itemNames[0].Equals("ingot", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var findName = itemName.Substring(6).Trim();
+
+                var exactMatchIngots = _ingotNames.Where(ingot => ingot.Equals(findName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+                if (exactMatchIngots.Length == 1)
+                {
+                    objectBuilder = new MyObjectBuilder_Ingot() { SubtypeName = exactMatchIngots[0] };
+                    options = new string[0];
+                    return true;
+                }
+                else if (exactMatchIngots.Length > 1)
+                {
+                    objectBuilder = null;
+                    options = exactMatchIngots;
+                    return false;
+                }
+
+                var partialMatchIngots = _ingotNames.Where(ingot => ingot.IndexOf(findName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToArray();
+                if (partialMatchIngots.Length == 1)
+                {
+                    objectBuilder = new MyObjectBuilder_Ingot() { SubtypeName = partialMatchIngots[0] };
+                    options = new string[0];
+                    return true;
+                }
+                else if (partialMatchIngots.Length > 1)
+                {
+                    objectBuilder = null;
+                    options = partialMatchIngots;
+                    return false;
+                }
+
+                objectBuilder = null;
+                options = new string[0];
+                return false;
+            }
+
+            // full name match.
+            var res = _physicalItemNames.FirstOrDefault(s => s.Equals(itemName, StringComparison.InvariantCultureIgnoreCase));
+
+            // need a good method for finding partial name matches.
+            if (res == null)
+            {
+                var matches = _physicalItemNames.Where(s => s.StartsWith(itemName, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToArray();
+
+                if (matches.Length == 1)
+                {
+                    res = matches.FirstOrDefault();
+                }
+                else
+                {
+                    matches = _physicalItemNames.Where(s => s.IndexOf(itemName, StringComparison.InvariantCultureIgnoreCase) >= 0).Distinct().ToArray();
+                    if (matches.Length == 1)
+                    {
+                        res = matches.FirstOrDefault();
+                    }
+                    else if (matches.Length > 1)
+                    {
+                        objectBuilder = null;
+                        options = matches;
+                        return false;
+                    }
+                }
+            }
+
+            if (res != null)
+            {
+                var item = _physicalItems[Array.IndexOf(_physicalItemNames, res)];
+                if (item != null)
+                {
+                    objectBuilder = Sandbox.Common.ObjectBuilders.Serializer.MyObjectBuilderSerializer.CreateNewObject(item.Id.TypeId, item.Id.SubtypeName);
+                    options = new string[0];
+                    return true;
+                }
+            }
+
+            objectBuilder = null;
+            options = new string[0];
+            return false;
         }
     }
 }

@@ -105,7 +105,7 @@ namespace midspace.adminscripts
         {
             StringBuilder builder = new StringBuilder();
 
-            foreach(KeyValuePair<string, string> entry in data) 
+            foreach (KeyValuePair<string, string> entry in data)
             {
                 //escape " -> \" & \ -> \\
                 string key = entry.Key.Replace(@"\", @"\\");
@@ -131,7 +131,7 @@ namespace midspace.adminscripts
         /// </summary>
         /// <param name="dataString"></param>
         /// <returns></returns>
-        public static Dictionary<string, string> Parse(string dataString) 
+        public static Dictionary<string, string> Parse(string dataString)
         {
             var data = new Dictionary<string, string>();
 
@@ -274,7 +274,7 @@ namespace midspace.adminscripts
                     case ConnectionKeys.CommandLevel:
                         uint level;
                         string[] values = entry.Value.Split(':');
-                        
+
                         if (values.Length < 2)
                             break;
 
@@ -343,7 +343,6 @@ namespace midspace.adminscripts
                                 MyAPIGateway.Utilities.ShowMessage("Server Spectator", enableSpectator ? "On" : "Off");
                         }
                         break;
-
                     case ConnectionKeys.Weapons:
                         bool enableWeapons;
                         if (bool.TryParse(entry.Value, out enableWeapons))
@@ -461,14 +460,14 @@ namespace midspace.adminscripts
                         ulong receiverSteamId = 0;
                         foreach (KeyValuePair<string, string> pmEntry in Parse(entry.Value))
                         {
-                            switch (pmEntry.Key) 
+                            switch (pmEntry.Key)
                             {
                                 case ConnectionKeys.PmReceiver:
-                                if (ulong.TryParse(pmEntry.Value, out receiverSteamId))
-                                {
-                                    SendMessageToPlayer(receiverSteamId, ConnectionKeys.PrivateMessage, entry.Value);
-                                }
-                                break;
+                                    if (ulong.TryParse(pmEntry.Value, out receiverSteamId))
+                                    {
+                                        SendMessageToPlayer(receiverSteamId, ConnectionKeys.PrivateMessage, entry.Value);
+                                    }
+                                    break;
                                 case ConnectionKeys.PmMessage:
                                     message = pmEntry.Value;
                                     break;
@@ -480,24 +479,26 @@ namespace midspace.adminscripts
                             Logger.Debug("Could not log private message");
                         break;
                     case ConnectionKeys.ForceKick:
-                        string[] values = entry.Value.Split(':');
-                        bool ban = false;
-                        ulong steamId;
-                        if (ulong.TryParse(values[0], out steamId) && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
                         {
-                            var players = new List<IMyPlayer>();
-                            MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
-                            IMyPlayer player = players.FirstOrDefault();
-                            if (values.Length > 1 && bool.TryParse(values[1], out ban) && ban)
+                            string[] values = entry.Value.Split(':');
+                            bool ban = false;
+                            ulong steamId;
+                            if (ulong.TryParse(values[0], out steamId) && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
                             {
-                                ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Add(new BannedPlayer()
+                                var players = new List<IMyPlayer>();
+                                MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
+                                IMyPlayer player = players.FirstOrDefault();
+                                if (values.Length > 1 && bool.TryParse(values[1], out ban) && ban)
                                 {
-                                    SteamId = steamId,
-                                    PlayerName = player.DisplayName
-                                });
+                                    ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Add(new BannedPlayer()
+                                    {
+                                        SteamId = steamId,
+                                        PlayerName = player.DisplayName
+                                    });
+                                }
+                                SendMessageToPlayer(steamId, ConnectionKeys.ForceKick, steamId.ToString());
+                                SendChatMessage(senderSteamId, string.Format("{0} player {1}.", ban ? "Forcebanned" : "Forcekicked", player.DisplayName));
                             }
-                            SendMessageToPlayer(steamId, ConnectionKeys.ForceKick, steamId.ToString());
-                            SendChatMessage(senderSteamId, string.Format("{0} player {1}.", ban ? "Forcebanned" : "Forcekicked" , player.DisplayName));
                         }
                         break;
                     case ConnectionKeys.Pardon:
@@ -521,9 +522,10 @@ namespace midspace.adminscripts
                         break;
                     case ConnectionKeys.Smite:
                         ulong smitePlayerSteamId;
-                        if (ulong.TryParse(entry.Value, out smitePlayerSteamId)) 
-                            SendMessageToPlayer(smitePlayerSteamId ,ConnectionKeys.Smite, "Smite yourself :D");
+                        if (ulong.TryParse(entry.Value, out smitePlayerSteamId))
+                            SendMessageToPlayer(smitePlayerSteamId, ConnectionKeys.Smite, "Smite yourself :D");
                         break;
+
                     #region Session settings
                     case ConnectionKeys.CargoShips:
                         bool enableCargoShips;
@@ -567,6 +569,7 @@ namespace midspace.adminscripts
                         SendMessageToAllPlayers(ConnectionKeys.Weapons, entry.Value);
                         break;
                     #endregion
+
                     #region permissions
                     case ConnectionKeys.CommandLevel:
                         foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
@@ -652,6 +655,70 @@ namespace midspace.adminscripts
                         ChatCommandLogic.Instance.ServerCfg.DeleteGroup(entry.Value, senderSteamId);
                         break;
                     #endregion
+
+                    case ConnectionKeys.Stop:
+                        {
+                            long entityId;
+                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.ExistsById(entityId))
+                            {
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId);
+                                entity.Stop();
+                            }
+                        }
+                        break;
+                    case ConnectionKeys.StopAndMove:
+                        {
+                            string[] values = entry.Value.Split(':');
+                            long entityId;
+                            double posX;
+                            double posY;
+                            double posZ;
+
+                            if (values.Length > 3 && long.TryParse(values[0], out entityId) && MyAPIGateway.Entities.ExistsById(entityId)
+                                && double.TryParse(values[1], out posX) && double.TryParse(values[2], out posY) && double.TryParse(values[3], out posZ))
+                            {
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId);
+                                entity.Stop();
+                                var destination = new Vector3D(posX, posY, posZ);
+
+                                // This still is not syncing properly. Called on the server, it does not show correctly on the client.
+                                entity.SetPosition(destination);
+                            }
+                        }
+                        break;
+                    case ConnectionKeys.Claim:
+                        {
+                            string[] values = entry.Value.Split(':');
+                            long entityId;
+                            long playerId;
+                            if (values.Length > 1 && long.TryParse(values[0], out playerId) && long.TryParse(values[1], out entityId) && MyAPIGateway.Entities.ExistsById(entityId))
+                            {
+                                var players = new List<IMyPlayer>();
+                                MyAPIGateway.Players.GetPlayers(players, p => p != null && p.PlayerID == playerId);
+                                IMyPlayer player = players.FirstOrDefault();
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId) as IMyCubeGrid;
+                                
+                                if (entity != null && player != null)
+                                {
+                                    entity.ChangeGridOwnership(player.PlayerID, MyOwnershipShareModeEnum.All);
+                                    SendChatMessage(senderSteamId, string.Format("Grid {0} Claimed by player {1}.", entity.DisplayName, player.DisplayName));
+                                }
+                            }
+                        }
+                        break;
+                    case ConnectionKeys.Revoke:
+                        {
+                            long entityId;
+                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.ExistsById(entityId))
+                            {
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId) as IMyCubeGrid;
+                                if (entity != null)
+                                {
+                                    entity.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
+                                }
+                            }
+                        }
+                        break;
                     #region connection request
                     case ConnectionKeys.ConnectionRequest:
                         ulong newClientSteamId;
@@ -736,7 +803,6 @@ namespace midspace.adminscripts
             public const string PrivateMessage = "pm";
             public const string Save = "save";
             public const string Sender = "sender";
-            public const string Smite = "smite";
 
             //permissions
             public const string CommandLevel = "cpermlvl";
@@ -751,10 +817,16 @@ namespace midspace.adminscripts
             public const string GroupCreate = "gpermcre";
             public const string GroupDelete = "gpermdel";
 
+            public const string Stop = "stop";
+            public const string StopAndMove = "stopmove";
+            public const string Claim = "claim";
+            public const string Revoke = "revoke";
+
             //pm subkeys
             public const string PmMessage = "msg";
             public const string PmSender = "sender";
             public const string PmSenderName = "sendername";
+            public const string Smite = "smite";
             public const string PmReceiver = "receiver";
 
             //session settings

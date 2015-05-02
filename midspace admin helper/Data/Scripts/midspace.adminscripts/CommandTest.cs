@@ -41,7 +41,6 @@
             {
                 // for testing things.
                 //MyAPIGateway.Utilities.ShowMessage("path", MyAPIGateway.Session.CurrentPath);
-                //MyAPIGateway.Utilities.ShowMessage("worldId", MyAPIGateway.Session.WorldID);
 
                 //MyAPIGateway.Utilities.ShowMessage("size1", MyAPIGateway.Utilities.ConfigDedicated.SessionSettings.WorldSizeKm.ToString());
                 //MyAPIGateway.Utilities.ShowMessage("size2", MyAPIGateway.Session.GetWorld().Checkpoint.Settings.WorldSizeKm.ToString());

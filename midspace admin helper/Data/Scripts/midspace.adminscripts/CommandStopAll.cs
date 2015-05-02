@@ -44,15 +44,15 @@
                     // Check for null physics and IsPhantom, to prevent picking up primitives.
                     if (item.Physics != null && !item.Physics.IsPhantom)
                     {
-                        if (item is IMyCubeGrid)
-                            item.StopShip();
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                            item.Stop();
                         else
-                            item.Physics.ClearSpeed();
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Stop, item.EntityId.ToString());
                         counter++;
                     }
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("Stopped", "{0} items in {1:N}m.", counter, range);
+                MyAPIGateway.Utilities.ShowMessage("Stopped", "{0} items within {1:N}m.", counter, range);
                 return true;
             }
 

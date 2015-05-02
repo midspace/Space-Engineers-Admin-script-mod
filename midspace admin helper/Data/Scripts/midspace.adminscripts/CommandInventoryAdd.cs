@@ -50,124 +50,45 @@
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.StartsWith("/invadd ", StringComparison.InvariantCultureIgnoreCase))
+            MyObjectBuilder_Base content = null;
+            string[] options;
+            decimal amount = 1;
+
+            var match = Regex.Match(messageText, @"/invadd\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
+            if (match.Success && content == null)
             {
-                MyObjectBuilder_InventoryItem inventoryItem = null;
+                var itemName = match.Groups["Key"].Value;
+                var strAmount = match.Groups["Value"].Value;
+                if (!decimal.TryParse(strAmount, out amount))
+                    amount = 1;
 
-                var match = Regex.Match(messageText, @"/invadd(?:\s{1,}(?<ITEM>[^\s]*)){1,3}", RegexOptions.IgnoreCase);
-                if (match.Success && match.Groups["ITEM"].Captures.Count > 1)
+                if (!Support.FindPhysicalParts(_oreNames, _ingotNames, _physicalItemNames, _physicalItems, itemName, out content, out options) && options.Length > 0)
                 {
-                    var item = match.Groups["ITEM"].Captures[0].Value;
-                    var subitem = match.Groups["ITEM"].Captures.Count > 1 ? match.Groups["ITEM"].Captures[1].Value : string.Empty;
-                    var strAmount = match.Groups["ITEM"].Captures.Count > 2 ? match.Groups["ITEM"].Captures[2].Value : "1";
-                    decimal amount = 1;
-                    decimal.TryParse(strAmount, out amount);
-
-                    if (item.Equals("ore", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        foreach (var ore in _oreNames)
-                        {
-                            if (ore.Equals(subitem, StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = new MyObjectBuilder_Ore() { SubtypeName = ore } };
-                                break;
-                            }
-                        }
-                    }
-
-                    if (item.Equals("ingot", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        foreach (var ingot in _ingotNames)
-                        {
-                            if (ingot.Equals(subitem, StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = new MyObjectBuilder_Ingot() { SubtypeName = ingot } };
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                match = Regex.Match(messageText, @"/invadd\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
-                if (match.Success && inventoryItem == null)
-                {
-                    var itemName = match.Groups["Key"].Value;
-                    var strAmount = match.Groups["Value"].Value;
-                    decimal amount = 1;
-                    if (!decimal.TryParse(strAmount, out amount))
-                        amount = 1;
-
-                    // full name match.
-                    var res = _physicalItemNames.FirstOrDefault(s => s.Equals(itemName, StringComparison.InvariantCultureIgnoreCase));
-                    //MyAPIGateway.Utilities.ShowMessage("match1", (res.Value == null).ToString());
-
-                    // need a good method for finding partial name matches.
-                    if (res == null)
-                    {
-                        var matches = _physicalItemNames.Where(s => s.StartsWith(itemName, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToArray();
-                        //MyAPIGateway.Utilities.ShowMessage("match2", matches.Count.ToString());
-
-                        if (matches.Length == 1)
-                        {
-                            res = matches.FirstOrDefault();
-                        }
-                        else
-                        {
-                            matches = _physicalItemNames.Where(s => s.IndexOf(itemName, StringComparison.InvariantCultureIgnoreCase) >= 0).Distinct().ToArray();
-                            //matches = _physicalItemNames.Where(kvp => s.Contains(itemName, StringComparison.InvariantCultureIgnoreCase)).ToArray();  // .Contains() stops mod from loading for some reason.
-                            //MyAPIGateway.Utilities.ShowMessage("match3", (matches.Count).ToString());
-                            if (matches.Length == 1)
-                            {
-                                res = matches.FirstOrDefault();
-                            }
-                            else if (matches.Length > 1)
-                            {
-                                var options = String.Join(", ", matches);
-                                MyAPIGateway.Utilities.ShowMessage("did you mean", options + " ?");
-                                return true;
-                            }
-                        }
-                    }
-
-                    //MyAPIGateway.Utilities.ShowMessage("match4", (res.Value == null).ToString());
-
-                    if (res != null)
-                    {
-                        var item = _physicalItems[Array.IndexOf(_physicalItemNames, res)];
-                        if (item != null)
-                        {
-                            if (item.Id.TypeId == typeof(MyObjectBuilder_Ore) || item.Id.TypeId == typeof(MyObjectBuilder_Ingot))
-                            {
-                                if (amount < 0)
-                                    amount = 1;
-                            }
-                            else
-                            {
-                                // must be whole numbers.
-                                amount = Math.Round(amount, 0);
-                                if (amount < 1)
-                                    amount = 1;
-                            }
-
-                            //MyAPIGateway.Utilities.ShowMessage("ammount", amount.ToString() + "   '" + strAmount + "'");
-                            //MyAPIGateway.Utilities.ShowMessage("Key", res.Key + " " + item.Id.ToString());
-                            var myObject = Sandbox.Common.ObjectBuilders.Serializer.MyObjectBuilderSerializer.CreateNewObject(item.Id.TypeId, item.Id.SubtypeName);
-                            inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = myObject };
-                        }
-                    }
-                }
-
-                if (inventoryItem != null)
-                {
-                    var inventoryOwnwer = MyAPIGateway.Session.Player.Controller.ControlledEntity as IMyInventoryOwner;
-                    var inventory = inventoryOwnwer.GetInventory(0) as Sandbox.ModAPI.IMyInventory;
-                    inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                    MyAPIGateway.Utilities.ShowMessage("Did you mean", String.Join(", ", options) + " ?");
                     return true;
                 }
             }
 
+            if (content != null)
+            {
+                if (amount < 0)
+                    amount = 1;
+
+                if (content.TypeId != typeof(MyObjectBuilder_Ore) && content.TypeId != typeof(MyObjectBuilder_Ingot))
+                {
+                    // must be whole numbers.
+                    amount = Math.Round(amount, 0);
+                }
+
+                MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
+                var inventoryOwnwer = MyAPIGateway.Session.Player.Controller.ControlledEntity as IMyInventoryOwner;
+                var inventory = inventoryOwnwer.GetInventory(0) as Sandbox.ModAPI.IMyInventory;
+                inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                return true;
+            }
+
             MyAPIGateway.Utilities.ShowMessage("Unknown Item", "Could not find the specified name.");
-            return false;
+            return true;
         }
     }
 }

@@ -163,6 +163,44 @@ namespace midspace.adminscripts
             return new IMyControllableEntity[0];
         }
 
+        public static void EjectControllingPlayers(this IMyCubeGrid cubeGrid)
+        {
+            var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+            cubeGrid.GetBlocks(blocks, f => f.FatBlock != null
+                && f.FatBlock is IMyControllableEntity
+                && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit)
+                || f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RemoteControl)));
+
+            foreach (var block in blocks)
+            {
+                var objectBuilder = block.GetObjectBuilder();
+                var cockpitBuilder = block.GetObjectBuilder() as MyObjectBuilder_Cockpit;
+                if (cockpitBuilder != null)
+                {
+                    var controller = block.FatBlock as IMyControllableEntity;
+
+                    if (controller != null)
+                    {
+                        controller.Use();
+                        continue;
+                    }
+                    continue;
+                }
+
+                var remoteBuilder = block.GetObjectBuilder() as MyObjectBuilder_RemoteControl;
+                if (remoteBuilder != null)
+                {
+                    var controller = block.FatBlock as IMyControllableEntity;
+
+                    if (controller != null)
+                    {
+                        controller.Use();
+                        continue;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Determines if the player is an Administrator of the active game session.
         /// </summary>
@@ -335,6 +373,21 @@ namespace midspace.adminscripts
             MyAPIGateway.Entities.RemapObjectBuilderCollection(entities);
             entities.ForEach(item => MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(item));
             MyAPIGateway.Multiplayer.SendEntitiesCreated(entities);
+        }
+
+        public static bool Stop(this IMyEntity entity)
+        {
+            if (entity is IMyCubeGrid)
+            {
+                return entity.StopShip();
+            }
+            else if (entity.Physics != null)
+            {
+                entity.Physics.ClearSpeed();
+                entity.Physics.UpdateAccelerations();
+                return true;
+            }
+            return false;
         }
 
         public static bool StopShip(this IMyEntity shipEntity)
