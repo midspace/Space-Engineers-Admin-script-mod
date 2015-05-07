@@ -10,7 +10,7 @@
     public class CommandShipDelete : ChatCommand
     {
         public CommandShipDelete()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "deleteship", new[] { "/deleteship" })
+            : base(ChatCommandSecurity.Admin, "deleteship", new[] { "/deleteship" })
         {
         }
 
@@ -80,19 +80,15 @@
 
             foreach (var cubeGrid in grids)
             {
-                // TODO: ejecting doesn't work here, as the player needs time to eject before deleting the grid.
+                // ejects any player prior to deleting the grid.
                 cubeGrid.EjectControllingPlayers();
 
                 var name = cubeGrid.DisplayName;
 
-                if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                {
-                    ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.Delete, cubeGrid.EntityId.ToString());
-                }
-                else
-                {
-                    cubeGrid.Delete(); // Doesn't sync from server to clients, or client to server.
-                }
+                // This will Delete the entity and sync to all.
+                // Using this, also works with player ejection in the same Tick.
+           
+                cubeGrid.SyncObject.SendCloseRequest();
 
                 MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' deleted.", name);
             }

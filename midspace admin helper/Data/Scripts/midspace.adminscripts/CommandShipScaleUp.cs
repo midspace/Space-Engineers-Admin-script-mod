@@ -14,13 +14,13 @@
         private const MyCubeSize scale = MyCubeSize.Large;
 
         public CommandShipScaleUp()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "scaleup", new[] { "/scaleup" })
+            : base(ChatCommandSecurity.Admin, "scaleup", new[] { "/scaleup" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/scaleup <#>", "---");
+            MyAPIGateway.Utilities.ShowMessage("/scaleup <#>", "Converts a small ship into a large ship, also converts all cubes to large.");
         }
 
         public override bool Invoke(string messageText)
@@ -110,7 +110,7 @@
 
             foreach (var cubeGrid in grids)
             {
-                // TODO: ejecting doesn't work here, as the player needs time to eject before deleting the grid.
+                // ejects any player prior to deleting the grid.
                 cubeGrid.EjectControllingPlayers();
                 cubeGrid.Physics.Enabled = false;
             }
@@ -166,14 +166,10 @@
                     gridObjectBuilder.CubeBlocks.Remove(block);
                 }
 
-                if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                {
-                    ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.Delete, cubeGrid.EntityId.ToString());
-                }
-                else
-                {
-                    cubeGrid.Delete(); // Doesn't sync from server to clients, or client to server.
-                }
+                // This will Delete the entity and sync to all.
+                // Using this, also works with player ejection in the same Tick.
+                cubeGrid.SyncObject.SendCloseRequest(); 
+
                 var name = cubeGrid.DisplayName;
                 MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' resized.", name);
 

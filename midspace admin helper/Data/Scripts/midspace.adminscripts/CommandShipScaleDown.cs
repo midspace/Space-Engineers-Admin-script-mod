@@ -13,13 +13,13 @@
         private const MyCubeSize scale = MyCubeSize.Small;
 
         public CommandShipScaleDown()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "scaledown", new[] { "/scaledown" })
+            : base(ChatCommandSecurity.Admin, "scaledown", new[] { "/scaledown" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/scaledown <#>", "---");
+            MyAPIGateway.Utilities.ShowMessage("/scaledown <#>", "Converts a large ship into a small ship, also converts all cubes to small.");
         }
 
         public override bool Invoke(string messageText)

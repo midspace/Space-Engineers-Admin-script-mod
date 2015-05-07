@@ -78,6 +78,8 @@
                                 // are all moved simultaneously to the same point in space, they will become stuck.
                                 _workQueue.Enqueue(delegate()
                                 {
+                                    //item.SyncObject.UpdatePosition(); // causes Null exception.
+
                                     if (MyAPIGateway.Multiplayer.MultiplayerActive)
                                     {
                                         ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
