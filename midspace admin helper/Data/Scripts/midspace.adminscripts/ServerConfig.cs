@@ -535,6 +535,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 SendPermissionChange(player.SteamUserId, commandStruct);
             }
 
+            ConnectionHelper.SendChatMessage(sender, string.Format("The level of command {0} was set to {1}.", commandName, level));
+
             SavePermissionFile();
         }
 
@@ -669,6 +671,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 playerPermission.UsePlayerLevel = usePlayerLevel;
                 Permissions.Players[i] = playerPermission;
 
+                SendPermissions(playerPermission.Player.SteamId);
+
                 ConnectionHelper.SendChatMessage(sender, string.Format("{0} uses the {1} level now. Current level: {2}", playerName, usePlayerLevel ? "player" : "group", GetPlayerLevel(playerPermission.Player.SteamId)));
             }
             else
@@ -715,6 +719,11 @@ If you can't find the error, simply delete the file. The server will create a ne
             var i = Permissions.Groups.IndexOf(group);
             group.Level = level;
             Permissions.Groups[i] = group;
+
+            foreach (ulong steamId in group.Members)
+            {
+                SendPermissions(steamId);
+            }
 
             ConnectionHelper.SendChatMessage(sender, string.Format("The level of group {0} was updated to {1}.", groupName, level));
 
@@ -771,6 +780,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 var i = Permissions.Groups.IndexOf(group);
                 group.Members.Add(playerPermission.Player.SteamId);
                 Permissions.Groups[i] = group;
+
+                SendPermissions(playerPermission.Player.SteamId);
             }
             else
             {
@@ -807,6 +818,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 var i = Permissions.Groups.IndexOf(group);
                 group.Members.Remove(playerPermission.Player.SteamId);
                 Permissions.Groups[i] = group;
+
+                SendPermissions(playerPermission.Player.SteamId);
             }
             else
             {
@@ -830,6 +843,11 @@ If you can't find the error, simply delete the file. The server will create a ne
             var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
             groupName = group.GroupName;
             Permissions.Groups.Remove(group);
+
+            foreach (ulong steamId in group.Members)
+            {
+                SendPermissions(steamId);
+            }
 
             ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} has been deleted.", groupName));
 

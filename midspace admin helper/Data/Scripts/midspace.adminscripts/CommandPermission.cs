@@ -155,7 +155,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Command setlevel:", "/perm command setlevel <commandName> <level>");
+                        MyAPIGateway.Utilities.ShowMessage("Command setlevel", "/perm command setlevel <commandName> <level>");
                         return;
                     }
 
@@ -187,7 +187,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Player setlevel:", "/perm player setlevel <playerName> <level>");
+                        MyAPIGateway.Utilities.ShowMessage("Player setlevel", "/perm player setlevel <playerName> <level>");
                         return;
                     }
 
@@ -204,7 +204,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Player extend:", "/perm player extend <playerName> <commandName>");
+                        MyAPIGateway.Utilities.ShowMessage("Player extend", "/perm player extend <playerName> <commandName>");
                         Help(true);
                         return;
                     }
@@ -222,7 +222,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Player restrict:", "/perm player restrict <playerName> <commandName>");
+                        MyAPIGateway.Utilities.ShowMessage("Player restrict", "/perm player restrict <playerName> <commandName>");
                         return;
                     }
 
@@ -240,7 +240,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Player useplayerlevel:", "/perm player upl <playerName> <true|false>");
+                        MyAPIGateway.Utilities.ShowMessage("Player useplayerlevel", "/perm player upl <playerName> <true|false>");
                         Help(true);
                         return;
                     }
@@ -272,7 +272,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Group setlevel:", "/perm group setlevel <groupName> <level>");
+                        MyAPIGateway.Utilities.ShowMessage("Group setlevel", "/perm group setlevel <groupName> <level>");
                         Help(true);
                         return;
                     }
@@ -291,7 +291,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Group setname:", "/perm group setname <groupName> <newGroupName>");
+                        MyAPIGateway.Utilities.ShowMessage("Group setname", "/perm group setname <groupName> <newGroupName>");
                         return;
                     }
                     
@@ -303,7 +303,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Group addplayer:", "/perm group add <groupName> <playerName>");
+                        MyAPIGateway.Utilities.ShowMessage("Group addplayer", "/perm group add <groupName> <playerName>");
                         return;
                     }
 
@@ -315,7 +315,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Group removeplayer:", "/perm group remove <groupName> <playerName>");
+                        MyAPIGateway.Utilities.ShowMessage("Group removeplayer", "/perm group remove <groupName> <playerName>");
                         return;
                     }
                     
@@ -326,7 +326,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 4)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Group create:", "/perm group create <groupName> <level>");
+                        MyAPIGateway.Utilities.ShowMessage("Group create", "/perm group create <groupName> <level>");
                         return;
                     }
 
@@ -342,7 +342,7 @@ Creates a hotlist containing all groups and provides information about them.
                     if (args.Length < 3)
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
-                        MyAPIGateway.Utilities.ShowMessage("Group delete:", "/perm group create <groupName>");
+                        MyAPIGateway.Utilities.ShowMessage("Group delete", "/perm group create <groupName>");
                         return;
                     }
 
