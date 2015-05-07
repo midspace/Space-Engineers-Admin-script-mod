@@ -8,7 +8,6 @@
 
     using Sandbox.ModAPI;
     using VRageMath;
-    using System.IO;
 
     public class CommandTeleportList : ChatCommand
     {

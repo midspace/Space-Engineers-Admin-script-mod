@@ -166,7 +166,14 @@
                     gridObjectBuilder.CubeBlocks.Remove(block);
                 }
 
-                cubeGrid.Delete();
+                if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                {
+                    ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.Delete, cubeGrid.EntityId.ToString());
+                }
+                else
+                {
+                    cubeGrid.Delete(); // Doesn't sync from server to clients, or client to server.
+                }
                 var name = cubeGrid.DisplayName;
                 MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' resized.", name);
 

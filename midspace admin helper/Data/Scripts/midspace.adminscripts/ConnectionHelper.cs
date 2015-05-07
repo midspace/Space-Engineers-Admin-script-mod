@@ -1,4 +1,5 @@
 ﻿using Sandbox.Common.ObjectBuilders;
+using Sandbox.Game.Multiplayer;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
 using System;
@@ -49,8 +50,33 @@ namespace midspace.adminscripts
 
         #endregion
 
-        #region connections to clients
+        #region connections to all
 
+        /// <summary>
+        /// Creates and sends an entity with the given information for all the server and all players.
+        /// </summary>
+        public static void SendMessageToAll(string key, string value)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add(key, value);
+            SendMessageToAll(data);
+        }
+
+        /// <summary>
+        /// Creates and sends an entity with the given information for the server and all players.
+        /// </summary>
+        /// <param name="content"></param>
+        public static void SendMessageToAll(Dictionary<string, string> content)
+        {
+            content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
+            if (!MyAPIGateway.Multiplayer.IsServer)
+                MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content)));
+            SendMessageToAllPlayers(content);
+        }
+
+        #endregion
+
+        #region connections to clients
 
         public static void SendMessageToPlayer(IMyPlayer player, Dictionary<string, string> content)
         {
@@ -345,15 +371,17 @@ namespace midspace.adminscripts
 
                     #region permissions
                     case ConnectionKeys.CommandLevel:
-                        uint level;
-                        string[] values = entry.Value.Split(':');
-
-                        if (values.Length < 2)
-                            break;
-
-                        if (uint.TryParse(values[1], out level))
                         {
-                            ChatCommandService.UpdateCommandSecurity(values[0], level);
+                            uint level;
+                            string[] values = entry.Value.Split(':');
+
+                            if (values.Length < 2)
+                                break;
+
+                            if (uint.TryParse(values[1], out level))
+                            {
+                                ChatCommandService.UpdateCommandSecurity(values[0], level);
+                            }
                         }
                         break;
                     case ConnectionKeys.PlayerLevel:
@@ -368,6 +396,38 @@ namespace midspace.adminscripts
                     case ConnectionKeys.Smite:
                         CommandPlayerSmite.Smite(MyAPIGateway.Session.Player);
                         break;
+                    case ConnectionKeys.StopAndMove:
+                        {
+                            string[] values = entry.Value.Split(':');
+                            long entityId;
+                            double posX;
+                            double posY;
+                            double posZ;
+
+                            if (values.Length > 3 && long.TryParse(values[0], out entityId) && MyAPIGateway.Entities.EntityExists(entityId)
+                                && double.TryParse(values[1], out posX) && double.TryParse(values[2], out posY) && double.TryParse(values[3], out posZ))
+                            {
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId);
+                                entity.Stop();
+                                var destination = new Vector3D(posX, posY, posZ);
+
+                                // This still is not syncing properly. Called on the server, it does not show correctly on the client.
+                                entity.SetPosition(destination);
+                            }
+                        }
+                        break;
+                    case ConnectionKeys.Delete:
+                        {
+                            long entityId;
+                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.EntityExists(entityId))
+                            {
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId);
+                                if (entity != null)
+                                    entity.Delete();  // Doesn't sync from server to clients, or client to server.
+                            }
+                        }
+                        break;
+
                     #endregion
                 }
                 Logger.Debug(string.Format("[Client]Finished processing KeyValuePair for Key: {0}", entry.Key));
@@ -679,7 +739,7 @@ namespace midspace.adminscripts
                     case ConnectionKeys.Stop:
                         {
                             long entityId;
-                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.ExistsById(entityId))
+                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.EntityExists(entityId))
                             {
                                 var entity = MyAPIGateway.Entities.GetEntityById(entityId);
                                 entity.Stop();
@@ -694,7 +754,7 @@ namespace midspace.adminscripts
                             double posY;
                             double posZ;
 
-                            if (values.Length > 3 && long.TryParse(values[0], out entityId) && MyAPIGateway.Entities.ExistsById(entityId)
+                            if (values.Length > 3 && long.TryParse(values[0], out entityId) && MyAPIGateway.Entities.EntityExists(entityId)
                                 && double.TryParse(values[1], out posX) && double.TryParse(values[2], out posY) && double.TryParse(values[3], out posZ))
                             {
                                 var entity = MyAPIGateway.Entities.GetEntityById(entityId);
@@ -711,7 +771,7 @@ namespace midspace.adminscripts
                             string[] values = entry.Value.Split(':');
                             long entityId;
                             long playerId;
-                            if (values.Length > 1 && long.TryParse(values[0], out playerId) && long.TryParse(values[1], out entityId) && MyAPIGateway.Entities.ExistsById(entityId))
+                            if (values.Length > 1 && long.TryParse(values[0], out playerId) && long.TryParse(values[1], out entityId) && MyAPIGateway.Entities.EntityExists(entityId))
                             {
                                 var players = new List<IMyPlayer>();
                                 MyAPIGateway.Players.GetPlayers(players, p => p != null && p.PlayerID == playerId);
@@ -726,10 +786,21 @@ namespace midspace.adminscripts
                             }
                         }
                         break;
+                    case ConnectionKeys.Delete:
+                        {
+                            long entityId;
+                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.EntityExists(entityId))
+                            {
+                                var entity = MyAPIGateway.Entities.GetEntityById(entityId);
+                                if (entity != null)
+                                    entity.Delete();  // Doesn't sync from server to clients, or client to server.
+                            }
+                        }
+                        break;
                     case ConnectionKeys.Revoke:
                         {
                             long entityId;
-                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.ExistsById(entityId))
+                            if (long.TryParse(entry.Value, out entityId) && MyAPIGateway.Entities.EntityExists(entityId))
                             {
                                 var entity = MyAPIGateway.Entities.GetEntityById(entityId) as IMyCubeGrid;
                                 if (entity != null)
@@ -841,6 +912,7 @@ namespace midspace.adminscripts
 
             //sync
             public const string Claim = "claim";
+            public const string Delete = "delete";
             public const string Stop = "stop";
             public const string StopAndMove = "stopmove";
             public const string Revoke = "revoke";

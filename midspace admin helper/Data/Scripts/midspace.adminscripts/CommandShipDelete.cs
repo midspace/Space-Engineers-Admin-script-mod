@@ -16,7 +16,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/deleteship <#>", "---");
+            MyAPIGateway.Utilities.ShowMessage("/deleteship <#>", "Deletes the specified <#> ship.");
         }
 
         public override bool Invoke(string messageText)
@@ -84,10 +84,17 @@
                 cubeGrid.EjectControllingPlayers();
 
                 var name = cubeGrid.DisplayName;
-                cubeGrid.Delete();
-                MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' deleted.", name);
 
-                // TODO: not sure if there are any other checks for a deleted grid. Dispose?
+                if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                {
+                    ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.Delete, cubeGrid.EntityId.ToString());
+                }
+                else
+                {
+                    cubeGrid.Delete(); // Doesn't sync from server to clients, or client to server.
+                }
+
+                MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' deleted.", name);
             }
         }
     }

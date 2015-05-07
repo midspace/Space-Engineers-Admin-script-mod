@@ -244,6 +244,12 @@ namespace midspace.adminscripts
 
         private void DetachEvents()
         {
+            if (_timer100 != null)
+            {
+                _timer100.Stop();
+                _timer100.Elapsed -= TimerOnElapsed100;
+            }
+
             if (ServerCfg != null)
             { //only for clients it is null
                 ServerCfg.Save();
@@ -261,17 +267,10 @@ namespace midspace.adminscripts
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
                 Logger.Debug("Uregistered MessageHandler Client");
             }
-
             
             if (MyAPIGateway.Utilities != null) {
                 MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
                 Logger.Debug("Detached MessageEntered");
-            }
-
-            if (_timer100 != null)
-            {
-                _timer100.Stop();
-                _timer100.Elapsed -= TimerOnElapsed100;
             }
         }
 

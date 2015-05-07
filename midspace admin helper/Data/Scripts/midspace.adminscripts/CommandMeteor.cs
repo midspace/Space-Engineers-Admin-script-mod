@@ -32,12 +32,12 @@
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                 {
                     worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
-                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn meteor 1.5m in front of player for safety.
+                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player for safety.
                 }
                 else
                 {
                     worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
-                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn ore 1.5m in front of player in cockpit for safety.
+                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
                 }
 
                 var meteorBuilder = new MyObjectBuilder_Meteor()

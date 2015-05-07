@@ -88,11 +88,11 @@
                 Vector3D position;
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                 {
-                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 1.5f; // Spawn ore 1.5m in front of player.
+                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 1.5f; // Spawn item 1.5m in front of player.
                 }
                 else
                 {
-                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn ore 1.5m in front of player in cockpit.
+                    position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player in cockpit.
                 }
 
                 floatingBuilder.PositionAndOrientation = new MyPositionAndOrientation()

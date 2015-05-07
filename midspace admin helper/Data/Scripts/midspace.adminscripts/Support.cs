@@ -138,7 +138,7 @@ namespace midspace.adminscripts
                 {
                     var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
 
-                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.ExistsById(motorBase.RotorEntityId))
+                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
                         continue;
 
                     if (motorBase.RotorEntityId == entityId)

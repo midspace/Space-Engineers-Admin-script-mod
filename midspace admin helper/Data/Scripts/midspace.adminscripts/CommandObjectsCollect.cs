@@ -38,17 +38,18 @@
                     if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                     {
                         var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
-                        destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn meteor 1.5m in front of player for safety.
+                        destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player for safety.
                     }
                     else
                     {
                         var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
-                        destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn ore 1.5m in front of player in cockpit for safety.
+                        destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
                     }
 
                     var sphere = new BoundingSphereD(destination, range);
                     var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-                    floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
+                    //floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
+                    floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject)).ToList();
 
                     foreach (var item in floatingList)
                     {
@@ -59,19 +60,35 @@
                             {
                                 var character = item.GetObjectBuilder() as MyObjectBuilder_Character;
                                 if (!character.Health.HasValue || character.Health.Value > 0) // ignore living players
-                                    continue;
-                            }
+                                {
+                                    // TODO: not working currently. It causes body duplicates?
 
-                            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                            {
-                                item.Physics.ClearSpeed();
-                                // Need queue the objects, and relocate them over a number of frames, otherwise if they 
-                                // are all moved simultaneously to the same point in space, they will become stuck.
-                                _workQueue.Enqueue(delegate() { item.SetPosition(destination); });
+                                    //item.Physics.ClearSpeed();
+                                    //_workQueue.Enqueue(delegate() { item.SetPosition(destination); });
+                                }
                             }
-                            else
+                            else if (item is IMyFloatingObject)
                             {
-                                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
+                                var floatingBuilder = (MyObjectBuilder_FloatingObject)item.GetObjectBuilder(true);
+                                var pos = floatingBuilder.PositionAndOrientation.Value;
+                                pos.Position = destination;
+                                floatingBuilder.PositionAndOrientation = pos;
+
+                                // Need to queue the objects, and relocate them over a number of frames, otherwise if they 
+                                // are all moved simultaneously to the same point in space, they will become stuck.
+                                _workQueue.Enqueue(delegate()
+                                {
+                                    if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                                    {
+                                        ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
+                                    }
+                                    else
+                                    {
+                                        item.Physics.ClearSpeed();
+                                        item.SetPosition(destination); // Doesn't sync to the server.
+                                    }
+                                });
+                                _workQueue.Enqueue(delegate() { floatingBuilder.CreateAndSyncEntity(); });
                             }
                         }
                     }

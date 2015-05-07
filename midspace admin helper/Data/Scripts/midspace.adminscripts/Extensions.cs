@@ -88,7 +88,7 @@ namespace midspace.adminscripts
                 {
                     // The MotorStator which inherits from MotorBase.
                     var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
-                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.ExistsById(motorBase.RotorEntityId))
+                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
                         continue;
                     var entityParent = MyAPIGateway.Entities.GetEntityById(motorBase.RotorEntityId).Parent as IMyCubeGrid;
                     if (entityParent == null)
@@ -118,7 +118,7 @@ namespace midspace.adminscripts
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
                 {
                     var pistonTop = block.GetObjectBuilder() as MyObjectBuilder_PistonTop;
-                    if (pistonTop == null || pistonTop.PistonBlockId == 0 || !MyAPIGateway.Entities.ExistsById(pistonTop.PistonBlockId))
+                    if (pistonTop == null || pistonTop.PistonBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonTop.PistonBlockId))
                         continue;
                     var entityParent = MyAPIGateway.Entities.GetEntityById(pistonTop.PistonBlockId).Parent as IMyCubeGrid;
                     if (entityParent == null)
@@ -133,7 +133,7 @@ namespace midspace.adminscripts
                     block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase))
                 {
                     var pistonBase = block.GetObjectBuilder() as MyObjectBuilder_PistonBase;
-                    if (pistonBase == null || pistonBase.TopBlockId == 0 || !MyAPIGateway.Entities.ExistsById(pistonBase.TopBlockId))
+                    if (pistonBase == null || pistonBase.TopBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonBase.TopBlockId))
                         continue;
                     var entityParent = MyAPIGateway.Entities.GetEntityById(pistonBase.TopBlockId).Parent as IMyCubeGrid;
                     if (entityParent == null)
