@@ -9,6 +9,12 @@ namespace midspace.adminscripts
 {
     class CommandPermission : ChatCommand
     {
+        //local cache
+        private static List<CommandCacheEntry> CommandCache = new List<CommandCacheEntry>();
+        private static List<PlayerCacheEntry> PlayerCache = new List<PlayerCacheEntry>();
+        private static List<GroupCacheEntry> GroupCache = new List<GroupCacheEntry>();
+
+
         public CommandPermission()
             : base(ChatCommandSecurity.Admin, "perm", new string[] { "/permission", "/perm" })
         {
@@ -170,7 +176,11 @@ Creates a hotlist containing all groups and provides information about them.
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
                     break;
                 case "list":
-                    MyAPIGateway.Utilities.ShowMessage("Error", "Not implemented yet.");
+                    string param = "";
+                    if (args.Length > 2)
+                        param = args[2];
+
+                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CommandList, param);
                     break;
                 default:
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, list.", args[1]));
@@ -208,12 +218,6 @@ Creates a hotlist containing all groups and provides information about them.
                         Help(true);
                         return;
                     }
-
-                    if (!ChatCommandService.IsCommandRegistered(args[3]))
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no command named {0}.", args[3]));
-                        return;
-                    }
                     
                     dict.Add(args[2], args[3]);
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerExtend, ConnectionHelper.ConvertData(dict));
@@ -223,12 +227,6 @@ Creates a hotlist containing all groups and provides information about them.
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
                         MyAPIGateway.Utilities.ShowMessage("Player restrict", "/perm player restrict <playerName> <commandName>");
-                        return;
-                    }
-
-                    if (!ChatCommandService.IsCommandRegistered(args[3]))
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no command named {0}.", args[3]));
                         return;
                     }
 
@@ -255,7 +253,11 @@ Creates a hotlist containing all groups and provides information about them.
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid value. It must be either true or false.", args[3]));
                     break;
                 case "list":
-                    MyAPIGateway.Utilities.ShowMessage("Error", "Not implemented yet.");
+                    string param = "";
+                    if (args.Length > 2)
+                        param = args[2];
+
+                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerList, param);
                     break;
                 default:
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, extend, restrict, useplayerlevel, list.", args[1]));
@@ -349,12 +351,141 @@ Creates a hotlist containing all groups and provides information about them.
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupDelete, args[2]);
                     break;
                 case "list":
-                    MyAPIGateway.Utilities.ShowMessage("Error", "Not implemented yet.");
+                    string param = "";
+                    if (args.Length > 2)
+                        param = args[2];
+
+                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupList, param);
                     break;
                 default:
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, setname, add, remove, create, delete, list.", args[1]));
                     break;
             }
+        }
+
+        public static void AddToCommandCache(string commandName, string commandLevel, bool show, bool newList)
+        {
+            if (newList)
+                CommandCache.Clear();
+
+            CommandCache.Add(new CommandCacheEntry()
+            {
+                Name = commandName,
+                NeededLevel = commandLevel
+            });
+
+            if (show)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                builder.AppendLine(string.Format(@"{0} results found:", CommandCache.Count));
+
+                int index = 0;
+                foreach (CommandCacheEntry command in CommandCache)
+                {
+                    builder.AppendFormat(@"
+#{0} {1}
+Level: {2}
+", ++index, command.Name, command.NeededLevel);
+                }
+
+                MyAPIGateway.Utilities.ShowMissionScreen("Commands", "Command hotlist", null, builder.ToString(), null, null);
+            }
+        }
+
+        public static void AddToPlayerCache(string playerName, string playerLevel, string steamId, string extensions, string restrictions, bool usePlayerLevel, bool show, bool newList)
+        {
+            if (newList)
+                PlayerCache.Clear();
+
+            PlayerCache.Add(new PlayerCacheEntry()
+            {
+                Name = playerName,
+                Level = playerLevel,
+                SteamId = steamId,
+                Extensions = extensions,
+                Restrictions = restrictions,
+                UsePlayerLevel = usePlayerLevel
+            });
+
+            if (show)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                builder.AppendLine(string.Format(@"{0} results found:", PlayerCache.Count));
+
+                int index = 0;
+                foreach (PlayerCacheEntry player in PlayerCache)
+                {
+                    string playerLevelString = "";
+                    if (player.UsePlayerLevel)
+                        playerLevelString = "(player level)";
+
+                    builder.AppendFormat(@"
+#{0} {1}, {6}
+Level: {2} {5}
+Extentions: {3}
+Restrictions: {4}
+", ++index, player.Name, player.Level, string.IsNullOrEmpty(player.Extensions) ? "none" : player.Extensions, string.IsNullOrEmpty(player.Restrictions) ? "none" : player.Restrictions, playerLevelString, player.SteamId);
+                }
+
+                MyAPIGateway.Utilities.ShowMissionScreen("Players", "Player hotlist", null, builder.ToString(), null, null);
+            }
+        }
+
+        public static void AddToGroupCache(string groupName, string groupLevel, string members, bool show, bool newList)
+        {
+            if (newList)
+                GroupCache.Clear();
+
+            GroupCache.Add(new GroupCacheEntry()
+            {
+                Name = groupName,
+                Level = groupLevel,
+                Members = members
+            });
+
+            if (show)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                builder.AppendLine(string.Format(@"{0} results found:", GroupCache.Count));
+
+                int index = 0;
+                foreach (GroupCacheEntry group in GroupCache)
+                {
+                    builder.AppendFormat(@"
+#{0} {1}
+Level: {2}
+Members: {3}
+", ++index, group.Name, group.Level, string.IsNullOrEmpty(group.Members) ? "none" : group.Members);
+                }
+
+                MyAPIGateway.Utilities.ShowMissionScreen("Groups", "Group hotlist", null, builder.ToString(), null, null);
+            }
+        }
+
+        private struct CommandCacheEntry
+        {
+            public string Name;
+            public string NeededLevel;
+        }
+
+        private struct PlayerCacheEntry
+        {
+            public string Name;
+            public string Level;
+            public string SteamId;
+            public string Extensions;
+            public string Restrictions;
+            public bool UsePlayerLevel;
+        }
+
+        private struct GroupCacheEntry
+        {
+            public string Name;
+            public string Level;
+            public string Members;
         }
     }
 }

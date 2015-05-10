@@ -371,24 +371,123 @@ namespace midspace.adminscripts
 
                     #region permissions
                     case ConnectionKeys.CommandLevel:
+                        uint level;
+                        string[] values = entry.Value.Split(':');
+
+                        if (values.Length < 2)
+                            break;
+
+                        if (uint.TryParse(values[1], out level))
                         {
-                            uint level;
-                            string[] values = entry.Value.Split(':');
+                            ChatCommandService.UpdateCommandSecurity(values[0], level);
+                        }
+                        break;
+                    case ConnectionKeys.CommandList:
+                        string commandName = "";
+                        string commandLevel = "";
+                        bool newCommandList = false;
+                        bool showCommandList = false;
 
-                            if (values.Length < 2)
-                                break;
-
-                            if (uint.TryParse(values[1], out level))
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            switch (pair.Key)
                             {
-                                ChatCommandService.UpdateCommandSecurity(values[0], level);
+                                case ConnectionKeys.PermEntryName:
+                                    commandName = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryLevel:
+                                    commandLevel = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermNewHotlist:
+                                    newCommandList = true;
+                                    break;
+                                case ConnectionKeys.PermLastEntry:
+                                    showCommandList = true;
+                                    break;
                             }
                         }
+
+                        CommandPermission.AddToCommandCache(commandName, commandLevel, showCommandList, newCommandList);
                         break;
                     case ConnectionKeys.PlayerLevel:
                         uint newUserSecurity;
                         if (uint.TryParse(entry.Value, out newUserSecurity))
                             ChatCommandService.UserSecurity = newUserSecurity;
                         ChatCommandLogic.Instance.BlockCommandExecution = false;
+                        break;
+                    case ConnectionKeys.PlayerList:
+                        string playerName = "";
+                        string playerLevel = "";
+                        string playerListEntrySteamId = "";
+                        string extensions = "";
+                        string restrictions = "";
+                        bool usePlayerLevel = false;
+                        bool newPlayerList = false;
+                        bool showPlayerList = false;
+
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            switch (pair.Key)
+                            {
+                                case ConnectionKeys.PermEntryName:
+                                    playerName = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryLevel:
+                                    playerLevel = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryId:
+                                    playerListEntrySteamId = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryExtensions:
+                                    extensions = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryRestrictions:
+                                    restrictions = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryUsePlayerLevel:
+                                    usePlayerLevel = true;
+                                    break;
+                                case ConnectionKeys.PermNewHotlist:
+                                    newPlayerList = true;
+                                    break;
+                                case ConnectionKeys.PermLastEntry:
+                                    showPlayerList = true;
+                                    break;
+                            }
+                        }
+
+                        CommandPermission.AddToPlayerCache(playerName, playerLevel, playerListEntrySteamId, extensions, restrictions, usePlayerLevel, showPlayerList, newPlayerList);
+                        break;
+                    case ConnectionKeys.GroupList:
+                        string groupName = "";
+                        string groupLevel = "";
+                        string members = "";
+                        bool newGroupList = false;
+                        bool showGroupList = false;
+
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            switch (pair.Key)
+                            {
+                                case ConnectionKeys.PermEntryName:
+                                    groupName = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryLevel:
+                                    groupLevel = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermEntryMembers:
+                                    members = pair.Value;
+                                    break;
+                                case ConnectionKeys.PermNewHotlist:
+                                    newGroupList = true;
+                                    break;
+                                case ConnectionKeys.PermLastEntry:
+                                    showGroupList = true;
+                                    break;
+                            }
+                        }
+
+                        CommandPermission.AddToGroupCache(groupName, groupLevel, members, showGroupList, newGroupList);
                         break;
                     #endregion
 
@@ -398,14 +497,14 @@ namespace midspace.adminscripts
                         break;
                     case ConnectionKeys.StopAndMove:
                         {
-                            string[] values = entry.Value.Split(':');
+                            string[] properties = entry.Value.Split(':');
                             long entityId;
                             double posX;
                             double posY;
                             double posZ;
 
-                            if (values.Length > 3 && long.TryParse(values[0], out entityId) && MyAPIGateway.Entities.EntityExists(entityId)
-                                && double.TryParse(values[1], out posX) && double.TryParse(values[2], out posY) && double.TryParse(values[3], out posZ))
+                            if (properties.Length > 3 && long.TryParse(properties[0], out entityId) && MyAPIGateway.Entities.EntityExists(entityId)
+                                && double.TryParse(properties[1], out posX) && double.TryParse(properties[2], out posY) && double.TryParse(properties[3], out posZ))
                             {
                                 var entity = MyAPIGateway.Entities.GetEntityById(entityId);
                                 entity.Stop();
@@ -503,7 +602,7 @@ namespace midspace.adminscripts
                 Logger.Debug(string.Format("[Server]Processing KeyValuePair - Key: {0}, Value: {1}", entry.Key, entry.Value));
                 switch (entry.Key)
                 {
-                    #region motd
+                    #region config
                     case ConnectionKeys.MessageOfTheDay:
                         ChatCommandLogic.Instance.ServerCfg.SetMessageOfTheDay(entry.Value);
                         SendMessageToAllPlayers(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
@@ -518,6 +617,14 @@ namespace midspace.adminscripts
                         {
                             CommandMessageOfTheDay.ShowInChat = motdsic;
                             SendMessageToAllPlayers(ConnectionKeys.MotdShowInChat, entry.Value);
+                        }
+                        break;
+                    case ConnectionKeys.AdminLevel:
+                        uint adminLevel;
+                        if (uint.TryParse(entry.Value, out adminLevel))
+                        {
+                            ChatCommandLogic.Instance.ServerCfg.AdminLevel = adminLevel;
+                            SendChatMessage(senderSteamId, string.Format("Updated default admin level to {0}. Please note that you have to use '/cfg save' to save it permanently", adminLevel));
                         }
                         break;
                     #endregion
@@ -655,6 +762,9 @@ namespace midspace.adminscripts
                                 SendChatMessage(senderSteamId, "Error in performing changes.");
                         }
                         break;
+                    case ConnectionKeys.CommandList:
+                        ChatCommandLogic.Instance.ServerCfg.CreateCommandHotlist(senderSteamId, entry.Value);
+                        break;
                     case ConnectionKeys.PlayerLevel:
                         foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
                         {
@@ -686,6 +796,9 @@ namespace midspace.adminscripts
                             else
                                 SendChatMessage(senderSteamId, "Error in performing changes.");
                         }
+                        break;
+                    case ConnectionKeys.PlayerList:
+                        ChatCommandLogic.Instance.ServerCfg.CreatePlayerHotlist(senderSteamId, entry.Value);
                         break;
                     case ConnectionKeys.GroupLevel:
                         foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
@@ -727,6 +840,9 @@ namespace midspace.adminscripts
                         break;
                     case ConnectionKeys.GroupDelete:
                         ChatCommandLogic.Instance.ServerCfg.DeleteGroup(entry.Value, senderSteamId);
+                        break;
+                    case ConnectionKeys.GroupList:
+                        ChatCommandLogic.Instance.ServerCfg.CreateGroupHotlist(senderSteamId, entry.Value);
                         break;
                     #endregion
 
@@ -882,6 +998,7 @@ namespace midspace.adminscripts
         public static class ConnectionKeys
         {
             //misc
+            public const string AdminLevel = "adminlvl";
             public const string AdminNotification = "adminnot";
             public const string ConfigReload = "cfgrl";
             public const string ConfigSave = "cfgsave";
@@ -899,16 +1016,30 @@ namespace midspace.adminscripts
 
             //permissions
             public const string CommandLevel = "cpermlvl";
+            public const string CommandList = "cpermlst";
             public const string PlayerLevel = "ppermlvl";
             public const string PlayerExtend = "ppermext";
             public const string PlayerRestrict = "ppermres";
             public const string UsePlayerLevel = "ppermupl";
+            public const string PlayerList = "ppermlst";
             public const string GroupLevel = "gpermlvl";
             public const string GroupName = "gpermnam";
             public const string GroupAddPlayer = "gpermadd";
             public const string GroupRemovePlayer = "gpermrem";
             public const string GroupCreate = "gpermcre";
             public const string GroupDelete = "gpermdel";
+            public const string GroupList = "gpermlst";
+
+            //perm subkeys
+            public const string PermEntryName = "pentnam";
+            public const string PermEntryLevel = "pentlvl";
+            public const string PermEntryId = "pentid";
+            public const string PermEntryUsePlayerLevel = "pentupl";
+            public const string PermEntryExtensions = "pentext";
+            public const string PermEntryRestrictions = "pentres";
+            public const string PermEntryMembers = "pentmem";
+            public const string PermNewHotlist = "pnewlst";
+            public const string PermLastEntry = "plstent";
 
             //sync
             public const string Claim = "claim";

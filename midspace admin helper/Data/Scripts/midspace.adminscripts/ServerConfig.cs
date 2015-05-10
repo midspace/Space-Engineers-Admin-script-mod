@@ -30,6 +30,11 @@ namespace midspace.adminscripts
 
         private List<PrivateConversation> PrivateConversations = new List<PrivateConversation>();
 
+        //hotlists
+        Dictionary<ulong, List<CommandStruct>> CommandCache = new Dictionary<ulong, List<CommandStruct>>();
+        Dictionary<ulong, List<Player>> PlayerCache = new Dictionary<ulong, List<Player>>();
+        Dictionary<ulong, List<PermissionGroup>> GroupCache = new Dictionary<ulong, List<PermissionGroup>>();
+
         /// <summary>
         /// Used for saving and loading things.
         /// </summary>
@@ -73,6 +78,8 @@ namespace midspace.adminscripts
             Logger.Debug("Config loaded.");
         }
 
+        public uint AdminLevel { get { return Config.AdminLevel; } set { Config.AdminLevel = value; } }
+
         public void Save()
         {
             //write values in cfg
@@ -102,7 +109,7 @@ namespace midspace.adminscripts
             data.Add(ConnectionHelper.ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
             data.Add(ConnectionHelper.ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
             data.Add(ConnectionHelper.ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
-            //data.Add(ConnectionHelper.ConnectionKeys.PmLogging, CommandPrivateMessage.PmLogging.ToString());
+            data.Add(ConnectionHelper.ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
 
             ConnectionHelper.SendMessageToAllPlayers(data);
         }
@@ -410,7 +417,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             writer.Close();
         }
 
-        public void SendPermissions(ulong steamId)
+        public void SendPermissions(ulong steamId) //TODO update playername if it has changed!
         {
             uint playerLevel = 0;
 
@@ -420,7 +427,17 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             if (Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
             {
-                var extendedPermissions = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId)).Extensions;
+                var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId));
+                IMyPlayer myPlayer;
+                if (MyAPIGateway.Players.TryGetPlayer(steamId, out myPlayer) && !playerPermission.Player.PlayerName.Equals(myPlayer.DisplayName))
+                {
+                    playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == myPlayer.SteamUserId);
+                    var i = Permissions.Players.IndexOf(playerPermission);
+                    playerPermission.Player.PlayerName = myPlayer.DisplayName;
+                    Permissions.Players[i] = playerPermission;
+                }
+
+                var extendedPermissions = playerPermission.Extensions;
                 foreach (string commandName in new List<string>(extendedPermissions))
                 {
                     if (!playerPermissions.Any(c => c.Name.Equals(commandName)))
@@ -438,7 +455,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     });
                 }
 
-                var restrictedPermissions = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId)).Restrictions;
+                var restrictedPermissions = playerPermission.Restrictions;
                 foreach (string commandName in new List<string>(restrictedPermissions))
                 {
                     if (!playerPermissions.Any(c => c.Name.Equals(commandName)))
@@ -502,6 +519,10 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
 
+            int index;
+            if (CommandCache.ContainsKey(sender) && commandName.Substring(0, 1) == "#" && Int32.TryParse(commandName.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
+                commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
+
             if (string.IsNullOrEmpty(commandStruct.Name))
             {
                 ConnectionHelper.SendChatMessage(sender, string.Format("Command {0} could not be found.", commandName));
@@ -526,6 +547,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 {
                     //no player found -> send changes
                     SendPermissionChange(player.SteamUserId, commandStruct);
+                    continue;
                 }
 
                 //don't send changes to players with exeptional permissions
@@ -540,6 +562,41 @@ If you can't find the error, simply delete the file. The server will create a ne
             SavePermissionFile();
         }
 
+        public void CreateCommandHotlist(ulong sender, string param = null)
+        {
+            List<CommandStruct> commands = new List<CommandStruct>(Permissions.Commands);
+
+            if (!string.IsNullOrEmpty(param))
+            {
+                commands = new List<CommandStruct>(Permissions.Commands.Where(c => c.Name.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
+
+                if (commands.Count == 0)
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("No command matching with {0} could be found.", param));
+                    return;
+                }
+            }
+
+            if (!CommandCache.ContainsKey(sender))
+                CommandCache.Add(sender, commands);
+            else
+                CommandCache[sender] = commands;
+
+            foreach (CommandStruct command in commands)
+            {
+                var dict = new Dictionary<string, string>();
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryName, command.Name);
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, command.NeededLevel.ToString());
+
+                if (commands.IndexOf(command) == 0)
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermNewHotlist, "");
+                if (commands.IndexOf(command) == commands.Count - 1)
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermLastEntry, "");
+
+                ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.CommandList, ConnectionHelper.ConvertData(dict));
+            }
+        }
+
         #endregion
 
         #region player
@@ -547,7 +604,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         public void SetPlayerLevel(string playerName, uint level, ulong sender)
         {
             PlayerPermission player;
-            if (TryGetPlayerPermission(playerName, out player))
+            if (TryGetPlayerPermission(playerName, out player, sender))
             {
                 playerName = player.Player.PlayerName;
 
@@ -573,11 +630,15 @@ If you can't find the error, simply delete the file. The server will create a ne
         public void ExtendRights(string playerName, string commandName, ulong sender)
         {
             PlayerPermission playerPermission;
-            if (TryGetPlayerPermission(playerName, out playerPermission))
+            if (TryGetPlayerPermission(playerName, out playerPermission, sender))
             {
                 playerName = playerPermission.Player.PlayerName;
 
                 var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+
+                int index;
+                if (CommandCache.ContainsKey(sender) && commandName.Substring(0, 1) == "#" && Int32.TryParse(commandName.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
+                    commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
                 {
@@ -585,6 +646,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     return;
                 }
 
+                commandName = commandStruct.Name;
                 var i = Permissions.Players.IndexOf(playerPermission);
 
                 if (Permissions.Players[i].Extensions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
@@ -618,11 +680,15 @@ If you can't find the error, simply delete the file. The server will create a ne
         public void RestrictRights(string playerName, string commandName, ulong sender)
         {
             PlayerPermission playerPermission;
-            if (TryGetPlayerPermission(playerName, out playerPermission))
+            if (TryGetPlayerPermission(playerName, out playerPermission, sender))
             {
                 playerName = playerPermission.Player.PlayerName;
 
                 var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+
+                int index;
+                if (CommandCache.ContainsKey(sender) && commandName.Substring(0, 1) == "#" && Int32.TryParse(commandName.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
+                    commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
                 {
@@ -630,6 +696,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     return;
                 }
 
+                commandName = commandStruct.Name;
                 var i = Permissions.Players.IndexOf(playerPermission);
 
                 if (Permissions.Players[i].Restrictions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
@@ -663,7 +730,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         public void UsePlayerLevel(string playerName, bool usePlayerLevel, ulong sender)
         {
             PlayerPermission playerPermission;
-            if (TryGetPlayerPermission(playerName, out playerPermission))
+            if (TryGetPlayerPermission(playerName, out playerPermission, sender))
             {
                 playerName = playerPermission.Player.PlayerName;
 
@@ -682,6 +749,73 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             SavePermissionFile();
+        }
+
+        public void CreatePlayerHotlist(ulong sender, string param)
+        {
+            List<Player> players = new List<Player>();
+
+            var onlinePlayers = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(onlinePlayers, p => p != null);
+
+            if (onlinePlayers.Count == 0 && Permissions.Players.Count == 0)
+            {
+                ConnectionHelper.SendChatMessage(sender, "No players found.");
+                return;
+            }
+
+            foreach (IMyPlayer player in onlinePlayers)
+                players.Add(new Player()
+                {
+                    PlayerName = player.DisplayName,
+                    SteamId = player.SteamUserId
+                });
+
+            foreach (PlayerPermission playerPermission in Permissions.Players)
+            {
+                if (!players.Contains(playerPermission.Player))
+                    players.Add(playerPermission.Player);
+            }
+
+            if (!string.IsNullOrEmpty(param))
+            {
+                players = new List<Player>(players.Where(p => p.PlayerName.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
+
+                if (players.Count == 0)
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("No player matching with {0} could be found.", param));
+                    return;
+                }
+            }
+
+            if (!PlayerCache.ContainsKey(sender))
+                PlayerCache.Add(sender, players);
+            else
+                PlayerCache[sender] = players;
+
+            foreach (Player player in players.OrderBy(p => p.PlayerName))
+            {
+                var dict = new Dictionary<string, string>();
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryName, player.PlayerName);
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, GetPlayerLevel(player.SteamId).ToString());
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryId, player.SteamId.ToString());
+
+                if (Permissions.Players.Any(p => p.Player.SteamId == player.SteamId))
+                {
+                    var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamId);
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermEntryExtensions, string.Join(", ", playerPermission.Extensions));
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermEntryRestrictions, string.Join(", ", playerPermission.Restrictions));
+                    if (playerPermission.UsePlayerLevel)
+                        dict.Add(ConnectionHelper.ConnectionKeys.PermEntryUsePlayerLevel, "");
+                }
+
+                if (players.IndexOf(player) == 0)
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermNewHotlist, "");
+                if (players.IndexOf(player) == players.Count - 1)
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermLastEntry, "");
+
+                ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.PlayerList, ConnectionHelper.ConvertData(dict));
+            }
         }
 
         #endregion
@@ -703,186 +837,278 @@ If you can't find the error, simply delete the file. The server will create a ne
             });
 
             ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} with level {1} was created.", name, level));
+
+            SavePermissionFile();
         }
 
         public void SetGroupLevel(string groupName, uint level, ulong sender)
         {
-            if (!Permissions.Groups.Any(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase)))
+            PermissionGroup group;
+            if (TryGetGroup(groupName, out group, sender))
+            {
+                groupName = group.GroupName;
+
+                var i = Permissions.Groups.IndexOf(group);
+                group.Level = level;
+                Permissions.Groups[i] = group;
+
+                foreach (ulong steamId in group.Members)
+                {
+                    SendPermissions(steamId);
+                }
+
+                ConnectionHelper.SendChatMessage(sender, string.Format("The level of group {0} was updated to {1}.", groupName, level));
+            }
+            else
             {
                 ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
                 return;
             }
-
-            var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
-            groupName = group.GroupName;
-
-            var i = Permissions.Groups.IndexOf(group);
-            group.Level = level;
-            Permissions.Groups[i] = group;
-
-            foreach (ulong steamId in group.Members)
-            {
-                SendPermissions(steamId);
-            }
-
-            ConnectionHelper.SendChatMessage(sender, string.Format("The level of group {0} was updated to {1}.", groupName, level));
 
             SavePermissionFile();
         }
 
         public void SetGroupName(string groupName, string newName, ulong sender)
         {
-            if (!Permissions.Groups.Any(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase)))
+            PermissionGroup group;
+            if (TryGetGroup(groupName, out group, sender))
+            {
+                if (Permissions.Groups.Any(g => g.GroupName.Equals(newName, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("There is already a group named {0}.", newName));
+                    return;
+                }
+
+                groupName = group.GroupName;
+
+                var i = Permissions.Groups.IndexOf(group);
+                group.GroupName = newName;
+                Permissions.Groups[i] = group;
+
+                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} was renamed to {1}.", groupName, newName));
+            }
+            else
             {
                 ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
                 return;
             }
-
-            if (Permissions.Groups.Any(g => g.GroupName.Equals(newName, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                ConnectionHelper.SendChatMessage(sender, string.Format("There is already a group named {0}.", newName));
-                return;
-            }
-
-            var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
-            groupName = group.GroupName;
-
-            var i = Permissions.Groups.IndexOf(group);
-            group.GroupName = newName;
-            Permissions.Groups[i] = group;
-
-            ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} was renamed to {1}.", groupName, newName));
 
             SavePermissionFile();
         }
 
         public void AddPlayerToGroup(string groupName, string playerName, ulong sender)
         {
-            if (!Permissions.Groups.Any(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase)))
+            PermissionGroup group;
+            if (TryGetGroup(groupName, out group, sender))
+            {
+                groupName = group.GroupName;
+
+                PlayerPermission playerPermission;
+                if (TryGetPlayerPermission(playerName, out playerPermission, sender))
+                {
+                    playerName = playerPermission.Player.PlayerName;
+                    if (group.Members.Contains(playerPermission.Player.SteamId))
+                    {
+                        ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is already a member of group {1}.", playerName, groupName));
+                        return;
+                    }
+
+                    var i = Permissions.Groups.IndexOf(group);
+                    group.Members.Add(playerPermission.Player.SteamId);
+                    Permissions.Groups[i] = group;
+
+                    SendPermissions(playerPermission.Player.SteamId);
+                }
+                else
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                    return;
+                }
+
+                ConnectionHelper.SendChatMessage(sender, string.Format("Added player {0} to group {1}.", playerName, groupName));
+            }
+            else
             {
                 ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
                 return;
             }
-
-            var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
-            groupName = group.GroupName;
-
-            PlayerPermission playerPermission;
-            if (TryGetPlayerPermission(playerName, out playerPermission))
-            {
-                playerName = playerPermission.Player.PlayerName;
-                if (group.Members.Contains(playerPermission.Player.SteamId))
-                {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is already a member of group {1}.", playerName, groupName));
-                    return;
-                }
-
-                var i = Permissions.Groups.IndexOf(group);
-                group.Members.Add(playerPermission.Player.SteamId);
-                Permissions.Groups[i] = group;
-
-                SendPermissions(playerPermission.Player.SteamId);
-            }
-            else
-            {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
-                return;
-            }
-
-            ConnectionHelper.SendChatMessage(sender, string.Format("Added player {0} to group {1}.", playerName, groupName));
 
             SavePermissionFile();
         }
 
         public void RemovePlayerFromGroup(string groupName, string playerName, ulong sender)
         {
-            if (!Permissions.Groups.Any(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase)))
+            PermissionGroup group;
+            if (TryGetGroup(groupName, out group, sender))
+            {
+                groupName = group.GroupName;
+
+                PlayerPermission playerPermission;
+                if (TryGetPlayerPermission(playerName, out playerPermission, sender))
+                {
+                    playerName = playerPermission.Player.PlayerName;
+                    if (!group.Members.Contains(playerPermission.Player.SteamId))
+                    {
+                        ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is not a member of group {1}.", playerName, groupName));
+                        return;
+                    }
+
+                    var i = Permissions.Groups.IndexOf(group);
+                    group.Members.Remove(playerPermission.Player.SteamId);
+                    Permissions.Groups[i] = group;
+
+                    SendPermissions(playerPermission.Player.SteamId);
+                }
+                else
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                    return;
+                }
+
+                ConnectionHelper.SendChatMessage(sender, string.Format("Removed player {0} from group {1}.", playerName, groupName));
+            }
+            else
             {
                 ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
                 return;
             }
-
-            var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
-            groupName = group.GroupName;
-
-            PlayerPermission playerPermission;
-            if (TryGetPlayerPermission(playerName, out playerPermission))
-            {
-                playerName = playerPermission.Player.PlayerName;
-                if (!group.Members.Contains(playerPermission.Player.SteamId))
-                {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is not a member of group {1}.", playerName, groupName));
-                    return;
-                }
-
-                var i = Permissions.Groups.IndexOf(group);
-                group.Members.Remove(playerPermission.Player.SteamId);
-                Permissions.Groups[i] = group;
-
-                SendPermissions(playerPermission.Player.SteamId);
-            }
-            else
-            {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
-                return;
-            }
-
-            ConnectionHelper.SendChatMessage(sender, string.Format("Removed player {0} from group {1}.", playerName, groupName));
 
             SavePermissionFile();
         }
 
         public void DeleteGroup(string groupName, ulong sender)
         {
-            if (!Permissions.Groups.Any(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase)))
+            PermissionGroup group;
+            if (TryGetGroup(groupName, out group, sender))
+            {
+                groupName = group.GroupName;
+                Permissions.Groups.Remove(group);
+
+                foreach (ulong steamId in group.Members)
+                {
+                    SendPermissions(steamId);
+                }
+
+                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} has been deleted.", groupName));
+            }
+            else
             {
                 ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
                 return;
             }
 
-            var group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
-            groupName = group.GroupName;
-            Permissions.Groups.Remove(group);
+            SavePermissionFile();
+        }
 
-            foreach (ulong steamId in group.Members)
+        public void CreateGroupHotlist(ulong sender, string param = null)
+        {
+            if (Permissions.Groups.Count == 0)
             {
-                SendPermissions(steamId);
+                ConnectionHelper.SendChatMessage(sender, "No groups found.");
+                return;
             }
 
-            ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} has been deleted.", groupName));
+            List<PermissionGroup> groups = new List<PermissionGroup>(Permissions.Groups);
 
-            SavePermissionFile();
+            if (!string.IsNullOrEmpty(param))
+            {
+                groups = new List<PermissionGroup>(Permissions.Groups.Where(g => g.GroupName.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
+
+                if (groups.Count == 0)
+                {
+                    ConnectionHelper.SendChatMessage(sender, string.Format("No group matching with {0} could be found.", param));
+                    return;
+                }
+            }
+
+            if (!GroupCache.ContainsKey(sender))
+                GroupCache.Add(sender, groups);
+            else
+                GroupCache[sender] = groups;
+
+            foreach (PermissionGroup group in groups.OrderBy(g => g.GroupName))
+            {
+                var dict = new Dictionary<string, string>();
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryName, group.GroupName);
+                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, group.Level.ToString());
+
+                if (group.Members.Count > 0)
+                {
+                    List<string> memberNames = new List<string>();
+                    foreach (ulong steamId in group.Members)
+                        memberNames.Add(Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Player.PlayerName);
+
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermEntryMembers, string.Join(", ", memberNames));
+                }
+
+                if (groups.IndexOf(group) == 0)
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermNewHotlist, "");
+                if (groups.IndexOf(group) == groups.Count - 1)
+                    dict.Add(ConnectionHelper.ConnectionKeys.PermLastEntry, "");
+
+                ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.GroupList, ConnectionHelper.ConvertData(dict));
+            }
         }
 
         #endregion
 
-        public bool TryGetPlayerPermission(string playerName, out PlayerPermission playerPermission)
+        public bool TryGetPlayerPermission(string playerName, out PlayerPermission playerPermission, ulong sender)
         {
             playerPermission = new PlayerPermission();
+
+            int index;
+            if (PlayerCache.ContainsKey(sender) && playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= PlayerCache[sender].Count)
+                playerName = PlayerCache[sender][index - 1].PlayerName;
+
             if (!Permissions.Players.Any(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 IMyPlayer myPlayer;
                 if (MyAPIGateway.Players.TryGetPlayer(playerName, out myPlayer))
                 {
-                    playerPermission = new PlayerPermission()
+                    if (Permissions.Players.Any(p => p.Player.SteamId == myPlayer.SteamUserId))
                     {
-                        Player = new Player()
+                        playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == myPlayer.SteamUserId);
+                        var i = Permissions.Players.IndexOf(playerPermission);
+                        playerPermission.Player.PlayerName = myPlayer.DisplayName;
+                        Permissions.Players[i] = playerPermission;
+                    }
+                    else
+                    {
+                        playerPermission = new PlayerPermission()
                         {
-                            PlayerName = myPlayer.DisplayName,
-                            SteamId = myPlayer.SteamUserId
-                        },
-                        Level = myPlayer.IsAdmin() ? Config.AdminLevel : 0,
-                        UsePlayerLevel = false,
-                        Extensions = new List<string>(),
-                        Restrictions = new List<string>()
-                    };
-                    Permissions.Players.Add(playerPermission);
+                            Player = new Player()
+                            {
+                                PlayerName = myPlayer.DisplayName,
+                                SteamId = myPlayer.SteamUserId
+                            },
+                            Level = myPlayer.IsAdmin() ? Config.AdminLevel : 0,
+                            UsePlayerLevel = false,
+                            Extensions = new List<string>(),
+                            Restrictions = new List<string>()
+                        };
+                        Permissions.Players.Add(playerPermission);
+                    }
                 }
                 else
                     return false;
             }
             else
                 playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
+            
+            return true;
+        }
+
+        public bool TryGetGroup(string groupName, out PermissionGroup group, ulong sender)
+        {
+            group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+
+            int index;
+            if (GroupCache.ContainsKey(sender) && groupName.Substring(0, 1) == "#" && Int32.TryParse(groupName.Substring(1), out index) && index > 0 && index <= GroupCache[sender].Count)
+                group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(GroupCache[sender][index - 1].GroupName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (string.IsNullOrEmpty(group.GroupName))
+                return false;
+
             return true;
         }
 

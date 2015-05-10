@@ -39,6 +39,9 @@ Available settings:
 - 'motdhl' or 'MotdHeadLine':
     Sets the headline of the message of the day. Only shown in dialog.
 
+- 'adminlevel'
+    Sets the default level for admins to a certain level. Please note that levels that were already set won't be changed.
+
 Available actions:
 - 'save':
     Saves the config to the files.
@@ -81,6 +84,13 @@ Examples:
                         bool motdsic;
                         if (bool.TryParse(value, out motdsic))
                             ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.MotdShowInChat, motdsic.ToString());
+                        else
+                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
+                        break;
+                    case "adminlevel":
+                        uint adminLevel;
+                        if (uint.TryParse(value, out adminLevel))
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.AdminLevel, adminLevel.ToString());
                         else
                             MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
                         break;
