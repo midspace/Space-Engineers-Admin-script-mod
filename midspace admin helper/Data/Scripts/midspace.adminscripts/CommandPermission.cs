@@ -50,8 +50,9 @@ Actions:
 Sets the needed level for a command to the specified level.
 Example: /perm command setlevel help 100
 
-    list (not implemented yet):
-Creates a hotlist containing all commands and provides information about the needed level of the commands.
+    list:
+Creates a hotlist containing all commands and provides information about the needed level of the commands. Use a keyword to refine your search
+Example: /perm command list roid
 
 
 - For 'player':
@@ -73,8 +74,9 @@ Example: /perm player restrict {0} tp
 If set to true the level of the player will be used. By default it is false.
 Example: /perm player useplayerlevel {0} true
 
-    list (not implemented yet):
-Creates a hotlist containing all players and provides information about them.
+    list:
+Creates a hotlist containing all players and provides information about them. Use a keyword to refine your search
+Example: /perm player list
 
 
 - For 'group':
@@ -102,8 +104,9 @@ Example: /perm group create mygroup 150
 Deletes the specified group.
 Example: /perm group delete mygroup
 
-    list (not implemented yet):
-Creates a hotlist containing all groups and provides information about them.
+    list:
+Creates a hotlist containing all groups and provides information about them. Use a keyword to refine your search
+Example: /perm group list
 ", MyAPIGateway.Session.Player.DisplayName, syntax));
 
                 MyAPIGateway.Utilities.ShowMissionScreen("Help", null, Name, description.ToString(), null, null);

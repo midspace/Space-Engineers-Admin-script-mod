@@ -417,7 +417,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             writer.Close();
         }
 
-        public void SendPermissions(ulong steamId) //TODO update playername if it has changed!
+        public void SendPermissions(ulong steamId)
         {
             uint playerLevel = 0;
 
