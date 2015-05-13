@@ -15,6 +15,7 @@
     /// </summary>
     public class CommandTeleport : ChatCommand
     {
+        private static readonly string teleportPattern = @"/tp\s+(?:(?<Ship1>S\d+)|(?<Player1>P\d+)|(?:GPS:([^:]{0,32}):(?<GX1>[\d\.-]*):(?<GY1>[\d\.-]*):(?<GZ1>[\d\.-]*):)|(?:""(?<Quote1>[^""]|.*?)"")|(?<Word1>[^\s]*)|(?:(?<X1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z1>[+-]?((\d+(\.\d*)?)|(\.\d+)))))(\s+(?:(?<Ship2>S\d+)|(?<Player2>P\d+)|(?:GPS:([^:]{0,32}):(?<GX2>[\d\.-]*):(?<GY2>[\d\.-]*):(?<GZ2>[\d\.-]*):)|(?:""(?<Quote2>[^""]|.*?)"")|(?<Word2>[^\s]*)|(?:(?<X2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z2>[+-]?((\d+(\.\d*)?)|(\.\d+)))))|)\s*$";
         public CommandTeleport()
             : base(ChatCommandSecurity.Admin, "tp", new[] { "/tp" })
         {
@@ -78,7 +79,7 @@ Function: Teleport the specified ship to the location.
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/tp\s+(?:(?<Ship1>S\d+)|(?<Player1>P\d+)|(?:""(?<Quote1>[^""]|.*?)"")|(?<Word1>[^\s]*)|(?:(?<X1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z1>[+-]?((\d+(\.\d*)?)|(\.\d+)))))(\s+(?:(?<Ship2>S\d+)|(?<Player2>P\d+)|(?:""(?<Quote2>[^""]|.*?)"")|(?<Word2>[^\s]*)|(?:(?<X2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z2>[+-]?((\d+(\.\d*)?)|(\.\d+)))))|)\s*$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, teleportPattern, RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -90,6 +91,8 @@ Function: Teleport the specified ship to the location.
                 var pos2 = !string.IsNullOrEmpty(match.Groups["X2"].Value);
                 var word1 = !string.IsNullOrEmpty(match.Groups["Quote1"].Value) || !string.IsNullOrEmpty(match.Groups["Word1"].Value);
                 var word2 = !string.IsNullOrEmpty(match.Groups["Quote2"].Value) || !string.IsNullOrEmpty(match.Groups["Word2"].Value);
+                var gps1 = !string.IsNullOrEmpty(match.Groups["GX1"].Value);
+                var gps2 = !string.IsNullOrEmpty(match.Groups["GX2"].Value);
                 var currentPosition = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
                 if (!ship2 && !player2 && !pos2 && !word2)
@@ -103,6 +106,17 @@ Function: Teleport the specified ship to the location.
                             double.Parse(match.Groups["X1"].Value, CultureInfo.InvariantCulture),
                             double.Parse(match.Groups["Y1"].Value, CultureInfo.InvariantCulture),
                             double.Parse(match.Groups["Z1"].Value, CultureInfo.InvariantCulture));
+
+                        MovePlayerPilotToPosition(player, position);
+                        CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+                        return true;
+                    }
+                    if (gps1)
+                    {
+                        var position = new Vector3D(
+                            double.Parse(match.Groups["GX1"].Value, CultureInfo.InvariantCulture),
+                            double.Parse(match.Groups["GY1"].Value, CultureInfo.InvariantCulture),
+                            double.Parse(match.Groups["GZ1"].Value, CultureInfo.InvariantCulture));
 
                         MovePlayerPilotToPosition(player, position);
                         CommandTeleportBack.SaveTeleportInHistory(currentPosition);
@@ -160,7 +174,7 @@ Function: Teleport the specified ship to the location.
                             return true;
                         }
 
-                        // TODO: too many entities. hostlist or sublist?
+                        // TODO: too many entities. hotlist or sublist?
 
                         MyAPIGateway.Utilities.ShowMessage("Players", "{0}", players.Count);
                         MyAPIGateway.Utilities.ShowMessage("Ships", "{0}", currentShipList.Count);
@@ -169,9 +183,6 @@ Function: Teleport the specified ship to the location.
                         return true;
                     }
                 }
-
-
-
 
 
                 var entityName1 = string.IsNullOrEmpty(match.Groups["Quote1"].Value) ? match.Groups["Word1"].Value : match.Groups["Quote1"].Value;
