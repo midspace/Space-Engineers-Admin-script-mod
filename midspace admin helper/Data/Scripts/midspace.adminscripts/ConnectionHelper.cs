@@ -1,7 +1,5 @@
 ﻿using Sandbox.Common.ObjectBuilders;
-using Sandbox.Game.Multiplayer;
 using Sandbox.ModAPI;
-using Sandbox.ModAPI.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +19,13 @@ namespace midspace.adminscripts
         public const ushort StandardClientId = 16103;
         public const ushort StandardServerId = StandardClientId + 1;
 
-        /// <summary>
-        /// True if an id request was sent otherwise false.
-        /// </summary>
-        public static bool ReceivedInitialRequest;
+        static int MAX_MESSAGE_SIZE = 4096;
+
+        static int client_IncomingMessages = 0;
+        static List<byte> client_MessageCache = new List<byte>();
+
+        static int server_IncomingMessages = 0;
+        static List<byte> server_MessageCache = new List<byte>();
 
         #region connections to server
 
@@ -45,7 +46,25 @@ namespace midspace.adminscripts
         public static void SendMessageToServer(Dictionary<string, string> content)
         {
             content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
-            MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content)));
+            byte[] byteData = System.Text.Encoding.Unicode.GetBytes(ConvertData(content));
+            if (byteData.Length <= MAX_MESSAGE_SIZE)
+                MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, byteData);
+            else
+            {
+                var byteList = byteData.ToList();
+                int parts = byteList.Count / MAX_MESSAGE_SIZE + 1;
+                SendMessageToServer(ConnectionKeys.IncomingMessageParts, parts.ToString());
+                for (int i = 0; i < parts; i++)
+                {
+                    List<byte> bytes = new List<byte>();
+                    if (i == parts - 1)
+                        bytes = byteList.GetRange(i * MAX_MESSAGE_SIZE, byteList.Count - i * MAX_MESSAGE_SIZE - 1);
+                    else //get leftover
+                        bytes = byteList.GetRange(i * MAX_MESSAGE_SIZE, MAX_MESSAGE_SIZE);
+
+                    MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, bytes.ToArray());
+                }
+            }
         }
 
         #endregion
@@ -70,7 +89,7 @@ namespace midspace.adminscripts
         {
             content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
             if (!MyAPIGateway.Multiplayer.IsServer)
-                MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content)));
+                SendMessageToServer(content);
             SendMessageToAllPlayers(content);
         }
 
@@ -85,7 +104,25 @@ namespace midspace.adminscripts
 
         public static void SendMessageToPlayer(ulong steamId, Dictionary<string, string> content)
         {
-            MyAPIGateway.Multiplayer.SendMessageTo(StandardClientId, System.Text.Encoding.Unicode.GetBytes(ConvertData(content)), steamId);
+            byte[] byteData = System.Text.Encoding.Unicode.GetBytes(ConvertData(content));
+            if (byteData.Length <= MAX_MESSAGE_SIZE)
+                MyAPIGateway.Multiplayer.SendMessageTo(StandardClientId, byteData, steamId);
+            else 
+            {
+                var byteList = byteData.ToList();
+                int parts = byteList.Count / MAX_MESSAGE_SIZE + 1;
+                SendMessageToPlayer(steamId, ConnectionKeys.IncomingMessageParts, parts.ToString());
+                for (int i = 0; i < parts; i++)
+                {
+                    List<byte> bytes = new List<byte>();
+                    if (i == parts - 1)
+                        bytes = byteList.GetRange(i * MAX_MESSAGE_SIZE, byteList.Count - i * MAX_MESSAGE_SIZE - 1);
+                    else //get leftover
+                        bytes = byteList.GetRange(i * MAX_MESSAGE_SIZE, MAX_MESSAGE_SIZE);
+
+                    MyAPIGateway.Multiplayer.SendMessageTo(StandardClientId, bytes.ToArray(), steamId);
+                }
+            }
         }
 
         public static void SendMessageToPlayer(IMyPlayer player, string key, string value)
@@ -268,6 +305,11 @@ namespace midspace.adminscripts
                     #endregion
 
                     #region misc
+                    case ConnectionKeys.AdminNotification:
+                        ChatCommandLogic.Instance.AdminNotification = entry.Value;
+                        if (CommandMessageOfTheDay.ShowOnReceive)
+                            MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
+                        break;
                     case ConnectionKeys.PrivateMessage: //pm
                         IMyPlayer sender = null;
                         string senderName = null;
@@ -305,6 +347,21 @@ namespace midspace.adminscripts
                         ulong steamId;
                         if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
                             CommandForceKick.DropPlayer = true;
+                        break;
+                    case ConnectionKeys.LogPrivateMessages:
+                        bool logPms;
+                        if (bool.TryParse(entry.Value, out logPms))
+                            CommandPrivateMessage.LogPrivateMessages = logPms;
+                        break;
+                    case ConnectionKeys.IncomingMessageParts:
+                        int parts;
+                        if (int.TryParse(entry.Value, out parts))
+                        {
+                            if (parts < 0)
+                                break;
+                            client_IncomingMessages = parts;
+                            client_MessageCache.Clear();
+                        }
                         break;
                     #endregion
 
@@ -535,49 +592,22 @@ namespace midspace.adminscripts
 
         public static void ProcessClientData(byte[] rawData)
         {
-            ProcessClientData(System.Text.Encoding.Unicode.GetString(rawData));
-        }
-
-        #region initial data
-
-        /// <summary>
-        /// Client side. Process the initial data sent from the server.
-        /// </summary>
-        /// <param name="dataString"></param>
-        public static void ProcessInitialData(string dataString)
-        {
-            Logger.Debug("[Client]Processing Initital Data...");
-            var parsedData = Parse(dataString);
-            foreach (KeyValuePair<string, string> entry in parsedData)
+            switch (client_IncomingMessages)
             {
-                switch (entry.Key)
-                {
-                    case ConnectionKeys.AdminNotification:
-                        ChatCommandLogic.Instance.AdminNotification = entry.Value;
-                        if (CommandMessageOfTheDay.ShowOnReceive)
-                            MyAPIGateway.Utilities.ShowMissionScreen("Admin Message System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
-                        break;
-                    case ConnectionKeys.ForceKick:
-                        ulong steamId;
-                        if (ulong.TryParse(entry.Value, out steamId) && steamId == MyAPIGateway.Session.Player.SteamUserId)
-                            CommandForceKick.DropPlayer = true;
-                        break;
-                    case ConnectionKeys.LogPrivateMessages:
-                        bool logPms;
-                        if (bool.TryParse(entry.Value, out logPms))
-                            CommandPrivateMessage.LogPrivateMessages = logPms;
-                        break;
-                }
+                case 0:
+                    ProcessClientData(System.Text.Encoding.Unicode.GetString(rawData));
+                    break;
+                case 1:
+                    client_MessageCache.AddArray(rawData);
+                    client_IncomingMessages--;
+                    ProcessClientData(System.Text.Encoding.Unicode.GetString(client_MessageCache.ToArray()));
+                    break;
+                default:
+                    client_MessageCache.AddArray(rawData);
+                    client_IncomingMessages--;
+                    break;
             }
-            Logger.Debug("[Client]Finished processing Initital Data");
         }
-
-        public static void ProcessInitialData(byte[] rawData)
-        {
-            ProcessInitialData(System.Text.Encoding.Unicode.GetString(rawData));
-        }
-
-        #endregion
 
         #endregion
 
@@ -704,6 +734,16 @@ namespace midspace.adminscripts
                     case ConnectionKeys.ConfigReload:
                         ChatCommandLogic.Instance.ServerCfg.Load();
                         SendChatMessage(senderSteamId, "Config reloaded.");
+                        break;
+                    case ConnectionKeys.IncomingMessageParts:
+                        int parts;
+                        if (int.TryParse(entry.Value, out parts))
+                        {
+                            if (parts < 0)
+                                break;
+                            server_IncomingMessages = parts;
+                            server_MessageCache.Clear();
+                        }
                         break;
                     #endregion
 
@@ -939,9 +979,6 @@ namespace midspace.adminscripts
                             BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == newClientSteamId);
                             if (bannedPlayer1.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.ForceKick, bannedPlayer1.SteamId.ToString());
-                            //only send the command permission if it is set, disabled by now
-                            /*if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.ServerCfg.CommandPermissions))
-                                data.Add("cmd", ChatCommandLogic.Instance.ServerCfg.CommandPermissions);*/
                             data.Add(ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
                             //first connection!
                             SendMessageToPlayer(newClientSteamId, data);
@@ -970,7 +1007,21 @@ namespace midspace.adminscripts
 
         public static void ProcessServerData(byte[] rawData)
         {
-            ProcessServerData(System.Text.Encoding.Unicode.GetString(rawData));
+            switch (server_IncomingMessages)
+            {
+                case 0:
+                    ProcessServerData(System.Text.Encoding.Unicode.GetString(rawData));
+                    break;
+                case 1:
+                    server_MessageCache.AddArray(rawData);
+                    server_IncomingMessages--;
+                    ProcessServerData(System.Text.Encoding.Unicode.GetString(server_MessageCache.ToArray()));
+                    break;
+                default:
+                    server_MessageCache.AddArray(rawData);
+                    server_IncomingMessages--;
+                    break;
+            }
         }
 
         #endregion
@@ -1005,8 +1056,10 @@ namespace midspace.adminscripts
             public const string ConnectionRequest = "connect";
             public const string ForceKick = "forcekick";
             public const string GlobalMessage = "glmsg";
+            public const string IncomingMessageParts = "incmsgpar";
             public const string LogPrivateMessages = "logpm";
             public const string MessageOfTheDay = "motd";
+            public const string MessagePart = "msgpart";
             public const string MotdHeadLine = "motdhl";
             public const string MotdShowInChat = "motdsic";
             public const string Pardon = "pard";

@@ -2,14 +2,12 @@ namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Timers;
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
@@ -52,7 +50,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Set manually to true for testing purposes. No need for this function in general.
         /// </summary>
-        public bool Debug = false;
+        public bool Debug = true;
 
         #endregion
 
@@ -129,7 +127,6 @@ namespace midspace.adminscripts
                 var data = new Dictionary<string, string>();
                 data.Add(ConnectionHelper.ConnectionKeys.ConnectionRequest, MyAPIGateway.Session.Player.SteamUserId.ToString());
                 //let the server know we are ready for connections
-                ConnectionHelper.ReceivedInitialRequest = false;
                 CommandMessageOfTheDay.ShowMotdOnSpawn = true;
                 BlockCommandExecution = true;
                 ConnectionHelper.SendMessageToServer(data);
@@ -260,7 +257,7 @@ namespace midspace.adminscripts
             if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
                 return;
 
-            if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive  || (ServerCfg != null && ServerCfg.ServerIsClient))
+            if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerCfg.ServerIsClient))
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
                 Logger.Debug("Detached Entities_OnEntityAdd_Client");
@@ -348,13 +345,7 @@ namespace midspace.adminscripts
         private static void HandleMessage_Client(byte[] message)
         {
             Logger.Debug(string.Format("HandleMessage - {0}", System.Text.Encoding.Unicode.GetString(message)));
-            if (!ConnectionHelper.ReceivedInitialRequest)
-            {
-                ConnectionHelper.ReceivedInitialRequest = true;
-                ConnectionHelper.ProcessInitialData(message);
-            }
-            else
-                ConnectionHelper.ProcessClientData(message);
+            ConnectionHelper.ProcessClientData(message);
         }
 
         private static void HandleMessage_Server(byte[] message)
