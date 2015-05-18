@@ -50,7 +50,6 @@ namespace midspace.adminscripts
         /// <summary>
         /// Set manually to true for testing purposes. No need for this function in general.
         /// </summary>
-        public bool Debug = true;
 
         #endregion
 
@@ -103,6 +102,7 @@ namespace midspace.adminscripts
 
         private void Init()
         {
+            Debug = MyAPIGateway.Session.Player.IsExperimentalCreator();
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
@@ -138,6 +138,7 @@ namespace midspace.adminscripts
         /// </summary>
         private void InitServer()
         {
+            //Debug = true;
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
