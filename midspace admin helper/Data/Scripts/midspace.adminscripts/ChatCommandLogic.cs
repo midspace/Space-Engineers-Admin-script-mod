@@ -50,6 +50,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Set manually to true for testing purposes. No need for this function in general.
         /// </summary>
+        public bool Debug = false;
 
         #endregion
 
