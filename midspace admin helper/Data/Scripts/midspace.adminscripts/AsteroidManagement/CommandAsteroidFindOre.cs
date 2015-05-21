@@ -58,10 +58,10 @@
                     return false;
                 }
 
-                var currentAsteroidList = new List<IMyVoxelMap>();
+                var currentAsteroidList = new List<IMyVoxelBase>();
                 var position = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => Math.Sqrt((position - v.PositionLeftBottomCorner).LengthSquared()) < 5000f);
-                var asteroids = new List<IMyVoxelMap>();
+                var asteroids = new List<IMyVoxelBase>();
 
                 var materials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(f => f.MinedOre.Equals(oreName, StringComparison.InvariantCultureIgnoreCase)).Select(f => f.Index).ToArray();
 

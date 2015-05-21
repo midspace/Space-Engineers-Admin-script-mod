@@ -37,8 +37,8 @@
                         double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
                     var searchName = match.Groups["Key"].Value;
 
-                    var currentAsteroidList = new List<IMyVoxelMap>();
-                    IMyVoxelMap originalAsteroid = null;
+                    var currentAsteroidList = new List<IMyVoxelBase>();
+                    IMyVoxelBase originalAsteroid = null;
                     MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(searchName, StringComparison.InvariantCultureIgnoreCase));
                     if (currentAsteroidList.Count == 1)
                     {

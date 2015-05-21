@@ -49,7 +49,7 @@ namespace midspace.adminscripts
                 var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 var position = worldMatrix.Translation + worldMatrix.Forward * 1.6f + worldMatrix.Up * 1.35f + worldMatrix.Right * 0.1f;
 
-                var currentAsteroidList = new List<IMyVoxelMap>();
+                var currentAsteroidList = new List<IMyVoxelBase>();
                 var bb = new BoundingBoxD(position - 0.2f, position + 0.2f);
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.IsBoxIntersectingBoundingBoxOfThisVoxelMap(ref bb));
 

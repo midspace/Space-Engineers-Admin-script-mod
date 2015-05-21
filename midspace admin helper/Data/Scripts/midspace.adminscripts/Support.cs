@@ -192,7 +192,7 @@ namespace midspace.adminscripts
             }
 
             var uniqueName = string.Format("{0}{1}", baseName, index);
-            var currentAsteroidList = new List<IMyVoxelMap>();
+            var currentAsteroidList = new List<IMyVoxelBase>();
             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v != null);
 
             while (currentAsteroidList.Any(a => a.StorageName.Equals(uniqueName, StringComparison.InvariantCultureIgnoreCase)))

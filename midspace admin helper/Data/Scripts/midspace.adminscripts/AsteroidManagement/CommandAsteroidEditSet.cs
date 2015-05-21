@@ -67,7 +67,7 @@
                         var tmp = ActiveVoxelSetterPosition;
                         if (tmp.HasValue)
                         {
-                            var currentAsteroidList = new List<IMyVoxelMap>();
+                            var currentAsteroidList = new List<IMyVoxelBase>();
                             var bb = new BoundingBoxD(tmp.Value - 0.2f, tmp.Value + 0.2f);
                             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.IsBoxIntersectingBoundingBoxOfThisVoxelMap(ref bb));
 
@@ -90,7 +90,7 @@
                         var tmp = ActiveVoxelSetterPosition;
                         if (tmp.HasValue)
                         {
-                            var currentAsteroidList = new List<IMyVoxelMap>();
+                            var currentAsteroidList = new List<IMyVoxelBase>();
                             var bb = new BoundingBoxD(tmp.Value - 0.2f, tmp.Value + 0.2f);
                             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.IsBoxIntersectingBoundingBoxOfThisVoxelMap(ref bb));
 
@@ -112,7 +112,7 @@
                     {
                         if (_activeVoxelSetterPositionA.HasValue && _activeVoxelSetterPositionB.HasValue && _activeVoxelSetterNameA == _activeVoxelSetterNameB)
                         {
-                            var currentAsteroidList = new List<IMyVoxelMap>();
+                            var currentAsteroidList = new List<IMyVoxelBase>();
                             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(_activeVoxelSetterNameA, StringComparison.InvariantCultureIgnoreCase));
                             if (currentAsteroidList.Count > 0)
                             {
@@ -153,7 +153,7 @@
                     {
                         if (_activeVoxelSetterPositionA.HasValue && _activeVoxelSetterPositionB.HasValue && _activeVoxelSetterNameA == _activeVoxelSetterNameB)
                         {
-                            var currentAsteroidList = new List<IMyVoxelMap>();
+                            var currentAsteroidList = new List<IMyVoxelBase>();
                             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(_activeVoxelSetterNameA, StringComparison.InvariantCultureIgnoreCase));
                             if (currentAsteroidList.Count > 0)
                             {

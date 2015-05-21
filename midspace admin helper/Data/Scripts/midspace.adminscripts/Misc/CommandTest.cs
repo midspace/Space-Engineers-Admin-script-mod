@@ -139,33 +139,62 @@
 
             if (messageText.Equals("/test4", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Ingame.IMyCockpit)
+                var player = MyAPIGateway.Session.Player;
+                if (player != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Player", "in cockpit.");
+                    var pos = player.GetPosition();
+                    MyAPIGateway.Utilities.ShowMessage("Player", "pos={0:N},{1:N},{2:N}", pos.X, pos.Y, pos.Z);
                 }
-                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Ingame.IMyRemoteControl)
+
+                var cockpit = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyCockpit;
+                var remoteControl = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyRemoteControl;
+                var character = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCharacter;
+                var character2 = MyAPIGateway.Session.ControlledObject as Sandbox.Game.Entities.Character.MyCharacter;
+                var camera = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCamera;
+                var cameraBlock = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyCameraBlock;
+                var cameraController = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Interfaces.IMyCameraController;
+                var spectator = MyAPIGateway.Session.ControlledObject as VRage.MySpectator;
+
+                if (cockpit != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Player", "remoting.");
+                    MyAPIGateway.Utilities.ShowMessage("Control", "in cockpit.");
                 }
-                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Ingame.IMyCameraBlock)
+                if (remoteControl != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Player", "camera.");
+                    MyAPIGateway.Utilities.ShowMessage("Control", "remoting.");
                 }
-                if (MyAPIGateway.Session.ControlledObject is Sandbox.ModAPI.Interfaces.IMyCameraController)
+                if (character != null)
                 {
-                    var controller = (Sandbox.ModAPI.Interfaces.IMyCameraController)MyAPIGateway.Session.ControlledObject;
-                    MyAPIGateway.Utilities.ShowMessage("Player", "camera controller 1. {0}", controller.IsInFirstPersonView);
+                    MyAPIGateway.Utilities.ShowMessage("Control", "character.");
+                }
+                if (character2 != null)
+                {
+                    //var pos = character2.PositionComp.GetPosition(); // Uses MyEntity which is not whitelisted.
+                    MyAPIGateway.Utilities.ShowMessage("Control", "character2.");
+                }
+                if (camera != null)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Control", "camera.");
+                }
+                if (cameraBlock != null)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Control", "camera block.");
+                }
+                if (cameraController != null)
+                {
+                    var pos = cameraController.GetViewMatrix().Translation;
+                    MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 1. FPV={0} POS={1:N},{2:N},{3:N}", cameraController.IsInFirstPersonView, pos.X, pos.Y, pos.Z);
                 }
                 if (MyAPIGateway.Session.ControlledObject.Entity is Sandbox.ModAPI.Interfaces.IMyCameraController)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Player", "camera controller 2.");
+                    MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 2.");
                 }
 
                 //MyAPIGateway.Utilities.ShowMessage("Player", "Spectator1. {0}", VRage.Common.MySpectator.Static.IsInFirstPersonView);
 
                 //System.Windows.Forms.Clipboard.SetText("hello");
 
-                if (MyAPIGateway.Session.ControlledObject is MySpectator)
+                if (spectator != null)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Player", "Spectator1.");
                 }
@@ -177,6 +206,8 @@
                 //{
                 //    MyAPIGateway.Utilities.ShowMessage("Player", "other.");
                 //} 
+
+                return true;
                 
                 var playerMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 var playerPosition = playerMatrix.Translation + playerMatrix.Forward * 0.5f + playerMatrix.Up * 1.0f;
@@ -572,8 +603,7 @@
 
             #endregion
 
-
-            #region test12
+            #region test13
 
             if (messageText.Equals("/test13", StringComparison.InvariantCultureIgnoreCase))
             {

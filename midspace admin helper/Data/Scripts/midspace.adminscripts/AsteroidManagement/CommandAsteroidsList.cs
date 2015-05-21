@@ -11,7 +11,7 @@
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of in game asteroids, populated only by search results.
         /// </summary>
-        public readonly static List<IMyVoxelMap> AsteroidCache = new List<IMyVoxelMap>();
+        public readonly static List<IMyVoxelBase> AsteroidCache = new List<IMyVoxelBase>();
 
         public CommandAsteroidsList()
             : base(ChatCommandSecurity.Admin, "listasteroids", new[] { "/listasteroids" })
@@ -34,7 +34,7 @@
                     asteroidName = match.Groups["Key"].Value;
                 }
 
-                var currentAsteroidList = new List<IMyVoxelMap>();
+                var currentAsteroidList = new List<IMyVoxelBase>();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => asteroidName == null || v.StorageName.IndexOf(asteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0);
 
                 AsteroidCache.Clear();

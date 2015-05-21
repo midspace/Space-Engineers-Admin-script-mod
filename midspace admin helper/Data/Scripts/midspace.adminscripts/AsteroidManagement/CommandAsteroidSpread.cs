@@ -34,7 +34,7 @@
                     asteroidName = match.Groups["Key"].Value;
                 }
 
-                var currentAsteroidList = new List<IMyVoxelMap>();
+                var currentAsteroidList = new List<IMyVoxelBase>();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => asteroidName == null || v.StorageName.IndexOf(asteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0);
 
                 
