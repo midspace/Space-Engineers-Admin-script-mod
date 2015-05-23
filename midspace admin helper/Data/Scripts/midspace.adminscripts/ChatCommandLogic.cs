@@ -122,7 +122,8 @@ namespace midspace.adminscripts
             //MultiplayerActive is false when initializing host... extreamly weird
             if (MyAPIGateway.Multiplayer.MultiplayerActive || ServerCfg != null) //only need this in mp
             {
-                MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd_Client;
+                MyAPIGateway.Session.OnSessionReady += Session_OnSessionReady;
+                Logger.Debug("Attach Session_OnSessionReady");
                 MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
                 Logger.Debug("Registered ProcessMessage_Client");
                 var data = new Dictionary<string, string>();
@@ -261,8 +262,8 @@ namespace midspace.adminscripts
 
             if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerConfig.ServerIsClient))
             {
-                MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
-                Logger.Debug("Detached Entities_OnEntityAdd_Client");
+                MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
+                Logger.Debug("Detached Session_OnSessionReady");
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
                 Logger.Debug("Uregistered MessageHandler Client");
             }
@@ -326,20 +327,17 @@ namespace midspace.adminscripts
 
         #endregion
 
-        void Entities_OnEntityAdd_Client(IMyEntity entity)
+        void Session_OnSessionReady()
         {
-            if (entity is IMyCharacter && CommandMessageOfTheDay.ShowMotdOnSpawn && entity.DisplayName.Equals(MyAPIGateway.Session.Player.DisplayName, StringComparison.InvariantCultureIgnoreCase))
+            if (CommandMessageOfTheDay.Received && CommandMessageOfTheDay.ShowMotdOnSpawn)
             {
-                if (CommandMessageOfTheDay.Received)
-                {
-                    CommandMessageOfTheDay.ShowMotd();
-                    if (!string.IsNullOrEmpty(AdminNotification))
-                        MyAPIGateway.Utilities.ShowMissionScreen("Admin Notification System", "Error", null, ChatCommandLogic.Instance.AdminNotification, null, null);
-                }
-                else
-                    CommandMessageOfTheDay.ShowOnReceive = true;
-                CommandMessageOfTheDay.ShowMotdOnSpawn = false;
+                CommandMessageOfTheDay.ShowMotd();
+                if (!string.IsNullOrEmpty(AdminNotification))
+                    MyAPIGateway.Utilities.ShowMissionScreen("Admin Notification System", "Error", null, AdminNotification, null, null);
             }
+            else
+                CommandMessageOfTheDay.ShowOnReceive = true;
+            CommandMessageOfTheDay.ShowMotdOnSpawn = false;
         }
 
         #region connection handling
