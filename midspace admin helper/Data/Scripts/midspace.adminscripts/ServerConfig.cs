@@ -44,9 +44,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// True for listen server
         /// </summary>
-        public bool ServerIsClient = true;
-
-        public List<BannedPlayer> ForceBannedPlayer { get { return Config.ForceBannedPlayers; } }
+        public static bool ServerIsClient = true;
 
         public ServerConfig(List<ChatCommand> commands)
         {
@@ -80,6 +78,8 @@ namespace midspace.adminscripts
 
         public uint AdminLevel { get { return Config.AdminLevel; } set { Config.AdminLevel = value; } }
 
+        public List<BannedPlayer> ForceBannedPlayers { get { return Config.ForceBannedPlayers; } }
+
         public void Save()
         {
             //write values in cfg
@@ -99,19 +99,10 @@ namespace midspace.adminscripts
             Logger.Debug("Config saved.");
         }
 
-        public void Load()
+        public void ReloadConfig()
         {
             LoadConfig();
             LoadMotd();
-
-            //send changes to clients
-            var data = new Dictionary<string, string>();
-            data.Add(ConnectionHelper.ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
-            data.Add(ConnectionHelper.ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
-            data.Add(ConnectionHelper.ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
-            data.Add(ConnectionHelper.ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
-
-            ConnectionHelper.SendMessageToAllPlayers(data);
         }
 
         #region server config
@@ -148,9 +139,20 @@ Message:
 If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message);
             }
 
+            var sendMotdHl = !Config.MotdHeadLine.Equals(CommandMessageOfTheDay.HeadLine);
             CommandMessageOfTheDay.HeadLine = Config.MotdHeadLine;
+            if (sendMotdHl)
+                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
+
+            var sendMotdSic = Config.MotdShowInChat != CommandMessageOfTheDay.ShowInChat;
             CommandMessageOfTheDay.ShowInChat = Config.MotdShowInChat;
+            if (sendMotdSic)
+                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
+
+            var sendLogPms = Config.LogPrivateMessages != CommandPrivateMessage.LogPrivateMessages;
             CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
+            if (sendLogPms)
+                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
         }
 
         private void WriteConfig()
@@ -178,9 +180,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(MotdFileName, typeof(ChatCommandLogic));
             var text = reader.ReadToEnd();
             reader.Close();
-
-            if (!string.IsNullOrEmpty(text))
-                SetMessageOfTheDay(text);
+            
+            SetMessageOfTheDay(text);
         }
 
         /// <summary>
@@ -215,10 +216,13 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         public void SetMessageOfTheDay(string motd)
         {
-            motd = ReplaceVariables(motd);
             if (motd == null)
                 motd = "";
+            motd = ReplaceVariables(motd);
+            var sendChanges = !motd.Equals(CommandMessageOfTheDay.Content);
             CommandMessageOfTheDay.Content = motd;
+            if (sendChanges)
+                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.MessageOfTheDay, motd);
         }
 
         private void SaveMotd()
@@ -509,6 +513,24 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             return playerLevel;
+        }
+
+        public void UpdateAdminLevel(uint adminLevel)
+        {
+            Config.AdminLevel = adminLevel;
+
+
+            var onlinePlayers = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(onlinePlayers, p => p != null);
+
+            foreach (IMyPlayer player in onlinePlayers)
+            {
+                if (!player.IsAdmin())
+                    continue;
+
+                if (!Permissions.Players.Any(p => p.Player.SteamId == player.SteamUserId) || (!Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamUserId).UsePlayerLevel && !Permissions.Groups.Any(g => g.Members.Contains(player.SteamUserId))))
+                    SendPermissions(player.SteamUserId);
+            }
         }
 
         #region actions

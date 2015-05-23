@@ -259,7 +259,7 @@ namespace midspace.adminscripts
             if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
                 return;
 
-            if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerCfg.ServerIsClient))
+            if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerConfig.ServerIsClient))
             {
                 MyAPIGateway.Entities.OnEntityAdd -= Entities_OnEntityAdd_Client;
                 Logger.Debug("Detached Entities_OnEntityAdd_Client");

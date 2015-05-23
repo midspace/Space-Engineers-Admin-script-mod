@@ -172,9 +172,11 @@ namespace midspace.adminscripts
 
             foreach (KeyValuePair<string, string> entry in data)
             {
+                var key = entry.Key ?? "";
+                var value = entry.Value ?? "";
                 //escape " -> \" & \ -> \\
-                string key = entry.Key.Replace(@"\", @"\\");
-                string value = entry.Value.Replace(@"\", @"\\");
+                key = entry.Key.Replace(@"\", @"\\");
+                value = entry.Value.Replace(@"\", @"\\");
                 key = key.Replace("\"", "\\\"");
                 value = value.Replace("\"", "\\\"");
                 //stick the entry together in the folowing form:
@@ -637,11 +639,12 @@ namespace midspace.adminscripts
                     #region config
                     case ConnectionKeys.MessageOfTheDay:
                         ChatCommandLogic.Instance.ServerCfg.SetMessageOfTheDay(entry.Value);
-                        SendMessageToAllPlayers(ConnectionKeys.MessageOfTheDay, CommandMessageOfTheDay.Content);
+                        SendChatMessage(senderSteamId, "The message of the day was updated. Please note that you have to use '/cfg save' to save it permanently.");
                         break;
                     case ConnectionKeys.MotdHeadLine:
                         CommandMessageOfTheDay.HeadLine = entry.Value;
                         SendMessageToAllPlayers(ConnectionKeys.MotdHeadLine, entry.Value);
+                        SendChatMessage(senderSteamId, "The headline of the message of the day was updated. Please note that you have to use '/cfg save' to save it permanently.");
                         break;
                     case ConnectionKeys.MotdShowInChat:
                         bool motdsic;
@@ -649,21 +652,22 @@ namespace midspace.adminscripts
                         {
                             CommandMessageOfTheDay.ShowInChat = motdsic;
                             SendMessageToAllPlayers(ConnectionKeys.MotdShowInChat, entry.Value);
+                            SendChatMessage(senderSteamId, string.Format("The setting motdShowInChat was set to {0}. Please note that you have to use '/cfg save' to save it permanently.", motdsic));
                         }
                         break;
                     case ConnectionKeys.AdminLevel:
                         uint adminLevel;
                         if (uint.TryParse(entry.Value, out adminLevel))
                         {
-                            ChatCommandLogic.Instance.ServerCfg.AdminLevel = adminLevel;
-                            SendChatMessage(senderSteamId, string.Format("Updated default admin level to {0}. Please note that you have to use '/cfg save' to save it permanently", adminLevel));
+                            ChatCommandLogic.Instance.ServerCfg.UpdateAdminLevel(adminLevel);
+                            SendChatMessage(senderSteamId, string.Format("Updated default admin level to {0}. Please note that you have to use '/cfg save' to save it permanently.", adminLevel));
                         }
                         break;
                     #endregion
 
                     #region misc
                     case ConnectionKeys.Save:
-                        if (ChatCommandLogic.Instance.ServerCfg.ServerIsClient)
+                        if (ServerConfig.ServerIsClient)
                             break; //no one should be able to do that
 
                         if (string.IsNullOrEmpty(entry.Value))
@@ -710,7 +714,7 @@ namespace midspace.adminscripts
                                 IMyPlayer player = players.FirstOrDefault();
                                 if (values.Length > 1 && bool.TryParse(values[1], out ban) && ban)
                                 {
-                                    ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Add(new BannedPlayer()
+                                    ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Add(new BannedPlayer()
                                     {
                                         SteamId = steamId,
                                         PlayerName = player.DisplayName
@@ -722,10 +726,10 @@ namespace midspace.adminscripts
                         }
                         break;
                     case ConnectionKeys.Pardon:
-                        BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.PlayerName.Equals(entry.Value, StringComparison.InvariantCultureIgnoreCase));
+                        BannedPlayer bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.FirstOrDefault(p => p.PlayerName.Equals(entry.Value, StringComparison.InvariantCultureIgnoreCase));
                         if (bannedPlayer.SteamId != 0)
                         {
-                            ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.Remove(bannedPlayer);
+                            ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Remove(bannedPlayer);
                             SendChatMessage(senderSteamId, string.Format("Pardoned player {0}", bannedPlayer.PlayerName));
                         }
                         break;
@@ -734,7 +738,7 @@ namespace midspace.adminscripts
                         SendChatMessage(senderSteamId, "Config saved.");
                         break;
                     case ConnectionKeys.ConfigReload:
-                        ChatCommandLogic.Instance.ServerCfg.Load();
+                        ChatCommandLogic.Instance.ServerCfg.ReloadConfig();
                         SendChatMessage(senderSteamId, "Config reloaded.");
                         break;
                     case ConnectionKeys.IncomingMessageParts:
@@ -978,7 +982,7 @@ namespace midspace.adminscripts
                             var data = new Dictionary<string, string>();
                             if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.AdminNotification, ChatCommandLogic.Instance.AdminNotification);
-                            BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayer.FirstOrDefault(p => p.SteamId == newClientSteamId);
+                            BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.FirstOrDefault(p => p.SteamId == newClientSteamId);
                             if (bannedPlayer1.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.ForceKick, bannedPlayer1.SteamId.ToString());
                             data.Add(ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
@@ -987,7 +991,7 @@ namespace midspace.adminscripts
 
                             ChatCommandLogic.Instance.ServerCfg.SendPermissions(newClientSteamId);
 
-                            if (CommandMessageOfTheDay.Content != null)
+                            if (CommandMessageOfTheDay.Content != null && !ServerConfig.ServerIsClient)
                             {
                                 //the header must be initialized before the motd otherwise it won't show
                                 if (!string.IsNullOrEmpty(CommandMessageOfTheDay.HeadLine))

@@ -51,7 +51,6 @@ namespace midspace.adminscripts
 
         public override bool Invoke(string messageText)
         {
-            //TODO set the motd
             if (!string.IsNullOrEmpty(Content))
                 ShowMotd();
             else
