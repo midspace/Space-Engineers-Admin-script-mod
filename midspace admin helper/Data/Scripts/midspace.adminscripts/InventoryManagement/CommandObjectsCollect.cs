@@ -69,11 +69,6 @@
                             }
                             else if (item is IMyFloatingObject)
                             {
-                                var floatingBuilder = (MyObjectBuilder_FloatingObject)item.GetObjectBuilder(true);
-                                var pos = floatingBuilder.PositionAndOrientation.Value;
-                                pos.Position = destination;
-                                floatingBuilder.PositionAndOrientation = pos;
-
                                 // Need to queue the objects, and relocate them over a number of frames, otherwise if they 
                                 // are all moved simultaneously to the same point in space, they will become stuck.
                                 _workQueue.Enqueue(delegate()
@@ -90,7 +85,6 @@
                                         item.SetPosition(destination); // Doesn't sync to the server.
                                     }
                                 });
-                                _workQueue.Enqueue(delegate() { floatingBuilder.CreateAndSyncEntity(); });
                             }
                         }
                     }

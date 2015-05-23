@@ -45,7 +45,8 @@ namespace midspace.adminscripts
         /// <param name="content"></param>
         public static void SendMessageToServer(Dictionary<string, string> content)
         {
-            content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
+            if (!content.ContainsKey(ConnectionKeys.Sender))
+                content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
             byte[] byteData = System.Text.Encoding.Unicode.GetBytes(ConvertData(content));
             if (byteData.Length <= MAX_MESSAGE_SIZE)
                 MyAPIGateway.Multiplayer.SendMessageToServer(StandardServerId, byteData);
@@ -87,7 +88,8 @@ namespace midspace.adminscripts
         /// <param name="content"></param>
         public static void SendMessageToAll(Dictionary<string, string> content)
         {
-            content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
+            if (!content.ContainsKey(ConnectionKeys.Sender))
+                content.Add(ConnectionKeys.Sender, MyAPIGateway.Session.Player.SteamUserId.ToString());
             if (!MyAPIGateway.Multiplayer.IsServer)
                 SendMessageToServer(content);
             SendMessageToAllPlayers(content);
