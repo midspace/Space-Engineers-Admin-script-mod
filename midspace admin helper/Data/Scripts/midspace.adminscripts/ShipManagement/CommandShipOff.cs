@@ -37,6 +37,8 @@
                         return true;
                     }
                 }
+                MyAPIGateway.Utilities.ShowMessage("Off", "No ship targeted.");
+                return true;
             }
 
             var match = Regex.Match(messageText, @"/off\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);

@@ -37,6 +37,8 @@
                         return true;
                     }
                 }
+                MyAPIGateway.Utilities.ShowMessage("On", "No ship targeted.");
+                return true;
             }
 
             if (messageText.StartsWith("/on ", StringComparison.InvariantCultureIgnoreCase))

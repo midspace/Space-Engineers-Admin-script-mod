@@ -43,6 +43,8 @@
                         }
                     }
                 }
+                MyAPIGateway.Utilities.ShowMessage("Stop", "No ship targeted.");
+                return true;
             }
 
             if (messageText.StartsWith("/stop ", StringComparison.InvariantCultureIgnoreCase))

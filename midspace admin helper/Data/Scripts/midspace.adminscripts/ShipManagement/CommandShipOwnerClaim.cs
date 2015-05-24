@@ -21,6 +21,30 @@
 
         public override bool Invoke(string messageText)
         {
+            if (messageText.Equals("/claim", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false);
+                if (entity != null)
+                {
+                    var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    if (shipEntity != null)
+                    {
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            shipEntity.ChangeGridOwnership(MyAPIGateway.Session.Player.PlayerID, MyOwnershipShareModeEnum.All);
+                        }
+                        else
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Claim, string.Format("{0}:{1}", MyAPIGateway.Session.Player.PlayerID, shipEntity.EntityId));
+                        }
+                        MyAPIGateway.Utilities.ShowMessage("Claim", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
+                        return true;
+                    }
+                }
+                MyAPIGateway.Utilities.ShowMessage("Claim", "No ship targeted.");
+                return true;
+            }
+
             var match = Regex.Match(messageText, @"/claim\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 
             if (match.Success)
@@ -53,6 +77,7 @@
                         {
                             ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Claim, string.Format("{0}:{1}", MyAPIGateway.Session.Player.PlayerID, grid.EntityId));
                         }
+                        MyAPIGateway.Utilities.ShowMessage("Claim", "Changing ownership of ship '{0}'.", grid.DisplayName);
                     }
                 }
 

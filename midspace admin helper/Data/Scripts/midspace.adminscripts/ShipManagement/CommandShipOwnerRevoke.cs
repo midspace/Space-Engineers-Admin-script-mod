@@ -21,6 +21,30 @@
 
         public override bool Invoke(string messageText)
         {
+            if (messageText.Equals("/revoke", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false);
+                if (entity != null)
+                {
+                    var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    if (shipEntity != null)
+                    {
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            shipEntity.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
+                        }
+                        else
+                        {
+                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Revoke, shipEntity.EntityId.ToString());
+                        }
+                        MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
+                        return true;
+                    }
+                }
+                MyAPIGateway.Utilities.ShowMessage("Revoke", "No ship targeted.");
+                return true;
+            }
+
             var match = Regex.Match(messageText, @"/revoke\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 
             if (match.Success)
@@ -53,6 +77,7 @@
                         {
                             ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Revoke, grid.EntityId.ToString());
                         }
+                        MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", grid.DisplayName);
                     }
                 }
 
