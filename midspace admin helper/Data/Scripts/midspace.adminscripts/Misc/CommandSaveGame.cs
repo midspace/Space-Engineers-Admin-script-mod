@@ -3,7 +3,8 @@
     using System;
 
     using Sandbox.ModAPI;
-    using VRage.Library.Utils;
+    using VRage.Library.Utils; // old
+    using VRage.Utils; // new
 
     /// <summary>
     /// Instructs the game to save to the local computer.
