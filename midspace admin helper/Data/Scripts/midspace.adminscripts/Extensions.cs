@@ -12,8 +12,6 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI.Interfaces;
     using VRageMath;
     using VRage;
-    using VRage.Library.Utils; // old
-    using VRage.Utils; // new
 
     public static class Extensions
     {
@@ -309,16 +307,6 @@ namespace midspace.adminscripts
 
             destroyable.DoDamage(1000f, damageType, true);
             return true;
-        }
-
-        public static string GetString(this MyStringId stringId)
-        {
-            return MyTexts.GetString(stringId);
-        }
-
-        public static string GetStringFormat(this MyStringId stringId, params object[] args)
-        {
-            return string.Format(MyTexts.GetString(stringId), args);
         }
 
         public static void ShowMessage(this IMyUtilities utilities, string sender, string messageText, params object[] args)

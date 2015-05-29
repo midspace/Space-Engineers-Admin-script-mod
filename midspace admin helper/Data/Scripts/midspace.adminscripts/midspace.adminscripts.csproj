@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatCommandService.cs" />
+    <Compile Include="Localize.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="AsteroidManagement\CommandAsteroidsList.cs" />
     <Compile Include="ShipManagement\CommandListPrefabs.cs" />
     <Compile Include="ShipManagement\CommandListShips.cs" />
-    <Compile Include="Misc\CommandVoxelsList.cs" />
+    <Compile Include="AsteroidManagement\CommandVoxelsList.cs" />
     <Compile Include="Misc\CommandMeteor.cs" />
     <Compile Include="ShipManagement\CommandPrefabPaste.cs" />
     <Compile Include="UserCommands\CommandPosition.cs" />
@@ -99,7 +100,7 @@
     <Compile Include="UserCommands\CommandVersion.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidEditClear.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidEditSet.cs" />
-    <Compile Include="Misc\CommandVoxelAdd.cs" />
+    <Compile Include="AsteroidManagement\CommandVoxelAdd.cs" />
     <Compile Include="Misc\CommandTest.cs" />
     <Compile Include="PlayerManagement\CommandListBots.cs" />
     <Compile Include="Misc\CommandSaveGame.cs" />

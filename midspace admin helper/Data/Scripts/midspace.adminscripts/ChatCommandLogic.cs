@@ -164,6 +164,8 @@ namespace midspace.adminscripts
             commands.Add(new CommandAsteroidsList());
             commands.Add(new CommandAsteroidRotate());
             //commands.Add(new CommandAsteroidSpread());  //not working
+            commands.Add(new CommandVoxelAdd());
+            commands.Add(new CommandVoxelsList());
             commands.Add(new CommandConfig());
             commands.Add(new CommandDate());
             commands.Add(new CommandFactionDemote());
@@ -234,8 +236,6 @@ namespace midspace.adminscripts
             commands.Add(new CommandTest());
             commands.Add(new CommandTime());
             commands.Add(new CommandVersion());
-            //commands.Add(new CommandVoxelAdd());  //not working any more
-            //commands.Add(new CommandVoxelsList()); //not working any more
 
             return commands;
         }

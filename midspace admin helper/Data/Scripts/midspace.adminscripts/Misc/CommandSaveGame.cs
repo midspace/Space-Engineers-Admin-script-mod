@@ -3,8 +3,6 @@
     using System;
 
     using Sandbox.ModAPI;
-    using VRage.Library.Utils; // old
-    using VRage.Utils; // new
 
     /// <summary>
     /// Instructs the game to save to the local computer.
@@ -29,7 +27,7 @@
             if (messageText.Equals("/savegame", StringComparison.InvariantCultureIgnoreCase))
             {
                 MyAPIGateway.Session.Save();
-                var msg = MyStringId.Get("WorldSaved").GetStringFormat(MyAPIGateway.Session.Name);
+                var msg = Localize.GetResource(Localize.WorldSaved, MyAPIGateway.Session.Name);
                 MyAPIGateway.Utilities.ShowNotification(msg, 2500, Sandbox.Common.MyFontEnum.White);
                 return true;
             }
