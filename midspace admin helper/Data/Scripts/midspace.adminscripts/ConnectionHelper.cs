@@ -300,7 +300,7 @@ namespace midspace.adminscripts
                         if (!CommandMessageOfTheDay.Received)
                         {
                             CommandMessageOfTheDay.Received = true;
-                            if (CommandMessageOfTheDay.ShowOnReceive)
+                            if (CommandMessageOfTheDay.ShowOnReceive && !String.IsNullOrEmpty(CommandMessageOfTheDay.Content))
                                 CommandMessageOfTheDay.ShowMotd();
                             break;
                         }

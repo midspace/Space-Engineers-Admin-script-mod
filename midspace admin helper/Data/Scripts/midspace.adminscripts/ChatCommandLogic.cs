@@ -331,7 +331,8 @@ namespace midspace.adminscripts
         {
             if (CommandMessageOfTheDay.Received && CommandMessageOfTheDay.ShowMotdOnSpawn)
             {
-                CommandMessageOfTheDay.ShowMotd();
+                 if (!String.IsNullOrEmpty(CommandMessageOfTheDay.Content))
+                    CommandMessageOfTheDay.ShowMotd();
                 if (!string.IsNullOrEmpty(AdminNotification))
                     MyAPIGateway.Utilities.ShowMissionScreen("Admin Notification System", "Error", null, AdminNotification, null, null);
             }
