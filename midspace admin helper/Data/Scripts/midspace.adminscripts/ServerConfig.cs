@@ -8,6 +8,9 @@ using System.Text;
 
 namespace midspace.adminscripts
 {
+    /// <summary>
+    /// Represents the server configuration of the mod.
+    /// </summary>
     public class ServerConfig
     {
         /// <summary>
@@ -42,7 +45,7 @@ namespace midspace.adminscripts
         private Permissions Permissions;
 
         /// <summary>
-        /// True for listen server
+        /// True for listen server.
         /// </summary>
         public static bool ServerIsClient = true;
 
@@ -92,7 +95,7 @@ namespace midspace.adminscripts
             //motd
             SaveMotd();
 
-            SaveGlobalChatLog();
+            SaveGlobalChatLog(); //TODO save chat & pm log every 5 minutes. Or when saving? Would require to create an event for that...
 
             if (Config.LogPrivateMessages)
                 SavePmLog();
@@ -185,7 +188,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         }
 
         /// <summary>
-        /// Create motd file
+        /// Create empty motd file.
         /// </summary>
         private void CreateMotdConfig()
         {
@@ -346,6 +349,40 @@ If you can't find the error, simply delete the file. The server will create a ne
             writer.Write(MyAPIGateway.Utilities.SerializeToXML<List<ChatMessage>>(ChatMessages));
             writer.Flush();
             writer.Close();
+        }
+
+        /// <summary>
+        /// Sends the given amount of chat entries to the client to display the chat history.
+        /// </summary>
+        /// <param name="senderSteamId">The Steamid of the receiving client.</param>
+        /// <param name="entryCount">The amount of entries that are requested.</param>
+        public void SendChatHistory(ulong receiver, uint entryCount)
+        {
+            //we just append new chat messages to the log. To get the most recent on top we have to sort it.
+            List<ChatMessage> cache = new List<ChatMessage>(ChatMessages.OrderByDescending(m => m.Date));
+            for (int i = 0; i < entryCount; i++)
+            {
+                bool lastEntry = i == entryCount - 1 || cache.Count == i + 1; 
+
+                Dictionary<string, string> mainContent = new Dictionary<string, string>();
+                Dictionary<string, string> msgContent = new Dictionary<string, string>();
+
+                ChatMessage chatMessage = cache[i];
+
+                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatMessage, chatMessage.Message);
+                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatSender, chatMessage.Sender.SteamId.ToString());
+                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatSenderName, chatMessage.Sender.PlayerName);
+                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatDate, chatMessage.Date.ToString());
+
+                mainContent.Add(ConnectionHelper.ConnectionKeys.ListEntry, ConnectionHelper.ConvertData(msgContent));
+
+                if (lastEntry) 
+                    mainContent.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
+
+                ConnectionHelper.SendMessageToPlayer(receiver, ConnectionHelper.ConnectionKeys.Chat, ConnectionHelper.ConvertData(mainContent));
+                if (cache.Count == i + 1)
+                    break;
+            }
         }
 
         #endregion
@@ -607,13 +644,13 @@ If you can't find the error, simply delete the file. The server will create a ne
             foreach (CommandStruct command in commands)
             {
                 var dict = new Dictionary<string, string>();
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryName, command.Name);
+                dict.Add(ConnectionHelper.ConnectionKeys.ListEntry, command.Name);
                 dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, command.NeededLevel.ToString());
 
                 if (commands.IndexOf(command) == 0)
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermNewHotlist, "");
+                    dict.Add(ConnectionHelper.ConnectionKeys.NewList, "");
                 if (commands.IndexOf(command) == commands.Count - 1)
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermLastEntry, "");
+                    dict.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
 
                 ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.CommandList, ConnectionHelper.ConvertData(dict));
             }
@@ -818,7 +855,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             foreach (Player player in players.OrderBy(p => p.PlayerName))
             {
                 var dict = new Dictionary<string, string>();
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryName, player.PlayerName);
+                dict.Add(ConnectionHelper.ConnectionKeys.ListEntry, player.PlayerName);
                 dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, GetPlayerLevel(player.SteamId).ToString());
                 dict.Add(ConnectionHelper.ConnectionKeys.PermEntryId, player.SteamId.ToString());
 
@@ -832,9 +869,9 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
 
                 if (players.IndexOf(player) == 0)
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermNewHotlist, "");
+                    dict.Add(ConnectionHelper.ConnectionKeys.NewList, "");
                 if (players.IndexOf(player) == players.Count - 1)
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermLastEntry, "");
+                    dict.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
 
                 ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.PlayerList, ConnectionHelper.ConvertData(dict));
             }
@@ -1051,7 +1088,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             foreach (PermissionGroup group in groups.OrderBy(g => g.GroupName))
             {
                 var dict = new Dictionary<string, string>();
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryName, group.GroupName);
+                dict.Add(ConnectionHelper.ConnectionKeys.ListEntry, group.GroupName);
                 dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, group.Level.ToString());
 
                 if (group.Members.Count > 0)
@@ -1064,9 +1101,9 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
 
                 if (groups.IndexOf(group) == 0)
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermNewHotlist, "");
+                    dict.Add(ConnectionHelper.ConnectionKeys.NewList, "");
                 if (groups.IndexOf(group) == groups.Count - 1)
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermLastEntry, "");
+                    dict.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
 
                 ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.GroupList, ConnectionHelper.ConvertData(dict));
             }
@@ -1140,10 +1177,10 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         #region utils
         /// <summary>
-        /// Replaces the chars from the given string that aren't allowed for a filename with a whitespace.
+        /// Replaces the chars from the given string that are not allowed for filenames with a whitespace.
         /// </summary>
-        /// <param name="originalText"></param>
-        /// <returns></returns>
+        /// <param name="originalText">The text containing characters that shall not be used in filenames.</param>
+        /// <returns>A string where the characters are replaced with a whitespace.</returns>
         public static string ReplaceForbiddenChars(string originalText)
         {
             if (string.IsNullOrWhiteSpace(originalText))
@@ -1163,7 +1200,12 @@ If you can't find the error, simply delete the file. The server will create a ne
             return convertedText;
         }
 
-        public bool IsServerAdmin(ulong steamId)
+        /// <summary>
+        /// Determines if the client is an admin.
+        /// </summary>
+        /// <param name="steamId">The Steamid of the client.</param>
+        /// <returns>True if the client is a server admin, false if it is not .</returns>
+        public static bool IsServerAdmin(ulong steamId)
         {
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players, p => p != null);

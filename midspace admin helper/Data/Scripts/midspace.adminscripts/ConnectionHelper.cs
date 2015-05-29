@@ -300,7 +300,7 @@ namespace midspace.adminscripts
                         if (!CommandMessageOfTheDay.Received)
                         {
                             CommandMessageOfTheDay.Received = true;
-                            if (CommandMessageOfTheDay.ShowOnReceive)
+                            if (CommandMessageOfTheDay.ShowOnReceive && !String.IsNullOrEmpty(CommandMessageOfTheDay.Content))
                                 CommandMessageOfTheDay.ShowMotd();
                             break;
                         }
@@ -323,17 +323,17 @@ namespace midspace.adminscripts
                             Logger.Debug(string.Format("[Client]Processing PM KeyValuePair - Key: {0}, Value: {1}", pmEntry.Key, pmEntry.Value));
                             switch (pmEntry.Key)
                             {
-                                case ConnectionKeys.PmSender:
+                                case ConnectionKeys.ChatSender:
                                     ulong senderSteamId;
                                     if (ulong.TryParse(pmEntry.Value, out senderSteamId) && senderSteamId != 0)
                                     {
                                         MyAPIGateway.Players.TryGetPlayer(senderSteamId, out sender);
                                     }
                                     break;
-                                case ConnectionKeys.PmSenderName:
+                                case ConnectionKeys.ChatSenderName:
                                     senderName = pmEntry.Value;
                                     break;
-                                case ConnectionKeys.PmMessage:
+                                case ConnectionKeys.ChatMessage:
                                     message = pmEntry.Value;
                                     break;
                             }
@@ -366,6 +366,43 @@ namespace midspace.adminscripts
                             client_IncomingMessages = parts;
                             client_MessageCache.Clear();
                         }
+                        break;
+                    case ConnectionKeys.Chat:
+                        bool lastEntry = false;
+                        ChatMessage chatMessage = new ChatMessage();
+                        foreach (KeyValuePair<string, string> pair in Parse(entry.Value))
+                        {
+                            switch (pair.Key)
+                            {
+                                case ConnectionKeys.ListEntry:
+                                    foreach (KeyValuePair<string, string> chatMsgPair in Parse(pair.Value))
+                                    {
+                                        ulong msgSenderSteamId;
+                                        switch (chatMsgPair.Key)
+                                        {
+                                            case ConnectionKeys.ChatMessage:
+                                                chatMessage.Message = chatMsgPair.Value;
+                                                break;
+                                            case ConnectionKeys.ChatSender:
+                                                if (ulong.TryParse(chatMsgPair.Value, out msgSenderSteamId))
+                                                    chatMessage.Sender.SteamId = msgSenderSteamId;
+                                                break;
+                                            case ConnectionKeys.ChatSenderName:
+                                                chatMessage.Sender.PlayerName = chatMsgPair.Value;
+                                                break;
+                                            case ConnectionKeys.ChatDate:
+                                                chatMessage.Date = DateTime.Parse(chatMsgPair.Value);
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case ConnectionKeys.ListLastEntry:
+                                    lastEntry = true;
+                                    break;
+                            }
+                        }
+
+                        CommandChatHistory.AddMessageToCache(chatMessage, lastEntry);
                         break;
                     #endregion
 
@@ -453,16 +490,16 @@ namespace midspace.adminscripts
                         {
                             switch (pair.Key)
                             {
-                                case ConnectionKeys.PermEntryName:
+                                case ConnectionKeys.ListEntry:
                                     commandName = pair.Value;
                                     break;
                                 case ConnectionKeys.PermEntryLevel:
                                     commandLevel = pair.Value;
                                     break;
-                                case ConnectionKeys.PermNewHotlist:
+                                case ConnectionKeys.NewList:
                                     newCommandList = true;
                                     break;
-                                case ConnectionKeys.PermLastEntry:
+                                case ConnectionKeys.ListLastEntry:
                                     showCommandList = true;
                                     break;
                             }
@@ -490,7 +527,7 @@ namespace midspace.adminscripts
                         {
                             switch (pair.Key)
                             {
-                                case ConnectionKeys.PermEntryName:
+                                case ConnectionKeys.ListEntry:
                                     playerName = pair.Value;
                                     break;
                                 case ConnectionKeys.PermEntryLevel:
@@ -508,10 +545,10 @@ namespace midspace.adminscripts
                                 case ConnectionKeys.PermEntryUsePlayerLevel:
                                     usePlayerLevel = true;
                                     break;
-                                case ConnectionKeys.PermNewHotlist:
+                                case ConnectionKeys.NewList:
                                     newPlayerList = true;
                                     break;
-                                case ConnectionKeys.PermLastEntry:
+                                case ConnectionKeys.ListLastEntry:
                                     showPlayerList = true;
                                     break;
                             }
@@ -530,7 +567,7 @@ namespace midspace.adminscripts
                         {
                             switch (pair.Key)
                             {
-                                case ConnectionKeys.PermEntryName:
+                                case ConnectionKeys.ListEntry:
                                     groupName = pair.Value;
                                     break;
                                 case ConnectionKeys.PermEntryLevel:
@@ -539,10 +576,10 @@ namespace midspace.adminscripts
                                 case ConnectionKeys.PermEntryMembers:
                                     members = pair.Value;
                                     break;
-                                case ConnectionKeys.PermNewHotlist:
+                                case ConnectionKeys.NewList:
                                     newGroupList = true;
                                     break;
-                                case ConnectionKeys.PermLastEntry:
+                                case ConnectionKeys.ListLastEntry:
                                     showGroupList = true;
                                     break;
                             }
@@ -683,13 +720,13 @@ namespace midspace.adminscripts
                         {
                             switch (pmEntry.Key)
                             {
-                                case ConnectionKeys.PmReceiver:
+                                case ConnectionKeys.ChatReceiver:
                                     if (ulong.TryParse(pmEntry.Value, out receiverSteamId))
                                     {
                                         SendMessageToPlayer(receiverSteamId, ConnectionKeys.PrivateMessage, entry.Value);
                                     }
                                     break;
-                                case ConnectionKeys.PmMessage:
+                                case ConnectionKeys.ChatMessage:
                                     message = pmEntry.Value;
                                     break;
                             }
@@ -707,7 +744,7 @@ namespace midspace.adminscripts
                             string[] values = entry.Value.Split(':');
                             bool ban = false;
                             ulong steamId;
-                            if (ulong.TryParse(values[0], out steamId) && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(steamId))
+                            if (ulong.TryParse(values[0], out steamId) && !ServerConfig.IsServerAdmin(steamId))
                             {
                                 var players = new List<IMyPlayer>();
                                 MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
@@ -750,6 +787,11 @@ namespace midspace.adminscripts
                             server_IncomingMessages = parts;
                             server_MessageCache.Clear();
                         }
+                        break;
+                    case ConnectionKeys.Chat:
+                        uint entryCount;
+                        if (uint.TryParse(entry.Value, out entryCount))
+                            ChatCommandLogic.Instance.ServerCfg.SendChatHistory(senderSteamId, entryCount);
                         break;
                     #endregion
 
@@ -980,10 +1022,10 @@ namespace midspace.adminscripts
                         if (ulong.TryParse(entry.Value, out newClientSteamId))
                         {
                             var data = new Dictionary<string, string>();
-                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
+                            if (!string.IsNullOrEmpty(ChatCommandLogic.Instance.AdminNotification) && ServerConfig.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.AdminNotification, ChatCommandLogic.Instance.AdminNotification);
                             BannedPlayer bannedPlayer1 = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.FirstOrDefault(p => p.SteamId == newClientSteamId);
-                            if (bannedPlayer1.SteamId != 0 && !ChatCommandLogic.Instance.ServerCfg.IsServerAdmin(newClientSteamId))
+                            if (bannedPlayer1.SteamId != 0 && !ServerConfig.IsServerAdmin(newClientSteamId))
                                 data.Add(ConnectionKeys.ForceKick, bannedPlayer1.SteamId.ToString());
                             data.Add(ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
                             //first connection!
@@ -1043,10 +1085,10 @@ namespace midspace.adminscripts
                 return;
 
             var data = new Dictionary<string, string>();
-            data.Add(ConnectionHelper.ConnectionKeys.PmReceiver, steamId.ToString());
-            data.Add(ConnectionHelper.ConnectionKeys.PmSender, "0");
-            data.Add(ConnectionHelper.ConnectionKeys.PmSenderName, "Server");
-            data.Add(ConnectionHelper.ConnectionKeys.PmMessage, message);
+            data.Add(ConnectionHelper.ConnectionKeys.ChatReceiver, steamId.ToString());
+            data.Add(ConnectionHelper.ConnectionKeys.ChatSender, "0");
+            data.Add(ConnectionHelper.ConnectionKeys.ChatSenderName, "Server");
+            data.Add(ConnectionHelper.ConnectionKeys.ChatMessage, message);
             string messageData = ConnectionHelper.ConvertData(data);
 
             SendMessageToPlayer(steamId, ConnectionKeys.PrivateMessage, ConvertData(data));
@@ -1057,6 +1099,7 @@ namespace midspace.adminscripts
             //misc
             public const string AdminLevel = "adminlvl";
             public const string AdminNotification = "adminnot";
+            public const string Chat = "chat";
             public const string ConfigReload = "cfgrl";
             public const string ConfigSave = "cfgsave";
             public const string ConnectionRequest = "connect";
@@ -1090,29 +1133,32 @@ namespace midspace.adminscripts
             public const string GroupList = "gpermlst";
 
             //perm subkeys
-            public const string PermEntryName = "pentnam";
             public const string PermEntryLevel = "pentlvl";
             public const string PermEntryId = "pentid";
             public const string PermEntryUsePlayerLevel = "pentupl";
             public const string PermEntryExtensions = "pentext";
             public const string PermEntryRestrictions = "pentres";
             public const string PermEntryMembers = "pentmem";
-            public const string PermNewHotlist = "pnewlst";
-            public const string PermLastEntry = "plstent";
+
+            //lists
+            public const string ListEntry = "lstent";
+            public const string NewList = "lstnew";
+            public const string ListLastEntry = "lstlastent";
 
             //sync
             public const string Claim = "claim";
             public const string Delete = "delete";
+            public const string Smite = "smite";
             public const string Stop = "stop";
             public const string StopAndMove = "stopmove";
             public const string Revoke = "revoke";
 
-            //pm subkeys
-            public const string PmMessage = "msg";
-            public const string PmSender = "sender";
-            public const string PmSenderName = "sendername";
-            public const string Smite = "smite";
-            public const string PmReceiver = "receiver";
+            //chat message subkeys
+            public const string ChatMessage = "chmsg";
+            public const string ChatSender = "chsen";
+            public const string ChatSenderName = "chsennam";
+            public const string ChatReceiver = "chrec";
+            public const string ChatDate = "chdat";
 
             //session settings
             public const string Creative = "creative";

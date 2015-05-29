@@ -189,10 +189,10 @@ The logging of private messages is {1}.
                 MyAPIGateway.Utilities.ShowMessage("PM System", "Message too short.");
 
             var data = new Dictionary<string, string>();
-            data.Add(ConnectionHelper.ConnectionKeys.PmReceiver, receiver.SteamUserId.ToString());
-            data.Add(ConnectionHelper.ConnectionKeys.PmSender, MyAPIGateway.Session.Player.SteamUserId.ToString());
-            data.Add(ConnectionHelper.ConnectionKeys.PmSenderName, MyAPIGateway.Session.Player.DisplayName);
-            data.Add(ConnectionHelper.ConnectionKeys.PmMessage, message);
+            data.Add(ConnectionHelper.ConnectionKeys.ChatReceiver, receiver.SteamUserId.ToString());
+            data.Add(ConnectionHelper.ConnectionKeys.ChatSender, MyAPIGateway.Session.Player.SteamUserId.ToString());
+            data.Add(ConnectionHelper.ConnectionKeys.ChatSenderName, MyAPIGateway.Session.Player.DisplayName);
+            data.Add(ConnectionHelper.ConnectionKeys.ChatMessage, message);
             string messageData = ConnectionHelper.ConvertData(data);
 
             ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PrivateMessage, messageData);
