@@ -43,7 +43,7 @@ Example:
                 return true;
             }
 
-            var match = Regex.Match(messageText, @"/chat\s+((?<Entries>.+)|)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/chat(\s+(?<Entries>.+)|)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -51,7 +51,7 @@ Example:
 
                 uint entries = 100;
 
-                if (!string.IsNullOrEmpty(entriesStr))
+                if (string.IsNullOrEmpty(entriesStr))
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Chat, entries.ToString());
                 else
                     if (uint.TryParse(entriesStr, out entries) && entries != 0)

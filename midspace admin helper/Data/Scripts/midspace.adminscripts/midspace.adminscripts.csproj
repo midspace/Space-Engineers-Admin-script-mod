@@ -104,7 +104,7 @@
     <Compile Include="AsteroidManagement\CommandVoxelAdd.cs" />
     <Compile Include="Misc\CommandTest.cs" />
     <Compile Include="PlayerManagement\CommandListBots.cs" />
-    <Compile Include="Misc\CommandSaveGame.cs" />
+    <Compile Include="Misc\CommandSave.cs" />
     <Compile Include="ChatCommandSecurity.cs" />
     <Compile Include="ShipManagement\CommandShipOwnerRevoke.cs" />
     <Compile Include="FactionManagement\CommandFactionPromote.cs" />

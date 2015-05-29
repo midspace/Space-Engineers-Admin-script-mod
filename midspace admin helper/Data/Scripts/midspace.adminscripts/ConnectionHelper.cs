@@ -704,14 +704,22 @@ namespace midspace.adminscripts
 
                     #region misc
                     case ConnectionKeys.Save:
-                        if (ServerConfig.ServerIsClient)
-                            break; //no one should be able to do that
+                        if (ServerConfig.ServerIsClient && senderSteamId != MyAPIGateway.Session.Player.SteamUserId) //no one should be able to do that
+                        {
+                            SendChatMessage(senderSteamId, "Saving the session on a locally hosted server is not allowed.");
+                            break; 
+                        }
 
                         if (string.IsNullOrEmpty(entry.Value))
+                        {
                             MyAPIGateway.Session.Save();
+                            SendChatMessage(senderSteamId, "Session saved.");
+                        }
                         else
+                        {
                             MyAPIGateway.Session.Save(entry.Value);
-                        //TODO implement a command that uses this
+                            SendChatMessage(senderSteamId, string.Format("Session saved as {0}.", entry.Value));
+                        }
                         break;
                     case ConnectionKeys.PrivateMessage:
                         string message = "";
@@ -1114,6 +1122,7 @@ namespace midspace.adminscripts
             public const string Pardon = "pard";
             public const string PrivateMessage = "pm";
             public const string Save = "save";
+            public const string SaveTime = "savetime";
             public const string Sender = "sender";
 
             //permissions
