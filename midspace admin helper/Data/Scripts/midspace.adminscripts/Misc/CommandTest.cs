@@ -6,14 +6,22 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using Sandbox.Common;
+    using Sandbox.Common.Components;
     using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.Definitions;
+    using Sandbox.Common.ObjectBuilders.Voxels;
     using Sandbox.Common.ObjectBuilders.VRageData;
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
-    using VRageMath;
     using VRage;
-    using Sandbox.Common.ObjectBuilders.Definitions;
-    using Sandbox.Definitions;
+    using VRage.Components;
+    using VRage.ModAPI;
+    using VRage.ObjectBuilders;
+    using VRage.Utils;
+    using VRage.Voxels;
+    using VRageMath;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -395,7 +403,7 @@
                 };
 
                 Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock cube = new Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock();
-                cube.Min = new Sandbox.Common.ObjectBuilders.VRageData.SerializableVector3I(0, 0, 0);
+                cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
                 cube.ShareMode = MyOwnershipShareModeEnum.None;
@@ -443,7 +451,7 @@
                 };
 
                 Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock cube = new Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock();
-                cube.Min = new Sandbox.Common.ObjectBuilders.VRageData.SerializableVector3I(0, 0, 0);
+                cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
                 cube.ShareMode = MyOwnershipShareModeEnum.None;

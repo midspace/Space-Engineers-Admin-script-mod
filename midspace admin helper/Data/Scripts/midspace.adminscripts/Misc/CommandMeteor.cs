@@ -1,10 +1,11 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using System.Collections.Generic;
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage;
+    using VRage.ObjectBuilders;
     using VRageMath;
 
     public class CommandMeteor : ChatCommand
