@@ -5,7 +5,8 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
-    using Sandbox.Common.ObjectBuilders;
+    using VRage.ModAPI;
+    using VRage.ObjectBuilders;
 
     public class CommandAsteroidSpread : ChatCommand
     {

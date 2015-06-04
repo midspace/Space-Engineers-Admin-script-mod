@@ -1,11 +1,13 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRage.ModAPI;
 
     public class CommandListShips : ChatCommand
     {
@@ -38,12 +40,30 @@
                 var currentShipList = Support.FindShipsByName(shipName);
 
                 ShipCache.Clear();
-                MyAPIGateway.Utilities.ShowMessage("Count", currentShipList.Count.ToString());
-                var index = 1;
-                foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
+
+                //only display the list in chat if the chat allows to fully show it, else display it in a mission screen.
+                if (currentShipList.Count <= 9)
                 {
-                    ShipCache.Add(ship);
-                    MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), ship.DisplayName);
+                    MyAPIGateway.Utilities.ShowMessage("Count", currentShipList.Count.ToString());
+                    var index = 1;
+                    foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
+                    {
+                        ShipCache.Add(ship);
+                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), ship.DisplayName);
+                    }
+                }
+                else
+                {
+                    var description = new StringBuilder();
+                    var prefix = string.Format("Count: {0}", currentShipList.Count);
+                    var index = 1;
+                    foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
+                    {
+                        CommandListShips.ShipCache.Add(ship);
+                        description.AppendFormat("#{0}: {1}\r\n", index++, ship.DisplayName);
+                    }
+
+                    MyAPIGateway.Utilities.ShowMissionScreen("List Ships", prefix, " ", description.ToString());
                 }
 
                 return true;

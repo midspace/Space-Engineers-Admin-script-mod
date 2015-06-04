@@ -5,7 +5,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
-    using VRageMath;
+    using VRage.ModAPI;
 
     public class CommandTeleportToShip : ChatCommand
     {

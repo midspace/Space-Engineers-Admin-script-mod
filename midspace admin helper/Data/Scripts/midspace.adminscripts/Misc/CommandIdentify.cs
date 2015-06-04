@@ -7,6 +7,7 @@
 
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using VRage.ModAPI;
     using VRage.Voxels;
     using VRageMath;
 
