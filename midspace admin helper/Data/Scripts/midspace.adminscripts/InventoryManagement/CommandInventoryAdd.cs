@@ -11,7 +11,6 @@
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
-    using VRage.ObjectBuilders;
 
     public class CommandInventoryAdd : ChatCommand
     {

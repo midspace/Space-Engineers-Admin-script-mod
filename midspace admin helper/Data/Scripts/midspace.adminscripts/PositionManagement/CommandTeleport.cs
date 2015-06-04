@@ -8,7 +8,6 @@
 
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using VRage.ModAPI;
     using VRageMath;
 
     /// <summary>

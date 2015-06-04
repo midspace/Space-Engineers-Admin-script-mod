@@ -8,8 +8,6 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using VRage;
-    using VRage.ObjectBuilders;
     using VRageMath;
 
     public class CommandPrefabAdd : ChatCommand

@@ -9,8 +9,6 @@ namespace midspace.adminscripts
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
-    using VRage.ModAPI;
-    using VRage.ObjectBuilders;
     using VRage.Voxels;
     using VRageMath;
 
@@ -512,7 +510,7 @@ namespace midspace.adminscripts
                 var item = _physicalItems[Array.IndexOf(_physicalItemNames, res)];
                 if (item != null)
                 {
-                    objectBuilder = MyObjectBuilderSerializer.CreateNewObject(item.Id.TypeId, item.Id.SubtypeName);
+                    objectBuilder = Sandbox.Common.ObjectBuilders.Serializer.MyObjectBuilderSerializer.CreateNewObject(item.Id.TypeId, item.Id.SubtypeName);
                     options = new string[0];
                     return true;
                 }

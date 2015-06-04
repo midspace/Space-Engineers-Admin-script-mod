@@ -6,10 +6,8 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using VRage.ModAPI;
-    using VRage.ObjectBuilders;
+    using Sandbox.Definitions;
 
     public class CommandShipScaleUp : ChatCommand
     {

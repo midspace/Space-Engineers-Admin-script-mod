@@ -3,8 +3,9 @@
     using System;
     using System.Collections.Generic;
 
+    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
-    using VRage.ModAPI;
+    using Sandbox.ModAPI.Interfaces;
 
     public class CommandObjectsCount : ChatCommand
     {

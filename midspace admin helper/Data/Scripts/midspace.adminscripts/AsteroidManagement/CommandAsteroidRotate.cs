@@ -6,9 +6,8 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
-    using VRage.ModAPI;
-    using VRage.Voxels;
     using VRageMath;
+    using VRage.Voxels;
 
     /// <summary>
     /// This worked by creating a new asteroid store with the new dimentions required (as the entire space is rotated).

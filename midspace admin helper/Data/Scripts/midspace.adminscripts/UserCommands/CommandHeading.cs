@@ -28,7 +28,7 @@
                 var playerQ = Quaternion.CreateFromRotationMatrix(MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetViewMatrix());
                 var referenceQ = Quaternion.CreateFromForwardUp(Vector3.Forward, Vector3.Up); // or the direction to target.
                 var fixRotate = Quaternion.Normalize(Quaternion.Inverse(playerQ) * referenceQ);
-                var vector = MyMath.QuaternionToEuler(fixRotate);
+                var vector = Sandbox.Common.MyMath.QuaternionToEuler(fixRotate);
                 var elevation = vector.X * 180 / Math.PI;
                 var azimuth = vector.Y * -180 / Math.PI;
 
@@ -67,7 +67,7 @@
                 var playerQ = Quaternion.CreateFromRotationMatrix(MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetViewMatrix());
                 var referenceQ = Quaternion.CreateFromForwardUp(Vector3.Forward, Vector3.Up);
                 var fixRotate = Quaternion.Normalize(Quaternion.Inverse(playerQ) * referenceQ); // or the direction to target.
-                var vector = MyMath.QuaternionToEuler(fixRotate);
+                var vector = Sandbox.Common.MyMath.QuaternionToEuler(fixRotate);
                 var elevation = vector.X * 180 / Math.PI;
                 var azimuth = vector.Y * -180 / Math.PI;
 

@@ -46,9 +46,6 @@
     <Reference Include="VRage">
       <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files\Reference Assemblies\SpaceEngineers\VRage.dll</HintPath>
     </Reference>
-    <Reference Include="VRage.Game">
-      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files\Reference Assemblies\SpaceEngineers\VRage.Game.dll</HintPath>
-    </Reference>
     <Reference Include="VRage.Library">
       <HintPath>C:\Program Files\Reference Assemblies\SpaceEngineers\VRage.Library.dll</HintPath>
       <Private>False</Private>

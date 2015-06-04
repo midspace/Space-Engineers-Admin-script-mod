@@ -7,7 +7,6 @@
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
-    using VRage.ModAPI;
 
     public class CommandShipScaleDown : ChatCommand
     {
