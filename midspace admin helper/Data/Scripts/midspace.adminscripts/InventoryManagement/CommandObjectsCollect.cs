@@ -100,8 +100,13 @@
         {
             if (_workQueue.Count > 0)
             {
-                var action = _workQueue.Dequeue();
-                action.Invoke();
+                // unable to Lock the queue, so we have to check the item before dequeuing.
+                var action = _workQueue.Peek();
+                if (action != null)
+                {
+                    action = _workQueue.Dequeue();
+                    action.Invoke();
+                }
             }
         }
     }

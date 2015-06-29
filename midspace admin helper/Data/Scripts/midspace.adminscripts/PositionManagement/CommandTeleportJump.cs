@@ -8,7 +8,7 @@
     public class CommandTeleportJump : ChatCommand
     {
         public CommandTeleportJump()
-            : base(ChatCommandSecurity.Admin, "j", new[] { "/j" })
+            : base(ChatCommandSecurity.Admin, "j", new[] { "/j", "/jump" })
         {
         }
 
@@ -19,7 +19,7 @@
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/j\s{1,}(?<D>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/((j)|(jump))\s{1,}(?<D>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {

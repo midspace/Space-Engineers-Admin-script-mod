@@ -65,6 +65,8 @@
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />
+    <Compile Include="PositionManagement\CommandSpeed.cs" />
+    <Compile Include="ShipManagement\CommandShipDestructable.cs" />
     <Compile Include="UserCommands\CommandChatHistory.cs" />
     <Compile Include="UserCommands\CommandPrivateMessage.cs" />
     <Compile Include="PlayerManagement\CommandPardon.cs" />
