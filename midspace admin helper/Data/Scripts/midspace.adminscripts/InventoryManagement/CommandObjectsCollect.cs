@@ -51,6 +51,8 @@
                     //floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
                     floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject)).ToList();
 
+                    _workQueue.Clear();
+
                     foreach (var item in floatingList)
                     {
                         // Check for null physics and IsPhantom, to prevent picking up primitives.
@@ -79,7 +81,7 @@
                                     {
                                         ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
                                     }
-                                    else
+                                    else if (item.Physics != null)
                                     {
                                         item.Physics.ClearSpeed();
                                         item.SetPosition(destination); // Doesn't sync to the server.
@@ -100,13 +102,8 @@
         {
             if (_workQueue.Count > 0)
             {
-                // unable to Lock the queue, so we have to check the item before dequeuing.
-                var action = _workQueue.Peek();
-                if (action != null)
-                {
-                    action = _workQueue.Dequeue();
-                    action.Invoke();
-                }
+                var action = _workQueue.Dequeue();
+                action.Invoke();
             }
         }
     }

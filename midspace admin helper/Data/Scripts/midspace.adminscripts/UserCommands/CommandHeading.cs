@@ -1,8 +1,9 @@
 ﻿namespace midspace.adminscripts
 {
+    using System;
+
     using Sandbox.Common;
     using Sandbox.ModAPI;
-    using System;
     using VRageMath;
 
     public class CommandHeading : ChatCommand
