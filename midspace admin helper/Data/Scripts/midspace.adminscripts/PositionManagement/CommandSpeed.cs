@@ -32,7 +32,7 @@
                 {
                     var cubeGrid = entity.GetTopMostParent();
                     var grids = cubeGrid.GetAttachedGrids();
-                    var targetVector = cubeGrid.WorldMatrix.Forward;
+                    var targetVector = entity.WorldMatrix.Forward;
                     targetVector = Vector3D.Normalize(targetVector) * vector;
 
                     foreach (var grid in grids)
