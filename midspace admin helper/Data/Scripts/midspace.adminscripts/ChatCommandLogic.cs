@@ -159,6 +159,8 @@ namespace midspace.adminscripts
             //commands.Add(new CommandAsteroidFindOre(_oreNames));
             //commands.Add(new CommandAsteroidEditClear());
             //commands.Add(new CommandAsteroidEditSet());
+            commands.Add(new CommandAsteroidFill());
+            commands.Add(new CommandAsteroidReplace());
             commands.Add(new CommandAsteroidCreate());
             commands.Add(new CommandAsteroidCreateSphere());
             commands.Add(new CommandAsteroidsList());

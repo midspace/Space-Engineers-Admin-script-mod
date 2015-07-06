@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsteroidManagement\CommandAsteroidReplace.cs" />
     <Compile Include="ChatCommandService.cs" />
     <Compile Include="Localize.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="AsteroidManagement\CommandAsteroidCreateSphere.cs" />
     <Compile Include="SessionManagement\CommandSessionSpectator.cs" />
     <Compile Include="SessionManagement\CommandSessionWeapons.cs" />
+    <Compile Include="AsteroidManagement\CommandAsteroidFill.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />

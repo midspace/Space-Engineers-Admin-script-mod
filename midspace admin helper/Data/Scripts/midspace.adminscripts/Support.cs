@@ -522,5 +522,68 @@ namespace midspace.adminscripts
             options = new string[0];
             return false;
         }
+
+        /// <summary>
+        /// Find the physical asteroid either of the specified name or in the user hot list;
+        /// </summary>
+        /// <param name="searchAsteroidName"></param>
+        /// <param name="originalAsteroid"></param>
+        /// <returns></returns>
+        public static bool FindAsteroid(string searchAsteroidName, out IMyVoxelBase originalAsteroid)
+        {
+            var currentAsteroidList = new List<IMyVoxelBase>();
+            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(searchAsteroidName, StringComparison.InvariantCultureIgnoreCase));
+            if (currentAsteroidList.Count == 1)
+            {
+                originalAsteroid = currentAsteroidList[0];
+                return true;
+            }
+            else
+            {
+                MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.IndexOf(searchAsteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+
+                if (currentAsteroidList.Count == 1)
+                {
+                    originalAsteroid = currentAsteroidList[0];
+                    return true;
+                }
+            }
+
+            int index;
+            if (searchAsteroidName.Substring(0, 1) == "#" && Int32.TryParse(searchAsteroidName.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
+            {
+                originalAsteroid = CommandAsteroidsList.AsteroidCache[index - 1];
+                return true;
+            }
+
+            originalAsteroid = null;
+            return false;
+        }
+
+        public static bool FindMaterial(string searchMaterialName, out MyVoxelMaterialDefinition material, ref string suggestedMaterials)
+        {
+            string[] validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(k => k.Id.SubtypeName.Equals(searchMaterialName, StringComparison.InvariantCultureIgnoreCase)).Select(k => k.Id.SubtypeName).ToArray();
+            if (validMaterials.Length == 0 || validMaterials.Length > 1)
+            {
+                validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(k => k.Id.SubtypeName.IndexOf(searchMaterialName, StringComparison.InvariantCultureIgnoreCase) >= 0).Select(k => k.Id.SubtypeName).ToArray();
+                if (validMaterials.Length == 0)
+                {
+                    validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
+                    material = null;
+                    suggestedMaterials = String.Join(", ", validMaterials);
+                    return false;
+                }
+                if (validMaterials.Length > 1)
+                {
+                    material = null;
+                    suggestedMaterials = String.Join(", ", validMaterials);
+                    return false;
+                }
+            }
+
+            suggestedMaterials = "";
+            material = MyDefinitionManager.Static.GetVoxelMaterialDefinition(validMaterials[0]);
+            return true;
+        }
     }
 }
