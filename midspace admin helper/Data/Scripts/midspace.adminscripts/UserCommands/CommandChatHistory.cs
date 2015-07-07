@@ -15,7 +15,8 @@ namespace midspace.adminscripts
         public CommandChatHistory()
             : base (ChatCommandSecurity.User, "chat", new string[] { "/chat" })
         {
-
+            // clear the static cache.
+            MessageCache.Clear();
         }
 
         public override void Help(bool brief)

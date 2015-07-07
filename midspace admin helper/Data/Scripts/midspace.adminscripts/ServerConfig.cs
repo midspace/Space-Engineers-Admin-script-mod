@@ -358,8 +358,15 @@ If you can't find the error, simply delete the file. The server will create a ne
         /// <param name="entryCount">The amount of entries that are requested.</param>
         public void SendChatHistory(ulong receiver, uint entryCount)
         {
-            //we just append new chat messages to the log. To get the most recent on top we have to sort it.
+            // we just append new chat messages to the log. To get the most recent on top we have to sort it.
             List<ChatMessage> cache = new List<ChatMessage>(ChatMessages.OrderByDescending(m => m.Date));
+
+            if (cache.Count == 0)
+            {
+                // TODO: return a count of zero messages to the receiver.
+                return;
+            }
+
             for (int i = 0; i < entryCount; i++)
             {
                 bool lastEntry = i == entryCount - 1 || cache.Count == i + 1; 
