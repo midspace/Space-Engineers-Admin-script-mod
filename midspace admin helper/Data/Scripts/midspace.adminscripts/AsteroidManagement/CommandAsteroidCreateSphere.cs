@@ -32,7 +32,7 @@
             }
             else
             {
-                var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
+                var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).OrderBy(s => s).ToArray();
                 var materialNames = String.Join(", ", validMaterials);
 
                 var description = new StringBuilder();

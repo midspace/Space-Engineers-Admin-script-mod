@@ -319,12 +319,20 @@ If you can't find the error, simply delete the file. The server will create a ne
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == sender);
             IMyPlayer player = players.FirstOrDefault();
+
+            if (player == null)
+            {
+                // TODO: trap and log.
+                // Player's Steam ID should exist at this point in the game, as an in game player sent the message!
+                // Log the message regardless below under user Unknown.
+            }
+
             ChatMessages.Add(new ChatMessage()
             {
                 Sender = new Player()
                 {
-                    SteamId = player.SteamUserId,
-                    PlayerName = player.DisplayName
+                    SteamId = player == null ? 0 : player.SteamUserId,
+                    PlayerName = player == null ? "Unknown" : player.DisplayName
                 },
                 Date = DateTime.Now,
                 Message = message

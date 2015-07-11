@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
@@ -38,12 +40,30 @@
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => asteroidName == null || v.StorageName.IndexOf(asteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0);
 
                 AsteroidCache.Clear();
-                MyAPIGateway.Utilities.ShowMessage("Count", currentAsteroidList.Count.ToString());
-                var index = 1;
-                foreach (var voxelMap in currentAsteroidList)
+
+                // Only display the list in chat if the chat allows to fully show it, else display it in a mission screen.
+                if (currentAsteroidList.Count <= 9)
                 {
-                    AsteroidCache.Add(voxelMap);
-                    MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), voxelMap.StorageName);
+                    MyAPIGateway.Utilities.ShowMessage("Count", currentAsteroidList.Count.ToString());
+                    var index = 1;
+                    foreach (var voxelMap in currentAsteroidList)
+                    {
+                        AsteroidCache.Add(voxelMap);
+                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), voxelMap.StorageName);
+                    }
+                }
+                else
+                {
+                    var description = new StringBuilder();
+                    var prefix = string.Format("Count: {0}", currentAsteroidList.Count);
+                    var index = 1;
+                    foreach (var voxelMap in currentAsteroidList.OrderBy(s => s.StorageName))
+                    {
+                        AsteroidCache.Add(voxelMap);
+                        description.AppendFormat("#{0}: {1}\r\n", index++, voxelMap.StorageName);
+                    }
+
+                    MyAPIGateway.Utilities.ShowMissionScreen("List Asteroids", prefix, " ", description.ToString());
                 }
 
                 return true;
