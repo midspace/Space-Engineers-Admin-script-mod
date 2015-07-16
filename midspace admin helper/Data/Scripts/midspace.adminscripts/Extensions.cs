@@ -5,13 +5,13 @@ namespace midspace.adminscripts
     using System.Linq;
 
     using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
+    using VRage.Utils;
     using VRageMath;
 
     public static class Extensions
@@ -300,7 +300,7 @@ namespace midspace.adminscripts
         /// </summary>
         /// <param name="player"></param>
         /// <param name="damageType"></param>
-        public static bool KillPlayer(this IMyPlayer player, MyDamageType damageType = MyDamageType.Unknown)
+        public static bool KillPlayer(this IMyPlayer player, MyStringHash damageType)
         {
             var destroyable = player.Controller.ControlledEntity as IMyDestroyableObject;
             if (destroyable == null)
