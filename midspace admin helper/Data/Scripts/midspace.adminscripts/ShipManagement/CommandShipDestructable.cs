@@ -44,7 +44,7 @@
                 // set destructable on the ship in the crosshairs.
                 if (string.IsNullOrEmpty(shipName))
                 {
-                    var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false);
+                    var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false);
                     if (entity != null)
                     {
                         var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;

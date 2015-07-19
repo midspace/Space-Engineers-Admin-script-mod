@@ -32,7 +32,7 @@
 
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                 {
-                    worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
+                    worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
                     position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player for safety.
                 }
                 else

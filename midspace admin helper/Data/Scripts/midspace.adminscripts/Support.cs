@@ -16,31 +16,32 @@ namespace midspace.adminscripts
 
     public static class Support
     {
-        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips = true, bool findPlayers = true, bool findAsteroids = true)
+        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips = true, bool findPlayers = true, bool findAsteroids = true, bool findPlanets = true)
         {
             IMyEntity entity;
             double distance;
-            FindLookAtEntity(controlledEntity, out entity, out distance, findShips, findPlayers, findAsteroids);
+            FindLookAtEntity(controlledEntity, out entity, out distance, findShips, findPlayers, findAsteroids, findPlanets);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, bool findShips = true, bool findPlayers = true, bool findAsteroids = true)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, bool findShips = true, bool findPlayers = true, bool findAsteroids = true, bool findPlanets = true)
         {
+            const float range = 5000000;
             Matrix worldMatrix;
             Vector3D startPosition;
             Vector3D endPosition;
             if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
             {
-                worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true); // most accurate for player view.
+                worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
-                endPosition = worldMatrix.Translation + worldMatrix.Forward * 5000.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 0.5f);
             }
             else
             {
                 worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 // TODO: need to adjust for position of cockpit within ship.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 1.5f;
-                endPosition = worldMatrix.Translation + worldMatrix.Forward * 5001.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 1.5f);
             }
 
             //var worldMatrix = MyAPIGateway.Session.Player.PlayerCharacter.Entity.WorldMatrix;
@@ -97,7 +98,25 @@ namespace midspace.adminscripts
                         var hit = ray.Intersects(aabb);
                         if (hit.HasValue)
                         {
-                            var distance = (startPosition - hit.Value).Length();
+                            var center = voxelMap.PositionLeftBottomCorner + (voxelMap.Storage.Size / 2);
+                            var distance = (startPosition - center).Length();  // use distance to center of asteroid.
+                            list.Add(entity, distance);
+                        }
+                    }
+                }
+
+                if (findPlanets)
+                {
+                    // Looks to be working against Git and public release.
+                    var planet = entity as Sandbox.Game.Entities.MyPlanet;
+                    if (planet != null)
+                    {
+                        var aabb = new BoundingBoxD(planet.PositionLeftBottomCorner, planet.PositionLeftBottomCorner + planet.Size);
+                        var hit = ray.Intersects(aabb);
+                        if (hit.HasValue)
+                        {
+                            var center = planet.PositionLeftBottomCorner + (planet.Size / 2);
+                            var distance = (startPosition - center).Length(); // use distance to center of planet.
                             list.Add(entity, distance);
                         }
                     }

@@ -22,6 +22,7 @@
     using VRage.Utils;
     using VRage.Voxels;
     using VRageMath;
+    using Sandbox.Game.World;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -433,7 +434,6 @@
 
             if (messageText.Equals("/test8B", StringComparison.InvariantCultureIgnoreCase))
             {
-
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false) as Sandbox.ModAPI.IMyCubeGrid;
 
                 if (entity == null)
@@ -655,6 +655,27 @@
             }
 
             #endregion
+
+            #region test14
+
+            // Tag every floating object in player GPS.
+            if (messageText.Equals("/test14", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var entites = new HashSet<IMyEntity>();
+                MyAPIGateway.Entities.GetEntities(entites, e => (e is Sandbox.ModAPI.IMyFloatingObject));
+
+                foreach (var entity in entites)
+                {
+                    var pos = entity.GetPosition();
+                    var gps = MyAPIGateway.Session.GPS.Create("Floating " + entity.DisplayName, "Some drifting junk", pos, true, false);
+                    MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                }
+
+                return true;
+            }
+
+            #endregion
+
 
             return false;
         }
