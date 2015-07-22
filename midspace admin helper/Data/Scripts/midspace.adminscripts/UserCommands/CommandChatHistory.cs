@@ -1,4 +1,5 @@
-﻿using Sandbox.ModAPI;
+﻿using midspace.adminscripts.Messages;
+using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,6 @@ namespace midspace.adminscripts
 
     public class CommandChatHistory : ChatCommand
     {
-        static List<ChatMessage> MessageCache = new List<ChatMessage>();
 
         public CommandChatHistory()
             : base (ChatCommandSecurity.User, "chat", new string[] { "/chat" })
@@ -52,10 +52,10 @@ Example:
                 uint entries = 100;
 
                 if (string.IsNullOrEmpty(entriesStr))
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Chat, entries.ToString());
+                    SendRequest(entries);
                 else
                     if (uint.TryParse(entriesStr, out entries) && entries != 0)
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Chat, entries.ToString());
+                        SendRequest(entries);
                     else
                         MyAPIGateway.Utilities.ShowMessage("Entries", "The argument entries must be an integer higher than 0");
 
@@ -65,20 +65,22 @@ Example:
             return false;
         }
 
-        public static void AddMessageToCache(ChatMessage message, bool lastEntry)
+        void SendRequest(uint entryCount)
         {
-            MessageCache.Add(message);
+            ConnectionHelper.SendMessageToServer(new MessageChatHistory() { EntryCount = entryCount });
+        }
 
-            if (lastEntry)
-            {
-                StringBuilder content = new StringBuilder();
-                foreach (ChatMessage chatMessage in MessageCache.OrderByDescending(m => m.Date))
-                    content.AppendLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss}] {1}: {2}", chatMessage.Date, chatMessage.Sender.PlayerName, chatMessage.Message));
+        public static void DisplayChatHistory(List<ChatMessage> chatMessages)
+        {
+            StringBuilder content = new StringBuilder();
 
-                MyAPIGateway.Utilities.ShowMissionScreen("Chat History", "Displayed messages: ", MessageCache.Count.ToString(), content.ToString());
+            if (chatMessages.Count == 0)
+                content.Append("There are no messages in the chat history.");
+            else
+                foreach (ChatMessage chatMessage in chatMessages.OrderByDescending(m => m.Date))
+                    content.AppendLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss}] {1}: {2}", chatMessage.Date, chatMessage.Sender.PlayerName, chatMessage.Text));
 
-                MessageCache.Clear();
-            }
+            MyAPIGateway.Utilities.ShowMissionScreen("Chat History", "Displayed messages: ", chatMessages.Count.ToString(), content.ToString());
         }
     }
 }

@@ -8,6 +8,7 @@ namespace midspace.adminscripts
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using midspace.adminscripts.Messages;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
@@ -32,8 +33,9 @@ namespace midspace.adminscripts
 
         public static ChatCommandLogic Instance;
         public ServerConfig ServerCfg;
-        public string AdminNotification;
+        public AdminNotification AdminNotification;
         public bool BlockCommandExecution = false;
+        public bool ShowDialogsOnReceive = false;
 
         private bool _isInitialized;
         private Timer _timer100;
@@ -63,6 +65,8 @@ namespace midspace.adminscripts
             // It would be nicer to just read a property that indicates this is a dedicated server, and simply return.
             if (!_isInitialized && MyAPIGateway.Session != null && MyAPIGateway.Session.Player != null)
             {
+                Debug = MyAPIGateway.Session.Player.IsExperimentalCreator();
+
                 if (!MyAPIGateway.Session.OnlineMode.Equals(MyOnlineModeEnum.OFFLINE) && MyAPIGateway.Multiplayer.IsServer && !MyAPIGateway.Utilities.IsDedicated)
                     InitServer();
                 Init();
@@ -103,7 +107,6 @@ namespace midspace.adminscripts
 
         private void Init()
         {
-            Debug = MyAPIGateway.Session.Player.IsExperimentalCreator();
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
@@ -126,12 +129,10 @@ namespace midspace.adminscripts
                 Logger.Debug("Attach Session_OnSessionReady");
                 MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
                 Logger.Debug("Registered ProcessMessage_Client");
-                var data = new Dictionary<string, string>();
-                data.Add(ConnectionHelper.ConnectionKeys.ConnectionRequest, MyAPIGateway.Session.Player.SteamUserId.ToString());
-                //let the server know we are ready for connections
-                CommandMessageOfTheDay.ShowMotdOnSpawn = true;
+                ConnectionHelper.Client_MessageCache.Clear();
                 BlockCommandExecution = true;
-                ConnectionHelper.SendMessageToServer(data);
+                //let the server know we are ready for connections
+                ConnectionHelper.SendMessageToServer(new MessageConnectionRequest());
             }
         }
 
@@ -143,11 +144,15 @@ namespace midspace.adminscripts
             //Debug = true;
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
+            AdminNotificator.Init();
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
             Logger.Debug("Registered ProcessMessage_Server");
 
+            ConnectionHelper.Server_MessageCache.Clear();
+
             ServerCfg = new ServerConfig(GetAllChatCommands());
         }
+
         private List<ChatCommand> GetAllChatCommands()
         {
             // This will populate the _oreNames, _ingotNames, ready for the ChatCommands.
@@ -298,12 +303,21 @@ namespace midspace.adminscripts
         private void Utilities_MessageEntered(string messageText, ref bool sendToOthers)
         {
             if (ChatCommandService.ProcessMessage(messageText))
-            {
                 sendToOthers = false;
+            else
+            {
+                var globalMessage = new MessageGlobalMessage() { 
+                    ChatMessage = new ChatMessage() { 
+                        Text = messageText,
+                        Sender = new Player() {
+                            SteamId = MyAPIGateway.Session.Player.SteamUserId,
+                            PlayerName = MyAPIGateway.Session.Player.DisplayName
+                        },
+                        Date = DateTime.Now
+                    }
+                };
+                ConnectionHelper.SendMessageToServer(globalMessage);
             }
-
-            if (sendToOthers)
-                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GlobalMessage, messageText);
         }
 
         #endregion
@@ -330,16 +344,13 @@ namespace midspace.adminscripts
 
         void Session_OnSessionReady()
         {
-            if (CommandMessageOfTheDay.Received && CommandMessageOfTheDay.ShowMotdOnSpawn)
-            {
-                 if (!String.IsNullOrEmpty(CommandMessageOfTheDay.Content))
-                    CommandMessageOfTheDay.ShowMotd();
-                if (!string.IsNullOrEmpty(AdminNotification))
-                    MyAPIGateway.Utilities.ShowMissionScreen("Admin Notification System", "Error", null, AdminNotification, null, null);
-            }
-            else
-                CommandMessageOfTheDay.ShowOnReceive = true;
-            CommandMessageOfTheDay.ShowMotdOnSpawn = false;
+            if (CommandMessageOfTheDay.Received && !String.IsNullOrEmpty(CommandMessageOfTheDay.Content))
+                CommandMessageOfTheDay.ShowMotd();
+
+            if (AdminNotification != null)
+                AdminNotification.Show();
+
+            ShowDialogsOnReceive = true;
         }
 
         #region connection handling

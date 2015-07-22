@@ -202,19 +202,14 @@
             return command.Security <= _userSecurity;
         }
 
-        public static bool UpdateCommandSecurity(string commandName, uint newSecurity)
+        public static bool UpdateCommandSecurity(CommandStruct command)
         {
-            if (!Commands.ContainsKey(commandName))
+            if (!Commands.ContainsKey(command.Name))
                 return false;
 
-            bool changed;
+            Commands[command.Name].Security = command.NeededLevel;
 
-            if (changed = Commands[commandName].Security != newSecurity)
-            {
-                Commands[commandName].Security = newSecurity;
-            }
-
-            return changed;
+            return true;
         }
 
         public static bool IsCommandRegistered(string commandName)

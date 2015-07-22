@@ -6,44 +6,85 @@
 
     public static class Logger
     {
-        private readonly static string fileName;
-        private static TextWriter Writer;
+        private readonly static string DebugFileName;
+        private static TextWriter DebugWriter;
+
+        private readonly static string ErrorLogFileName;
+        private static TextWriter ErrorLogWriter;
+        
         private static bool isInitialized = false;
+
+        public static string ErrorFileName { get { return ErrorLogFileName; } }
 
         static Logger()
         {
             if (MyAPIGateway.Session != null)
-                fileName = string.Format("AdminHelperCommands_{0}.log", Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
+            {
+                DebugFileName = string.Format("Debug_{0}.log", Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
+                ErrorLogFileName = string.Format("ErrorLog_{0}_{1:yyyy-MM-dd_HH-mm-ss}.log", Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath), DateTime.Now);
+            }
             else
-                fileName = string.Format("AdminHelperCommands_{0}.log", 0);
+            {
+                DebugFileName = string.Format("Debug_{0}.log", 0);
+                ErrorLogFileName = string.Format("ErrorLog_{0}_{1:yyyy-MM-dd_HH-mm-ss}.log", 0, DateTime.Now);
+            }
         }
 
         public static void Init()
         {
-            if (ChatCommandLogic.Instance.Debug && !isInitialized)
+            if (!isInitialized)
             {
-                Writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(Logger));
+                if (ChatCommandLogic.Instance.Debug)
+                    DebugWriter = MyAPIGateway.Utilities.WriteFileInLocalStorage(DebugFileName, typeof(Logger));
                 isInitialized = true;
             }
         }
 
         public static void Debug(string text)
         {
-            if (Writer == null || !isInitialized || !ChatCommandLogic.Instance.Debug)
+            if (DebugWriter == null || !isInitialized || !ChatCommandLogic.Instance.Debug)
                 return;
 
-            Writer.WriteLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss:fff}] Debug - {1}", DateTime.Now, text));
-            Writer.Flush();
+            DebugWriter.WriteLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss:fff}] Debug - {1}", DateTime.Now, text));
+            DebugWriter.Flush();
+        }
+
+        public static void LogException(Exception ex, string additionalInformation = null)
+        {
+            if(!isInitialized)
+                return;
+            
+            // we create the writer when it is needed to prevent the creation of empty files
+            if (ErrorLogWriter == null) 
+                ErrorLogWriter = MyAPIGateway.Utilities.WriteFileInLocalStorage(ErrorLogFileName, typeof(Logger));
+
+            ErrorLogWriter.WriteLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss:fff}] Error - {1}", DateTime.Now, ex.ToString()));
+
+            if (!string.IsNullOrEmpty(additionalInformation))
+            {
+                ErrorLogWriter.WriteLine(string.Format("Additional information on {0}:", ex.Message));
+                ErrorLogWriter.WriteLine(additionalInformation);
+            }
+
+            ErrorLogWriter.Flush();
         }
 
         public static void Terminate()
         {
-            if (Writer != null)
+            if (DebugWriter != null)
             {
-                Writer.Flush();
-                Writer.Close();
-                Writer = null;
+                DebugWriter.Flush();
+                DebugWriter.Close();
+                DebugWriter = null;
             }
+
+            if (ErrorLogWriter != null)
+            {
+                ErrorLogWriter.Flush();
+                ErrorLogWriter.Close();
+                ErrorLogWriter = null;
+            }
+
             isInitialized = false;
         }
     }

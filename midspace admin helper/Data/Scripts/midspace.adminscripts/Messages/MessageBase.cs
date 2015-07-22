@@ -1,0 +1,92 @@
+﻿using ProtoBuf;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Xml.Serialization;
+
+namespace midspace.adminscripts.Messages
+{
+    // ALL CLASSES DERIVED FROM MessageBase MUST BE ADDED HERE
+    [XmlInclude(typeof(MessageAdminNotification))]
+    [XmlInclude(typeof(MessageChatHistory))]
+    [XmlInclude(typeof(MessageConfig))]
+    [XmlInclude(typeof(MessageConnectionRequest))]
+    [XmlInclude(typeof(MessageGlobalMessage))]
+    [XmlInclude(typeof(MessageIncomingMessageParts))]
+    [XmlInclude(typeof(MessageOfTheDayMessage))]
+    [XmlInclude(typeof(MessageCommandPermissions))]
+    [XmlInclude(typeof(MessagePrivateMessage))]
+    [ProtoContract]
+    public abstract class MessageBase
+    {
+        /// <summary>
+        /// The SteamId of the message's sender. Note that this will be set when the message is sent, so there is no need for setting it otherwise.
+        /// </summary>
+        [ProtoMember]
+        public ulong SenderSteamId;
+
+        /// <summary>
+        /// Defines on which side the message should be processed. Note that this will be set when the message is sent, so there is no need for setting it otherwise.
+        /// </summary>
+        [ProtoMember]
+        public MessageSide Side;
+
+        /*
+        [ProtoAfterDeserialization]
+        void InvokeProcessing() // is not invoked after deserialization from xml
+        {
+            Logger.Debug("START - Processing");
+            switch (Side)
+            {
+                case MessageSide.ClientSide:
+                    ProcessClient();
+                    break;
+                case MessageSide.ServerSide:
+                    ProcessServer();
+                    break;
+            }
+            Logger.Debug("END - Processing");
+        }
+        */
+
+        public void InvokeProcessing()
+        {
+                switch (Side)
+                {
+                    case MessageSide.ClientSide:
+                        InvokeClientProcessing();
+                        break;
+                    case MessageSide.ServerSide:
+                        InvokeServerProcessing();
+                        break;
+                }
+        }
+
+        private void InvokeClientProcessing()
+        {
+            Logger.Debug("START - Processing [Client]");
+            ProcessClient();
+            Logger.Debug("END - Processing [Client]");
+        }
+
+        private void InvokeServerProcessing()
+        {
+            Logger.Debug("START - Processing [Server]");
+            
+            try
+            {
+                ProcessServer();
+            }
+            catch (Exception ex)
+            {
+                AdminNotificator.StoreExceptionAndNotify(ex);
+            }
+
+            Logger.Debug("END - Processing [Server]");
+        }
+
+        public abstract void ProcessClient();
+        public abstract void ProcessServer();
+    }
+}

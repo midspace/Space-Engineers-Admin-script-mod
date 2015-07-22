@@ -19,16 +19,6 @@ namespace midspace.adminscripts
         public static string HeadLine;
 
         /// <summary>
-        /// If true, on the next character spawn, the motd will be shown. False by default.
-        /// </summary>
-        public static bool ShowMotdOnSpawn = false;
-
-        /// <summary>
-        /// If true the motd could not be shown on the character spawn, so that it will be shown when the client receives the data. Mostly used in creative sessions. False by default.
-        /// </summary>
-        public static bool ShowOnReceive = false;
-
-        /// <summary>
         /// True if the motd was received.
         /// </summary>
         public static bool Received =  false;

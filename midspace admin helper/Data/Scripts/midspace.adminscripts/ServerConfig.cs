@@ -1,10 +1,12 @@
-﻿using ProtoBuf;
+﻿using midspace.adminscripts.Messages;
+using ProtoBuf;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace midspace.adminscripts
 {
@@ -81,7 +83,7 @@ namespace midspace.adminscripts
 
         public uint AdminLevel { get { return Config.AdminLevel; } set { Config.AdminLevel = value; } }
 
-        public List<BannedPlayer> ForceBannedPlayers { get { return Config.ForceBannedPlayers; } }
+        public List<Player> ForceBannedPlayers { get { return Config.ForceBannedPlayers; } }
 
         public void Save()
         {
@@ -134,23 +136,19 @@ namespace midspace.adminscripts
             }
             catch (Exception ex)
             {
-                ChatCommandLogic.Instance.AdminNotification = string.Format(@"There is an error in the config file. It couldn't be read. The server was started with default settings.
+                AdminNotification notification = new AdminNotification()
+                {
+                    Date = DateTime.Now,
+                    Content = string.Format(@"There is an error in the config file. It couldn't be read. The server was started with default settings.
 
 Message:
 {0}
 
-If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message);
+If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message)
+                };
+
+                AdminNotificator.StoreAndNotify(notification);
             }
-
-            var sendMotdHl = !Config.MotdHeadLine.Equals(CommandMessageOfTheDay.HeadLine);
-            CommandMessageOfTheDay.HeadLine = Config.MotdHeadLine;
-            if (sendMotdHl)
-                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.MotdHeadLine, CommandMessageOfTheDay.HeadLine);
-
-            var sendMotdSic = Config.MotdShowInChat != CommandMessageOfTheDay.ShowInChat;
-            CommandMessageOfTheDay.ShowInChat = Config.MotdShowInChat;
-            if (sendMotdSic)
-                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.MotdShowInChat, CommandMessageOfTheDay.ShowInChat.ToString());
 
             var sendLogPms = Config.LogPrivateMessages != CommandPrivateMessage.LogPrivateMessages;
             CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
@@ -183,8 +181,35 @@ If you can't find the error, simply delete the file. The server will create a ne
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(MotdFileName, typeof(ChatCommandLogic));
             var text = reader.ReadToEnd();
             reader.Close();
-            
-            SetMessageOfTheDay(text);
+
+
+            var message = new MessageOfTheDayMessage();
+
+            var sendMotd = !Config.MotdHeadLine.Equals(CommandMessageOfTheDay.HeadLine);
+            if (sendMotd)
+            {
+                message.Content = SetMessageOfTheDay(text);
+                message.FieldsToUpdate = message.FieldsToUpdate | MessageOfTheDayMessage.ChangedFields.Content;
+            }
+
+            var sendMotdHl = !Config.MotdHeadLine.Equals(CommandMessageOfTheDay.HeadLine);
+            CommandMessageOfTheDay.HeadLine = Config.MotdHeadLine;
+            if (sendMotdHl)
+            {
+                message.HeadLine = CommandMessageOfTheDay.HeadLine;
+                message.FieldsToUpdate = message.FieldsToUpdate | MessageOfTheDayMessage.ChangedFields.HeadLine;
+            }
+
+            var sendMotdSic = Config.MotdShowInChat != CommandMessageOfTheDay.ShowInChat;
+            CommandMessageOfTheDay.ShowInChat = Config.MotdShowInChat;
+            if (sendMotdSic)
+            {
+                message.ShowInChat = CommandMessageOfTheDay.ShowInChat;
+                message.FieldsToUpdate = message.FieldsToUpdate | MessageOfTheDayMessage.ChangedFields.ShowInChat;
+            }
+
+            if (sendMotdHl || sendMotdSic)
+                ConnectionHelper.SendMessageToAllPlayers(message);
         }
 
         /// <summary>
@@ -217,15 +242,20 @@ If you can't find the error, simply delete the file. The server will create a ne
             return text;
         }
 
-        public void SetMessageOfTheDay(string motd)
+        /// <summary>
+        /// Replaces the variables and sets the message of the day.
+        /// </summary>
+        /// <param name="motd">The message of the day.</param>
+        /// <returns>The message of the day with replaced variables.</returns>
+        public string SetMessageOfTheDay(string motd)
         {
             if (motd == null)
                 motd = "";
             motd = ReplaceVariables(motd);
             var sendChanges = !motd.Equals(CommandMessageOfTheDay.Content);
             CommandMessageOfTheDay.Content = motd;
-            if (sendChanges)
-                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.MessageOfTheDay, motd);
+
+            return motd;
         }
 
         private void SaveMotd()
@@ -265,12 +295,12 @@ If you can't find the error, simply delete the file. The server will create a ne
             List<PrivateConversation> senderConversations = PrivateConversations.FindAll(c => c.Participants.Exists(p => p.SteamId == sender));
 
             var pm = new PrivateMessage()
-                {
-                    Sender = sender,
-                    Receiver = receiver,
-                    Date = DateTime.Now,
-                    Message = message
-                };
+            {
+                Sender = sender,
+                Receiver = receiver,
+                Date = DateTime.Now,
+                Text = message
+            };
 
             if (senderConversations.Exists(c => c.Participants.Exists(p => p.SteamId == receiver)))
             {
@@ -285,8 +315,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 var receiverPlayer = players.FirstOrDefault(p => p.SteamUserId == receiver);
 
                 PrivateConversations.Add(new PrivateConversation()
-                    {
-                        Participants = new List<Player>(new Player[] {
+                {
+                    Participants = new List<Player>(new Player[] {
                             new Player() {
                                 SteamId = senderPlayer.SteamUserId,
                                 PlayerName = senderPlayer.DisplayName
@@ -295,8 +325,52 @@ If you can't find the error, simply delete the file. The server will create a ne
                                 SteamId = receiverPlayer.SteamUserId,
                                 PlayerName = receiverPlayer.DisplayName
                             }}),
-                        Messages = new List<PrivateMessage>(new PrivateMessage[] { pm })
-                    });
+                    Messages = new List<PrivateMessage>(new PrivateMessage[] { pm })
+                });
+            }
+            //TODO save the log every 5 minutes
+        }
+
+        public void LogPrivateMessage(ChatMessage chatMessage, ulong receiver)
+        {
+            if (!Config.LogPrivateMessages)
+                return;
+
+            List<PrivateConversation> senderConversations = PrivateConversations.FindAll(c => c.Participants.Exists(p => p.SteamId == chatMessage.Sender.SteamId));
+
+            var pm = new PrivateMessage()
+            {
+                Sender = chatMessage.Sender.SteamId,
+                Receiver = receiver,
+                Date = chatMessage.Date,
+                Text = chatMessage.Text
+            };
+
+            if (senderConversations.Exists(c => c.Participants.Exists(p => p.SteamId == receiver)))
+            {
+                PrivateConversation conversation = senderConversations.Find(c => c.Participants.Exists(p => p.SteamId == receiver));
+                conversation.Messages.Add(pm);
+            }
+            else
+            {
+                List<IMyPlayer> players = new List<IMyPlayer>();
+                MyAPIGateway.Players.GetPlayers(players, p => p != null);
+                var senderPlayer = players.FirstOrDefault(p => p.SteamUserId == chatMessage.Sender.SteamId);
+                var receiverPlayer = players.FirstOrDefault(p => p.SteamUserId == receiver);
+
+                PrivateConversations.Add(new PrivateConversation()
+                {
+                    Participants = new List<Player>(new Player[] {
+                            new Player() {
+                                SteamId = senderPlayer.SteamUserId,
+                                PlayerName = senderPlayer.DisplayName
+                            },
+                            new Player(){
+                                SteamId = receiverPlayer.SteamUserId,
+                                PlayerName = receiverPlayer.DisplayName
+                            }}),
+                    Messages = new List<PrivateMessage>(new PrivateMessage[] { pm })
+                });
             }
             //TODO save the log every 5 minutes
         }
@@ -319,7 +393,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == sender);
             IMyPlayer player = players.FirstOrDefault();
-            ChatMessages.Add(new ChatMessage()
+            LogGlobalMessage(new ChatMessage()
             {
                 Sender = new Player()
                 {
@@ -327,8 +401,13 @@ If you can't find the error, simply delete the file. The server will create a ne
                     PlayerName = player.DisplayName
                 },
                 Date = DateTime.Now,
-                Message = message
+                Text = message
             });
+        }
+
+        public void LogGlobalMessage(ChatMessage chatMessage)
+        {
+            ChatMessages.Add(chatMessage);
         }
 
         private void LoadOrCreateChatLog()
@@ -358,31 +437,19 @@ If you can't find the error, simply delete the file. The server will create a ne
         /// <param name="entryCount">The amount of entries that are requested.</param>
         public void SendChatHistory(ulong receiver, uint entryCount)
         {
-            //we just append new chat messages to the log. To get the most recent on top we have to sort it.
+            // we just append new chat messages to the log. To get the most recent on top we have to sort it.
             List<ChatMessage> cache = new List<ChatMessage>(ChatMessages.OrderByDescending(m => m.Date));
-            for (int i = 0; i < entryCount; i++)
-            {
-                bool lastEntry = i == entryCount - 1 || cache.Count == i + 1; 
 
-                Dictionary<string, string> mainContent = new Dictionary<string, string>();
-                Dictionary<string, string> msgContent = new Dictionary<string, string>();
+            // we have to make sure that we don't throw an ArgumentOutOfBoundsException
+            int range = (int)entryCount;
+            if (cache.Count < entryCount)
+                range = cache.Count;
+            
+            var msgHistory = new MessageChatHistory() {
+                ChatHistory = cache.GetRange(0, range)
+            };
 
-                ChatMessage chatMessage = cache[i];
-
-                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatMessage, chatMessage.Message);
-                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatSender, chatMessage.Sender.SteamId.ToString());
-                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatSenderName, chatMessage.Sender.PlayerName);
-                msgContent.Add(ConnectionHelper.ConnectionKeys.ChatDate, chatMessage.Date.ToString());
-
-                mainContent.Add(ConnectionHelper.ConnectionKeys.ListEntry, ConnectionHelper.ConvertData(msgContent));
-
-                if (lastEntry) 
-                    mainContent.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
-
-                ConnectionHelper.SendMessageToPlayer(receiver, ConnectionHelper.ConnectionKeys.Chat, ConnectionHelper.ConvertData(mainContent));
-                if (cache.Count == i + 1)
-                    break;
-            }
+            ConnectionHelper.SendMessageToPlayer(receiver, msgHistory);
         }
 
         #endregion
@@ -469,6 +536,8 @@ If you can't find the error, simply delete the file. The server will create a ne
             if (Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
             {
                 var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId));
+                
+                // create new entry if necessary or update the playername
                 IMyPlayer myPlayer;
                 if (MyAPIGateway.Players.TryGetPlayer(steamId, out myPlayer) && !playerPermission.Player.PlayerName.Equals(myPlayer.DisplayName))
                 {
@@ -488,7 +557,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                         continue;
                     }
 
-                    playerPermissions.Remove(playerPermissions.FirstOrDefault(s => s.Equals(commandName)));
+                    playerPermissions.RemoveAll(s => s.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
                     SendPermissionChange(steamId, new CommandStruct()
                     {
                         Name = commandName,
@@ -505,7 +574,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                         continue;
                     }
 
-                    playerPermissions.Remove(playerPermissions.FirstOrDefault(s => s.Equals(commandName)));
+                    playerPermissions.RemoveAll(s => s.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
                     SendPermissionChange(steamId, new CommandStruct()
                     {
                         Name = commandName,
@@ -524,7 +593,14 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         public void SendPermissionChange(ulong steamId, CommandStruct commandStruct)
         {
-            ConnectionHelper.SendMessageToPlayer(steamId, ConnectionHelper.ConnectionKeys.CommandLevel, string.Format("{0}:{1}", commandStruct.Name, commandStruct.NeededLevel));
+            var message = new MessageCommandPermissions()
+            {
+                Commands = new List<CommandStruct>(),
+                CommandAction = CommandActions.Level
+            };
+            message.Commands.Add(commandStruct);
+
+            ConnectionHelper.SendMessageToPlayer(steamId, message);
         }
 
         public uint GetPlayerLevel(ulong steamId)
@@ -574,25 +650,25 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         #region command
 
-        public void UpdateCommandSecurity(string commandName, uint level, ulong sender)
+        public void UpdateCommandSecurity(CommandStruct command, ulong sender)
         {
-            var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+            var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(command.Name, StringComparison.InvariantCultureIgnoreCase));
 
             int index;
-            if (CommandCache.ContainsKey(sender) && commandName.Substring(0, 1) == "#" && Int32.TryParse(commandName.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
+            if (CommandCache.ContainsKey(sender) && command.Name.Substring(0, 1) == "#" && Int32.TryParse(command.Name.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
                 commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
 
             if (string.IsNullOrEmpty(commandStruct.Name))
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Command {0} could not be found.", commandName));
+                ConnectionHelper.SendChatMessage(sender, string.Format("Command {0} could not be found.", command.Name));
                 return;
             }
 
-            commandName = commandStruct.Name;
+            command.Name = commandStruct.Name;
 
             //update security first
             var i = Permissions.Commands.IndexOf(commandStruct);
-            commandStruct.NeededLevel = level;
+            commandStruct.NeededLevel = command.NeededLevel;
             Permissions.Commands[i] = commandStruct;
 
             //then send changes
@@ -610,13 +686,13 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
 
                 //don't send changes to players with exeptional permissions
-                if (playerPermission.Extensions.Any(s => s.Equals(commandName)) || playerPermission.Restrictions.Any(s => s.Equals(commandName)))
+                if (playerPermission.Extensions.Any(s => s.Equals(commandStruct.Name)) || playerPermission.Restrictions.Any(s => s.Equals(commandStruct.Name)))
                     continue;
 
                 SendPermissionChange(player.SteamUserId, commandStruct);
             }
 
-            ConnectionHelper.SendChatMessage(sender, string.Format("The level of command {0} was set to {1}.", commandName, level));
+            ConnectionHelper.SendChatMessage(sender, string.Format("The level of command {0} was set to {1}.", commandStruct.Name, commandStruct.NeededLevel));
 
             SavePermissionFile();
         }
@@ -641,19 +717,13 @@ If you can't find the error, simply delete the file. The server will create a ne
             else
                 CommandCache[sender] = commands;
 
-            foreach (CommandStruct command in commands)
+            var message = new MessageCommandPermissions()
             {
-                var dict = new Dictionary<string, string>();
-                dict.Add(ConnectionHelper.ConnectionKeys.ListEntry, command.Name);
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, command.NeededLevel.ToString());
+                Commands = commands,
+                CommandAction = CommandActions.List
+            };
 
-                if (commands.IndexOf(command) == 0)
-                    dict.Add(ConnectionHelper.ConnectionKeys.NewList, "");
-                if (commands.IndexOf(command) == commands.Count - 1)
-                    dict.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
-
-                ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.CommandList, ConnectionHelper.ConvertData(dict));
-            }
+            ConnectionHelper.SendMessageToPlayer(sender, message);
         }
 
         #endregion
@@ -718,13 +788,18 @@ If you can't find the error, simply delete the file. The server will create a ne
                 {
                     var command = Permissions.Players[i].Restrictions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
                     Permissions.Players[i].Restrictions.Remove(command);
-                    ConnectionHelper.SendMessageToPlayer(playerPermission.Player.SteamId, ConnectionHelper.ConnectionKeys.CommandLevel, string.Format("{0}:{1}", commandStruct.Name, commandStruct.NeededLevel));
+                    SendPermissionChange(playerPermission.Player.SteamId, commandStruct);
                     ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
                     return;
                 }
 
                 Permissions.Players[i].Extensions.Add(commandStruct.Name);
-                ConnectionHelper.SendMessageToPlayer(playerPermission.Player.SteamId, ConnectionHelper.ConnectionKeys.CommandLevel, string.Format("{0}:{1}", commandStruct.Name, GetPlayerLevel(playerPermission.Player.SteamId)));
+
+                SendPermissionChange(playerPermission.Player.SteamId, new CommandStruct() 
+                { 
+                    Name = commandStruct.Name, 
+                    NeededLevel = GetPlayerLevel(playerPermission.Player.SteamId) 
+                });
                 ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has extended access to {1} from now.", playerName, commandName));
             }
             else
@@ -768,13 +843,18 @@ If you can't find the error, simply delete the file. The server will create a ne
                 {
                     var command = Permissions.Players[i].Extensions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
                     Permissions.Players[i].Extensions.Remove(command);
-                    ConnectionHelper.SendMessageToPlayer(playerPermission.Player.SteamId, ConnectionHelper.ConnectionKeys.CommandLevel, string.Format("{0}:{1}", commandStruct.Name, commandStruct.NeededLevel));
+                    SendPermissionChange(playerPermission.Player.SteamId, commandStruct);
                     ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
                     return;
                 }
 
                 Permissions.Players[i].Restrictions.Add(commandStruct.Name);
-                ConnectionHelper.SendMessageToPlayer(playerPermission.Player.SteamId, ConnectionHelper.ConnectionKeys.CommandLevel, string.Format("{0}:{1}", commandStruct.Name, GetPlayerLevel(playerPermission.Player.SteamId) + 1));
+
+                SendPermissionChange(playerPermission.Player.SteamId, new CommandStruct()
+                {
+                    Name = commandStruct.Name,
+                    NeededLevel = GetPlayerLevel(playerPermission.Player.SteamId) + 1
+                });
                 ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has no access to {1} from now.", playerName, commandName));
             }
             else
@@ -1238,7 +1318,9 @@ If you can't find the error, simply delete the file. The server will create a ne
         public string MotdHeadLine;
         public bool MotdShowInChat;
         public bool LogPrivateMessages;
-        public List<BannedPlayer> ForceBannedPlayers;
+        [XmlArray("ForceBannedPlayers")]
+        [XmlArrayItem("BannedPlayer")]
+        public List<Player> ForceBannedPlayers;
         public uint AdminLevel;
 
         public ServerConfigurationStruct()
@@ -1249,17 +1331,9 @@ If you can't find the error, simply delete the file. The server will create a ne
             MotdHeadLine = "";
             MotdShowInChat = false;
             LogPrivateMessages = true;
-            ForceBannedPlayers = new List<BannedPlayer>();
+            ForceBannedPlayers = new List<Player>();
             AdminLevel = ChatCommandSecurity.Admin;
         }
-    }
-
-    //Need to change this to Player... Don't know how without breaking the downward compatibility because forcebanned players are saved as 'BannedPlayer'.
-    //They would not be read in if they are 'Player'
-    public struct BannedPlayer
-    {
-        public ulong SteamId;
-        public string PlayerName;
     }
 
     public struct Player
@@ -1279,14 +1353,16 @@ If you can't find the error, simply delete the file. The server will create a ne
         public ulong Sender;
         public ulong Receiver;
         public DateTime Date;
-        public string Message;
+        [XmlElement("Message")]
+        public string Text;
     }
 
     public struct ChatMessage
     {
         public Player Sender;
         public DateTime Date;
-        public string Message;
+        [XmlElement("Message")]
+        public string Text;
     }
 
     public struct Permissions

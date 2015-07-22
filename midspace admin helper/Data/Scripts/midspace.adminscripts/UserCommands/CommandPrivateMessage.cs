@@ -1,4 +1,5 @@
-﻿using Sandbox.ModAPI;
+﻿using midspace.adminscripts.Messages;
+using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -188,14 +189,21 @@ The logging of private messages is {1}.
             if (string.IsNullOrEmpty(message))
                 MyAPIGateway.Utilities.ShowMessage("PM System", "Message too short.");
 
-            var data = new Dictionary<string, string>();
-            data.Add(ConnectionHelper.ConnectionKeys.ChatReceiver, receiver.SteamUserId.ToString());
-            data.Add(ConnectionHelper.ConnectionKeys.ChatSender, MyAPIGateway.Session.Player.SteamUserId.ToString());
-            data.Add(ConnectionHelper.ConnectionKeys.ChatSenderName, MyAPIGateway.Session.Player.DisplayName);
-            data.Add(ConnectionHelper.ConnectionKeys.ChatMessage, message);
-            string messageData = ConnectionHelper.ConvertData(data);
+            var privateMessage = new MessagePrivateMessage();
+            privateMessage.ChatMessage = new ChatMessage()
+            {
+                Sender = new Player()
+                {
+                    SteamId = MyAPIGateway.Session.Player.SteamUserId,
+                    PlayerName = MyAPIGateway.Session.Player.DisplayName
+                },
+                Text = message,
+                Date = DateTime.Now
+            };
 
-            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PrivateMessage, messageData);
+            privateMessage.Receiver = receiver.SteamUserId;
+            ConnectionHelper.SendMessageToServer(privateMessage);
+
             MyAPIGateway.Utilities.ShowMessage(string.Format("Whispered {0}", receiver.DisplayName), message);
         }
     }

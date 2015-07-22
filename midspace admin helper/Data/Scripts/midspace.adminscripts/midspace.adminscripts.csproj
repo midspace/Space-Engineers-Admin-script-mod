@@ -59,8 +59,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminNotification.cs" />
+    <Compile Include="AdminNotificator.cs" />
     <Compile Include="ChatCommandService.cs" />
     <Compile Include="Localize.cs" />
+    <Compile Include="Messages\MessageAdminNotification.cs" />
+    <Compile Include="Messages\MessageBase.cs" />
+    <Compile Include="Messages\MessageChatHistory.cs" />
+    <Compile Include="Messages\MessageConfig.cs" />
+    <Compile Include="Messages\MessageConnectionRequest.cs" />
+    <Compile Include="Messages\MessageContainer.cs" />
+    <Compile Include="Messages\MessageGlobalMessage.cs" />
+    <Compile Include="Messages\MessageIncomingMessageParts.cs" />
+    <Compile Include="Messages\MessageOfTheDayMessage.cs" />
+    <Compile Include="Messages\MessageCommandPermissions.cs" />
+    <Compile Include="Messages\MessagePrivateMessage.cs" />
+    <Compile Include="Messages\MessageSide.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />

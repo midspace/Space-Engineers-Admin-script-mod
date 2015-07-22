@@ -1,4 +1,5 @@
-﻿using Sandbox.ModAPI;
+﻿using midspace.adminscripts.Messages;
+using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,6 @@ namespace midspace.adminscripts
     class CommandPermission : ChatCommand
     {
         //local cache
-        private static List<CommandCacheEntry> CommandCache = new List<CommandCacheEntry>();
         private static List<PlayerCacheEntry> PlayerCache = new List<PlayerCacheEntry>();
         private static List<GroupCacheEntry> GroupCache = new List<GroupCacheEntry>();
 
@@ -158,6 +158,7 @@ Example: /perm group list
 
         public void ProcessCommandPermission(string[] args)
         {
+            var commandMessage = new MessageCommandPermissions();
             switch (args[1].ToLowerInvariant())
             {
                 case "setlevel":
@@ -171,24 +172,31 @@ Example: /perm group list
                     uint level;
                     if (uint.TryParse(args[3], out level))
                     {
-                        var dict = new Dictionary<string, string>();
-                        dict.Add(args[2], args[3]);
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CommandLevel, ConnectionHelper.ConvertData(dict));
+                        commandMessage.Commands = new List<CommandStruct>();
+                        commandMessage.CommandAction = CommandActions.Level;
+
+                        commandMessage.Commands.Add(new CommandStruct()
+                        {
+                            Name = args[2],
+                            NeededLevel = level
+                        });
                     }
                     else
+                    {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        return;
+                    }
                     break;
                 case "list":
-                    string param = "";
+                    commandMessage.CommandAction = CommandActions.List;
                     if (args.Length > 2)
-                        param = args[2];
-
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CommandList, param);
+                        commandMessage.ListParameter = args[2];
                     break;
                 default:
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, list.", args[1]));
-                    break;
+                    return;
             }
+            ConnectionHelper.SendMessageToServer(commandMessage);
         }
 
         public void ProcessPlayerPermission(string[] args)
@@ -221,7 +229,7 @@ Example: /perm group list
                         Help(true);
                         return;
                     }
-                    
+
                     dict.Add(args[2], args[3]);
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerExtend, ConnectionHelper.ConvertData(dict));
                     break;
@@ -299,7 +307,7 @@ Example: /perm group list
                         MyAPIGateway.Utilities.ShowMessage("Group setname", "/perm group setname <groupName> <newGroupName>");
                         return;
                     }
-                    
+
                     dict.Add(args[2], args[3]);
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupName, ConnectionHelper.ConvertData(dict));
                     break;
@@ -323,7 +331,7 @@ Example: /perm group list
                         MyAPIGateway.Utilities.ShowMessage("Group removeplayer", "/perm group remove <groupName> <playerName>");
                         return;
                     }
-                    
+
                     dict.Add(args[2], args[3]);
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupRemovePlayer, ConnectionHelper.ConvertData(dict));
                     break;
@@ -366,34 +374,22 @@ Example: /perm group list
             }
         }
 
-        public static void AddToCommandCache(string commandName, string commandLevel, bool show, bool newList)
+        public static void ShowCommandList(List<CommandStruct> commands)
         {
-            if (newList)
-                CommandCache.Clear();
+            StringBuilder builder = new StringBuilder();
 
-            CommandCache.Add(new CommandCacheEntry()
+            builder.AppendLine(string.Format(@"{0} results found:", commands.Count));
+
+            int index = 0;
+            foreach (CommandStruct command in commands)
             {
-                Name = commandName,
-                NeededLevel = commandLevel
-            });
-
-            if (show)
-            {
-                StringBuilder builder = new StringBuilder();
-
-                builder.AppendLine(string.Format(@"{0} results found:", CommandCache.Count));
-
-                int index = 0;
-                foreach (CommandCacheEntry command in CommandCache)
-                {
-                    builder.AppendFormat(@"
+                builder.AppendFormat(@"
 #{0} {1}
 Level: {2}
 ", ++index, command.Name, command.NeededLevel);
-                }
-
-                MyAPIGateway.Utilities.ShowMissionScreen("Commands", "Command hotlist", null, builder.ToString(), null, null);
             }
+
+            MyAPIGateway.Utilities.ShowMissionScreen("Commands", "Command hotlist", null, builder.ToString(), null, null);
         }
 
         public static void AddToPlayerCache(string playerName, string playerLevel, string steamId, string extensions, string restrictions, bool usePlayerLevel, bool show, bool newList)
@@ -466,12 +462,6 @@ Members: {3}
 
                 MyAPIGateway.Utilities.ShowMissionScreen("Groups", "Group hotlist", null, builder.ToString(), null, null);
             }
-        }
-
-        private struct CommandCacheEntry
-        {
-            public string Name;
-            public string NeededLevel;
         }
 
         private struct PlayerCacheEntry

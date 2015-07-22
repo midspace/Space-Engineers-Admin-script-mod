@@ -1,4 +1,5 @@
-﻿using Sandbox.ModAPI;
+﻿using midspace.adminscripts.Messages;
+using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,36 +74,36 @@ Examples:
                 {
                     case "motd":
                     case "messageoftheday":
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.MessageOfTheDay, value);
+                        ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { Content = value , FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.Content });
                         break;
                     case "motdheadline":
                     case "motdhl":
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.MotdHeadLine, value);
+                        ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { HeadLine = value, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.HeadLine });
                         break;
                     case "motdsic":
                     case "motdshowinchat":
                         bool motdsic;
                         if (bool.TryParse(value, out motdsic))
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.MotdShowInChat, motdsic.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { ShowInChat = motdsic, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.ShowInChat });
                         else
                             MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
                         break;
                     case "adminlevel":
                         uint adminLevel;
                         if (uint.TryParse(value, out adminLevel))
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.AdminLevel, adminLevel.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageConfig() { AdminLevel = adminLevel, Action = ConfigAction.AdminLevel });
                         else
                             MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
                         break;
                     case "save":
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.ConfigSave, "");
+                        ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Save });
                         break;
                     case "reload":
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.ConfigReload, "");
+                        ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Reload });
                         break;
                     default:
                         MyAPIGateway.Utilities.ShowMessage("Config", "Invalid setting or action. Type '/help cfg' for help.");
-                        MyAPIGateway.Utilities.ShowMessage("Config", key.ToLowerInvariant());
+                        MyAPIGateway.Utilities.ShowMessage("Available actions and settings:", "motd, motdhl, motdsic, adminlevel, save, reload");
                         break;
                 }
 
