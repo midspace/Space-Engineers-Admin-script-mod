@@ -8,7 +8,7 @@
     public class CommandTeleportJump : ChatCommand
     {
         public CommandTeleportJump()
-            : base(ChatCommandSecurity.Admin, "j", new[] { "/j" })
+            : base(ChatCommandSecurity.Admin, "j", new[] { "/j", "/jump" })
         {
         }
 
@@ -19,14 +19,14 @@
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/j\s{1,}(?<D>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/((j)|(jump))\s{1,}(?<D>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
                 var distance = double.Parse(match.Groups["D"].Value, CultureInfo.InvariantCulture);
 
                 // Use the player to determine direction of offset.
-                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
+                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
                 var position = worldMatrix.Translation + worldMatrix.Forward * distance;
 
                 var currentPosition = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();

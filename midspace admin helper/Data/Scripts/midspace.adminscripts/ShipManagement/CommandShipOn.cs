@@ -25,7 +25,7 @@
         {
             if (messageText.Equals("/on", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false);
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false);
                 if (entity != null)
                 {
                     var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
@@ -42,30 +42,28 @@
                 return true;
             }
 
-            if (messageText.StartsWith("/on ", StringComparison.InvariantCultureIgnoreCase))
+            var match = Regex.Match(messageText, @"/on\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            if (match.Success)
             {
-                var match = Regex.Match(messageText, @"/on\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
+                var shipName = match.Groups["Key"].Value;
+
+                var currentShipList = new HashSet<IMyEntity>();
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (currentShipList.Count == 0)
                 {
-                    var shipName = match.Groups["Key"].Value;
-
-                    var currentShipList = new HashSet<IMyEntity>();
-                    MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
-
-                    if (currentShipList.Count == 0)
+                    int index;
+                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count)
                     {
-                        int index;
-                        if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count)
-                        {
-                            currentShipList = new HashSet<IMyEntity> { CommandListShips.ShipCache[index - 1] };
-                        }
+                        currentShipList = new HashSet<IMyEntity> { CommandListShips.ShipCache[index - 1] };
                     }
-                    int reactors;
-                    int batteries;
-                    TurnOnShips(currentShipList, out reactors, out batteries);
-                    MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, "{0} Reactors, {1} Batteries turned on.", reactors, batteries);
-                    return true;
                 }
+
+                int reactors;
+                int batteries;
+                TurnOnShips(currentShipList, out reactors, out batteries);
+                MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, "{0} Reactors, {1} Batteries turned on.", reactors, batteries);
+                return true;
             }
 
             return false;
@@ -96,7 +94,7 @@
                 var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, f => f.FatBlock != null
                     && f.FatBlock is IMyFunctionalBlock
-                   && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor)
+                    && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor)
                       || f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_BatteryBlock)));
 
                 var list = blocks.Select(f => (IMyFunctionalBlock)f.FatBlock).Where(f => !f.Enabled).ToArray();

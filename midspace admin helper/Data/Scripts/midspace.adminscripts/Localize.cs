@@ -21,7 +21,10 @@
 
         public static string GetResource(string stringId, params object[] args)
         {
-            return MyStringId.Get(stringId).GetStringFormat(args);
+            if (args.Length == 0)
+                return MyStringId.Get(stringId).GetString();
+            else
+                return MyStringId.Get(stringId).GetStringFormat(args);
         }
 
         // kind of pointless without the Sandbox.Game.Localization namespace, unless we define our own.

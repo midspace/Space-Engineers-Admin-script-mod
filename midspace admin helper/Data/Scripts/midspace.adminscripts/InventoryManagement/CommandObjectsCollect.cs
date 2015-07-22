@@ -37,7 +37,7 @@
 
                     if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                     {
-                        var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
+                        var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false);
                         destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player for safety.
                     }
                     else
@@ -50,6 +50,8 @@
                     var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
                     //floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
                     floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject)).ToList();
+
+                    _workQueue.Clear();
 
                     foreach (var item in floatingList)
                     {
@@ -79,7 +81,7 @@
                                     {
                                         ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
                                     }
-                                    else
+                                    else if (item.Physics != null)
                                     {
                                         item.Physics.ClearSpeed();
                                         item.SetPosition(destination); // Doesn't sync to the server.

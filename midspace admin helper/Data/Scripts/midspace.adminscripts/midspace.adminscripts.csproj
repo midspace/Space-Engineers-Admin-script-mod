@@ -61,6 +61,8 @@
   <ItemGroup>
     <Compile Include="AdminNotification.cs" />
     <Compile Include="AdminNotificator.cs" />
+    <Compile Include="AsteroidManagement\CommandAsteroidScanOre.cs" />
+    <Compile Include="AsteroidManagement\CommandAsteroidReplace.cs" />
     <Compile Include="ChatCommandService.cs" />
     <Compile Include="Localize.cs" />
     <Compile Include="Messages\MessageAdminNotification.cs" />
@@ -76,9 +78,12 @@
     <Compile Include="Messages\MessagePrivateMessage.cs" />
     <Compile Include="Messages\MessageSide.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
+    <Compile Include="Misc\CommandDetail.cs" />
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />
+    <Compile Include="PositionManagement\CommandSpeed.cs" />
+    <Compile Include="ShipManagement\CommandShipDestructable.cs" />
     <Compile Include="UserCommands\CommandChatHistory.cs" />
     <Compile Include="UserCommands\CommandPrivateMessage.cs" />
     <Compile Include="PlayerManagement\CommandPardon.cs" />
@@ -158,6 +163,7 @@
     <Compile Include="AsteroidManagement\CommandAsteroidCreateSphere.cs" />
     <Compile Include="SessionManagement\CommandSessionSpectator.cs" />
     <Compile Include="SessionManagement\CommandSessionWeapons.cs" />
+    <Compile Include="AsteroidManagement\CommandAsteroidFill.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />

@@ -73,7 +73,6 @@
 
         public static void Smite(IMyPlayer selectedPlayer)
         {
-
             var worldMatrix = selectedPlayer.Controller.ControlledEntity.GetHeadMatrix(true, true, true);
             var maxspeed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed * 1.25f;
 

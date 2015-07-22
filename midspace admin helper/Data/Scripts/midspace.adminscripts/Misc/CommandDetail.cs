@@ -3,26 +3,29 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
+    using VRage.Voxels;
     using VRageMath;
 
-    public class CommandIdentify : ChatCommand
+    public class CommandDetail : ChatCommand
     {
-        public CommandIdentify()
-            : base(ChatCommandSecurity.Admin, "id", new[] { "/id" })
+        public CommandDetail()
+            : base(ChatCommandSecurity.Admin, "detail", new[] { "/detail" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/id", "Identifies the name of the object the player is looking at.");
+            MyAPIGateway.Utilities.ShowMessage("/detail", "Provides detail on the object the player is looking at.");
         }
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.Equals("/id", StringComparison.InvariantCultureIgnoreCase))
+            if (messageText.Equals("/detail", StringComparison.InvariantCultureIgnoreCase))
             {
                 IMyEntity entity;
                 double distance;
@@ -38,11 +41,21 @@
                         displayType = "asteroid";
                         displayName = voxelMap.StorageName;
                         var aabb = new BoundingBoxD(voxelMap.PositionLeftBottomCorner, voxelMap.PositionLeftBottomCorner + voxelMap.Storage.Size);
-                        description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nUse /detail for more information on asteroid content.",
-                            distance, voxelMap.Storage.Size,
-                            aabb.Center.X, aabb.Center.Y, aabb.Center.Z);
 
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                        //float GetVoxelContentInBoundingBox(BoundingBoxD worldAabb, out float cellCount);  // Do we bother with this detail?
+
+                        if (voxelMap.Storage.Size.RectangularLength() >= 1536) // 512x512x512 or bigger.
+                        {
+                            MyAPIGateway.Utilities.ShowMessage("Asteroid", "{0} is too big to load immediately, so processing is occurring in the background. Details will appear when finished.", displayName);
+
+                            // use IMyParallelTask to process in the background.
+                            MyAPIGateway.Parallel.StartBackground(
+                                delegate() { ProcessAsteroid(displayType, displayName, voxelMap, distance, aabb); });
+                        }
+                        else
+                        {
+                            ProcessAsteroid(displayType, displayName, voxelMap, distance, aabb);
+                        }
                     }
                     else if (entity is Sandbox.Game.Entities.MyPlanet)
                     {
@@ -50,7 +63,7 @@
                         displayType = "planet";
                         displayName = planet.StorageName;
                         description = string.Format("Distance: {0:N}\r\nMinimum Surface Radius: {1:N}\r\nAtmosphere Radius: {2:N}\r\nHas Atmosphere: {3}",
-                            distance, 
+                            distance,
                             planet.MinimumSurfaceRadius,
                             planet.AtmosphereRadius,
                             planet.HasAtmosphere);
@@ -149,6 +162,77 @@
             }
 
             return false;
+        }
+
+        private void ProcessAsteroid(string displayType, string displayName, IMyVoxelMap voxelMap, double distance, BoundingBoxD aabb)
+        {
+            Vector3I min = Vector3I.MaxValue;
+            Vector3I max = Vector3I.MinValue;
+            Vector3I block;
+            Dictionary<byte, long> assetCount = new Dictionary<byte, long>();
+
+            // read the asteroid in chunks of 64 to avoid the Arithmetic overflow issue.
+            for (block.Z = 0; block.Z < voxelMap.Storage.Size.Z; block.Z += 64)
+                for (block.Y = 0; block.Y < voxelMap.Storage.Size.Y; block.Y += 64)
+                    for (block.X = 0; block.X < voxelMap.Storage.Size.X; block.X += 64)
+                    {
+                        var cacheSize = new Vector3I(64);
+                        var oldCache = new MyStorageDataCache();
+                        oldCache.Resize(cacheSize);
+                        // LOD1 is not detailed enough for content information on asteroids.
+                        voxelMap.Storage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, block, block + cacheSize - 1);
+
+                        Vector3I p;
+                        for (p.Z = 0; p.Z < cacheSize.Z; ++p.Z)
+                            for (p.Y = 0; p.Y < cacheSize.Y; ++p.Y)
+                                for (p.X = 0; p.X < cacheSize.X; ++p.X)
+                                {
+                                    var content = oldCache.Content(ref p);
+                                    if (content > 0)
+                                    {
+                                        min = Vector3I.Min(min, p + block);
+                                        max = Vector3I.Max(max, p + block + 1);
+
+                                        var material = oldCache.Material(ref p);
+                                        if (assetCount.ContainsKey(material))
+                                            assetCount[material] += content;
+                                        else
+                                            assetCount.Add(material, content);
+                                    }
+                                }
+                    }
+
+            var assetNameCount = new Dictionary<string, long>();
+
+            foreach (var kvp in assetCount)
+            {
+                var name = MyDefinitionManager.Static.GetVoxelMaterialDefinition(kvp.Key).Id.SubtypeName;
+
+                if (assetNameCount.ContainsKey(name))
+                {
+                    assetNameCount[name] += kvp.Value;
+                }
+                else
+                {
+                    assetNameCount.Add(name, kvp.Value);
+                }
+            }
+
+            var sum = assetNameCount.Values.Sum();
+
+            var ores = new StringBuilder();
+            foreach (var kvp in assetNameCount)
+                ores.AppendFormat("{0}  {1:N}  {2:P}\r\n", kvp.Key, (double)kvp.Value / 255, (double)kvp.Value / (double)sum);
+
+            var contentBox = new BoundingBoxD(voxelMap.PositionLeftBottomCorner + min, voxelMap.PositionLeftBottomCorner + max);
+            var description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nContent Size:{5}\r\nLOD0 Content Center: [X:{6:N} Y:{7:N} Z:{8:N}]\r\n\r\nMaterial  Mass  Percent\r\n{9}",
+                distance, voxelMap.Storage.Size,
+                aabb.Center.X, aabb.Center.Y, aabb.Center.Z,
+                max - min,
+                contentBox.Center.X, contentBox.Center.Y, contentBox.Center.Z,
+                ores);
+
+            MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
         }
     }
 }

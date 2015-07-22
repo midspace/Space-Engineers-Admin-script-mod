@@ -473,11 +473,14 @@ namespace midspace.adminscripts
                                 && double.TryParse(properties[1], out posX) && double.TryParse(properties[2], out posY) && double.TryParse(properties[3], out posZ))
                             {
                                 var entity = MyAPIGateway.Entities.GetEntityById(entityId);
-                                entity.Stop();
-                                var destination = new Vector3D(posX, posY, posZ);
+                                if (entity != null)
+                                {
+                                    entity.Stop();
+                                    var destination = new Vector3D(posX, posY, posZ);
 
-                                // This still is not syncing properly. Called on the server, it does not show correctly on the client.
-                                entity.SetPosition(destination);
+                                    // This still is not syncing properly. Called on the server, it does not show correctly on the client.
+                                    entity.SetPosition(destination);
+                                }
                             }
                         }
                         break;
@@ -747,11 +750,14 @@ namespace midspace.adminscripts
                                 && double.TryParse(values[1], out posX) && double.TryParse(values[2], out posY) && double.TryParse(values[3], out posZ))
                             {
                                 var entity = MyAPIGateway.Entities.GetEntityById(entityId);
-                                entity.Stop();
-                                var destination = new Vector3D(posX, posY, posZ);
+                                if (entity != null)
+                                {
+                                    entity.Stop();
+                                    var destination = new Vector3D(posX, posY, posZ);
 
-                                // This still is not syncing properly. Called on the server, it does not show correctly on the client.
-                                entity.SetPosition(destination);
+                                    // This still is not syncing properly. Called on the server, it does not show correctly on the client.
+                                    entity.SetPosition(destination);
+                                }
                             }
                         }
                         break;

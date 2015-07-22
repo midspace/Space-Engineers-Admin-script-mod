@@ -388,23 +388,6 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         #region global messages
 
-        public void LogGlobalMessage(ulong sender, string message)
-        {
-            List<IMyPlayer> players = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(players, p => p != null && p.SteamUserId == sender);
-            IMyPlayer player = players.FirstOrDefault();
-            LogGlobalMessage(new ChatMessage()
-            {
-                Sender = new Player()
-                {
-                    SteamId = player.SteamUserId,
-                    PlayerName = player.DisplayName
-                },
-                Date = DateTime.Now,
-                Text = message
-            });
-        }
-
         public void LogGlobalMessage(ChatMessage chatMessage)
         {
             ChatMessages.Add(chatMessage);
@@ -440,7 +423,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             // we just append new chat messages to the log. To get the most recent on top we have to sort it.
             List<ChatMessage> cache = new List<ChatMessage>(ChatMessages.OrderByDescending(m => m.Date));
 
-            // we have to make sure that we don't throw an ArgumentOutOfBoundsException
+            // we have to make sure that we don't throw an exception
             int range = (int)entryCount;
             if (cache.Count < entryCount)
                 range = cache.Count;

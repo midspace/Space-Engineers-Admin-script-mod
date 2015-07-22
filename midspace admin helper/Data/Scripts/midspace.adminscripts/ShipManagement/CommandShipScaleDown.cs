@@ -27,7 +27,7 @@
         {
             if (messageText.Equals("/scaledown", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false);
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false);
                 if (entity != null)
                 {
                     if (CommandShipScaleUp.ScaleShip(entity as IMyCubeGrid, scale))

@@ -162,8 +162,11 @@ namespace midspace.adminscripts
             // New command classes must be added in here.
 
             //commands.Add(new CommandAsteroidFindOre(_oreNames));
+            commands.Add(new CommandAsteroidScanOre(_oreNames));
             //commands.Add(new CommandAsteroidEditClear());
             //commands.Add(new CommandAsteroidEditSet());
+            commands.Add(new CommandAsteroidFill());
+            commands.Add(new CommandAsteroidReplace());
             commands.Add(new CommandAsteroidCreate());
             commands.Add(new CommandAsteroidCreateSphere());
             commands.Add(new CommandAsteroidsList());
@@ -187,6 +190,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandHelloWorld());
             commands.Add(new CommandHelp());
             commands.Add(new CommandIdentify());
+            commands.Add(new CommandDetail());
             commands.Add(new CommandInventoryAdd(_oreNames, _ingotNames.ToArray(), _physicalItems));
             commands.Add(new CommandInventoryClear());
             commands.Add(new CommandInventoryDrop(_oreNames, _ingotNames.ToArray(), _physicalItems));
@@ -219,11 +223,13 @@ namespace midspace.adminscripts
             commands.Add(new CommandSessionSpectator());
             commands.Add(new CommandSessionWeapons());
             commands.Add(new CommandSetVector());
+            commands.Add(new CommandSpeed());
             commands.Add(new CommandShipOff());
             commands.Add(new CommandShipOn());
             commands.Add(new CommandShipOwnerClaim());
             commands.Add(new CommandShipOwnerRevoke());
             commands.Add(new CommandShipDelete());
+            commands.Add(new CommandShipDestructable());
             commands.Add(new CommandShipScaleDown());
             commands.Add(new CommandShipScaleUp());
             //commands.Add(new CommandShipOwnerShare());  //not working

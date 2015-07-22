@@ -32,7 +32,7 @@
             }
             else
             {
-                var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
+                var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).OrderBy(s => s).ToArray();
                 var materialNames = String.Join(", ", validMaterials);
 
                 var description = new StringBuilder();
@@ -68,7 +68,7 @@ Examples:
 
             /*
             Sample calls...
-            /createroidsphere 200 200 200 50 0 Gold_01 test
+            /createroidsphere test 200 200 200 1 Gold_01 200
             
             /createroidsphere sphere_solid_xx_stone_01a 2000 2000 2000 2 Stone_01 200 none 100
             /createroidsphere sphere_solid_xx_stone_01a 2000 2000 2000 2 Stone_01 200 Iron_01 180 Nickel_01 100 Cobalt_01 90 Magnesium_01 80 Silicon_01 70 Silver_01 60 Gold_01 50 Platinum_01 40 Uraninite_01 30
@@ -135,22 +135,16 @@ Examples:
                     }
                     else
                     {
-                        var validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(k => k.Id.SubtypeName.IndexOf(checkName, StringComparison.InvariantCultureIgnoreCase) >= 0).Select(k => k.Id.SubtypeName).ToArray();
-                        if (validMaterials.Length == 0)
+                        MyVoxelMaterialDefinition materialDef;
+                        string suggestedMaterials = "";
+                        if (!Support.FindMaterial(checkName, out materialDef, ref suggestedMaterials))
                         {
-                            validMaterials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Select(k => k.Id.SubtypeName).ToArray();
-                            var materialNames = String.Join(", ", validMaterials);
-                            MyAPIGateway.Utilities.ShowMessage("Invalid", "Material specified. Cannot find the material '{0}'.\r\nTry the following: {1}", checkName, materialNames);
+                            MyAPIGateway.Utilities.ShowMessage("Invalid Material1 specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", checkName, suggestedMaterials);
                             return true;
                         }
-                        if (validMaterials.Length > 1)
-                        {
-                            var materialNames = String.Join(", ", validMaterials);
-                            MyAPIGateway.Utilities.ShowMessage("Invalid", "Material specified. Did you mean {0} ?", materialNames);
-                            return true;
-                        }
-                        materialName = validMaterials[0];
-                        material = MyDefinitionManager.Static.GetVoxelMaterialDefinition(materialName).Index;
+
+                        materialName = materialDef.Id.SubtypeName;
+                        material = materialDef.Index;
                     }
 
                     var diameter = double.Parse(match.Groups["Diameter"].Captures[i].Value, CultureInfo.InvariantCulture);
