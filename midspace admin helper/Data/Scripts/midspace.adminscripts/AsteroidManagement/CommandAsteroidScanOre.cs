@@ -67,13 +67,16 @@
 
                 var currentAsteroidList = new List<IMyVoxelBase>();
                 var position = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
-                MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => Math.Sqrt((position - v.PositionLeftBottomCorner).LengthSquared()) < 50000f);
+                MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => Math.Sqrt((position - v.PositionLeftBottomCorner).LengthSquared()) < Math.Sqrt(Math.Pow(v.Storage.Size.X, 2) * 3) + scanRange + 500f);
                 var asteroids = new List<IMyVoxelBase>();
-
                 int hits = 0;
+
+                //var vm = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, false, true, false) as IMyVoxelBase;
+                //hits += FindMaterial(vm, position, 3, scanRange);
+
                 foreach(var voxelMap in currentAsteroidList)
                 {
-                    hits += FindMaterial(voxelMap, position, 6, scanRange);
+                    hits += FindMaterial(voxelMap, position, 3, scanRange);
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("Scanned", "{0} ore deposits found on {1} asteroids within {2}m range.", hits, currentAsteroidList.Count, scanRange);

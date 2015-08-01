@@ -320,7 +320,7 @@ namespace midspace.adminscripts
                         {
                             //already set by server
                             if (!MyAPIGateway.Session.Player.IsHost())
-                                MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
+                                MyAPIGateway.Session.SessionSettings.CargoShipsEnabled = enableCargoShips;
                             if (MyAPIGateway.Session.Player.IsAdmin())
                                 MyAPIGateway.Utilities.ShowMessage("Server CargoShips", enableCargoShips ? "On" : "Off");
                         }
@@ -330,7 +330,7 @@ namespace midspace.adminscripts
                         if (bool.TryParse(entry.Value, out enableCopyPaste))
                         {
                             if (!MyAPIGateway.Session.Player.IsHost())
-                                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
+                                MyAPIGateway.Session.SessionSettings.EnableCopyPaste = enableCopyPaste;
                             if (MyAPIGateway.Session.Player.IsAdmin())
                                 MyAPIGateway.Utilities.ShowMessage("Server CopyPaste", enableCopyPaste ? "On" : "Off");
                         }
@@ -342,7 +342,7 @@ namespace midspace.adminscripts
                             if (!MyAPIGateway.Session.Player.IsHost())
                             {
                                 MyGameModeEnum gameMode = enableCreative ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
-                                MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
+                                MyAPIGateway.Session.SessionSettings.GameMode = gameMode;
                             }
                             if (MyAPIGateway.Session.Player.IsAdmin())
                                 MyAPIGateway.Utilities.ShowMessage("Server Creative", enableCreative ? "On" : "Off");
@@ -354,7 +354,7 @@ namespace midspace.adminscripts
                         {
                             if (!MyAPIGateway.Session.Player.IsHost())
                             {
-                                MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
+                                MyAPIGateway.Session.SessionSettings.EnableSpectator = enableSpectator;
                             }
                             if (MyAPIGateway.Session.Player.IsAdmin())
                                 MyAPIGateway.Utilities.ShowMessage("Server Spectator", enableSpectator ? "On" : "Off");
@@ -366,7 +366,7 @@ namespace midspace.adminscripts
                         {
                             if (!MyAPIGateway.Session.Player.IsHost())
                             {
-                                MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = enableWeapons;
+                                MyAPIGateway.Session.SessionSettings.WeaponsEnabled = enableWeapons;
                             }
                             if (MyAPIGateway.Session.Player.IsAdmin())
                                 MyAPIGateway.Utilities.ShowMessage("Server Weapons", enableWeapons ? "On" : "Off");
@@ -601,7 +601,7 @@ namespace midspace.adminscripts
                         bool enableCargoShips;
                         if (bool.TryParse(entry.Value, out enableCargoShips))
                         {
-                            MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
+                            MyAPIGateway.Session.SessionSettings.CargoShipsEnabled = enableCargoShips;
                         }
                         SendMessageToAllPlayers(ConnectionKeys.CargoShips, entry.Value);
                         break;
@@ -609,7 +609,7 @@ namespace midspace.adminscripts
                         bool enableCopyPaste;
                         if (bool.TryParse(entry.Value, out enableCopyPaste))
                         {
-                            MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
+                            MyAPIGateway.Session.SessionSettings.EnableCopyPaste = enableCopyPaste;
                         }
                         SendMessageToAllPlayers(ConnectionKeys.CopyPaste, entry.Value);
                         break;
@@ -618,7 +618,7 @@ namespace midspace.adminscripts
                         if (bool.TryParse(entry.Value, out enableCreative))
                         {
                             MyGameModeEnum gameMode = enableCreative ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
-                            MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
+                            MyAPIGateway.Session.SessionSettings.GameMode = gameMode;
                         }
                         SendMessageToAllPlayers(ConnectionKeys.Creative, entry.Value);
                         break;
@@ -626,7 +626,7 @@ namespace midspace.adminscripts
                         bool enableSpectator;
                         if (bool.TryParse(entry.Value, out enableSpectator))
                         {
-                            MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
+                            MyAPIGateway.Session.SessionSettings.EnableSpectator = enableSpectator;
                         }
                         SendMessageToAllPlayers(ConnectionKeys.Spectator, entry.Value);
                         break;
@@ -634,7 +634,7 @@ namespace midspace.adminscripts
                         bool enableWeapons;
                         if (bool.TryParse(entry.Value, out enableWeapons))
                         {
-                            MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = enableWeapons;
+                            MyAPIGateway.Session.SessionSettings.WeaponsEnabled = enableWeapons;
                         }
                         SendMessageToAllPlayers(ConnectionKeys.Weapons, entry.Value);
                         break;

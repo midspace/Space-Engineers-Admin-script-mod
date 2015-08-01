@@ -499,12 +499,12 @@ namespace midspace.adminscripts
             }
 
             // full name match.
-            var res = _physicalItemNames.FirstOrDefault(s => s.Equals(itemName, StringComparison.InvariantCultureIgnoreCase));
+            var res = _physicalItemNames.FirstOrDefault(s => s != null && s.Equals(itemName, StringComparison.InvariantCultureIgnoreCase));
 
             // need a good method for finding partial name matches.
             if (res == null)
             {
-                var matches = _physicalItemNames.Where(s => s.StartsWith(itemName, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToArray();
+                var matches = _physicalItemNames.Where(s => s != null && s.StartsWith(itemName, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToArray();
 
                 if (matches.Length == 1)
                 {
@@ -512,7 +512,7 @@ namespace midspace.adminscripts
                 }
                 else
                 {
-                    matches = _physicalItemNames.Where(s => s.IndexOf(itemName, StringComparison.InvariantCultureIgnoreCase) >= 0).Distinct().ToArray();
+                    matches = _physicalItemNames.Where(s => s != null && s.IndexOf(itemName, StringComparison.InvariantCultureIgnoreCase) >= 0).Distinct().ToArray();
                     if (matches.Length == 1)
                     {
                         res = matches.FirstOrDefault();

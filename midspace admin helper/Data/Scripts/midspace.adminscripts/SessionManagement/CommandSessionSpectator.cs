@@ -43,7 +43,7 @@
                     ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Spectator, state.Value.ToString());
                     return true;
                 }
-                MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = state.Value;
+                MyAPIGateway.Session.SessionSettings.EnableSpectator = state.Value;
             }
 
             // Display the current state.
