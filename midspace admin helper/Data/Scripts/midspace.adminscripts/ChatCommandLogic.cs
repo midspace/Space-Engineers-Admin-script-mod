@@ -266,7 +266,7 @@ namespace midspace.adminscripts
             { //only for clients it is null
                 ServerCfg.Close();
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
-                Logger.Debug("Uregistered MessageHandler Server");
+                Logger.Debug("Unregistered MessageHandler Server");
             }
 
             if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
@@ -277,7 +277,7 @@ namespace midspace.adminscripts
                 MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
                 Logger.Debug("Detached Session_OnSessionReady");
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
-                Logger.Debug("Uregistered MessageHandler Client");
+                Logger.Debug("Unregistered MessageHandler Client");
             }
             
             if (MyAPIGateway.Utilities != null) {
@@ -363,12 +363,13 @@ namespace midspace.adminscripts
 
         private static void HandleMessage_Client(byte[] message)
         {
-            Logger.Debug(string.Format("HandleMessage - {0}", System.Text.Encoding.Unicode.GetString(message)));
+            Logger.Debug(string.Format("HandleMessageClient - {0}", System.Text.Encoding.Unicode.GetString(message)));
             ConnectionHelper.ProcessClientData(message);
         }
 
         private static void HandleMessage_Server(byte[] message)
         {
+            Logger.Debug(string.Format("HandleMessageServer - {0}", System.Text.Encoding.Unicode.GetString(message)));
             ConnectionHelper.ProcessServerData(message);
         }
 

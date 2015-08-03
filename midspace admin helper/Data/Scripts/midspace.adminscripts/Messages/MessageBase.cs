@@ -66,22 +66,22 @@ namespace midspace.adminscripts.Messages
 
         private void InvokeClientProcessing()
         {
-            Logger.Debug("START - Processing [Client]");
+            Logger.Debug("START - Processing [Client] {0}", this.GetType().Name);
             try
             {
                 ProcessClient();
             }
-            catch (Exception ex) 
-            { 
-             // TODO send error to server and notify admins
+            catch (Exception ex)
+            {
+                // TODO send error to server and notify admins
             }
-            Logger.Debug("END - Processing [Client]");
+            Logger.Debug("END - Processing [Client] {0}", this.GetType().Name);
         }
 
         private void InvokeServerProcessing()
         {
-            Logger.Debug("START - Processing [Server]");
-            
+            Logger.Debug("START - Processing [Server] {0}", this.GetType().Name);
+
             try
             {
                 ProcessServer();
@@ -91,7 +91,7 @@ namespace midspace.adminscripts.Messages
                 AdminNotificator.StoreExceptionAndNotify(ex);
             }
 
-            Logger.Debug("END - Processing [Server]");
+            Logger.Debug("END - Processing [Server] {0}", this.GetType().Name);
         }
 
         public abstract void ProcessClient();

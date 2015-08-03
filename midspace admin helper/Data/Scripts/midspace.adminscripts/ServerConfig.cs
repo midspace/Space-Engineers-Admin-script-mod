@@ -69,6 +69,14 @@ namespace midspace.adminscripts
             //cfg
             ConfigFileName = string.Format(ConfigFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
             LoadOrCreateConfig();
+
+            if (Config.EnableLog)
+            {
+                ChatCommandLogic.Instance.Debug = true;
+                Logger.Init();
+                Logger.Debug("Log Enabled.");
+            }
+
             //motd
             MotdFileName = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
             LoadOrCreateMotdFile();
@@ -446,6 +454,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
 
                 SavePermissionFile();
+                Logger.Debug("Permission File created.");
                 return;
             }
 
@@ -481,6 +490,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 //remove all invalid commands
                 Permissions.Commands.Remove(cmdStruct);
             }
+
+            Logger.Debug("Permission File loaded {0} commands.", Permissions.Commands.Count);
 
             SavePermissionFile();
             return;
@@ -1291,6 +1302,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         [XmlArrayItem("BannedPlayer")]
         public List<Player> ForceBannedPlayers;
         public uint AdminLevel;
+        public bool EnableLog;
 
         public ServerConfigurationStruct()
         {
@@ -1302,6 +1314,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             LogPrivateMessages = true;
             ForceBannedPlayers = new List<Player>();
             AdminLevel = ChatCommandSecurity.Admin;
+            EnableLog = false;
         }
     }
 

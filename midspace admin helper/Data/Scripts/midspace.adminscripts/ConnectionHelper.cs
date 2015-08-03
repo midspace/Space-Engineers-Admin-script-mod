@@ -111,8 +111,10 @@ namespace midspace.adminscripts
 
         public static void SendMessageToPlayer(ulong steamId, MessageBase message)
         {
+            Logger.Debug("SendMessageToPlayer {0} {1} {2}.", steamId, message.Side, message.GetType().Name);
+
             message.Side = MessageSide.ClientSide;
-            var xml = MyAPIGateway.Utilities.SerializeToXML<MessageContainer>(new MessageContainer() { Content = message });
+            var xml = MyAPIGateway.Utilities.SerializeToXML(new MessageContainer() { Content = message });
             byte[] byteData = System.Text.Encoding.Unicode.GetBytes(xml);
             if (byteData.Length <= MAX_MESSAGE_SIZE)
                 MyAPIGateway.Multiplayer.SendMessageTo(StandardClientId, byteData, steamId);
@@ -280,18 +282,31 @@ namespace midspace.adminscripts
         /// <param name="dataString"></param>
         public static void ProcessClientData(string dataString)
         {
+            Logger.Debug("START - Message Serialization");
+            MessageContainer message = null;
+
             try
             {
-                Logger.Debug("START - Message Serialization");
-                var message = MyAPIGateway.Utilities.SerializeFromXML<MessageContainer>(dataString).Content;
-                Logger.Debug("END - Message Serialization");
-
-                message.InvokeProcessing();
-                return;
+                message = MyAPIGateway.Utilities.SerializeFromXML<MessageContainer>(dataString);
             }
-            catch (Exception e)
+            catch
             {
-                Logger.Debug(e.ToString());
+                Logger.Debug("Message cannot Deserialize");
+            }
+
+            Logger.Debug("END - Message Serialization");
+
+            if (message != null && message.Content != null)
+            {
+                try
+                {
+                    message.Content.InvokeProcessing();
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug("Processing Client message exception: {0}", e.ToString());
+                }
+                return;
             }
 
             var parsedData = Parse(dataString);
@@ -456,18 +471,31 @@ namespace midspace.adminscripts
         /// <param name="dataString"></param>
         public static void ProcessServerData(string dataString)
         {
+            Logger.Debug("START - Message Serialization");
+            MessageContainer message = null;
+
             try
             {
-                Logger.Debug("START - Message Serialization");
-                var message = MyAPIGateway.Utilities.SerializeFromXML<MessageContainer>(dataString).Content;
-                Logger.Debug("END - Message Serialization");
-
-                message.InvokeProcessing();
-                return;
+                message = MyAPIGateway.Utilities.SerializeFromXML<MessageContainer>(dataString);
             }
-            catch (Exception e)
+            catch
             {
-                Logger.Debug(e.ToString());
+                Logger.Debug("Message cannot Deserialize");
+            }
+
+            Logger.Debug("END - Message Serialization");
+
+            if (message != null && message.Content != null)
+            {
+                try
+                {
+                    message.Content.InvokeProcessing();
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug("Processing Server message exception: {0}", e.ToString());
+                }
+                return;
             }
 
             var parsedData = Parse(dataString);
@@ -475,7 +503,10 @@ namespace midspace.adminscripts
             if (parsedData.ContainsKey(ConnectionKeys.Sender) && ulong.TryParse(parsedData[ConnectionKeys.Sender], out senderSteamId))
                 parsedData.Remove(ConnectionKeys.Sender);
             else
+            {
+                Logger.Debug("Server ParseError - Invalid or no Sender Key.");
                 return; //if we don't know who sent the request, we don't execute it
+            }
 
             foreach (KeyValuePair<string, string> entry in parsedData)
             {
@@ -751,6 +782,8 @@ namespace midspace.adminscripts
 
         private static void SendMessageParts(byte[] byteData, MessageSide side, ulong receiver = 0)
         {
+            Logger.Debug("SendMessageParts {0} {1} {2}.", byteData.Length, side, receiver);
+
             var byteList = byteData.ToList();
 
             while (byteList.Count > 0)

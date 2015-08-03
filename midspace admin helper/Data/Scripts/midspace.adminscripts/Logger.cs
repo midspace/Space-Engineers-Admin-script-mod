@@ -35,17 +35,23 @@
             if (!isInitialized)
             {
                 if (ChatCommandLogic.Instance.Debug)
+                {
                     DebugWriter = MyAPIGateway.Utilities.WriteFileInLocalStorage(DebugFileName, typeof(Logger));
-                isInitialized = true;
+                    isInitialized = true;
+                }
             }
         }
 
-        public static void Debug(string text)
+        public static void Debug(string text, params object[] args)
         {
             if (DebugWriter == null || !isInitialized || !ChatCommandLogic.Instance.Debug)
                 return;
 
-            DebugWriter.WriteLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss:fff}] Debug - {1}", DateTime.Now, text));
+            string msg = text;
+            if (args.Length != 0)
+                msg = string.Format(text, args);
+
+            DebugWriter.WriteLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss:fff}] Debug - {1}", DateTime.Now, msg));
             DebugWriter.Flush();
         }
 
