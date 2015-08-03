@@ -10,7 +10,7 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageAdminNotification : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public AdminNotification Notification;
 
         public override void ProcessClient()
