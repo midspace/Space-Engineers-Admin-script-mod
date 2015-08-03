@@ -43,7 +43,7 @@
                     ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.Weapons });
                     return true;
                 }
-                MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = state.Value;
+                MyAPIGateway.Session.SessionSettings.WeaponsEnabled = state.Value;
             }
 
             // Display the current state.

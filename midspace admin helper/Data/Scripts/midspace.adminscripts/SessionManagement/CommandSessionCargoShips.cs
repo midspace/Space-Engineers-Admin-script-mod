@@ -45,7 +45,7 @@
                     ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.CargoShips });
                     return true;
                 }
-                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = state.Value;
+                MyAPIGateway.Session.SessionSettings.EnableCopyPaste = state.Value;
             }
 
             // Display the current state.

@@ -313,67 +313,6 @@ namespace midspace.adminscripts
                         break;
                     #endregion
 
-                    #region session settings
-                    case ConnectionKeys.CargoShips:
-                        bool enableCargoShips;
-                        if (bool.TryParse(entry.Value, out enableCargoShips))
-                        {
-                            //already set by server
-                            if (!MyAPIGateway.Session.Player.IsHost())
-                                MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
-                            if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Server CargoShips", enableCargoShips ? "On" : "Off");
-                        }
-                        break;
-                    case ConnectionKeys.CopyPaste:
-                        bool enableCopyPaste;
-                        if (bool.TryParse(entry.Value, out enableCopyPaste))
-                        {
-                            if (!MyAPIGateway.Session.Player.IsHost())
-                                MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
-                            if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Server CopyPaste", enableCopyPaste ? "On" : "Off");
-                        }
-                        break;
-                    case ConnectionKeys.Creative:
-                        bool enableCreative;
-                        if (bool.TryParse(entry.Value, out enableCreative))
-                        {
-                            if (!MyAPIGateway.Session.Player.IsHost())
-                            {
-                                MyGameModeEnum gameMode = enableCreative ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
-                                MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
-                            }
-                            if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Server Creative", enableCreative ? "On" : "Off");
-                        }
-                        break;
-                    case ConnectionKeys.Spectator:
-                        bool enableSpectator;
-                        if (bool.TryParse(entry.Value, out enableSpectator))
-                        {
-                            if (!MyAPIGateway.Session.Player.IsHost())
-                            {
-                                MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
-                            }
-                            if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Server Spectator", enableSpectator ? "On" : "Off");
-                        }
-                        break;
-                    case ConnectionKeys.Weapons:
-                        bool enableWeapons;
-                        if (bool.TryParse(entry.Value, out enableWeapons))
-                        {
-                            if (!MyAPIGateway.Session.Player.IsHost())
-                            {
-                                MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = enableWeapons;
-                            }
-                            if (MyAPIGateway.Session.Player.IsAdmin())
-                                MyAPIGateway.Utilities.ShowMessage("Server Weapons", enableWeapons ? "On" : "Off");
-                        }
-                        break;
-                    #endregion
-
                     #region permissions
                     case ConnectionKeys.PlayerLevel:
                         uint newUserSecurity;

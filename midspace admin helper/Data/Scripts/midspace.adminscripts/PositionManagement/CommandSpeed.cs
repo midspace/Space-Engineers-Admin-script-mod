@@ -45,7 +45,8 @@
                 }
                 else
                 {
-                    var targetVector = entity.WorldMatrix.Forward;
+                    var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
+                    var targetVector = worldMatrix.Forward;
                     targetVector = Vector3D.Normalize(targetVector) * vector;
                     entity.Physics.LinearVelocity = targetVector;
                     return true;

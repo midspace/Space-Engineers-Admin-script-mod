@@ -53,7 +53,10 @@
                     ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.Creative });
                     return true;
                 }
-                MyAPIGateway.Session.GetCheckpoint("null").GameMode = state.Value ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
+                if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                    MyAPIGateway.Utilities.ShowMessage("Error", "Cannot change Creative state as Private.");
+                else
+                    MyAPIGateway.Session.SessionSettings.GameMode = state.Value ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
             }
 
             // Display the current state.
