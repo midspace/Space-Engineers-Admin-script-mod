@@ -471,9 +471,8 @@ namespace midspace.adminscripts
             }
 
             var parsedData = Parse(dataString);
-            string senderIdString = parsedData[ConnectionKeys.Sender];
             ulong senderSteamId;
-            if (ulong.TryParse(senderIdString, out senderSteamId))
+            if (parsedData.ContainsKey(ConnectionKeys.Sender) && ulong.TryParse(parsedData[ConnectionKeys.Sender], out senderSteamId))
                 parsedData.Remove(ConnectionKeys.Sender);
             else
                 return; //if we don't know who sent the request, we don't execute it
