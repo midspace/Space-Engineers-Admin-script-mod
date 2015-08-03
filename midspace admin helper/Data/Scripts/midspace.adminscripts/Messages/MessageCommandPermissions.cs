@@ -9,13 +9,13 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageCommandPermissions : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public List<CommandStruct> Commands;
 
-        [ProtoMember]
+        [ProtoMember(2)]
         public CommandActions CommandAction;
 
-        [ProtoMember]
+        [ProtoMember(3)]
         public string ListParameter;
 
         public override void ProcessClient()

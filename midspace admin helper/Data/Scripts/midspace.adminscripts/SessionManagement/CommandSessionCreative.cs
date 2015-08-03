@@ -5,6 +5,7 @@
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using midspace.adminscripts.Messages;
 
     public class CommandSessionCreative : ChatCommand
     {
@@ -49,7 +50,7 @@
             {
                 if (!priv && MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Creative, state.Value.ToString());
+                    ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.Creative });
                     return true;
                 }
                 MyAPIGateway.Session.GetCheckpoint("null").GameMode = state.Value ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;

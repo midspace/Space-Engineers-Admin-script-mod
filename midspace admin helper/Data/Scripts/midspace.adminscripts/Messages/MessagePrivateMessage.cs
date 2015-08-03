@@ -11,10 +11,10 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessagePrivateMessage : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public ChatMessage ChatMessage;
 
-        [ProtoMember]
+        [ProtoMember(2)]
         public ulong Receiver;
 
         public override void ProcessClient()

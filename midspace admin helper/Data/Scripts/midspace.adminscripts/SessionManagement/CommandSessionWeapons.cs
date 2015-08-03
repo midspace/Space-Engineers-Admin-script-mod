@@ -4,6 +4,7 @@
     using System.Linq;
 
     using Sandbox.ModAPI;
+    using midspace.adminscripts.Messages;
 
     public class CommandSessionWeapons : ChatCommand
     {
@@ -39,7 +40,7 @@
             {
                 if (!priv && MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Weapons, state.Value.ToString());
+                    ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.Weapons });
                     return true;
                 }
                 MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = state.Value;

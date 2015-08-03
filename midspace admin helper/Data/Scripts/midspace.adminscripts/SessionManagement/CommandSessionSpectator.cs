@@ -4,6 +4,7 @@
     using System.Linq;
 
     using Sandbox.ModAPI;
+    using midspace.adminscripts.Messages;
 
     public class CommandSessionSpectator : ChatCommand
     {
@@ -40,7 +41,7 @@
             {
                 if (!priv && MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Spectator, state.Value.ToString());
+                    ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.Spectator });
                     return true;
                 }
                 MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = state.Value;

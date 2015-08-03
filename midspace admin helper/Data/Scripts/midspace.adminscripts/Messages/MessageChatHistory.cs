@@ -10,10 +10,10 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageChatHistory : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public List<ChatMessage> ChatHistory;
 
-        [ProtoMember]
+        [ProtoMember(2)]
         public uint EntryCount;
 
         public override void ProcessClient()

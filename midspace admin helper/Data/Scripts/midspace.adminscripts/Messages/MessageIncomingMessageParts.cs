@@ -10,10 +10,10 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageIncomingMessageParts : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public byte[] Content;
 
-        [ProtoMember]
+        [ProtoMember(2)]
         public bool LastPart;
 
         public override void ProcessClient()

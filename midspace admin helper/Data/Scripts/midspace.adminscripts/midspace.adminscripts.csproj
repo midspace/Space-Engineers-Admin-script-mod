@@ -76,6 +76,7 @@
     <Compile Include="Messages\MessageOfTheDayMessage.cs" />
     <Compile Include="Messages\MessageCommandPermissions.cs" />
     <Compile Include="Messages\MessagePrivateMessage.cs" />
+    <Compile Include="Messages\MessageSession.cs" />
     <Compile Include="Messages\MessageSide.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />

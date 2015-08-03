@@ -10,7 +10,7 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageGlobalMessage : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public ChatMessage ChatMessage;
 
         public override void ProcessClient()

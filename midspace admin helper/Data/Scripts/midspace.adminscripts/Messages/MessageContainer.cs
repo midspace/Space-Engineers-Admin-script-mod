@@ -12,7 +12,7 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageContainer
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public MessageBase Content;
     }
 }

@@ -10,10 +10,10 @@ namespace midspace.adminscripts.Messages
     [ProtoContract]
     public class MessageConfig : MessageBase
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public ConfigAction Action;
 
-        [ProtoMember]
+        [ProtoMember(2)]
         public uint AdminLevel;
 
         public override void ProcessClient()

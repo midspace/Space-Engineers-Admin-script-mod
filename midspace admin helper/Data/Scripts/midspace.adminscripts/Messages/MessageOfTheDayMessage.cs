@@ -14,25 +14,25 @@ namespace midspace.adminscripts.Messages
         /// <summary>
         /// The content of the message of the day.
         /// </summary>
-        [ProtoMember]
+        [ProtoMember(1)]
         public string Content;
 
         /// <summary>
         /// The head line of the message of the day.
         /// </summary>
-        [ProtoMember]
+        [ProtoMember(2)]
         public string HeadLine;
 
         /// <summary>
         /// Determines if the message of the day is displayed in the chat or in a dialog.
         /// </summary>
-        [ProtoMember]
+        [ProtoMember(3)]
         public bool ShowInChat;
 
         /// <summary>
         /// The fields are supposed to be updated must be set here.
         /// </summary>
-        [ProtoMember]
+        [ProtoMember(4)]
         public ChangedFields FieldsToUpdate;
 
         public override void ProcessClient()

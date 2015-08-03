@@ -10,26 +10,27 @@ namespace midspace.adminscripts.Messages
     // ALL CLASSES DERIVED FROM MessageBase MUST BE ADDED HERE
     [XmlInclude(typeof(MessageAdminNotification))]
     [XmlInclude(typeof(MessageChatHistory))]
+    [XmlInclude(typeof(MessageCommandPermissions))]
     [XmlInclude(typeof(MessageConfig))]
     [XmlInclude(typeof(MessageConnectionRequest))]
     [XmlInclude(typeof(MessageGlobalMessage))]
     [XmlInclude(typeof(MessageIncomingMessageParts))]
     [XmlInclude(typeof(MessageOfTheDayMessage))]
-    [XmlInclude(typeof(MessageCommandPermissions))]
     [XmlInclude(typeof(MessagePrivateMessage))]
+    [XmlInclude(typeof(MessageSession))]
     [ProtoContract]
     public abstract class MessageBase
     {
         /// <summary>
         /// The SteamId of the message's sender. Note that this will be set when the message is sent, so there is no need for setting it otherwise.
         /// </summary>
-        [ProtoMember]
+        [ProtoMember(1)]
         public ulong SenderSteamId;
 
         /// <summary>
         /// Defines on which side the message should be processed. Note that this will be set when the message is sent, so there is no need for setting it otherwise.
         /// </summary>
-        [ProtoMember]
+        [ProtoMember(2)]
         public MessageSide Side;
 
         /*
@@ -66,7 +67,14 @@ namespace midspace.adminscripts.Messages
         private void InvokeClientProcessing()
         {
             Logger.Debug("START - Processing [Client]");
-            ProcessClient();
+            try
+            {
+                ProcessClient();
+            }
+            catch (Exception ex) 
+            { 
+             // TODO send error to server and notify admins
+            }
             Logger.Debug("END - Processing [Client]");
         }
 

@@ -555,6 +555,7 @@ namespace midspace.adminscripts
                         if (string.IsNullOrEmpty(entry.Value))
                         {
                             MyAPIGateway.Session.Save();
+                            ChatCommandLogic.Instance.ServerCfg.SaveLogs();
                             SendChatMessage(senderSteamId, "Session saved.");
                         }
                         else
@@ -593,50 +594,6 @@ namespace midspace.adminscripts
                             ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Remove(bannedPlayer);
                             SendChatMessage(senderSteamId, string.Format("Pardoned player {0}", bannedPlayer.PlayerName));
                         }
-                        break;
-                    #endregion
-
-                    #region Session settings
-                    case ConnectionKeys.CargoShips:
-                        bool enableCargoShips;
-                        if (bool.TryParse(entry.Value, out enableCargoShips))
-                        {
-                            MyAPIGateway.Session.GetCheckpoint("null").CargoShipsEnabled = enableCargoShips;
-                        }
-                        SendMessageToAllPlayers(ConnectionKeys.CargoShips, entry.Value);
-                        break;
-                    case ConnectionKeys.CopyPaste:
-                        bool enableCopyPaste;
-                        if (bool.TryParse(entry.Value, out enableCopyPaste))
-                        {
-                            MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = enableCopyPaste;
-                        }
-                        SendMessageToAllPlayers(ConnectionKeys.CopyPaste, entry.Value);
-                        break;
-                    case ConnectionKeys.Creative:
-                        bool enableCreative;
-                        if (bool.TryParse(entry.Value, out enableCreative))
-                        {
-                            MyGameModeEnum gameMode = enableCreative ? MyGameModeEnum.Creative : MyGameModeEnum.Survival;
-                            MyAPIGateway.Session.GetCheckpoint("null").GameMode = gameMode;
-                        }
-                        SendMessageToAllPlayers(ConnectionKeys.Creative, entry.Value);
-                        break;
-                    case ConnectionKeys.Spectator:
-                        bool enableSpectator;
-                        if (bool.TryParse(entry.Value, out enableSpectator))
-                        {
-                            MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpectator = enableSpectator;
-                        }
-                        SendMessageToAllPlayers(ConnectionKeys.Spectator, entry.Value);
-                        break;
-                    case ConnectionKeys.Weapons:
-                        bool enableWeapons;
-                        if (bool.TryParse(entry.Value, out enableWeapons))
-                        {
-                            MyAPIGateway.Session.GetCheckpoint("null").WeaponsEnabled = enableWeapons;
-                        }
-                        SendMessageToAllPlayers(ConnectionKeys.Weapons, entry.Value);
                         break;
                     #endregion
 

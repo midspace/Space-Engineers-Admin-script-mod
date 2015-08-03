@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Timers;
 using System.Xml.Serialization;
 
 namespace midspace.adminscripts
@@ -51,6 +52,11 @@ namespace midspace.adminscripts
         /// </summary>
         public static bool ServerIsClient = true;
 
+        /// <summary>
+        /// Saves the log at the same interval as the session saves...
+        /// </summary>
+        private Timer LogSaveTimer;
+
         public ServerConfig(List<ChatCommand> commands)
         {
             ChatCommands = commands;
@@ -78,6 +84,11 @@ namespace midspace.adminscripts
                 PmLogFileName = string.Format(PmLogFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
                 LoadOrCreatePmLog();
             }
+
+            LogSaveTimer = new Timer(MyAPIGateway.Session.AutoSaveInMinutes * 60 * 1000);
+            LogSaveTimer.Elapsed += SaveTimer_Elapsed;
+            LogSaveTimer.Start();
+
             Logger.Debug("Config loaded.");
         }
 
@@ -97,17 +108,36 @@ namespace midspace.adminscripts
             //motd
             SaveMotd();
 
-            SaveGlobalChatLog(); //TODO save chat & pm log every 5 minutes. Or when saving? Would require to create an event for that...
+            SaveLogs();
 
-            if (Config.LogPrivateMessages)
-                SavePmLog();
             Logger.Debug("Config saved.");
+        }
+
+        public void Close()
+        {
+            Save();
+
+            LogSaveTimer.Elapsed -= SaveTimer_Elapsed;
+            LogSaveTimer.Close();
         }
 
         public void ReloadConfig()
         {
             LoadConfig();
             LoadMotd();
+        }
+        public void SaveLogs()
+        {
+            SaveGlobalChatLog();
+
+            if (Config.LogPrivateMessages)
+                SavePmLog();
+            Logger.Debug("Logs saved.");
+        }
+
+        void SaveTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            SaveLogs();
         }
 
         #region server config
@@ -286,51 +316,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             reader.Close();
             PrivateConversations = MyAPIGateway.Utilities.SerializeFromXML<List<PrivateConversation>>(text);
         }
-
-        public void LogPrivateMessage(ulong sender, ulong receiver, string message)
-        {
-            if (!Config.LogPrivateMessages)
-                return;
-
-            List<PrivateConversation> senderConversations = PrivateConversations.FindAll(c => c.Participants.Exists(p => p.SteamId == sender));
-
-            var pm = new PrivateMessage()
-            {
-                Sender = sender,
-                Receiver = receiver,
-                Date = DateTime.Now,
-                Text = message
-            };
-
-            if (senderConversations.Exists(c => c.Participants.Exists(p => p.SteamId == receiver)))
-            {
-                PrivateConversation conversation = senderConversations.Find(c => c.Participants.Exists(p => p.SteamId == receiver));
-                conversation.Messages.Add(pm);
-            }
-            else
-            {
-                List<IMyPlayer> players = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(players, p => p != null);
-                var senderPlayer = players.FirstOrDefault(p => p.SteamUserId == sender);
-                var receiverPlayer = players.FirstOrDefault(p => p.SteamUserId == receiver);
-
-                PrivateConversations.Add(new PrivateConversation()
-                {
-                    Participants = new List<Player>(new Player[] {
-                            new Player() {
-                                SteamId = senderPlayer.SteamUserId,
-                                PlayerName = senderPlayer.DisplayName
-                            },
-                            new Player(){
-                                SteamId = receiverPlayer.SteamUserId,
-                                PlayerName = receiverPlayer.DisplayName
-                            }}),
-                    Messages = new List<PrivateMessage>(new PrivateMessage[] { pm })
-                });
-            }
-            //TODO save the log every 5 minutes
-        }
-
+        
         public void LogPrivateMessage(ChatMessage chatMessage, ulong receiver)
         {
             if (!Config.LogPrivateMessages)

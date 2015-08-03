@@ -264,7 +264,7 @@ namespace midspace.adminscripts
 
             if (ServerCfg != null)
             { //only for clients it is null
-                ServerCfg.Save();
+                ServerCfg.Close();
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
                 Logger.Debug("Uregistered MessageHandler Server");
             }

@@ -4,6 +4,7 @@
     using System.Linq;
 
     using Sandbox.ModAPI;
+    using midspace.adminscripts.Messages;
 
     public class CommandSessionCargoShips : ChatCommand
     {
@@ -41,7 +42,7 @@
             {
                 if (!priv && MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.CargoShips, state.Value.ToString());
+                    ConnectionHelper.SendMessageToServer(new MessageSession() { State = state.Value, Setting = SessionSetting.CargoShips });
                     return true;
                 }
                 MyAPIGateway.Session.GetCheckpoint("null").EnableCopyPaste = state.Value;
