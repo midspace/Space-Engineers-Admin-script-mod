@@ -93,7 +93,9 @@ namespace midspace.adminscripts
                 LoadOrCreatePmLog();
             }
 
-            LogSaveTimer = new Timer(MyAPIGateway.Session.AutoSaveInMinutes * 60 * 1000);
+            // TODO: remove timer if AutoSaveInMinutes is 0.
+            var autotime = (MyAPIGateway.Session.AutoSaveInMinutes == 0 ? 5 : MyAPIGateway.Session.AutoSaveInMinutes) * 60 * 1000;
+            LogSaveTimer = new Timer(autotime);
             LogSaveTimer.Elapsed += SaveTimer_Elapsed;
             LogSaveTimer.Start();
 
