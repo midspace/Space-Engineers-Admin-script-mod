@@ -16,15 +16,15 @@ namespace midspace.adminscripts
 
     public static class Support
     {
-        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips = true, bool findPlayers = true, bool findAsteroids = true, bool findPlanets = true)
+        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
         {
             IMyEntity entity;
             double distance;
-            FindLookAtEntity(controlledEntity, out entity, out distance, findShips, findPlayers, findAsteroids, findPlanets);
+            FindLookAtEntity(controlledEntity, out entity, out distance, findShips, findCubes, findPlayers, findAsteroids, findPlanets);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, bool findShips = true, bool findPlayers = true, bool findAsteroids = true, bool findPlanets = true)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
         {
             const float range = 5000000;
             Matrix worldMatrix;
@@ -63,7 +63,7 @@ namespace midspace.adminscripts
 
             foreach (var entity in entites)
             {
-                if (findShips)
+                if (findShips || findCubes)
                 {
                     var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
 
@@ -74,7 +74,12 @@ namespace midspace.adminscripts
                         if (hit.HasValue)
                         {
                             var distance = (startPosition - cubeGrid.GridIntegerToWorld(hit.Value)).Length();
-                            list.Add(entity, distance);
+                            var block = cubeGrid.GetCubeBlock(hit.Value);
+
+                            if (block.FatBlock != null && findCubes)
+                                list.Add(block.FatBlock, distance);
+                            else if (findShips)
+                                list.Add(entity, distance);
                         }
                     }
                 }
@@ -235,6 +240,12 @@ namespace midspace.adminscripts
         /// <returns></returns>
         public static bool MovePlayerToPlayer(IMyPlayer player, IMyPlayer targetPlayer, bool safely = true, bool agressivePosition = true)
         {
+            if (targetPlayer == null || targetPlayer.Controller == null || targetPlayer.Controller.ControlledEntity == null)
+            {
+                MyAPIGateway.Utilities.ShowMessage("Failed", "Player does not have body to teleport to.");
+                return false;
+            }
+
             var worldMatrix = targetPlayer.Controller.ControlledEntity.Entity.WorldMatrix;
 
             Vector3D position;

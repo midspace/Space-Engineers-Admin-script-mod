@@ -29,7 +29,7 @@
             {
                 IMyEntity entity;
                 double distance;
-                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, out entity, out distance);
+                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, out entity, out distance, true, true, true, true, true);
                 if (entity != null)
                 {
                     string displayType;
@@ -69,9 +69,19 @@
                             planet.HasAtmosphere);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
-                    else if (entity is IMyCubeGrid)
+                    else if (entity is IMyCubeBlock || entity is IMyCubeGrid)
                     {
-                        var gridCube = (IMyCubeGrid)entity;
+                        IMyCubeGrid gridCube;
+                        IMyCubeBlock cubeBlock = null;
+
+                        if (entity is IMyCubeGrid)
+                            gridCube = (IMyCubeGrid)entity;
+                        else
+                        {
+                            cubeBlock = (IMyCubeBlock)entity;
+                            gridCube = (IMyCubeGrid)cubeBlock.GetTopMostParent();
+                        }
+
                         var attachedGrids = gridCube.GetAttachedGrids();
                         var blocks = new List<IMySlimBlock>();
                         gridCube.GetBlocks(blocks);
@@ -123,7 +133,7 @@
                         }
 
                         displayType = gridCube.IsStatic ? "Station" : gridCube.GridSizeEnum.ToString() + " Ship";
-                        displayName = entity.DisplayName;
+                        displayName = gridCube.DisplayName;
 
                         description = string.Format("Distance: {0:N} m\r\n",
                             distance);
@@ -137,12 +147,21 @@
                                 gridCube.Physics.LinearVelocity.Length(),
                                 gridCube.Physics.CenterOfMassWorld);
 
-                        description += string.Format("Size: {0}\r\nNumber of Blocks: {1:#,##0}\r\nAttached Grids: {2:#,##0} (including this one).\r\nOwners: {3}\r\nBuild: {4} blocks incomplete.",
+                        description += string.Format("Size : {0}\r\nNumber of Blocks : {1:#,##0}\r\nAttached Grids : {2:#,##0} (including this one).\r\nOwners : {3}\r\nBuild : {4} blocks incomplete.",
                             gridCube.LocalAABB.Size,
                             blocks.Count,
                             attachedGrids.Count,
                             String.Join(", ", ownerList),
                             incompleteBlocks);
+
+                        if (cubeBlock != null)
+                        {
+                            string ownerName = "";
+                            var owner = identities.FirstOrDefault(p => p.PlayerId == cubeBlock.OwnerId);
+                            if (owner != null)
+                                ownerName = owner.DisplayName;
+                            description += string.Format("\r\n\r\nCube;\r\n  Type : {0}\r\n  Name : {1}\r\n  Owner : {2}", cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName);
+                        }
 
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
