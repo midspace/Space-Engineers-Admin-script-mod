@@ -334,6 +334,8 @@ namespace midspace.adminscripts
                         if (uint.TryParse(entry.Value, out newUserSecurity))
                             ChatCommandService.UserSecurity = newUserSecurity;
                         ChatCommandLogic.Instance.BlockCommandExecution = false;
+                        if (ChatCommandLogic.Instance.PermissionRequestTimer != null)
+                            ChatCommandLogic.Instance.PermissionRequestTimer.Close();
                         break;
                     case ConnectionKeys.PlayerList:
                         string playerName = "";

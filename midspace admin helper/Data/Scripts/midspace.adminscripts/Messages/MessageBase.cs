@@ -16,6 +16,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageGlobalMessage))]
     [XmlInclude(typeof(MessageIncomingMessageParts))]
     [XmlInclude(typeof(MessageOfTheDayMessage))]
+    [XmlInclude(typeof(MessagePermissionRequest))]
     [XmlInclude(typeof(MessagePrivateMessage))]
     [XmlInclude(typeof(MessageSession))]
     [ProtoContract]

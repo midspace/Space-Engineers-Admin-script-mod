@@ -34,8 +34,10 @@ namespace midspace.adminscripts
         public static ChatCommandLogic Instance;
         public ServerConfig ServerCfg;
         public AdminNotification AdminNotification;
-        public bool BlockCommandExecution = false;
         public bool ShowDialogsOnReceive = false;
+
+        public Timer PermissionRequestTimer;
+        public bool BlockCommandExecution = false;
 
         private bool _isInitialized;
         private Timer _timer100;
@@ -131,6 +133,9 @@ namespace midspace.adminscripts
                 Logger.Debug("Registered ProcessMessage_Client");
                 ConnectionHelper.Client_MessageCache.Clear();
                 BlockCommandExecution = true;
+                PermissionRequestTimer = new Timer(10000);
+                PermissionRequestTimer.Elapsed += PermissionRequestTimer_Elapsed;
+                PermissionRequestTimer.Start();
                 //let the server know we are ready for connections
                 ConnectionHelper.SendMessageToServer(new MessageConnectionRequest());
             }
@@ -278,6 +283,8 @@ namespace midspace.adminscripts
                 Logger.Debug("Detached Session_OnSessionReady");
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
                 Logger.Debug("Unregistered MessageHandler Client");
+                if (PermissionRequestTimer != null)
+                    PermissionRequestTimer.Close();
             }
             
             if (MyAPIGateway.Utilities != null) {
@@ -300,6 +307,11 @@ namespace midspace.adminscripts
 
             if (_timerCounter == 100)
                 _timerCounter = 0;
+        }
+
+        void PermissionRequestTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            ConnectionHelper.SendMessageToServer(new MessagePermissionRequest());
         }
 
         #endregion
