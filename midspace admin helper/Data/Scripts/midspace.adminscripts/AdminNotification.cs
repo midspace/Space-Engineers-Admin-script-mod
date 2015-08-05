@@ -10,10 +10,10 @@ namespace midspace.adminscripts
     [ProtoContract]
     public class AdminNotification
     {
-        [ProtoMember]
+        [ProtoMember(1)]
         public string Content;
         
-        [ProtoMember]
+        [ProtoMember(2)]
         public DateTime Date;
 
         /// <summary>
