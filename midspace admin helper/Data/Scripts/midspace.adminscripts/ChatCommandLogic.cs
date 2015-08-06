@@ -284,7 +284,10 @@ namespace midspace.adminscripts
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
                 Logger.Debug("Unregistered MessageHandler Client");
                 if (PermissionRequestTimer != null)
+                {
+                    PermissionRequestTimer.Stop();
                     PermissionRequestTimer.Close();
+                }
             }
             
             if (MyAPIGateway.Utilities != null) {

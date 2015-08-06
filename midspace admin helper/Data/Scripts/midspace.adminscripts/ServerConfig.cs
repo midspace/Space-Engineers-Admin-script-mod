@@ -55,7 +55,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Saves the log at the same interval as the session saves...
         /// </summary>
-        private Timer LogSaveTimer;
+        private Timer LogSaveTimer = null;
 
         public ServerConfig(List<ChatCommand> commands)
         {
@@ -93,11 +93,13 @@ namespace midspace.adminscripts
                 LoadOrCreatePmLog();
             }
 
-            // TODO: remove timer if AutoSaveInMinutes is 0.
-            var autotime = (MyAPIGateway.Session.AutoSaveInMinutes == 0 ? 5 : MyAPIGateway.Session.AutoSaveInMinutes) * 60 * 1000;
-            LogSaveTimer = new Timer(autotime);
-            LogSaveTimer.Elapsed += SaveTimer_Elapsed;
-            LogSaveTimer.Start();
+            if (MyAPIGateway.Session.AutoSaveInMinutes > 0)
+            {
+                double autotime = Math.Max(MyAPIGateway.Session.AutoSaveInMinutes * 60 * 1000, 300000d);
+                LogSaveTimer = new Timer(autotime);
+                LogSaveTimer.Elapsed += SaveTimer_Elapsed;
+                LogSaveTimer.Start();
+            }
 
             Logger.Debug("Config loaded.");
         }
@@ -125,10 +127,15 @@ namespace midspace.adminscripts
 
         public void Close()
         {
-            Save();
+            if (LogSaveTimer != null)
+            {
+                // Stop the timer first before Save, in case it calls Save in the split second between checks.
+                LogSaveTimer.Stop();
+                LogSaveTimer.Elapsed -= SaveTimer_Elapsed;
+                LogSaveTimer.Close();
+            }
 
-            LogSaveTimer.Elapsed -= SaveTimer_Elapsed;
-            LogSaveTimer.Close();
+            Save();
         }
 
         public void ReloadConfig()
