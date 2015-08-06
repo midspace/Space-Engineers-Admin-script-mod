@@ -39,6 +39,7 @@ namespace midspace.adminscripts
         public Timer PermissionRequestTimer;
         public bool BlockCommandExecution = false;
 
+        private bool _permissionRequest;
         private bool _isInitialized;
         private Timer _timer100;
         private bool _100MsTimerElapsed;
@@ -92,6 +93,12 @@ namespace midspace.adminscripts
             {
                 _1000MsTimerElapsed = false;
                 ChatCommandService.UpdateBeforeSimulation1000();
+            }
+
+            if (_permissionRequest)
+            {
+                _permissionRequest = false;
+                ConnectionHelper.SendMessageToServer(new MessagePermissionRequest());
             }
 
             ChatCommandService.UpdateBeforeSimulation();
@@ -279,15 +286,15 @@ namespace midspace.adminscripts
 
             if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerConfig.ServerIsClient))
             {
-                MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
-                Logger.Debug("Detached Session_OnSessionReady");
-                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
-                Logger.Debug("Unregistered MessageHandler Client");
                 if (PermissionRequestTimer != null)
                 {
                     PermissionRequestTimer.Stop();
                     PermissionRequestTimer.Close();
                 }
+                MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
+                Logger.Debug("Detached Session_OnSessionReady");
+                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
+                Logger.Debug("Unregistered MessageHandler Client");
             }
             
             if (MyAPIGateway.Utilities != null) {
@@ -314,7 +321,7 @@ namespace midspace.adminscripts
 
         void PermissionRequestTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            ConnectionHelper.SendMessageToServer(new MessagePermissionRequest());
+            _permissionRequest = true;
         }
 
         #endregion
