@@ -81,7 +81,7 @@ The following materials are available:
             {
                 IMyEntity entity;
                 double distance;
-                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, out entity, out distance, false, false, true);
+                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, out entity, out distance, false, false, false, true, true);
 
                 if (entity != null && entity is IMyVoxelMap)
                 {

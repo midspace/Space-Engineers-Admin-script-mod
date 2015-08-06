@@ -139,6 +139,19 @@
                 var ed = ((MyObjectBuilder_EnvironmentDefinition)MyDefinitionManager.Static.EnvironmentDefinition.GetObjectBuilder());
                 MyAPIGateway.Utilities.ShowMessage("LargeShipMaxSpeed", "{0}", ed.LargeShipMaxSpeed);
                 MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1} {2}", ed.SunDirection.X, ed.SunDirection.Y, ed.SunDirection.Z);
+
+                // Environment is null for some reason.
+                //var environment = MyAPIGateway.Session.GetSector().Environment;
+                //MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1}", environment.SunAzimuth, environment.SunElevation);
+
+                // MySector is not whitelisted.
+                //var env = MySector.GetEnvironmentSettings();
+
+                MyAPIGateway.Utilities.ShowMessage("LastSaveTime", "{0:o}", MyAPIGateway.Session.GetWorld().Checkpoint.LastSaveTime);
+
+
+                
+
                 return true;
             }
 
@@ -434,7 +447,7 @@
 
             if (messageText.Equals("/test8B", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false) as Sandbox.ModAPI.IMyCubeGrid;
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, false, false, true) as Sandbox.ModAPI.IMyCubeGrid;
 
                 if (entity == null)
                     return false;
@@ -565,7 +578,7 @@
 
             if (messageText.Equals("/test12", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject);
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, true, true, true);
                 var resultList = new List<ITerminalAction>();
                 if (entity != null)
                 {
