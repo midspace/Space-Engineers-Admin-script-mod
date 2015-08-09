@@ -43,7 +43,7 @@
                     CommandListShips.ShipCache.Add(ship);
                     var pos = ship.WorldAABB.Center;
                     var distance = Math.Sqrt((position - pos).LengthSquared());
-                    description.AppendFormat("#{0} {1} ({2:N}|{3:N}|{4:N}) {5:N}m\r\n", index++, ship.DisplayName, pos.X, pos.Y, pos.Z, distance);
+                    description.AppendFormat("#{0} {1}\r\n  ({2:N}|{3:N}|{4:N}) {5:N}m\r\n", index++, ship.DisplayName, pos.X, pos.Y, pos.Z, distance);
                 }
 
                 MyAPIGateway.Utilities.ShowMissionScreen("List Ships", prefix, " ", description.ToString(), null, "OK");
