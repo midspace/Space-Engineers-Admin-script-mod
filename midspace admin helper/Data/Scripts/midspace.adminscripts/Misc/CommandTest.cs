@@ -512,29 +512,22 @@
 
             #region test10
 
-            if (messageText.StartsWith("/test10 ", StringComparison.InvariantCultureIgnoreCase))
+            if (messageText.Equals("/test10", StringComparison.InvariantCultureIgnoreCase))
             {
-                var match = Regex.Match(messageText, @"/test10\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    var prefabName = match.Groups["Key"].Value;
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false) as Sandbox.ModAPI.IMyCubeGrid;
 
-                    var entities = new HashSet<IMyEntity>();
-                    MyAPIGateway.Entities.GetEntities(entities, e => e is Sandbox.ModAPI.IMyCubeGrid);
+                if (entity == null)
+                    return false;
 
-                    var idx = Int32.Parse(prefabName);
-                    var cubeGrid = (Sandbox.ModAPI.IMyCubeGrid)entities.ToArray()[idx];
+                var cubeGrid = (Sandbox.ModAPI.IMyCubeGrid)entity;
+                var grids = cubeGrid.GetAttachedGrids();
 
-                    var grids = cubeGrid.GetAttachedGrids();
+                MyAPIGateway.Utilities.ShowMessage("Attached Count", string.Format("{0}", grids.Count));
 
-                    MyAPIGateway.Utilities.ShowMessage("Attached Count", string.Format("{0}", grids.Count));
+                //foreach (var grid in grids)
+                //    MyAPIGateway.Utilities.ShowMessage("Attached", string.Format("{0}", grid.EntityId));
 
-                    //foreach (var grid in grids)
-                    //    MyAPIGateway.Utilities.ShowMessage("Attached", string.Format("{0}", grid.EntityId));
-
-                    return true;
-                }
-                //var vm = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, true); // most accurate for player view.
+                return true;
             }
 
             #endregion

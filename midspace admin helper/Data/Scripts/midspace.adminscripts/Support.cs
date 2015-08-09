@@ -32,7 +32,7 @@ namespace midspace.adminscripts
             Vector3D endPosition;
             if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
             {
-                worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
+                worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs, or the direction the player is looking with ALT.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
                 endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 0.5f);
             }
@@ -290,18 +290,41 @@ namespace midspace.adminscripts
             return true;
         }
 
-        public static bool MovePlayerToCockpit(IMyPlayer player, IMyEntity cockpit)
+        /// <summary>
+        /// Move player to specific cube which may be a cockpit.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="cube"></param>
+        /// <param name="safely"></param>
+        /// <returns></returns>
+        public static bool MovePlayerToCube(IMyPlayer player, IMyEntity cube, bool safely = true)
         {
-            if (player == null || cockpit == null)
+            if (player == null || cube == null)
                 return false;
 
-            var worldMatrix = cockpit.WorldMatrix;
+            var worldMatrix = cube.WorldMatrix;
+            // TODO: search local grid for empty location.
             var position = worldMatrix.Translation + worldMatrix.Forward * -2.5d + worldMatrix.Up * -0.9d;  // Suitable for Large 1x1x1 cockpit.
+
+            if (safely)
+            {
+                // Find empty location, centering on the target Player.
+                var freePos = MyAPIGateway.Entities.FindFreePlace(position, (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
+                if (!freePos.HasValue)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    return false;
+                }
+
+                // Offset will center the player character in the middle of the location.
+                var offset = player.Controller.ControlledEntity.Entity.WorldAABB.Center - player.Controller.ControlledEntity.Entity.GetPosition();
+                position = freePos.Value - offset;
+            }
 
             var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
 
             var matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
-            var linearVelocity = cockpit.Parent.Physics.LinearVelocity;
+            var linearVelocity = cube.Parent.Physics.LinearVelocity;
 
             // The Physics.LinearVelocity doesn't change the player speed quickly enough before SetPosition is called, as
             // the player will smack into the other obejct before it's correct velocity is actually registered.

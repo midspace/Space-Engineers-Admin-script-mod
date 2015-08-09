@@ -144,6 +144,68 @@ namespace midspace.adminscripts
                         GetAttachedGrids(entityParent, ref results);
                     }
                 }
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipConnector))
+                {
+                    // There isn't a non-Ingame interface for IMyShipConnector at this time.
+                    var connector = (Sandbox.ModAPI.Ingame.IMyShipConnector)block.FatBlock;
+
+                    if (connector.IsConnected == false || connector.IsLocked == false || connector.OtherConnector == null)
+                        continue;
+
+                    var otherGrid = (IMyCubeGrid)connector.OtherConnector.CubeGrid;
+
+                    if (!results.Any(e => e.EntityId == otherGrid.EntityId))
+                    {
+                        results.Add(otherGrid);
+                        GetAttachedGrids(otherGrid, ref results);
+                    }
+                }
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_LandingGear))
+                {
+                    var landingGear = (IMyLandingGear)block.FatBlock;
+                    if (landingGear.IsLocked == false)
+                        continue;
+
+                    var entity = landingGear.GetAttachedEntity();
+                    if (entity == null || !(entity is IMyCubeGrid))
+                        continue;
+
+                    var otherGrid = (IMyCubeGrid)entity;
+                    if (!results.Any(e => e.EntityId == otherGrid.EntityId))
+                    {
+                        results.Add(otherGrid);
+                        GetAttachedGrids(otherGrid, ref results);
+                    }
+                }
+            }
+
+            // Loop through all other grids, find their Landing gear, and figure out if they are attached to <cubeGrid>.
+            var allShips = new HashSet<IMyEntity>();
+            var checkList = results; // cannot use ref paramter in Lambada expression!?!.
+            MyAPIGateway.Entities.GetEntities(allShips, e => e is IMyCubeGrid && !checkList.Contains(e));
+
+            foreach (IMyCubeGrid ship in allShips)
+            {
+                blocks = new List<IMySlimBlock>();
+                ship.GetBlocks(blocks, b => b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull && b.FatBlock is IMyLandingGear);
+
+                foreach (var block in blocks)
+                {
+                    var landingGear = (IMyLandingGear)block.FatBlock;
+                    if (landingGear.IsLocked == false)
+                        continue;
+
+                    var entity = landingGear.GetAttachedEntity();
+
+                    if (entity == null || entity.EntityId != cubeGrid.EntityId)
+                        continue;
+
+                    if (!results.Any(e => e.EntityId == ship.EntityId))
+                    {
+                        results.Add(ship);
+                        GetAttachedGrids(ship, ref results);
+                    }
+                }
             }
         }
 

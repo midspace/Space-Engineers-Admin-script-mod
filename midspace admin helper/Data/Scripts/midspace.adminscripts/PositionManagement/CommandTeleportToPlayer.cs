@@ -83,7 +83,7 @@
                         {
                             if (cockpit.CubeGrid.GridSizeEnum != Sandbox.Common.ObjectBuilders.MyCubeSize.Small)
                             {
-                                Support.MovePlayerToCockpit(MyAPIGateway.Session.Player, player.Controller.ControlledEntity.Entity);
+                                Support.MovePlayerToCube(MyAPIGateway.Session.Player, player.Controller.ControlledEntity.Entity);
                             }
                             else
                             {

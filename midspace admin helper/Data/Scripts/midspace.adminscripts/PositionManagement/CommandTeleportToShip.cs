@@ -64,7 +64,7 @@
                     var cockpits = ship.FindWorkingCockpits();
                     if (cockpits.Length > 0 && ((IMyCubeGrid)ship).GridSizeEnum != Sandbox.Common.ObjectBuilders.MyCubeSize.Small)
                     { 
-                        return Support.MovePlayerToCockpit(MyAPIGateway.Session.Player, (IMyEntity)cockpits[0]);
+                        return Support.MovePlayerToCube(MyAPIGateway.Session.Player, (IMyEntity)cockpits[0]);
                     }
                     else
                     {
