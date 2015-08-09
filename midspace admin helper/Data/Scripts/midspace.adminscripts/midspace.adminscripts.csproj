@@ -65,6 +65,7 @@
     <Compile Include="AsteroidManagement\CommandAsteroidReplace.cs" />
     <Compile Include="AsteroidManagement\CommandPlanetsList.cs" />
     <Compile Include="ChatCommandService.cs" />
+    <Compile Include="InventoryManagement\CommandInventoryInsert.cs" />
     <Compile Include="Localize.cs" />
     <Compile Include="Messages\MessageAdminNotification.cs" />
     <Compile Include="Messages\MessageBase.cs" />

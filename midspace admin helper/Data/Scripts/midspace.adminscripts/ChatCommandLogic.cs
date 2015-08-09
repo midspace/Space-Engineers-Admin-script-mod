@@ -205,6 +205,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandIdentify());
             commands.Add(new CommandDetail());
             commands.Add(new CommandInventoryAdd(_oreNames, _ingotNames.ToArray(), _physicalItems));
+            commands.Add(new CommandInventoryInsert(_oreNames, _ingotNames.ToArray(), _physicalItems));
             commands.Add(new CommandInventoryClear());
             commands.Add(new CommandInventoryDrop(_oreNames, _ingotNames.ToArray(), _physicalItems));
             commands.Add(new CommandListBots());
