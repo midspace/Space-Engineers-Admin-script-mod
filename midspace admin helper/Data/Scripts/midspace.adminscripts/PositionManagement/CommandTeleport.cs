@@ -16,7 +16,7 @@
     /// </summary>
     public class CommandTeleport : ChatCommand
     {
-        private static readonly string teleportPattern = @"(?<command>(/tp)|(/tpx))\s+(?:(?<ID1>ID)|(?<Ship1>S\d+)|(?<Character1>C\d+)|(?:GPS:([^:]{0,32}):(?<GX1>[\d\.-]*):(?<GY1>[\d\.-]*):(?<GZ1>[\d\.-]*):)|(?:""(?<Quote1>[^""]|.*?)"")|(?<Word1>[^\s]*)|(?:(?<X1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z1>[+-]?((\d+(\.\d*)?)|(\.\d+)))))(\s+(?:(?<ID2>ID)(?<Ship2>S\d+)|(?<Character2>C\d+)|(?:GPS:([^:]{0,32}):(?<GX2>[\d\.-]*):(?<GY2>[\d\.-]*):(?<GZ2>[\d\.-]*):)|(?:""(?<Quote2>[^""]|.*?)"")|(?<Word2>[^\s]*)|(?:(?<X2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z2>[+-]?((\d+(\.\d*)?)|(\.\d+)))))|)\s*$";
+        private static readonly string teleportPattern = @"(?<command>(/tp)|(/tpx))\s+(?:(?<ID1>ID)|(?<Ship1>S\d+)|(?<Character1>C\d+)|(?<Asteroid1>A\d+)|(?<Planet1>P\d+)|(?:GPS:([^:]{0,32}):(?<GX1>[\d\.-]*):(?<GY1>[\d\.-]*):(?<GZ1>[\d\.-]*):)|(?:""(?<Quote1>[^""]|.*?)"")|(?<Word1>[^\s]*)|(?:(?<X1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z1>[+-]?((\d+(\.\d*)?)|(\.\d+)))))(\s+(?:(?<ID2>ID)(?<Ship2>S\d+)|(?<Character2>C\d+)|(?<Asteroid2>A\d+)|(?<Planet2>P\d+)|(?:GPS:([^:]{0,32}):(?<GX2>[\d\.-]*):(?<GY2>[\d\.-]*):(?<GZ2>[\d\.-]*):)|(?:""(?<Quote2>[^""]|.*?)"")|(?<Word2>[^\s]*)|(?:(?<X2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z2>[+-]?((\d+(\.\d*)?)|(\.\d+)))))|)\s*$";
         public CommandTeleport()
             : base(ChatCommandSecurity.Admin, "tp", new[] { "/tp", "/tpx" })
         {
@@ -91,6 +91,10 @@ Function: Teleport the specified ship to the location.
                 var ship2 = !string.IsNullOrEmpty(match.Groups["Ship2"].Value);
                 var character1 = !string.IsNullOrEmpty(match.Groups["Character1"].Value);
                 var character2 = !string.IsNullOrEmpty(match.Groups["Character2"].Value);
+                var asteroid1 = !string.IsNullOrEmpty(match.Groups["Asteroid1"].Value);
+                var asteroid2 = !string.IsNullOrEmpty(match.Groups["Asteroid2"].Value);
+                var planet1 = !string.IsNullOrEmpty(match.Groups["Planet1"].Value);
+                var planet2 = !string.IsNullOrEmpty(match.Groups["Planet2"].Value);
                 var pos1 = !string.IsNullOrEmpty(match.Groups["X1"].Value);
                 var pos2 = !string.IsNullOrEmpty(match.Groups["X2"].Value);
                 var word1 = !string.IsNullOrEmpty(match.Groups["Quote1"].Value) || !string.IsNullOrEmpty(match.Groups["Word1"].Value);
@@ -99,11 +103,10 @@ Function: Teleport the specified ship to the location.
                 var gps2 = !string.IsNullOrEmpty(match.Groups["GX2"].Value);
                 var currentPosition = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
-                if (!ship2 && !character2 && !pos2 && !word2)
+                if (!ident2 && !ship2 && !character2 && !asteroid2 && !planet2 && !pos2 && !word2)
                 {
                     // move this player or the ship this player is in.
                     var player = MyAPIGateway.Session.Player;
-
 
                     if (ident1)
                     {
@@ -130,6 +133,13 @@ Function: Teleport the specified ship to the location.
                         if (CommandIdentify.IdentifyCache is IMyCubeBlock)
                         {
                             MovePlayerPilotToShip(player, CommandIdentify.IdentifyCache.GetTopMostParent(), safely);
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+                            return true;
+                        }
+
+                        if (CommandIdentify.IdentifyCache is IMyVoxelBase)
+                        {
+                            MovePlayerPilotToVoxel(player, (IMyVoxelBase)CommandIdentify.IdentifyCache, safely);
                             CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                             return true;
                         }
@@ -182,6 +192,30 @@ Function: Teleport the specified ship to the location.
                             return true;
                         }
                     }
+                    if (asteroid1)
+                    {
+                        int index;
+                        if (Int32.TryParse(match.Groups["Asteroid1"].Value.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
+                        {
+                            var currentAsteroidList = new HashSet<IMyEntity> { CommandAsteroidsList.AsteroidCache[index - 1] };
+                            var asteroid = (IMyVoxelBase)currentAsteroidList.FirstElement();
+                            MovePlayerPilotToVoxel(player, asteroid, safely);
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+                            return true;
+                        }
+                    }
+                    if (planet1)
+                    {
+                        int index;
+                        if (Int32.TryParse(match.Groups["Planet1"].Value.Substring(1), out index) && index > 0 && index <= CommandPlanetsList.PlanetCache.Count)
+                        {
+                            var currentPlanetList = new HashSet<IMyEntity> { CommandPlanetsList.PlanetCache[index - 1] };
+                            var planet = (IMyVoxelBase)currentPlanetList.FirstElement();
+                            MovePlayerPilotToVoxel(player, planet, safely);
+                            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+                            return true;
+                        }
+                    }
                     if (word1)
                     {
                         var entityName = string.IsNullOrEmpty(match.Groups["Quote1"].Value) ? match.Groups["Word1"].Value : match.Groups["Quote1"].Value;
@@ -219,6 +253,9 @@ Function: Teleport the specified ship to the location.
 
                         return true;
                     }
+
+                    MyAPIGateway.Utilities.ShowMessage("Error", "Could not find requested object");
+                    return true;
                 }
 
 
@@ -483,5 +520,39 @@ Function: Teleport the specified ship to the location.
             if (!success)
                 MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Could not find a safe location to teleport to.");
         }
+
+
+        private void MovePlayerPilotToVoxel(IMyPlayer sourcePlayer, IMyVoxelBase targetedVoxel, bool safely)
+        {
+            if (sourcePlayer == null)
+            {
+                MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Source Player no longer exists.");
+                return;
+            }
+
+            if (targetedVoxel == null)
+            {
+                MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Targeted Voxel not found.");
+                return;
+            }
+
+            if (targetedVoxel.Closed)
+            {
+                MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Targeted Voxel no longer exists.");
+                return;
+            }
+
+            bool success;
+
+            if (sourcePlayer.Controller.ControlledEntity is IMyCubeBlock)
+                success = Support.MoveShipToVoxel(sourcePlayer.Controller.ControlledEntity.Entity.GetTopMostParent(), targetedVoxel);
+            else
+                // Move the player only.
+                success = Support.MovePlayerToVoxel(sourcePlayer, targetedVoxel, safely);
+
+            if (!success)
+                MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Could not find a safe location to teleport to.");
+        }
+
     }
 }

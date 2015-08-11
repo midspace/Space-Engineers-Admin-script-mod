@@ -44,7 +44,7 @@
                         displayType = "asteroid";
                         displayName = voxelMap.StorageName;
                         var aabb = new BoundingBoxD(voxelMap.PositionLeftBottomCorner, voxelMap.PositionLeftBottomCorner + voxelMap.Storage.Size);
-                        description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nUse /detail for more information on asteroid content.",
+                        description = string.Format("Distance: {0:N} m\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nUse /detail for more information on asteroid content.",
                             distance, voxelMap.Storage.Size,
                             aabb.Center.X, aabb.Center.Y, aabb.Center.Z);
 
@@ -55,9 +55,10 @@
                         var planet = (Sandbox.Game.Entities.MyPlanet)entity;
                         displayType = "planet";
                         displayName = planet.StorageName;
-                        description = string.Format("Distance: {0:N}\r\nMinimum Surface Radius: {1:N}\r\nAtmosphere Radius: {2:N}\r\nHas Atmosphere: {3}",
+                        description = string.Format("Distance: {0:N} m\r\nMinimum Surface Radius: {1:N} m\r\nAverage Surface Radius: {2:N} m\r\nAtmosphere Radius: {3:N} m\r\nHas Atmosphere: {4}",
                             distance,
                             planet.MinimumSurfaceRadius,
+                            planet.AveragePlanetRadius,
                             planet.AtmosphereRadius,
                             planet.HasAtmosphere);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
@@ -162,7 +163,7 @@
                     {
                         displayType = "player";
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N}", distance);
+                        description = string.Format("Distance: {0:N} m", distance);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
 

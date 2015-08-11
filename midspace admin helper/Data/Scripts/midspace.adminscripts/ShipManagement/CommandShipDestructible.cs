@@ -10,21 +10,21 @@
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
 
-    public class CommandShipDestructable : ChatCommand
+    public class CommandShipDestructible : ChatCommand
     {
-        public CommandShipDestructable()
-            : base(ChatCommandSecurity.Admin, "destructable", new[] { "/destructable", "/destruct" })
+        public CommandShipDestructible()
+            : base(ChatCommandSecurity.Admin, "destructible", new[] { "/destructible", "/destruct" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/destructable On|Off <#>", "Set the specified <#> ship as destructable. Ship will be removed and regenerated.");
+            MyAPIGateway.Utilities.ShowMessage("/destructible On|Off <#>", "Set the specified <#> ship as destructible. Ship will be removed and regenerated.");
         }
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/((destructable)|(destruct))\s+(?<switch>(on)|(off)|1|2)(\s+|$)(?<Name>.*)|$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/((destructible)|(destruct))\s+(?<switch>(on)|(off)|1|2)(\s+|$)(?<Name>.*)|$", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 bool switchOn = false;
@@ -41,7 +41,7 @@
                     switchOn = false;
 
 
-                // set destructable on the ship in the crosshairs.
+                // set destructible on the ship in the crosshairs.
                 if (string.IsNullOrEmpty(shipName))
                 {
                     var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false);
@@ -50,12 +50,12 @@
                         var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
                         if (shipEntity != null)
                         {
-                            SetDestructable(shipEntity, switchOn);
+                            SetDestructible(shipEntity, switchOn);
                             return true;
                         }
                     }
 
-                    MyAPIGateway.Utilities.ShowMessage("destructable", "No ship targeted.");
+                    MyAPIGateway.Utilities.ShowMessage("destructible", "No ship targeted.");
                     return true;
                 }
 
@@ -65,7 +65,7 @@
 
                 if (currentShipList.Count == 1)
                 {
-                    SetDestructable(currentShipList.First(), switchOn);
+                    SetDestructible(currentShipList.First(), switchOn);
                     return true;
                 }
                 else if (currentShipList.Count == 0)
@@ -73,35 +73,35 @@
                     int index;
                     if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count && CommandListShips.ShipCache[index - 1] != null)
                     {
-                        SetDestructable(CommandListShips.ShipCache[index - 1], switchOn);
+                        SetDestructible(CommandListShips.ShipCache[index - 1], switchOn);
                         CommandListShips.ShipCache[index - 1] = null;
                         return true;
                     }
                 }
                 else if (currentShipList.Count > 1)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("destructable", "{0} Ships match that name.", currentShipList.Count);
+                    MyAPIGateway.Utilities.ShowMessage("destructible", "{0} Ships match that name.", currentShipList.Count);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("destructable", "Ship name not found.");
+                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship name not found.");
                 return true;
             }
 
             return false;
         }
 
-        private void SetDestructable(IMyEntity shipEntity, bool destructable)
+        private void SetDestructible(IMyEntity shipEntity, bool destructible)
         {
             var gridObjectBuilder = shipEntity.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
-            if (gridObjectBuilder.DestructibleBlocks == destructable)
+            if (gridObjectBuilder.DestructibleBlocks == destructible)
             {
-                MyAPIGateway.Utilities.ShowMessage("destructable", "Ship '{0}' destructable is already set to {1}.",  shipEntity.DisplayName, destructable ? "On" : "Off");
+                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible is already set to {1}.",  shipEntity.DisplayName, destructible ? "On" : "Off");
                 return;
             }
 
             gridObjectBuilder.EntityId = 0;
-            gridObjectBuilder.DestructibleBlocks = destructable;
+            gridObjectBuilder.DestructibleBlocks = destructible;
 
             // This will Delete the entity and sync to all.
             // Using this, also works with player ejection in the same Tick.
@@ -111,7 +111,7 @@
             tempList.Add(gridObjectBuilder);
             tempList.CreateAndSyncEntities();
 
-            MyAPIGateway.Utilities.ShowMessage("destructable", "Ship '{0}' destructable has been set to {1}.", shipEntity.DisplayName, destructable ? "On" : "Off");
+            MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible has been set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
         }
     }
 }

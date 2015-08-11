@@ -26,19 +26,23 @@
                 var distance = double.Parse(match.Groups["D"].Value, CultureInfo.InvariantCulture);
 
                 // Use the player to determine direction of offset.
-                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
-                var position = worldMatrix.Translation + worldMatrix.Forward * distance;
-
+                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false, false); // dead center of player cross hairs.
                 var currentPosition = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                 {
                     // Move the player only.
+
+                    // Adjust for offset between head and foot, as SetPosition uses feet of player, whilst GetHeadMatrix(...) uses head.
+                    // TODO: use player.WorldMatrix to precicely adjust for offset.
+                    var position = worldMatrix.Translation + (worldMatrix.Forward * distance) + (worldMatrix.Down * 1.70292f); 
                     MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.SetPosition(position);
                 }
                 else
                 {
                     // Move the ship the player is piloting.
+                    var position = worldMatrix.Translation + worldMatrix.Forward * distance;
+                    // TODO: adjust for offset between entity.WorldMatrix and GetHeadMatrix.
                     var cubeGrid = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetTopMostParent();
                     currentPosition = cubeGrid.GetPosition();
                     var grids = cubeGrid.GetAttachedGrids();

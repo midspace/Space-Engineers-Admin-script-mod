@@ -33,7 +33,7 @@
     public class CommandTest : ChatCommand
     {
         public CommandTest()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13", "/test14" })
         {
         }
 
@@ -668,15 +668,29 @@
             if (messageText.Equals("/test14", StringComparison.InvariantCultureIgnoreCase))
             {
                 var entites = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(entites, e => (e is Sandbox.ModAPI.IMyFloatingObject));
+                //MyAPIGateway.Entities.GetEntities(entites, e => (e is Sandbox.ModAPI.IMyFloatingObject));
 
-                foreach (var entity in entites)
-                {
-                    var pos = entity.GetPosition();
-                    var gps = MyAPIGateway.Session.GPS.Create("Floating " + entity.DisplayName, "Some drifting junk", pos, true, false);
-                    MyAPIGateway.Session.GPS.AddLocalGps(gps);
-                }
+                //foreach (var entity in entites)
+                //{
+                //    var pos = entity.GetPosition();
+                //    var gps = MyAPIGateway.Session.GPS.Create("Floating " + entity.DisplayName, "Some drifting junk", pos, true, false);
+                //    MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                //}
 
+                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false, false); // dead center of player cross hairs.
+
+                var gps = MyAPIGateway.Session.GPS.Create("GetHeadMatrix", "", worldMatrix.Translation, true, false);
+                //MyAPIGateway.Session.GPS.AddLocalGps(gps);
+
+                gps = MyAPIGateway.Session.GPS.Create("GetPosition", "", MyAPIGateway.Session.Player.GetPosition(), true, false);
+                //MyAPIGateway.Session.GPS.AddLocalGps(gps);
+
+
+                var pos1 = worldMatrix.Translation;
+                var pos2 = MyAPIGateway.Session.Player.GetPosition();
+                var pos = pos2 - pos1;
+
+                MyAPIGateway.Utilities.ShowMessage("Distance", "{0}", pos.Length());
                 return true;
             }
 

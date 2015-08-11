@@ -16,6 +16,8 @@ namespace midspace.adminscripts
 
     public static class Support
     {
+        #region Find Assets
+
         public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
         {
             IMyEntity entity;
@@ -141,40 +143,6 @@ namespace midspace.adminscripts
             lookDistance = item.Value;
         }
 
-        public static IMyCubeBlock FindRotorBase(long entityId, IMyCubeGrid parent = null)
-        {
-            var entities = new HashSet<IMyEntity>();
-            MyAPIGateway.Entities.GetEntities(entities, e => e is IMyCubeGrid);
-
-            foreach (var entity in entities)
-            {
-                var cubeGrid = (IMyCubeGrid)entity;
-
-                if (cubeGrid == null)
-                    continue;
-
-                var blocks = new List<IMySlimBlock>();
-                cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null &&
-                    (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase)));
-
-                foreach (var block in blocks)
-                {
-                    var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
-
-                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
-                        continue;
-
-                    if (motorBase.RotorEntityId == entityId)
-                        return block.FatBlock;
-                }
-            }
-
-            return null;
-        }
-
         public static HashSet<IMyEntity> FindShipsByName(string findShipName, bool searchTransmittingBlockNames = true)
         {
             var allShips = new HashSet<IMyEntity>();
@@ -204,245 +172,6 @@ namespace midspace.adminscripts
             }
 
             return shipList;
-        }
-
-        public static string CreateUniqueStorageName(string baseName)
-        {
-            long index = 0;
-            var match = Regex.Match(baseName, @"^(?<Key>.+?)(?<Value>(\d+?))$", RegexOptions.IgnoreCase);
-
-            if (match.Success)
-            {
-                baseName = match.Groups["Key"].Captures[0].Value;
-                long.TryParse(match.Groups["Value"].Captures[0].Value, out index);
-            }
-
-            var uniqueName = string.Format("{0}{1}", baseName, index);
-            var currentAsteroidList = new List<IMyVoxelBase>();
-            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v != null);
-
-            while (currentAsteroidList.Any(a => a.StorageName.Equals(uniqueName, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                index++;
-                uniqueName = string.Format("{0}{1}", baseName, index);
-            }
-
-            return uniqueName;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="targetPlayer"></param>
-        /// <param name="safely">Attempts to find a safe location not inside of a wall.</param>
-        /// <param name="agressivePosition">Places the player behind the targetPlayer, otherwise face to face.</param>
-        /// <returns></returns>
-        public static bool MovePlayerToPlayer(IMyPlayer player, IMyPlayer targetPlayer, bool safely = true, bool agressivePosition = true)
-        {
-            if (targetPlayer == null || targetPlayer.Controller == null || targetPlayer.Controller.ControlledEntity == null)
-            {
-                MyAPIGateway.Utilities.ShowMessage("Failed", "Player does not have body to teleport to.");
-                return false;
-            }
-
-            var worldMatrix = targetPlayer.Controller.ControlledEntity.Entity.WorldMatrix;
-
-            Vector3D position;
-            MatrixD matrix;
-
-            if (agressivePosition)
-                position = worldMatrix.Translation + worldMatrix.Forward * -2.5d;
-            else
-                position = worldMatrix.Translation + worldMatrix.Forward * 2.5d;
-
-            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
-
-            if (safely)
-            {
-                // Find empty location, centering on the target Player.
-                var freePos = MyAPIGateway.Entities.FindFreePlace(position, (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
-                if (!freePos.HasValue)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
-                    return false;
-                }
-
-                // Offset will center the player character in the middle of the location.
-                var offset = player.Controller.ControlledEntity.Entity.WorldAABB.Center - player.Controller.ControlledEntity.Entity.GetPosition();
-                position = freePos.Value - offset;
-            }
-
-            if (agressivePosition)
-                matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
-            else
-                matrix = MatrixD.CreateWorld(position, worldMatrix.Backward, worldMatrix.Up);
-
-            var linearVelocity = targetPlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity;
-
-            player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;
-            player.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
-            player.Controller.ControlledEntity.Entity.SetPosition(position);
-
-            //save teleport in history
-            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Move player to specific cube which may be a cockpit.
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="cube"></param>
-        /// <param name="safely"></param>
-        /// <returns></returns>
-        public static bool MovePlayerToCube(IMyPlayer player, IMyEntity cube, bool safely = true)
-        {
-            if (player == null || cube == null)
-                return false;
-
-            var worldMatrix = cube.WorldMatrix;
-            // TODO: search local grid for empty location.
-            var position = worldMatrix.Translation + worldMatrix.Forward * -2.5d + worldMatrix.Up * -0.9d;  // Suitable for Large 1x1x1 cockpit.
-
-            if (safely)
-            {
-                // Find empty location, centering on the target Player.
-                var freePos = MyAPIGateway.Entities.FindFreePlace(position, (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
-                if (!freePos.HasValue)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
-                    return false;
-                }
-
-                // Offset will center the player character in the middle of the location.
-                var offset = player.Controller.ControlledEntity.Entity.WorldAABB.Center - player.Controller.ControlledEntity.Entity.GetPosition();
-                position = freePos.Value - offset;
-            }
-
-            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
-
-            var matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
-            var linearVelocity = cube.Parent.Physics.LinearVelocity;
-
-            // The Physics.LinearVelocity doesn't change the player speed quickly enough before SetPosition is called, as
-            // the player will smack into the other obejct before it's correct velocity is actually registered.
-            player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;
-
-            player.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
-
-            // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
-            // the player will bounce off objects before it's correct orentation is actually registered.
-            player.Controller.ControlledEntity.Entity.SetPosition(position);
-
-            //save teleport in history
-            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
-
-            return true;
-        }
-
-        public static bool MovePlayerToShipGrid(IMyPlayer player, IMyEntity ship, bool safely = true)
-        {
-            var destination = ship.WorldAABB.GetCorners()[0];
-
-            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
-
-            if (safely)
-            {
-                // Find empty location, centering on the ship grid.
-                var freePos = MyAPIGateway.Entities.FindFreePlace(ship.WorldAABB.Center, (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
-                if (!freePos.HasValue)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
-                    return false;
-                }
-
-                // Offset will center the player character in the middle of the location.
-                var offset = player.Controller.ControlledEntity.Entity.WorldAABB.Center - player.Controller.ControlledEntity.Entity.GetPosition();
-                destination = freePos.Value - offset;
-            }
-
-            player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = ship.Physics.LinearVelocity;
-            player.Controller.ControlledEntity.Entity.SetPosition(destination);
-
-            //save teleport in history
-            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
-
-            return true;
-        }
-
-        public static bool MoveShipToPlayer(IMyEntity shipGrid, IMyPlayer targetPlayer)
-        {
-            // TODO: complete.
-
-            MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function not complete. Cannot transport piloted Ship to another player.");
-
-
-            //save teleport in history
-            //CommandBack.SaveTeleportInHistory(currentPosition);
-
-            return false;
-        }
-
-        public static bool MoveShipToShip(IMyEntity shipGrid, IMyEntity targetshipGrid)
-        {
-            // TODO: determine good location for moving one ship to another, checking for OrientedBoundingBox.Intersects().
-
-            //// Move the ship the player is piloting.
-            //var cubeGrid = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetTopMostParent();
-            var grids = shipGrid.GetAttachedGrids();
-            //var worldOffset = position - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
-
-            MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function not complete. Cannot transport piloted Ship to another ship.");
-
-            foreach (var grid in grids)
-            {
-                //grid.SetPosition(grid.GetPosition() + worldOffset);
-            }
-
-            //save teleport in history
-            //CommandBack.SaveTeleportInHistory(currentPosition);
-
-            return false;
-        }
-
-        /// <summary>
-        /// Create a new Asteroid, ready for some manipulation.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="size">Currently the size must be multiple of 64, eg. 128x64x256</param>
-        /// <param name="position"></param>
-        public static IMyVoxelMap CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
-        {
-            var cache = new MyStorageDataCache();
-
-            // new storage is created completely full
-            // no geometry will be created because that requires full-empty transition
-            var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
-
-            // midspace's Note: The following steps appear redundant, as the storage space is created empty.
-            /*
-            // always ensure cache is large enough for whatever you plan to load into it
-            cache.Resize(size);
-
-            // range is specified using inclusive min and max coordinates
-            // Choose a reasonable size of range you plan to work with, to avoid high memory usage
-            // memory size in bytes required by cache is computed as Size.X * Size.Y * Size.Z * 2, where Size is size of the range.
-            // min and max coordinates are inclusive, so if you want to read 8^3 voxels starting at coordinate [8,8,8], you
-            // should pass in min = [8,8,8], max = [15,15,15]
-            // For LOD, you should only use LOD0 or LOD1
-            // When you write data inside cache back to storage, you always write to LOD0 (the most detailed LOD), LOD1 can only be read from.
-            storage.ReadRange(cache, MyStorageDataTypeFlags.All, 0, Vector3I.Zero, size - 1);
-
-            // resets all loaded content to empty
-            cache.ClearContent(0);
-
-            // write new data back to the storage
-            storage.WriteRange(cache, MyStorageDataTypeFlags.Content, Vector3I.Zero, size - 1);
-            */
-
-            return MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storageName, storage, position, 0);
         }
 
         /// <summary>
@@ -475,7 +204,7 @@ namespace midspace.adminscripts
                     return false;
                 }
 
-                var partialMatchOres = _oreNames.Where(ore => ore.IndexOf(findName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToArray() ;
+                var partialMatchOres = _oreNames.Where(ore => ore.IndexOf(findName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToArray();
                 if (partialMatchOres.Length == 1)
                 {
                     objectBuilder = new MyObjectBuilder_Ore() { SubtypeName = partialMatchOres[0] };
@@ -638,5 +367,359 @@ namespace midspace.adminscripts
             material = MyDefinitionManager.Static.GetVoxelMaterialDefinition(validMaterials[0]);
             return true;
         }
+
+        #endregion
+
+        #region Find Cube in Grid
+
+        public static IMyCubeBlock FindRotorBase(long entityId, IMyCubeGrid parent = null)
+        {
+            var entities = new HashSet<IMyEntity>();
+            MyAPIGateway.Entities.GetEntities(entities, e => e is IMyCubeGrid);
+
+            foreach (var entity in entities)
+            {
+                var cubeGrid = (IMyCubeGrid)entity;
+
+                if (cubeGrid == null)
+                    continue;
+
+                var blocks = new List<IMySlimBlock>();
+                cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null &&
+                    (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase)));
+
+                foreach (var block in blocks)
+                {
+                    var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
+
+                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
+                        continue;
+
+                    if (motorBase.RotorEntityId == entityId)
+                        return block.FatBlock;
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Voxel
+
+        public static string CreateUniqueStorageName(string baseName)
+        {
+            long index = 0;
+            var match = Regex.Match(baseName, @"^(?<Key>.+?)(?<Value>(\d+?))$", RegexOptions.IgnoreCase);
+
+            if (match.Success)
+            {
+                baseName = match.Groups["Key"].Captures[0].Value;
+                long.TryParse(match.Groups["Value"].Captures[0].Value, out index);
+            }
+
+            var uniqueName = string.Format("{0}{1}", baseName, index);
+            var currentAsteroidList = new List<IMyVoxelBase>();
+            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v != null);
+
+            while (currentAsteroidList.Any(a => a.StorageName.Equals(uniqueName, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                index++;
+                uniqueName = string.Format("{0}{1}", baseName, index);
+            }
+
+            return uniqueName;
+        }
+
+        /// <summary>
+        /// Create a new Asteroid, ready for some manipulation.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size">Currently the size must be multiple of 64, eg. 128x64x256</param>
+        /// <param name="position"></param>
+        public static IMyVoxelMap CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
+        {
+            var cache = new MyStorageDataCache();
+
+            // new storage is created completely full
+            // no geometry will be created because that requires full-empty transition
+            var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
+
+            // midspace's Note: The following steps appear redundant, as the storage space is created empty.
+            /*
+            // always ensure cache is large enough for whatever you plan to load into it
+            cache.Resize(size);
+
+            // range is specified using inclusive min and max coordinates
+            // Choose a reasonable size of range you plan to work with, to avoid high memory usage
+            // memory size in bytes required by cache is computed as Size.X * Size.Y * Size.Z * 2, where Size is size of the range.
+            // min and max coordinates are inclusive, so if you want to read 8^3 voxels starting at coordinate [8,8,8], you
+            // should pass in min = [8,8,8], max = [15,15,15]
+            // For LOD, you should only use LOD0 or LOD1
+            // When you write data inside cache back to storage, you always write to LOD0 (the most detailed LOD), LOD1 can only be read from.
+            storage.ReadRange(cache, MyStorageDataTypeFlags.All, 0, Vector3I.Zero, size - 1);
+
+            // resets all loaded content to empty
+            cache.ClearContent(0);
+
+            // write new data back to the storage
+            storage.WriteRange(cache, MyStorageDataTypeFlags.Content, Vector3I.Zero, size - 1);
+            */
+
+            return MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storageName, storage, position, 0);
+        }
+
+        #endregion
+
+        #region MoveTo
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="targetPlayer"></param>
+        /// <param name="safely">Attempts to find a safe location not inside of a wall.</param>
+        /// <param name="agressivePosition">Places the player behind the targetPlayer, otherwise face to face.</param>
+        /// <returns></returns>
+        public static bool MovePlayerToPlayer(IMyPlayer player, IMyPlayer targetPlayer, bool safely = true, bool agressivePosition = true)
+        {
+            if (targetPlayer == null || targetPlayer.Controller == null || targetPlayer.Controller.ControlledEntity == null)
+            {
+                MyAPIGateway.Utilities.ShowMessage("Failed", "Player does not have body to teleport to.");
+                return false;
+            }
+
+            var worldMatrix = targetPlayer.Controller.ControlledEntity.Entity.WorldMatrix;
+
+            Vector3D position;
+            MatrixD matrix;
+
+            if (agressivePosition)
+                position = worldMatrix.Translation + worldMatrix.Forward * -2.5d;
+            else
+                position = worldMatrix.Translation + worldMatrix.Forward * 2.5d;
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
+
+            if (safely)
+            {
+                if (!FindPlayerFreePosition(ref position, player))
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    return false;
+                }
+            }
+
+            if (agressivePosition)
+                matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
+            else
+                matrix = MatrixD.CreateWorld(position, worldMatrix.Backward, worldMatrix.Up);
+
+            var linearVelocity = targetPlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity;
+
+            player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;
+            player.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
+            player.Controller.ControlledEntity.Entity.SetPosition(position);
+
+            //save teleport in history
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Move player to specific cube which may be a cockpit.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="cube"></param>
+        /// <param name="safely"></param>
+        /// <returns></returns>
+        public static bool MovePlayerToCube(IMyPlayer player, IMyEntity cube, bool safely = true)
+        {
+            if (player == null || cube == null)
+                return false;
+
+            var worldMatrix = cube.WorldMatrix;
+            // TODO: search local grid for empty location.
+            var position = worldMatrix.Translation + worldMatrix.Forward * -2.5d + worldMatrix.Up * -0.9d;  // Suitable for Large 1x1x1 cockpit.
+
+            if (safely)
+            {
+                if (!FindPlayerFreePosition(ref position, player))
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    return false;
+                }
+            }
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
+
+            var matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
+            var linearVelocity = cube.Parent.Physics.LinearVelocity;
+
+            // The Physics.LinearVelocity doesn't change the player speed quickly enough before SetPosition is called, as
+            // the player will smack into the other obejct before it's correct velocity is actually registered.
+            player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;
+
+            player.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
+
+            // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
+            // the player will bounce off objects before it's correct orentation is actually registered.
+            player.Controller.ControlledEntity.Entity.SetPosition(position);
+
+            // save teleport in history
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+
+            return true;
+        }
+
+        public static bool MovePlayerToShipGrid(IMyPlayer player, IMyEntity ship, bool safely = true)
+        {
+            var destination = ship.WorldAABB.GetCorners()[0];
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
+
+            if (safely)
+            {
+                // Find empty location, centering on the ship grid.
+                var freePos = MyAPIGateway.Entities.FindFreePlace(ship.WorldAABB.Center, (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
+                if (!freePos.HasValue)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    return false;
+                }
+
+                // Offset will center the player character in the middle of the location.
+                var offset = player.Controller.ControlledEntity.Entity.WorldAABB.Center - player.Controller.ControlledEntity.Entity.GetPosition();
+                destination = freePos.Value - offset;
+            }
+
+            player.Controller.ControlledEntity.Entity.Physics.LinearVelocity = ship.Physics.LinearVelocity;
+            player.Controller.ControlledEntity.Entity.SetPosition(destination);
+
+            //save teleport in history
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+
+            return true;
+        }
+
+        public static bool MoveShipToPlayer(IMyEntity shipGrid, IMyPlayer targetPlayer)
+        {
+            // TODO: complete.
+
+            MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function not complete. Cannot transport piloted Ship to another player.");
+
+
+            //save teleport in history
+            //CommandBack.SaveTeleportInHistory(currentPosition);
+
+            return false;
+        }
+
+        public static bool MoveShipToShip(IMyEntity shipGrid, IMyEntity targetshipGrid)
+        {
+            // TODO: determine good location for moving one ship to another, checking for OrientedBoundingBox.Intersects().
+
+            //// Move the ship the player is piloting.
+            //var cubeGrid = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetTopMostParent();
+            var grids = shipGrid.GetAttachedGrids();
+            //var worldOffset = position - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
+
+            MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function not complete. Cannot transport piloted Ship to another ship.");
+
+            foreach (var grid in grids)
+            {
+                //grid.SetPosition(grid.GetPosition() + worldOffset);
+            }
+
+            //save teleport in history
+            //CommandBack.SaveTeleportInHistory(currentPosition);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Move player to Voxel. Either Asteroid or planet.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="ship"></param>
+        /// <param name="safely"></param>
+        /// <returns></returns>
+        public static bool MovePlayerToVoxel(IMyPlayer player, IMyVoxelBase voxel, bool safely = true)
+        {
+            if (player == null || voxel == null)
+                return false;
+
+            Vector3D position;
+
+            if (voxel is IMyVoxelMap)
+            {
+                var asteroid = (IMyVoxelMap)voxel;
+                position = asteroid.PositionLeftBottomCorner;
+            }
+            else if (voxel is Sandbox.Game.Entities.MyPlanet)
+            {
+                var planet = (Sandbox.Game.Entities.MyPlanet)voxel;
+
+                var zenithPoint = planet.PositionLeftBottomCorner + planet.SizeInMetresHalf;
+                zenithPoint.Y += planet.AtmosphereRadius;
+
+                Vector3D closestSurfacePoint;
+                MyVoxelCoordSystems.WorldPositionToLocalPosition(planet.PositionLeftBottomCorner, ref zenithPoint, out closestSurfacePoint);
+                Vector3D vector3D = planet.GetWorldGravityNormalized(ref zenithPoint);
+                closestSurfacePoint = planet.GetClosestSurfacePoint(ref closestSurfacePoint, ref vector3D, 20, 0);
+                MyVoxelCoordSystems.LocalPositionToWorldPosition(planet.PositionLeftBottomCorner, ref closestSurfacePoint, out position);
+            }
+            else
+            {
+                return false;
+            }
+
+            if (safely)
+            {
+                if (!FindPlayerFreePosition(ref position, player))
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    return false;
+                }
+            }
+
+            var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
+
+            // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
+            // the player will bounce off objects before it's correct orentation is actually registered.
+            player.Controller.ControlledEntity.Entity.SetPosition(position);
+
+            // save teleport in history
+            CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+
+            return true;
+        }
+
+        public static bool MoveShipToVoxel(IMyEntity shipGrid, IMyVoxelBase ship, bool safely = true)
+        {
+            // TODO: complete code.
+
+            return false;
+        }
+
+        private static bool FindPlayerFreePosition(ref Vector3D position, IMyPlayer player)
+        {
+            // Find empty location, centering on the target Player.
+            var freePos = MyAPIGateway.Entities.FindFreePlace(position, (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
+            if (!freePos.HasValue)
+                return false;
+
+            // Offset will center the player character in the middle of the location.
+            var offset = player.Controller.ControlledEntity.Entity.WorldAABB.Center - player.Controller.ControlledEntity.Entity.GetPosition();
+            position = freePos.Value - offset;
+
+            return true;
+        }
+
+        #endregion
     }
 }
