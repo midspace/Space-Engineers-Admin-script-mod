@@ -18,6 +18,7 @@
         public CommandAsteroidsList()
             : base(ChatCommandSecurity.Admin, "listasteroids", new[] { "/listasteroids" })
         {
+            AsteroidCache.Clear();
         }
 
         public override void Help(bool brief)
@@ -37,7 +38,7 @@
                 }
 
                 var currentAsteroidList = new List<IMyVoxelBase>();
-                MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => asteroidName == null || v.StorageName.IndexOf(asteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v is IMyVoxelMap && (asteroidName == null || v.StorageName.IndexOf(asteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
                 AsteroidCache.Clear();
 

@@ -672,6 +672,7 @@ namespace midspace.adminscripts
                 Vector3D vector3D = planet.GetWorldGravityNormalized(ref zenithPoint);
                 closestSurfacePoint = planet.GetClosestSurfacePoint(ref closestSurfacePoint, ref vector3D, 20, 0);
                 MyVoxelCoordSystems.LocalPositionToWorldPosition(planet.PositionLeftBottomCorner, ref closestSurfacePoint, out position);
+                //position.Y += 0.5d; // add a small margin because the voxel LOD can sometimes push a player down when first loading a distant cluster.
             }
             else
             {
@@ -688,6 +689,8 @@ namespace midspace.adminscripts
             }
 
             var currentPosition = player.Controller.ControlledEntity.Entity.GetPosition();
+
+            player.Controller.ControlledEntity.Entity.SetWorldMatrix(MatrixD.CreateWorld(position, Vector3D.Forward, Vector3D.Up));
 
             // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
             // the player will bounce off objects before it's correct orentation is actually registered.

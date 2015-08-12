@@ -16,8 +16,9 @@
         public readonly static List<IMyVoxelBase> PlanetCache = new List<IMyVoxelBase>();
 
         public CommandPlanetsList()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "listplanets", new[] { "/listplanets" })
+            : base(ChatCommandSecurity.Admin, "listplanets", new[] { "/listplanets" })
         {
+            PlanetCache.Clear();
         }
 
         public override void Help(bool brief)
@@ -37,7 +38,7 @@
                 }
 
                 var currentPlanetList = new List<IMyVoxelBase>();
-                MyAPIGateway.Session.VoxelMaps.GetInstances(currentPlanetList, v => planetName == null || v.StorageName.IndexOf(planetName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                MyAPIGateway.Session.VoxelMaps.GetInstances(currentPlanetList, v => v is Sandbox.Game.Entities.MyPlanet && (planetName == null || v.StorageName.IndexOf(planetName, StringComparison.InvariantCultureIgnoreCase) >= 0));
                 //MyAPIGateway.Session.pl .. ????
 
                 PlanetCache.Clear();
