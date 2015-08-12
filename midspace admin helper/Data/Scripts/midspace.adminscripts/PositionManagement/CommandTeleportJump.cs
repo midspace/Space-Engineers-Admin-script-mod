@@ -26,32 +26,28 @@
                 var distance = double.Parse(match.Groups["D"].Value, CultureInfo.InvariantCulture);
 
                 // Use the player to determine direction of offset.
-                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false, false); // dead center of player cross hairs.
-                var currentPosition = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
+                var entity = MyAPIGateway.Session.Player.Controller.ControlledEntity;
+                var currentPosition = entity.Entity.GetPosition();
 
-                if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
+                if (entity.Entity.Parent == null)
                 {
                     // Move the player only.
-
-                    // Adjust for offset between head and foot, as SetPosition uses feet of player, whilst GetHeadMatrix(...) uses head.
-                    // TODO: use player.WorldMatrix to precicely adjust for offset.
-                    var position = worldMatrix.Translation + (worldMatrix.Forward * distance) + (worldMatrix.Down * 1.70292f); 
-                    MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.SetPosition(position);
+                    // Use player HeadMatrix to calculate direction of Jump.
+                    // Dead center of player cross hairs, except in thrid person where the view can be shifted with ALT.
+                    var worldMatrix = entity.GetHeadMatrix(true, true, false, false);
+                    var position = entity.Entity.GetPosition() + (worldMatrix.Forward * distance);
+                    entity.Entity.SetPosition(position);
                 }
                 else
                 {
                     // Move the ship the player is piloting.
-                    var position = worldMatrix.Translation + worldMatrix.Forward * distance;
-                    // TODO: adjust for offset between entity.WorldMatrix and GetHeadMatrix.
-                    var cubeGrid = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetTopMostParent();
-                    currentPosition = cubeGrid.GetPosition();
+                    var cubeGrid = entity.Entity.GetTopMostParent();
                     var grids = cubeGrid.GetAttachedGrids();
-                    var worldOffset = position - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
+                    // Use cockpit/chair WorldMatrix to calculate direction of Jump.
+                    var worldOffset = (entity.Entity.WorldMatrix.Forward * distance);
                     foreach (var grid in grids)
-                    {
                         grid.SetPosition(grid.GetPosition() + worldOffset);
-                    }
                 }
 
                 //save teleport in history
