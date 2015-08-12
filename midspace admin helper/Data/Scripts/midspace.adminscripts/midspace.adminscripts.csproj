@@ -83,6 +83,7 @@
     <Compile Include="Messages\MessageSide.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />
+    <Compile Include="Misc\CommandBomb.cs" />
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />

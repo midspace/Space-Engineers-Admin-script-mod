@@ -420,7 +420,6 @@
                 cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
-                cube.ShareMode = MyOwnershipShareModeEnum.None;
                 cube.EntityId = 0;
                 cube.Owner = 0;
                 cube.BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Forward, Base6Directions.Direction.Up);
