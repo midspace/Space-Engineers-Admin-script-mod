@@ -7,6 +7,7 @@
 
     using Sandbox.ModAPI;
     using VRage.ModAPI;
+    using midspace.adminscripts.Messages.Sync;
 
     public class CommandStop : ChatCommand
     {
@@ -38,7 +39,7 @@
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Stop, shipEntity.EntityId.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = shipEntity.EntityId, Type = SyncEntityType.Stop});
                             MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, "Is stopping.");
                             return true;
                         }
@@ -77,7 +78,7 @@
                     {
                         foreach (var selectedShip in currentShipList)
                         {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Stop, selectedShip.EntityId.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = selectedShip.EntityId, Type = SyncEntityType.Stop });
                         }
                         MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, "Is stopping.");
                         return true;

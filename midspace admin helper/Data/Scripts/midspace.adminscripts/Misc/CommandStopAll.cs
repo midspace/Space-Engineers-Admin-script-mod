@@ -6,6 +6,7 @@
 
     using Sandbox.ModAPI;
     using VRageMath;
+    using midspace.adminscripts.Messages.Sync;
 
     public class CommandStopAll : ChatCommand
     {
@@ -47,7 +48,7 @@
                         if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                             item.Stop();
                         else
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Stop, item.EntityId.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = item.EntityId, Type = SyncEntityType.Stop });
                         counter++;
                     }
                 }

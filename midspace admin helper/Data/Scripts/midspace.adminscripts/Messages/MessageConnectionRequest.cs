@@ -19,10 +19,16 @@ namespace midspace.adminscripts.Messages
                 AdminNotificator.SendEnqueuedNotifications(SenderSteamId);
 
             if (!ServerConfig.IsServerAdmin(SenderSteamId) && ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Any(p => p.SteamId == SenderSteamId))
-                data.Add(ConnectionHelper.ConnectionKeys.ForceKick, SenderSteamId.ToString());
+                ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageForceDisconnect() { SteamId = SenderSteamId });
 
-            data.Add(ConnectionHelper.ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
-            ConnectionHelper.SendMessageToPlayer(SenderSteamId, data);
+            ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageConfig()
+            {
+                Config = new ServerConfigurationStruct()
+                {
+                    LogPrivateMessages = CommandPrivateMessage.LogPrivateMessages
+                },
+                Action = ConfigAction.LogPrivateMessages
+            });
 
             ChatCommandLogic.Instance.ServerCfg.SendPermissions(SenderSteamId);
 

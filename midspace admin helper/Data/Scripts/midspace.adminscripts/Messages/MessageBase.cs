@@ -1,4 +1,6 @@
-﻿using ProtoBuf;
+﻿using midspace.adminscripts.Messages.Permissions;
+using midspace.adminscripts.Messages.Sync;
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +12,26 @@ namespace midspace.adminscripts.Messages
     // ALL CLASSES DERIVED FROM MessageBase MUST BE ADDED HERE
     [XmlInclude(typeof(MessageAdminNotification))]
     [XmlInclude(typeof(MessageChatHistory))]
-    [XmlInclude(typeof(MessageCommandPermissions))]
     [XmlInclude(typeof(MessageConfig))]
     [XmlInclude(typeof(MessageConnectionRequest))]
+    [XmlInclude(typeof(MessageForceDisconnect))]
     [XmlInclude(typeof(MessageGlobalMessage))]
     [XmlInclude(typeof(MessageIncomingMessageParts))]
     [XmlInclude(typeof(MessageOfTheDayMessage))]
+    [XmlInclude(typeof(MessagePardon))]
     [XmlInclude(typeof(MessagePermissionRequest))]
     [XmlInclude(typeof(MessagePrivateMessage))]
+    [XmlInclude(typeof(MessageSave))]
     [XmlInclude(typeof(MessageSession))]
+    //permissions
+    [XmlInclude(typeof(MessageCommandPermission))]
+    [XmlInclude(typeof(MessageGroupPermission))]
+    [XmlInclude(typeof(MessagePlayerPermission))]
+    //sync
+    [XmlInclude(typeof(MessageSyncClaim))]
+    [XmlInclude(typeof(MessageSyncEntity))]
+    [XmlInclude(typeof(MessageSyncEntityPosition))]
+    [XmlInclude(typeof(MessageSyncSmite))]
     [ProtoContract]
     public abstract class MessageBase
     {

@@ -1,5 +1,6 @@
 ﻿namespace midspace.adminscripts
 {
+    using midspace.adminscripts.Messages;
     using Sandbox.ModAPI;
     using System;
     using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@
             if (match.Success)
             {
                 var playerName = match.Groups["Key"].Value;
-                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Pardon, playerName);
+                ConnectionHelper.SendMessageToServer(new MessagePardon() { PlayerName = playerName });
                 MyAPIGateway.Utilities.ShowMessage("Pardoning", playerName);
                 return true;
             }

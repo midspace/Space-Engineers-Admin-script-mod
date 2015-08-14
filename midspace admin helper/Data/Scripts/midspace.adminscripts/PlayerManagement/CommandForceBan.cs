@@ -1,5 +1,6 @@
 ﻿namespace midspace.adminscripts
 {
+    using midspace.adminscripts.Messages;
     using Sandbox.ModAPI;
     using System;
     using System.Collections.Generic;
@@ -52,7 +53,7 @@
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("ForceBan", selectedPlayer.DisplayName);
-                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.ForceKick, string.Format("{0}:true", selectedPlayer.SteamUserId.ToString()));
+                ConnectionHelper.SendMessageToServer(new MessageForceDisconnect() { SteamId = selectedPlayer.SteamUserId, Ban = true });
                 return true;
             }
 

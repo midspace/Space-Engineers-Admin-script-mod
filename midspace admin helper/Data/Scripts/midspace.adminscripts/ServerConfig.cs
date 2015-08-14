@@ -1,4 +1,5 @@
 ﻿using midspace.adminscripts.Messages;
+using midspace.adminscripts.Messages.Permissions;
 using ProtoBuf;
 using Sandbox.ModAPI;
 using System;
@@ -38,7 +39,7 @@ namespace midspace.adminscripts
 
         //hotlists
         Dictionary<ulong, List<CommandStruct>> CommandCache = new Dictionary<ulong, List<CommandStruct>>();
-        Dictionary<ulong, List<Player>> PlayerCache = new Dictionary<ulong, List<Player>>();
+        Dictionary<ulong, List<PlayerPermission>> PlayerCache = new Dictionary<ulong, List<PlayerPermission>>();
         Dictionary<ulong, List<PermissionGroup>> GroupCache = new Dictionary<ulong, List<PermissionGroup>>();
 
         /// <summary>
@@ -200,7 +201,14 @@ If you can't find the error, simply delete the file. The server will create a ne
             var sendLogPms = Config.LogPrivateMessages != CommandPrivateMessage.LogPrivateMessages;
             CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
             if (sendLogPms)
-                ConnectionHelper.SendMessageToAllPlayers(ConnectionHelper.ConnectionKeys.LogPrivateMessages, CommandPrivateMessage.LogPrivateMessages.ToString());
+                ConnectionHelper.SendMessageToAllPlayers(new MessageConfig()
+                {
+                    Config = new ServerConfigurationStruct()
+                    {
+                        LogPrivateMessages = CommandPrivateMessage.LogPrivateMessages
+                    },
+                    Action = ConfigAction.LogPrivateMessages
+                });
         }
 
         private void WriteConfig()
@@ -573,16 +581,18 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             foreach (CommandStruct commandStruct in playerPermissions)
-            {
                 SendPermissionChange(steamId, commandStruct);
-            }
 
-            ConnectionHelper.SendMessageToPlayer(steamId, ConnectionHelper.ConnectionKeys.PlayerLevel, playerLevel.ToString());
+            ConnectionHelper.SendMessageToPlayer(steamId, new MessagePlayerPermission()
+            {
+                Action = PlayerPermissionAction.Level,
+                PlayerLevel = playerLevel
+            });
         }
 
         public void SendPermissionChange(ulong steamId, CommandStruct commandStruct)
         {
-            var message = new MessageCommandPermissions()
+            var message = new MessageCommandPermission()
             {
                 Commands = new List<CommandStruct>(),
                 CommandAction = CommandActions.Level
@@ -706,7 +716,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             else
                 CommandCache[sender] = commands;
 
-            var message = new MessageCommandPermissions()
+            var message = new MessageCommandPermission()
             {
                 Commands = commands,
                 CommandAction = CommandActions.List
@@ -881,7 +891,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         public void CreatePlayerHotlist(ulong sender, string param)
         {
-            List<Player> players = new List<Player>();
+            List<PlayerPermission> players = new List<PlayerPermission>(Permissions.Players);
 
             var onlinePlayers = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(onlinePlayers, p => p != null);
@@ -893,21 +903,22 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             foreach (IMyPlayer player in onlinePlayers)
-                players.Add(new Player()
-                {
-                    PlayerName = player.DisplayName,
-                    SteamId = player.SteamUserId
-                });
+                if (!players.Any(p => p.Player.SteamId == player.SteamUserId))
+                    players.Add(new PlayerPermission()
+                    {
+                        Player = new Player()
+                        {
+                            PlayerName = player.DisplayName,
+                            SteamId = player.SteamUserId
+                        },
+                        Level = GetPlayerLevel(player.SteamUserId),
+                        UsePlayerLevel = false
+                    });
 
-            foreach (PlayerPermission playerPermission in Permissions.Players)
-            {
-                if (!players.Contains(playerPermission.Player))
-                    players.Add(playerPermission.Player);
-            }
 
             if (!string.IsNullOrEmpty(param))
             {
-                players = new List<Player>(players.Where(p => p.PlayerName.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
+                players = new List<PlayerPermission>(players.Where(p => p.Player.PlayerName.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
                 if (players.Count == 0)
                 {
@@ -921,29 +932,11 @@ If you can't find the error, simply delete the file. The server will create a ne
             else
                 PlayerCache[sender] = players;
 
-            foreach (Player player in players.OrderBy(p => p.PlayerName))
+            ConnectionHelper.SendMessageToPlayer(sender, new MessagePlayerPermission()
             {
-                var dict = new Dictionary<string, string>();
-                dict.Add(ConnectionHelper.ConnectionKeys.ListEntry, player.PlayerName);
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, GetPlayerLevel(player.SteamId).ToString());
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryId, player.SteamId.ToString());
-
-                if (Permissions.Players.Any(p => p.Player.SteamId == player.SteamId))
-                {
-                    var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamId);
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermEntryExtensions, string.Join(", ", playerPermission.Extensions));
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermEntryRestrictions, string.Join(", ", playerPermission.Restrictions));
-                    if (playerPermission.UsePlayerLevel)
-                        dict.Add(ConnectionHelper.ConnectionKeys.PermEntryUsePlayerLevel, "");
-                }
-
-                if (players.IndexOf(player) == 0)
-                    dict.Add(ConnectionHelper.ConnectionKeys.NewList, "");
-                if (players.IndexOf(player) == players.Count - 1)
-                    dict.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
-
-                ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.PlayerList, ConnectionHelper.ConvertData(dict));
-            }
+                Action = PlayerPermissionAction.List,
+                PlayerPermissions = new List<PlayerPermission>(players.OrderBy(p => p.Player.PlayerName)),
+            });
         }
 
         #endregion
@@ -1154,28 +1147,25 @@ If you can't find the error, simply delete the file. The server will create a ne
             else
                 GroupCache[sender] = groups;
 
-            foreach (PermissionGroup group in groups.OrderBy(g => g.GroupName))
+            var memberNames = new List<string>();
+
+            groups = new List<PermissionGroup>(groups.OrderBy(g => g.GroupName));
+
+            foreach (PermissionGroup group in groups)
             {
-                var dict = new Dictionary<string, string>();
-                dict.Add(ConnectionHelper.ConnectionKeys.ListEntry, group.GroupName);
-                dict.Add(ConnectionHelper.ConnectionKeys.PermEntryLevel, group.Level.ToString());
+                List<string> names = new List<string>();
+                foreach (ulong steamId in group.Members)
+                    names.Add(Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Player.PlayerName);
 
-                if (group.Members.Count > 0)
-                {
-                    List<string> memberNames = new List<string>();
-                    foreach (ulong steamId in group.Members)
-                        memberNames.Add(Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Player.PlayerName);
-
-                    dict.Add(ConnectionHelper.ConnectionKeys.PermEntryMembers, string.Join(", ", memberNames));
-                }
-
-                if (groups.IndexOf(group) == 0)
-                    dict.Add(ConnectionHelper.ConnectionKeys.NewList, "");
-                if (groups.IndexOf(group) == groups.Count - 1)
-                    dict.Add(ConnectionHelper.ConnectionKeys.ListLastEntry, "");
-
-                ConnectionHelper.SendMessageToPlayer(sender, ConnectionHelper.ConnectionKeys.GroupList, ConnectionHelper.ConvertData(dict));
+                memberNames.Add(string.Join(", ", names));
             }
+
+            ConnectionHelper.SendMessageToPlayer(sender, new MessageGroupPermission()
+            {
+                Action = PermissionGroupAction.List,
+                Groups = groups,
+                MemberNames = memberNames
+            });
         }
 
         #endregion
@@ -1186,7 +1176,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             int index;
             if (PlayerCache.ContainsKey(sender) && playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= PlayerCache[sender].Count)
-                playerName = PlayerCache[sender][index - 1].PlayerName;
+                playerName = PlayerCache[sender][index - 1].Player.PlayerName;
 
             if (!Permissions.Players.Any(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)))
             {

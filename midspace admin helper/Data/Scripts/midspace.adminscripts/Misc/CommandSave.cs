@@ -5,6 +5,7 @@
     using Sandbox.ModAPI;
     using System.Text.RegularExpressions;
     using System.Text;
+    using midspace.adminscripts.Messages;
 
     public class CommandSaveGame : ChatCommand
     {
@@ -55,13 +56,12 @@ Example: /save local
                         MyAPIGateway.Utilities.ShowNotification(msg, 2500, Sandbox.Common.MyFontEnum.White);
                     }
                     else if (setting.Equals("server", StringComparison.InvariantCultureIgnoreCase) || setting.Equals("s", StringComparison.InvariantCultureIgnoreCase))
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Save, "");
+                        ConnectionHelper.SendMessageToServer(new MessageSave());
                     else
                         MyAPIGateway.Utilities.ShowMessage("Option", string.Format("{0} is no valid option. Options: server, s, local, l.", setting));
                 }
                 else
                     MyAPIGateway.Utilities.ShowMessage("Option", "You have to define an option. Options: server, s, local, l.");
-                    //ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.SaveTime, "");
 
                 return true;
             }

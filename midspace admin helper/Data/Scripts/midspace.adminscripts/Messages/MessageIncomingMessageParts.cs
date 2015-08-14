@@ -22,7 +22,7 @@ namespace midspace.adminscripts.Messages
 
             if (LastPart)
             {
-                ConnectionHelper.ProcessClientData(ConnectionHelper.Client_MessageCache.ToArray());
+                ConnectionHelper.ProcessData(ConnectionHelper.Client_MessageCache.ToArray());
                 ConnectionHelper.Client_MessageCache.Clear();
             }
         }
@@ -33,7 +33,7 @@ namespace midspace.adminscripts.Messages
 
             if (LastPart)
             {
-                ConnectionHelper.ProcessServerData(ConnectionHelper.Server_MessageCache[SenderSteamId].ToArray());
+                ConnectionHelper.ProcessData(ConnectionHelper.Server_MessageCache[SenderSteamId].ToArray());
                 ConnectionHelper.Server_MessageCache[SenderSteamId].Clear();
             }
         }

@@ -14,11 +14,16 @@ namespace midspace.adminscripts.Messages
         public ConfigAction Action;
 
         [ProtoMember(2)]
-        public uint AdminLevel;
+        public ServerConfigurationStruct Config;
 
         public override void ProcessClient()
         {
-            // never processed on client
+            switch (Action)
+            {
+                case ConfigAction.LogPrivateMessages:
+                    CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
+                    break;
+            }
         }
 
         public override void ProcessServer()
@@ -34,8 +39,8 @@ namespace midspace.adminscripts.Messages
                     ConnectionHelper.SendChatMessage(SenderSteamId, "Config reloaded.");
                     break;
                 case ConfigAction.AdminLevel:
-                    ChatCommandLogic.Instance.ServerCfg.UpdateAdminLevel(AdminLevel);
-                    ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Updated default admin level to {0}. Please note that you have to use '/cfg save' to save it permanently.", AdminLevel));
+                    ChatCommandLogic.Instance.ServerCfg.UpdateAdminLevel(Config.AdminLevel);
+                    ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Updated default admin level to {0}. Please note that you have to use '/cfg save' to save it permanently.", Config.AdminLevel));
                     break;
             }
         }
@@ -45,6 +50,7 @@ namespace midspace.adminscripts.Messages
     {
         Reload,
         Save,
-        AdminLevel
+        AdminLevel,
+        LogPrivateMessages
     }
 }

@@ -1,4 +1,5 @@
 ﻿using midspace.adminscripts.Messages;
+using midspace.adminscripts.Messages.Permissions;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,6 @@ namespace midspace.adminscripts
 {
     class CommandPermission : ChatCommand
     {
-        //local cache
-        private static List<PlayerCacheEntry> PlayerCache = new List<PlayerCacheEntry>();
-        private static List<GroupCacheEntry> GroupCache = new List<GroupCacheEntry>();
-
-
         public CommandPermission()
             : base(ChatCommandSecurity.Admin, "perm", new string[] { "/permission", "/perm" })
         {
@@ -158,7 +154,7 @@ Example: /perm group list
 
         public void ProcessCommandPermission(string[] args)
         {
-            var commandMessage = new MessageCommandPermissions();
+            var commandMessage = new MessageCommandPermission();
             switch (args[1].ToLowerInvariant())
             {
                 case "setlevel":
@@ -196,12 +192,13 @@ Example: /perm group list
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, list.", args[1]));
                     return;
             }
+
             ConnectionHelper.SendMessageToServer(commandMessage);
         }
 
         public void ProcessPlayerPermission(string[] args)
         {
-            var dict = new Dictionary<string, string>();
+            var playerMessage = new MessagePlayerPermission();
             switch (args[1].ToLowerInvariant())
             {
                 case "setlevel":
@@ -215,11 +212,15 @@ Example: /perm group list
                     uint level;
                     if (uint.TryParse(args[3], out level))
                     {
-                        dict.Add(args[2], args[3]);
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerLevel, ConnectionHelper.ConvertData(dict));
+                        playerMessage.Action = PlayerPermissionAction.Level;
+                        playerMessage.PlayerName = args[2];
+                        playerMessage.PlayerLevel = level;
                     }
                     else
+                    {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        return;
+                    }
                     break;
                 case "extend":
                     if (args.Length < 4)
@@ -230,8 +231,9 @@ Example: /perm group list
                         return;
                     }
 
-                    dict.Add(args[2], args[3]);
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerExtend, ConnectionHelper.ConvertData(dict));
+                    playerMessage.Action = PlayerPermissionAction.Extend;
+                    playerMessage.PlayerName = args[2];
+                    playerMessage.CommandName = args[3];
                     break;
                 case "restrict":
                     if (args.Length < 4)
@@ -241,8 +243,9 @@ Example: /perm group list
                         return;
                     }
 
-                    dict.Add(args[2], args[3]);
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerRestrict, ConnectionHelper.ConvertData(dict));
+                    playerMessage.Action = PlayerPermissionAction.Restrict;
+                    playerMessage.PlayerName = args[2];
+                    playerMessage.CommandName = args[3];
                     break;
                 case "upl":
                 case "useplayerlevel":
@@ -257,28 +260,36 @@ Example: /perm group list
                     bool usePlayerLevel;
                     if (bool.TryParse(args[3], out usePlayerLevel))
                     {
-                        dict.Add(args[2], args[3]);
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.UsePlayerLevel, ConnectionHelper.ConvertData(dict));
+
+                        playerMessage.Action = PlayerPermissionAction.UsePlayerLevel;
+                        playerMessage.PlayerName = args[2];
+                        playerMessage.UsePlayerLevel = usePlayerLevel;
                     }
                     else
+                    {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid value. It must be either true or false.", args[3]));
+                        return;
+                    }
                     break;
                 case "list":
                     string param = "";
                     if (args.Length > 2)
                         param = args[2];
 
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.PlayerList, param);
+                    playerMessage.Action = PlayerPermissionAction.List;
+                    playerMessage.PlayerName = param;
                     break;
                 default:
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, extend, restrict, useplayerlevel, list.", args[1]));
-                    break;
+                    return;
             }
+
+            ConnectionHelper.SendMessageToServer(playerMessage);
         }
 
         public void ProcessGroupPermission(string[] args)
         {
-            var dict = new Dictionary<string, string>();
+            var groupMessage = new MessageGroupPermission();
             switch (args[1].ToLowerInvariant())
             {
                 case "setlevel":
@@ -293,11 +304,15 @@ Example: /perm group list
                     uint level;
                     if (uint.TryParse(args[3], out level))
                     {
-                        dict.Add(args[2], args[3]);
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupLevel, ConnectionHelper.ConvertData(dict));
+                        groupMessage.Action = PermissionGroupAction.Level;
+                        groupMessage.GroupName = args[2];
+                        groupMessage.GroupLevel = level;
                     }
                     else
+                    {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        return;
+                    }
                     break;
                 case "setname":
                 case "rename":
@@ -308,8 +323,9 @@ Example: /perm group list
                         return;
                     }
 
-                    dict.Add(args[2], args[3]);
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupName, ConnectionHelper.ConvertData(dict));
+                    groupMessage.Action = PermissionGroupAction.Name;
+                    groupMessage.GroupName = args[2];
+                    groupMessage.Name = args[3];
                     break;
                 case "add":
                 case "addplayer":
@@ -320,8 +336,9 @@ Example: /perm group list
                         return;
                     }
 
-                    dict.Add(args[2], args[3]);
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupAddPlayer, ConnectionHelper.ConvertData(dict));
+                    groupMessage.Action = PermissionGroupAction.Add;
+                    groupMessage.GroupName = args[2];
+                    groupMessage.Name = args[3];
                     break;
                 case "remove":
                 case "removeplayer":
@@ -332,8 +349,9 @@ Example: /perm group list
                         return;
                     }
 
-                    dict.Add(args[2], args[3]);
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupRemovePlayer, ConnectionHelper.ConvertData(dict));
+                    groupMessage.Action = PermissionGroupAction.Remove;
+                    groupMessage.GroupName = args[2];
+                    groupMessage.Name = args[3];
                     break;
                 case "create":
                     if (args.Length < 4)
@@ -345,11 +363,15 @@ Example: /perm group list
 
                     if (uint.TryParse(args[3], out level))
                     {
-                        dict.Add(args[2], args[3]);
-                        ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupCreate, ConnectionHelper.ConvertData(dict));
+                        groupMessage.Action = PermissionGroupAction.Create;
+                        groupMessage.GroupName = args[2];
+                        groupMessage.GroupLevel = level;
                     }
                     else
+                    {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        return;
+                    }
                     break;
                 case "delete":
                     if (args.Length < 3)
@@ -359,19 +381,23 @@ Example: /perm group list
                         return;
                     }
 
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupDelete, args[2]);
+                    groupMessage.Action = PermissionGroupAction.Delete;
+                    groupMessage.GroupName = args[2];
                     break;
                 case "list":
                     string param = "";
                     if (args.Length > 2)
                         param = args[2];
 
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.GroupList, param);
+                    groupMessage.Action = PermissionGroupAction.List;
+                    groupMessage.GroupName = param;
                     break;
                 default:
                     MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, setname, add, remove, create, delete, list.", args[1]));
-                    break;
+                    return;
             }
+
+            ConnectionHelper.SendMessageToServer(groupMessage);
         }
 
         public static void ShowCommandList(List<CommandStruct> commands)
@@ -392,93 +418,53 @@ Level: {2}
             MyAPIGateway.Utilities.ShowMissionScreen("Commands", "Command hotlist", null, builder.ToString(), null, null);
         }
 
-        public static void AddToPlayerCache(string playerName, string playerLevel, string steamId, string extensions, string restrictions, bool usePlayerLevel, bool show, bool newList)
+        public static void ShowPlayerList(List<PlayerPermission> players)
         {
-            if (newList)
-                PlayerCache.Clear();
+            StringBuilder builder = new StringBuilder();
 
-            PlayerCache.Add(new PlayerCacheEntry()
+            builder.AppendLine(string.Format(@"{0} results found:", players.Count));
+
+            int index = 0;
+            foreach (PlayerPermission playerPermission in players)
             {
-                Name = playerName,
-                Level = playerLevel,
-                SteamId = steamId,
-                Extensions = extensions,
-                Restrictions = restrictions,
-                UsePlayerLevel = usePlayerLevel
-            });
+                string playerLevelString = "";
+                if (playerPermission.UsePlayerLevel)
+                    playerLevelString = "(player level)";
 
-            if (show)
-            {
-                StringBuilder builder = new StringBuilder();
+                var extentions = string.Join(", ", playerPermission.Extensions);
+                var restrictions = string.Join(", ", playerPermission.Restrictions);
 
-                builder.AppendLine(string.Format(@"{0} results found:", PlayerCache.Count));
-
-                int index = 0;
-                foreach (PlayerCacheEntry player in PlayerCache)
-                {
-                    string playerLevelString = "";
-                    if (player.UsePlayerLevel)
-                        playerLevelString = "(player level)";
-
-                    builder.AppendFormat(@"
+                builder.AppendFormat(@"
 #{0} {1}, {6}
 Level: {2} {5}
 Extentions: {3}
 Restrictions: {4}
-", ++index, player.Name, player.Level, string.IsNullOrEmpty(player.Extensions) ? "none" : player.Extensions, string.IsNullOrEmpty(player.Restrictions) ? "none" : player.Restrictions, playerLevelString, player.SteamId);
-                }
-
-                MyAPIGateway.Utilities.ShowMissionScreen("Players", "Player hotlist", null, builder.ToString(), null, null);
+", ++index, playerPermission.Player.PlayerName, playerPermission.Level, string.IsNullOrEmpty(extentions) ? "none" : extentions, string.IsNullOrEmpty(restrictions) ? "none" : restrictions, playerLevelString, playerPermission.Player.SteamId);
             }
+
+            MyAPIGateway.Utilities.ShowMissionScreen("Players", "Player hotlist", null, builder.ToString(), null, null);
         }
 
-        public static void AddToGroupCache(string groupName, string groupLevel, string members, bool show, bool newList)
+        public static void ShowGroupList(List<PermissionGroup> groups, List<string> memberNames)
         {
-            if (newList)
-                GroupCache.Clear();
 
-            GroupCache.Add(new GroupCacheEntry()
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine(string.Format(@"{0} results found:", groups.Count));
+
+            int index = 0;
+            foreach (PermissionGroup group in groups)
             {
-                Name = groupName,
-                Level = groupLevel,
-                Members = members
-            });
+                var members = memberNames[groups.IndexOf(group)];
 
-            if (show)
-            {
-                StringBuilder builder = new StringBuilder();
-
-                builder.AppendLine(string.Format(@"{0} results found:", GroupCache.Count));
-
-                int index = 0;
-                foreach (GroupCacheEntry group in GroupCache)
-                {
-                    builder.AppendFormat(@"
+                builder.AppendFormat(@"
 #{0} {1}
 Level: {2}
 Members: {3}
-", ++index, group.Name, group.Level, string.IsNullOrEmpty(group.Members) ? "none" : group.Members);
-                }
-
-                MyAPIGateway.Utilities.ShowMissionScreen("Groups", "Group hotlist", null, builder.ToString(), null, null);
+", ++index, group.GroupName, group.Level, string.IsNullOrEmpty(members) ? "none" : members);
             }
-        }
 
-        private struct PlayerCacheEntry
-        {
-            public string Name;
-            public string Level;
-            public string SteamId;
-            public string Extensions;
-            public string Restrictions;
-            public bool UsePlayerLevel;
-        }
-
-        private struct GroupCacheEntry
-        {
-            public string Name;
-            public string Level;
-            public string Members;
+            MyAPIGateway.Utilities.ShowMissionScreen("Groups", "Group hotlist", null, builder.ToString(), null, null);
         }
     }
 }

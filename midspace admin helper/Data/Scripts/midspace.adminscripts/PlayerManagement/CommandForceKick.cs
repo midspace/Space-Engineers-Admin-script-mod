@@ -1,10 +1,11 @@
 ﻿namespace midspace.adminscripts
 {
-    using Sandbox.ModAPI;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
+    using midspace.adminscripts.Messages;
+using Sandbox.ModAPI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
     public class CommandForceKick : ChatCommand
     {
@@ -54,7 +55,7 @@
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("ForceKick", selectedPlayer.DisplayName);
-                ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.ForceKick, selectedPlayer.SteamUserId.ToString());
+                ConnectionHelper.SendMessageToServer(new MessageForceDisconnect() { SteamId = selectedPlayer.SteamUserId });
                 return true;
             }
 

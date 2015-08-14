@@ -91,7 +91,7 @@ Examples:
                     case "adminlevel":
                         uint adminLevel;
                         if (uint.TryParse(value, out adminLevel))
-                            ConnectionHelper.SendMessageToServer(new MessageConfig() { AdminLevel = adminLevel, Action = ConfigAction.AdminLevel });
+                            ConnectionHelper.SendMessageToServer(new MessageConfig() { Config = new ServerConfigurationStruct() { AdminLevel = adminLevel }, Action = ConfigAction.AdminLevel });
                         else
                             MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
                         break;

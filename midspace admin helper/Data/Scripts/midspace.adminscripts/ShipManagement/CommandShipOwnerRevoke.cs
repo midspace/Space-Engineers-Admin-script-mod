@@ -7,6 +7,7 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
+    using midspace.adminscripts.Messages.Sync;
 
     public class CommandShipOwnerRevoke : ChatCommand
     {
@@ -36,7 +37,7 @@
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Revoke, shipEntity.EntityId.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = shipEntity.EntityId, Type = SyncEntityType.Revoke});
                         }
                         MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
                         return true;
@@ -76,7 +77,7 @@
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Revoke, grid.EntityId.ToString());
+                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = grid.EntityId, Type = SyncEntityType.Revoke });
                         }
                         MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", grid.DisplayName);
                     }

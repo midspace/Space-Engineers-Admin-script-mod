@@ -7,6 +7,7 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
+    using midspace.adminscripts.Messages.Sync;
 
     public class CommandShipOwnerClaim : ChatCommand
     {
@@ -36,7 +37,7 @@
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Claim, string.Format("{0}:{1}", MyAPIGateway.Session.Player.PlayerID, shipEntity.EntityId));
+                            ConnectionHelper.SendMessageToServer(new MessageSyncClaim() { EntityId = shipEntity.EntityId, PlayerId = MyAPIGateway.Session.Player.PlayerID});
                         }
                         MyAPIGateway.Utilities.ShowMessage("Claim", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
                         return true;
@@ -76,7 +77,7 @@
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Claim, string.Format("{0}:{1}", MyAPIGateway.Session.Player.PlayerID, grid.EntityId));
+                            ConnectionHelper.SendMessageToServer(new MessageSyncClaim() { EntityId = grid.EntityId, PlayerId = MyAPIGateway.Session.Player.PlayerID });
                         }
                         MyAPIGateway.Utilities.ShowMessage("Claim", "Changing ownership of ship '{0}'.", grid.DisplayName);
                     }

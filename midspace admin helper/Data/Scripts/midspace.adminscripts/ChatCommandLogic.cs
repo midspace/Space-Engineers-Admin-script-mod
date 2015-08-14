@@ -49,8 +49,7 @@ namespace midspace.adminscripts
         private static List<string> _ingotNames;
         private static MyPhysicalItemDefinition[] _physicalItems;
 
-        private Action<byte[]> MessageHandler_Client = new Action<byte[]>(HandleMessage_Client);
-        private Action<byte[]> MessageHandler_Server = new Action<byte[]>(HandleMessage_Server);
+        private Action<byte[]> MessageHandler = new Action<byte[]>(HandleMessage);
 
         /// <summary>
         /// Set manually to true for testing purposes. No need for this function in general.
@@ -136,8 +135,11 @@ namespace midspace.adminscripts
             {
                 MyAPIGateway.Session.OnSessionReady += Session_OnSessionReady;
                 Logger.Debug("Attach Session_OnSessionReady");
-                MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
-                Logger.Debug("Registered ProcessMessage_Client");
+                if (ServerCfg == null) // if the config is already present, the messagehandler is also already registered
+                {
+                    MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
+                    Logger.Debug("Registered ProcessMessage");
+                }
                 ConnectionHelper.Client_MessageCache.Clear();
                 BlockCommandExecution = true;
                 PermissionRequestTimer = new Timer(10000);
@@ -157,8 +159,8 @@ namespace midspace.adminscripts
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
             AdminNotificator.Init();
-            MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
-            Logger.Debug("Registered ProcessMessage_Server");
+            MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
+            Logger.Debug("Registered ProcessMessage");
 
             ConnectionHelper.Server_MessageCache.Clear();
 
@@ -280,8 +282,8 @@ namespace midspace.adminscripts
             if (ServerCfg != null)
             { //only for clients it is null
                 ServerCfg.Close();
-                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardServerId, MessageHandler_Server);
-                Logger.Debug("Unregistered MessageHandler Server");
+                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
+                Logger.Debug("Unregistered MessageHandler");
             }
 
             if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
@@ -296,8 +298,12 @@ namespace midspace.adminscripts
                 }
                 MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
                 Logger.Debug("Detached Session_OnSessionReady");
-                MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.StandardClientId, MessageHandler_Client);
-                Logger.Debug("Unregistered MessageHandler Client");
+                
+                if (ServerCfg == null)
+                {
+                    MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
+                    Logger.Debug("Unregistered MessageHandler");
+                }
             }
             
             if (MyAPIGateway.Utilities != null) {
@@ -386,16 +392,13 @@ namespace midspace.adminscripts
 
         #region connection handling
 
-        private static void HandleMessage_Client(byte[] message)
+        private static void HandleMessage(byte[] message)
         {
-            Logger.Debug(string.Format("HandleMessageClient - {0}", System.Text.Encoding.Unicode.GetString(message)));
-            ConnectionHelper.ProcessClientData(message);
-        }
-
-        private static void HandleMessage_Server(byte[] message)
-        {
-            Logger.Debug(string.Format("HandleMessageServer - {0}", System.Text.Encoding.Unicode.GetString(message)));
-            ConnectionHelper.ProcessServerData(message);
+            Logger.Debug("-- HandleMessage: --");
+            Logger.Debug("--------------------");
+            Logger.Debug(string.Format("{0}", System.Text.Encoding.Unicode.GetString(message)));
+            Logger.Debug("--------------------");
+            ConnectionHelper.ProcessData(message);
         }
 
         #endregion

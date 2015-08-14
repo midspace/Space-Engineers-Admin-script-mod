@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace midspace.adminscripts.Messages
+namespace midspace.adminscripts.Messages.Permissions
 {
     [ProtoContract]
-    public class MessageCommandPermissions : MessageBase
+    public class MessageCommandPermission : MessageBase
     {
         [ProtoMember(1)]
         public List<CommandStruct> Commands;

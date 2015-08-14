@@ -10,6 +10,7 @@
     using Sandbox.ModAPI;
     using VRage;
     using VRage.ObjectBuilders;
+    using midspace.adminscripts.Messages.Sync;
 
     public class CommandPlayerSmite : ChatCommand
     {
@@ -63,7 +64,7 @@
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive && !selectedPlayer.Equals(MyAPIGateway.Session.Player))
                     Smite(selectedPlayer);
                 else
-                    ConnectionHelper.SendMessageToServer(ConnectionHelper.ConnectionKeys.Smite, selectedPlayer.SteamUserId.ToString());
+                    ConnectionHelper.SendMessageToServer(new MessageSyncSmite() { SteamId = selectedPlayer.SteamUserId });
 
                 return true;
             }

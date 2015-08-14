@@ -9,6 +9,7 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRageMath;
+    using midspace.adminscripts.Messages.Sync;
 
     public class CommandObjectsCollect : ChatCommand
     {
@@ -79,7 +80,7 @@
 
                                     if (MyAPIGateway.Multiplayer.MultiplayerActive)
                                     {
-                                        ConnectionHelper.SendMessageToAll(ConnectionHelper.ConnectionKeys.StopAndMove, string.Format("{0}:{1}:{2}:{3}", item.EntityId, destination.X, destination.Y, destination.Z));
+                                        ConnectionHelper.SendMessageToAll(new MessageSyncEntityPosition() { EntityId = item.EntityId, Position = destination });
                                     }
                                     else if (item.Physics != null)
                                     {
