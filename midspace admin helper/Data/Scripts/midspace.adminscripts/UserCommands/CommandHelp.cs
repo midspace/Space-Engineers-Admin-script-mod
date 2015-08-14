@@ -4,6 +4,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using System.Collections.Generic;
 
     public class CommandHelp : ChatCommand
     {
@@ -33,7 +34,9 @@
             if (ChatCommandService.UserSecurity == ChatCommandSecurity.User)
             {
                 // Split help details. Regular users, get one list.
-                var commands = ChatCommandService.GetListCommands();
+                var commands = new List<string>(ChatCommandService.GetListCommands());
+                commands.Sort();
+
                 if (brief)
                     MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", commands));
                 else
@@ -42,8 +45,11 @@
             else
             {
                 // Split help details. Admins users, get two lists.
-                var commands = ChatCommandService.GetUserListCommands();
-                var nonUserCommands = ChatCommandService.GetNonUserListCommands();
+                var commands = new List<string>(ChatCommandService.GetUserListCommands());
+                commands.Sort();
+
+                var nonUserCommands = new List<string>(ChatCommandService.GetNonUserListCommands());
+                nonUserCommands.Sort();
 
                 if (brief)
                 {
