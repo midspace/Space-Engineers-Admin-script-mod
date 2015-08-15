@@ -58,6 +58,10 @@
 
             //var position = MyAPIGateway.Session.ControlledObject.Entity.GetPosition();
             //var position = MyAPIGateway.Session.CameraController.GetViewMatrix().Translation;
+
+            if (MyAPIGateway.Session.Player.Controller.ControlledEntity == null)
+                return;
+
             var position = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
             MyAPIGateway.Utilities.ShowNotification(string.Format("[{0:N},{1:N},{2:N}]", position.X, position.Y, position.Z), 1000, MyFontEnum.White);
         }
