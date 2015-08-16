@@ -32,6 +32,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageSyncEntity))]
     [XmlInclude(typeof(MessageSyncEntityPosition))]
     [XmlInclude(typeof(MessageSyncSmite))]
+    [XmlInclude(typeof(MessageSyncInvisible))]
     [ProtoContract]
     public abstract class MessageBase
     {
