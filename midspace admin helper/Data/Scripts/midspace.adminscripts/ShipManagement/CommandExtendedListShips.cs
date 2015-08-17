@@ -8,9 +8,9 @@
 
     using Sandbox.ModAPI;
 
-    public class CommandListShips2 : ChatCommand
+    public class CommandExtendedListShips : ChatCommand
     {
-        public CommandListShips2()
+        public CommandExtendedListShips()
             : base(ChatCommandSecurity.Admin, "elistships", new[] { "/elistships", "/extendedlistships", "/listships2" })
         {
         }

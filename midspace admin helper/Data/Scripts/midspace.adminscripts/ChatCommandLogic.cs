@@ -192,6 +192,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandVoxelsList());
             commands.Add(new CommandConfig());
             commands.Add(new CommandDate());
+            commands.Add(new CommandExtendedListShips());
             commands.Add(new CommandFactionDemote());
             commands.Add(new CommandFactionJoin());
             commands.Add(new CommandFactionKick());
@@ -201,6 +202,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandForceKick());
             commands.Add(new CommandFlyTo());
             commands.Add(new CommandGameName());
+            commands.Add(new CommandGodMode());
             commands.Add(new CommandHeading());
             commands.Add(new CommandHelloWorld());
             commands.Add(new CommandHelp());
@@ -214,7 +216,6 @@ namespace midspace.adminscripts
             //commands.Add(new CommandListBlueprints()); // no API currently.
             commands.Add(new CommandListPrefabs());
             commands.Add(new CommandListShips());
-            commands.Add(new CommandListShips2());
             commands.Add(new CommandMessageOfTheDay());
             commands.Add(new CommandBomb());
             commands.Add(new CommandInvisible());

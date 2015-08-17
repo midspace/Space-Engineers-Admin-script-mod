@@ -94,6 +94,7 @@
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />
     <Compile Include="Misc\CommandBomb.cs" />
+    <Compile Include="Misc\CommandGodMode.cs" />
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />
@@ -156,7 +157,7 @@
     <Compile Include="PositionManagement\CommandTeleportToShip.cs" />
     <Compile Include="FactionManagement\CommandFactionRemove.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidSpread.cs" />
-    <Compile Include="ShipManagement\CommandListShips2.cs" />
+    <Compile Include="ShipManagement\CommandExtendedListShips.cs" />
     <Compile Include="Misc\CommandGameName.cs" />
     <Compile Include="PositionManagement\CommandTeleportSave.cs" />
     <Compile Include="PositionManagement\CommandTeleportList.cs" />
