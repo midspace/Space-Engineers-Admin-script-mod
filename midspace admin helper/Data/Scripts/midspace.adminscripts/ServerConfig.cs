@@ -504,11 +504,71 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             foreach (CommandStruct cmdStruct in invalidCommands)
             {
-                //remove all invalid commands
+                // remove all invalid commands
                 Permissions.Commands.Remove(cmdStruct);
+
+                // clean up the player permissions
+                var extentions = new List<PlayerPermission>(Permissions.Players.Where(p => p.Extensions.Any(c => c.Equals(cmdStruct.Name))));
+                var restrictions = new List<PlayerPermission>(Permissions.Players.Where(p => p.Restrictions.Any(c => c.Equals(cmdStruct.Name))));
+
+                foreach (PlayerPermission playerPermission in extentions)
+                {
+                    var i = Permissions.Players.IndexOf(playerPermission);
+                    var player = Permissions.Players[i];
+                    Permissions.Players.RemoveAt(i);
+                    player.Extensions.Remove(cmdStruct.Name);
+                    Permissions.Players.Insert(i, playerPermission);
+                }
+
+                foreach (PlayerPermission playerPermission in restrictions)
+                {
+                    var i = Permissions.Players.IndexOf(playerPermission);
+                    var player = Permissions.Players[i];
+                    Permissions.Players.RemoveAt(i);
+                    player.Restrictions.Remove(cmdStruct.Name);
+                    Permissions.Players.Insert(i, player);
+                }
+
+                // if the struct used an alias, we add it again properly while keeping the previous level
+                // this might be because we changed the name of an command and keep the old as an alias to not confuse the users
+                if (ChatCommands.Any(c => c.Commands.Any(s => s.Substring(1).Equals(cmdStruct.Name))))
+                {
+                    var command = ChatCommands.First(c => c.Commands.Any(s => s.Substring(1).Equals(cmdStruct.Name)));
+
+                    // remove all commands with the same name as we might have added it already asuming it is new
+                    Permissions.Commands.RemoveAll(c => c.Name.Equals(command.Name));
+                    
+                    Permissions.Commands.Add(new CommandStruct()
+                    {
+                        Name = command.Name,
+                        NeededLevel = cmdStruct.NeededLevel
+                    });
+
+
+                    foreach (PlayerPermission playerPermission in extentions)
+                    {
+                        var i = Permissions.Players.IndexOf(Permissions.Players.First(p => p.Player.SteamId == playerPermission.Player.SteamId));
+                        var player = Permissions.Players[i];
+                        Permissions.Players.RemoveAt(i);
+                        player.Extensions.Add(command.Name);
+                        Permissions.Players.Insert(i, player);
+                    }
+
+                    foreach (PlayerPermission playerPermission in restrictions)
+                    {
+                        var i = Permissions.Players.IndexOf(Permissions.Players.First(p => p.Player.SteamId == playerPermission.Player.SteamId));
+                        var player = Permissions.Players[i];
+                        Permissions.Players.RemoveAt(i);
+                        player.Restrictions.Add(command.Name);
+                        Permissions.Players.Insert(i, player);
+                    }
+                }
             }
 
             Logger.Debug("Permission File loaded {0} commands.", Permissions.Commands.Count);
+
+            // for better readability we sort it, first by level then by name
+            Permissions.Commands = new List<CommandStruct>(Permissions.Commands.OrderByDescending(c => c.NeededLevel).ThenBy(c => c.Name));
 
             SavePermissionFile();
             return;

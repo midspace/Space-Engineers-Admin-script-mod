@@ -11,25 +11,22 @@
     public class CommandListShips2 : ChatCommand
     {
         public CommandListShips2()
-            : base(ChatCommandSecurity.Admin, "listships2", new[] { "/listships2" })
+            : base(ChatCommandSecurity.Admin, "elistships", new[] { "/elistships", "/extendedlistships", "/listships2" })
         {
         }
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/listships2 <filter>", "List in-game ships/stations, including postion and distance. Optional <filter> to refine your search by ship name or antenna/beacon name.");
+            MyAPIGateway.Utilities.ShowMessage("/elistships <filter>", "List in-game ships/stations, including postion and distance. Optional <filter> to refine your search by ship name or antenna/beacon name.");
         }
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.StartsWith("/listships2", StringComparison.InvariantCultureIgnoreCase))
+            string shipName = null;
+            var match = Regex.Match(messageText, @"/(elistships|extendedlistships|listships2)(\s{1,}(?<Key>.+)|)", RegexOptions.IgnoreCase);
+            if (match.Success)
             {
-                string shipName = null;
-                var match = Regex.Match(messageText, @"/listships2\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    shipName = match.Groups["Key"].Value;
-                }
+                shipName = match.Groups["Key"].Value;
 
                 var currentShipList = Support.FindShipsByName(shipName);
                 var position = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
