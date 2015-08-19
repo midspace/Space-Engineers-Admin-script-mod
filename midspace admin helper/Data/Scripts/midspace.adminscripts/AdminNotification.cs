@@ -25,7 +25,7 @@ namespace midspace.adminscripts
         {
             // build the message's content
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine(string.Format("An exception occurred in Midspace's admin helper commands. Please inform the mod's creators about it. You will find a file named \"{0}\" at the local storage of the mod.", Logger.ErrorFileName));
+            builder.AppendLine(string.Format("An exception occurred in Midspace's admin helper commands. Please inform the mod's creators about it. You will find a file named \"{0}\" at the local storage of the mod ({1}\\316190120.sbm_midspace.adminscripts).", Logger.ErrorFileName, MyAPIGateway.Utilities.GamePaths.ModsPath));
             builder.AppendLine("To share the file on the steam workshop, just paste the file's content at pastebin.com and provide the link to it. Thanks a lot!");
             builder.AppendLine("");
             builder.AppendLine("-----");

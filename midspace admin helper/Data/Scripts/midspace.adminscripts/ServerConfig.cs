@@ -412,8 +412,12 @@ If you can't find the error, simply delete the file. The server will create a ne
             TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(GcLogFileName, typeof(ServerConfig));
             var text = reader.ReadToEnd();
             reader.Close();
+            
+            if (!string.IsNullOrEmpty(text))
+                ChatMessages = MyAPIGateway.Utilities.SerializeFromXML<List<ChatMessage>>(text);
 
-            ChatMessages = MyAPIGateway.Utilities.SerializeFromXML<List<ChatMessage>>(text);
+            if (ChatMessages == null)
+                ChatMessages = new List<ChatMessage>();
         }
 
         private void SaveGlobalChatLog()
