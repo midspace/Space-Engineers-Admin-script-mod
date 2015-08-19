@@ -23,6 +23,9 @@ namespace midspace.adminscripts.Messages
                 case ConfigAction.LogPrivateMessages:
                     CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
                     break;
+                case ConfigAction.Show:
+                    Config.Show();
+                    break;
             }
         }
 
@@ -42,6 +45,14 @@ namespace midspace.adminscripts.Messages
                     ChatCommandLogic.Instance.ServerCfg.UpdateAdminLevel(Config.AdminLevel);
                     ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Updated default admin level to {0}. Please note that you have to use '/cfg save' to save it permanently.", Config.AdminLevel));
                     break;
+                case ConfigAction.NoGrindIndestructible:
+                    ChatCommandLogic.Instance.ServerCfg.SetNoGrindIndestructible(Config.NoGrindIndestructible);
+                    ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Set NoGrindIndestructible to {0}. ", Config.NoGrindIndestructible));
+                    break;
+                case ConfigAction.Show:
+                    Config = ChatCommandLogic.Instance.ServerCfg.Config;
+                    ConnectionHelper.SendMessageToPlayer(SenderSteamId, this);
+                    break;
             }
         }
     }
@@ -51,6 +62,8 @@ namespace midspace.adminscripts.Messages
         Reload,
         Save,
         AdminLevel,
-        LogPrivateMessages
+        LogPrivateMessages,
+        NoGrindIndestructible,
+        Show
     }
 }

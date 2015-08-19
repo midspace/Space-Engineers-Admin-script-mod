@@ -43,11 +43,16 @@ Available settings:
 - 'adminlevel'
     Sets the default level for admins to a certain level. Please note that levels that were already set won't be changed.
 
+- 'ngi' or 'NoGrindIndestructible'
+    Determines if it is allowed to grind ships that are set indestructible.
+
 Available actions:
 - 'save':
     Saves the config to the files.
 - 'reload':
     Reloads the config from the files.
+- 'show':
+    Shows the config.
 
 Examples:
 - '/cfg motdhl Welcome on the server!' -> This will set the headline of the motd to 'Welcome on the server!'. Note that it won't be saved until the server shuts down even though it is active. If someone reloads the config before it is saved (manually or at shutdown) the headline will be changed back to that one in the config file.
@@ -86,14 +91,22 @@ Examples:
                         if (bool.TryParse(value, out motdsic))
                             ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { ShowInChat = motdsic, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.ShowInChat });
                         else
-                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
+                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be eiter true or false.", new object[] { value, key });
                         break;
                     case "adminlevel":
                         uint adminLevel;
                         if (uint.TryParse(value, out adminLevel))
                             ConnectionHelper.SendMessageToServer(new MessageConfig() { Config = new ServerConfigurationStruct() { AdminLevel = adminLevel }, Action = ConfigAction.AdminLevel });
                         else
-                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}.", new object[] { value, key });
+                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be an integer higher or equal to {2} and lower or equal to {3}.", new object[] { value, key, uint.MinValue, uint.MaxValue });
+                        break;
+                    case "nogrindindestructible":
+                    case "ngi":
+                        bool noGrindIndestructible;
+                        if (bool.TryParse(value, out noGrindIndestructible))
+                            ConnectionHelper.SendMessageToServer(new MessageConfig() { Config = new ServerConfigurationStruct() { NoGrindIndestructible = noGrindIndestructible }, Action = ConfigAction.NoGrindIndestructible });
+                        else
+                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be eiter true or false.", new object[] { value, key });
                         break;
                     case "save":
                         ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Save });
@@ -101,9 +114,12 @@ Examples:
                     case "reload":
                         ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Reload });
                         break;
+                    case "show":
+                        ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Show });
+                        break;
                     default:
                         MyAPIGateway.Utilities.ShowMessage("Config", "Invalid setting or action. Type '/help cfg' for help.");
-                        MyAPIGateway.Utilities.ShowMessage("Available actions and settings:", "motd, motdhl, motdsic, adminlevel, save, reload");
+                        MyAPIGateway.Utilities.ShowMessage("Available actions and settings:", "adminlevel, motd, motdhl, motdsic, ngi, save, show, reload");
                         break;
                 }
 

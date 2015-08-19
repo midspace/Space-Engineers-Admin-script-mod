@@ -18,7 +18,7 @@ namespace midspace.adminscripts.Messages
             if (ServerConfig.IsServerAdmin(SenderSteamId))
                 AdminNotificator.SendEnqueuedNotifications(SenderSteamId);
 
-            if (!ServerConfig.IsServerAdmin(SenderSteamId) && ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Any(p => p.SteamId == SenderSteamId))
+            if (!ServerConfig.IsServerAdmin(SenderSteamId) && ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.Any(p => p.SteamId == SenderSteamId))
                 ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageForceDisconnect() { SteamId = SenderSteamId });
 
             ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageConfig()

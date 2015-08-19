@@ -30,7 +30,7 @@ namespace midspace.adminscripts.Messages
 
             if (Ban)
             {
-                ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Add(new Player()
+                ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.Add(new Player()
                 {
                     SteamId = SteamId,
                     PlayerName = player.DisplayName

@@ -1,6 +1,7 @@
 ﻿using midspace.adminscripts.Messages;
 using midspace.adminscripts.Messages.Permissions;
 using ProtoBuf;
+using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,6 @@ namespace midspace.adminscripts
 
         private List<ChatCommand> ChatCommands;
         private List<ChatMessage> ChatMessages = new List<ChatMessage>();
-
         private List<PrivateConversation> PrivateConversations = new List<PrivateConversation>();
 
         //hotlists
@@ -45,7 +45,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Used for saving and loading things.
         /// </summary>
-        private ServerConfigurationStruct Config;
+        private ServerConfigurationStruct m_Config;
         private Permissions Permissions;
 
         /// <summary>
@@ -57,6 +57,7 @@ namespace midspace.adminscripts
         /// Saves the log at the same interval as the session saves...
         /// </summary>
         private Timer LogSaveTimer = null;
+        private bool RegisteredIndestructibleDamageHandler = false;
 
         public ServerConfig(List<ChatCommand> commands)
         {
@@ -101,13 +102,18 @@ namespace midspace.adminscripts
                 LogSaveTimer.Elapsed += SaveTimer_Elapsed;
                 LogSaveTimer.Start();
             }
-
+            
+            if (Config.NoGrindIndestructible)
+            {
+                MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, IndestructibleDamageHandler);
+                RegisteredIndestructibleDamageHandler = true;
+                Logger.Debug("Registered indestructible damage handler.");
+            }
+            
             Logger.Debug("Config loaded.");
         }
 
-        public uint AdminLevel { get { return Config.AdminLevel; } set { Config.AdminLevel = value; } }
-
-        public List<Player> ForceBannedPlayers { get { return Config.ForceBannedPlayers; } }
+        public ServerConfigurationStruct Config { get { return m_Config; } private set { m_Config = value; } }
 
         public void Save()
         {
@@ -217,6 +223,30 @@ If you can't find the error, simply delete the file. The server will create a ne
             writer.Write(MyAPIGateway.Utilities.SerializeToXML(Config));
             writer.Flush();
             writer.Close();
+        }
+
+        private void IndestructibleDamageHandler(object target, ref MyDamageInformation info)
+        {
+            if (Config.NoGrindIndestructible && target is IMySlimBlock)
+            {
+                var block = target as IMySlimBlock;
+                var grid = block.CubeGrid;
+
+                if (grid != null && !((MyObjectBuilder_CubeGrid)grid.GetObjectBuilder()).DestructibleBlocks)
+                    info.Amount = 0;
+            }
+        }
+
+        public void SetNoGrindIndestructible(bool noGrindIndestructible)
+        {
+            Config.NoGrindIndestructible = noGrindIndestructible;
+
+            if (noGrindIndestructible && !RegisteredIndestructibleDamageHandler)
+            {
+                MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, IndestructibleDamageHandler);
+                RegisteredIndestructibleDamageHandler = true;
+                Logger.Debug("Registered indestructible damage handler.");
+            }
         }
 
         #endregion
@@ -1366,6 +1396,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         public List<Player> ForceBannedPlayers;
         public uint AdminLevel;
         public bool EnableLog;
+        public bool NoGrindIndestructible;
 
         public ServerConfigurationStruct()
         {
@@ -1378,6 +1409,23 @@ If you can't find the error, simply delete the file. The server will create a ne
             ForceBannedPlayers = new List<Player>();
             AdminLevel = ChatCommandSecurity.Admin;
             EnableLog = false;
+            NoGrindIndestructible = false;
+        }
+
+        public void Show()
+        {
+            StringBuilder description = new StringBuilder();
+            description.AppendFormat(@"Settings:
+
+  motd headline: {0}
+  motd show in chat: {1}
+  log private messages: {2}
+  admin level: {3}
+  enable log: {4}
+  no grind indestructible: {5}", MotdHeadLine, MotdShowInChat, LogPrivateMessages, AdminLevel, EnableLog, NoGrindIndestructible);
+
+
+            MyAPIGateway.Utilities.ShowMissionScreen("Server Config", "", null, description.ToString());
         }
     }
 

@@ -19,10 +19,10 @@ namespace midspace.adminscripts.Messages
 
         public override void ProcessServer()
         {
-            Player bannedPlayer = ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.FirstOrDefault(p => p.PlayerName.Equals(PlayerName, StringComparison.InvariantCultureIgnoreCase));
+            Player bannedPlayer = ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.FirstOrDefault(p => p.PlayerName.Equals(PlayerName, StringComparison.InvariantCultureIgnoreCase));
             if (bannedPlayer.SteamId != 0)
             {
-                ChatCommandLogic.Instance.ServerCfg.ForceBannedPlayers.Remove(bannedPlayer);
+                ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.Remove(bannedPlayer);
                 ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Pardoned player {0}", bannedPlayer.PlayerName));
             }
             else
