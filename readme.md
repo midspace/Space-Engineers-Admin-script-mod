@@ -8,7 +8,7 @@ of space works. Players build space ships and space stations of various sizes an
 utilization (civil and military), pilot ships and perform asteroid mining.
 
 More details about the "Space Engineeers" game is available here:
-[www.spaceengineersgame](http://www.spaceengineersgame.com/)
+[www.spaceengineersgame.com](http://www.spaceengineersgame.com/)
 
 
 This mod is published and publicly available on the [Steam Community here](
