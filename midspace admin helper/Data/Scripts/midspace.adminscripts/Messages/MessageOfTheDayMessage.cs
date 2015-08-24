@@ -39,7 +39,10 @@ namespace midspace.adminscripts.Messages
         {
             //update the fields
             if (FieldsToUpdate.HasFlag(ChangedFields.Content))
+            {
                 CommandMessageOfTheDay.Content = Content;
+                CommandMessageOfTheDay.ReplaceUserVariables();
+            }
 
             if (FieldsToUpdate.HasFlag(ChangedFields.HeadLine))
                 CommandMessageOfTheDay.HeadLine = HeadLine;

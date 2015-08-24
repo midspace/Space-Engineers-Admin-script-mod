@@ -56,5 +56,11 @@ namespace midspace.adminscripts
             else
                 MyAPIGateway.Utilities.ShowMessage("Motd", Content);
         }
+        
+        public static void ReplaceUserVariables()
+        {
+            Content = Content.Replace("%USER_NAME%", MyAPIGateway.Session.Player.DisplayName);
+        }
+        
     }
 }
