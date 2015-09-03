@@ -20,7 +20,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/listbots", "Displays the current bots.");
+            MyAPIGateway.Utilities.ShowMessage("/listbots", "Displays the current NPC entities.");
         }
 
         public override bool Invoke(string messageText)
@@ -39,7 +39,7 @@
                     var steamPlayer = players.FirstOrDefault(p => p.PlayerID == identity.PlayerId);
                     if (steamPlayer == null)
                     {
-                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), string.Format("Bot '{0}'", identity.DisplayName));
+                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), "Bot '{0}'", identity.DisplayName);
                         BotCache.Add(identity);
                     }
 
