@@ -407,6 +407,13 @@ namespace midspace.adminscripts
             return true;
         }
 
+        public static IMyPlayer Player(this IMyIdentity identity)
+        {
+            var listplayers = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == identity.PlayerId);
+            return listplayers.FirstOrDefault();
+        }
+
         /// <summary>
         /// Creates the objectbuilder in game, and syncs it to the server and all clients.
         /// </summary>
