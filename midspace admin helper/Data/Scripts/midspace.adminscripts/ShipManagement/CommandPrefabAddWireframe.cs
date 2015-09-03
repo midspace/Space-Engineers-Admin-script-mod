@@ -62,8 +62,11 @@
                         // Use the cubeGrid BoundingBox to determine distance to place.
                         Vector3I min = Vector3I.MaxValue;
                         Vector3I max = Vector3I.MinValue;
-                        prefab.CubeGrids[0].CubeBlocks.ForEach(b => min = Vector3I.Min(b.Min, min));
-                        prefab.CubeGrids[0].CubeBlocks.ForEach(b => max = Vector3I.Max(b.Min, max));
+                        foreach (var b in prefab.CubeGrids[0].CubeBlocks)
+                        {
+                            min = Vector3I.Min(b.Min, min);
+                            max = Vector3I.Max(b.Min, max);
+                        }
                         var size = new Vector3(max - min);
                         var distance = (Math.Sqrt(size.LengthSquared()) * prefab.CubeGrids[0].GridSizeEnum.ToGridLength() / 2) + 2;
                         var position = worldMatrix.Translation + worldMatrix.Forward * distance; // offset the position out in front of player by 2m.

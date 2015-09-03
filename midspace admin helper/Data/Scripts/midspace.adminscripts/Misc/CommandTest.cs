@@ -139,6 +139,8 @@
                 var ed = ((MyObjectBuilder_EnvironmentDefinition)MyDefinitionManager.Static.EnvironmentDefinition.GetObjectBuilder());
                 MyAPIGateway.Utilities.ShowMessage("LargeShipMaxSpeed", "{0}", ed.LargeShipMaxSpeed);
                 MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1} {2}", ed.SunDirection.X, ed.SunDirection.Y, ed.SunDirection.Z);
+                MyAPIGateway.Utilities.ShowMessage("ViewDistance", "{0:N}m", MyAPIGateway.Session.SessionSettings.ViewDistance);
+                
 
                 // Environment is null for some reason.
                 //var environment = MyAPIGateway.Session.GetSector().Environment;
