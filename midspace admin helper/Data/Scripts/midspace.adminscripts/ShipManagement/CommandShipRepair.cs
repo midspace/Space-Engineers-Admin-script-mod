@@ -79,7 +79,8 @@
 
         private void RepairShip(IMyEntity shipEntity)
         {
-            var gridObjectBuilder = shipEntity.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
+            // We SHOULD NOT make any changes directly to the prefab, we need to make a Value copy using Clone(), and modify that instead.
+            var gridObjectBuilder = shipEntity.GetObjectBuilder().Clone() as MyObjectBuilder_CubeGrid;
 
             shipEntity.Physics.Deactivate();
 
