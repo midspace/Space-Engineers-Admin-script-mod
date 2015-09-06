@@ -50,7 +50,7 @@
                         grid.SetPosition(grid.GetPosition() + worldOffset);
                 }
 
-                //save teleport in history
+                // save teleport in history
                 CommandTeleportBack.SaveTeleportInHistory(currentPosition);
                 return true;
             }

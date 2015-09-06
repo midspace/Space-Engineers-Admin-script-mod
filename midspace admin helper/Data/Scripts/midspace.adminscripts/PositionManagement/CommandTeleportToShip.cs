@@ -5,6 +5,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRageMath;
     using VRage.ModAPI;
 
     public class CommandTeleportToShip : ChatCommand
@@ -53,40 +54,29 @@
                     return true;
                 }
 
-                if (MyAPIGateway.Session.Player.Controller.ControlledEntity is IMyCubeBlock)
+                Action<Vector3D> saveTeleportBack = delegate (Vector3D position)
                 {
-                    Action emptySourceMsg = delegate ()
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Source entity no longer exists.");
-                    };
+                    // save teleport in history
+                    CommandTeleportBack.SaveTeleportInHistory(position);
+                };
 
-                    Action emptyTargetMsg = delegate ()
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Target entity no longer exists.");
-                    };
-
-                    Action noSafeLocationMsg = delegate ()
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
-                    };
-
-
-                    return
-                        Support.MoveTo(
-                            MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetTopMostParent(), ship,
-                            true, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
-                }
-
-                // Move the player only.
-                var cockpits = ship.FindWorkingCockpits();
-                if (cockpits.Length > 0 && ((IMyCubeGrid)ship).GridSizeEnum != Sandbox.Common.ObjectBuilders.MyCubeSize.Small)
+                Action emptySourceMsg = delegate ()
                 {
-                    return Support.MovePlayerToCube(MyAPIGateway.Session.Player, (IMyEntity)cockpits[0]);
-                }
-                else
+                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Source player no longer exists.");
+                };
+
+                Action emptyTargetMsg = delegate ()
                 {
-                    return Support.MovePlayerToShipGrid(MyAPIGateway.Session.Player, ship);
-                }
+                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Target ship no longer exists.");
+                };
+
+                Action noSafeLocationMsg = delegate ()
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                };
+
+                return Support.MoveTo(MyAPIGateway.Session.Player, ship, true,
+                           saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
             }
 
             return false;

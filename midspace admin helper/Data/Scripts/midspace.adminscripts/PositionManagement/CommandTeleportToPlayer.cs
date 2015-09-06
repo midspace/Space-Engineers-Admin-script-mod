@@ -62,65 +62,28 @@
                     return true;
                 }
 
-
-                if (MyAPIGateway.Session.Player.Controller.ControlledEntity is IMyCubeBlock)
+                Action<Vector3D> saveTeleportBack = delegate (Vector3D position)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function not complete. Cannot transport piloted Ship to another player.");
-                    return true;
-                }
-                else
+                    // save teleport in history
+                    CommandTeleportBack.SaveTeleportInHistory(position);
+                };
+
+                Action emptySourceMsg = delegate ()
                 {
-                    if (player.Controller.ControlledEntity is IMyCubeBlock)
-                    {
-                        var cockpit = (IMyCubeBlock)player.Controller.ControlledEntity;
+                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Source entity no longer exists.");
+                };
 
-                        var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpit.BlockDefinition);
-                        var cockpitDefintion = definition as MyCockpitDefinition;
-                        var remoteDefintion = definition as MyRemoteControlDefinition;
+                Action emptyTargetMsg = delegate ()
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Target entity no longer exists.");
+                };
 
-                        // target is a pilot in cockpit.
-                        if (cockpitDefintion != null)
-                        {
-                            if (cockpit.CubeGrid.GridSizeEnum != Sandbox.Common.ObjectBuilders.MyCubeSize.Small)
-                            {
-                                Support.MovePlayerToCube(MyAPIGateway.Session.Player, player.Controller.ControlledEntity.Entity);
-                            }
-                            else
-                            {
-                                return Support.MovePlayerToShipGrid(MyAPIGateway.Session.Player, cockpit.CubeGrid);
-                            }
-                            
-                            return true;
-                        }
+                Action noSafeLocationMsg = delegate ()
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                };
 
-                        if (remoteDefintion != null)
-                        {
-                            MyAPIGateway.Utilities.ShowMessage("Failed", string.Format("Cannot determine player location. Is Remote controlling '{0}'", cockpit.CubeGrid.DisplayName));
-
-                            // where is the player? in a cockpit/chair or freefloating?
-
-                            // player.GetPosition() is actually the remote ship location.
-
-                            //var freePos = MyAPIGateway.Entities.FindFreePlace(player.GetPosition(), (float)player.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
-                            //if (!freePos.HasValue)
-                            //{
-                            //    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
-                            //    return true;
-                            //}
-
-                            //MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.SetPosition(freePos.Value);
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        // target is a player only.
-                        Support.MovePlayerToPlayer(MyAPIGateway.Session.Player, player);
-                        return true;
-                    }
-                }
-
-                MyAPIGateway.Utilities.ShowMessage("Failed", "Unable to determine player location.");
+                Support.MoveTo(MyAPIGateway.Session.Player, player, true, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                 return true;
             }
 
