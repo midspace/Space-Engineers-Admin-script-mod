@@ -225,6 +225,21 @@ namespace midspace.adminscripts
             return new IMyControllableEntity[0];
         }
 
+        public static bool IsShipControlEnabled(this Sandbox.ModAPI.Ingame.IMyCubeBlock cockpitBlock)
+        {
+            var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpitBlock.BlockDefinition);
+            var cockpitDefintion = definition as MyCockpitDefinition;
+            var remoteDefintion = definition as MyRemoteControlDefinition;
+
+            if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
+                return true;
+            if (remoteDefintion != null && remoteDefintion.EnableShipControl)
+                return true;
+
+            // is Passenger chair.
+            return false;
+        }
+
         public static void EjectControllingPlayers(this IMyCubeGrid cubeGrid)
         {
             var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
@@ -295,27 +310,6 @@ namespace midspace.adminscripts
             // Otherwise Treat everyone as Normal Player.
 
             return false;
-        }
-
-        public static bool IsValidCockpit(Sandbox.ModAPI.Ingame.IMySlimBlock block)
-        {
-            if (block.FatBlock == null)
-                return false;
-
-            if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit)
-                || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RemoteControl))
-            {
-                var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(block.FatBlock.BlockDefinition);
-                var cockpitDefintion = definition as MyCockpitDefinition;
-                if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
-                    return true;
-
-                var remoteDefintion = definition as MyRemoteControlDefinition;
-                if (remoteDefintion != null && remoteDefintion.EnableShipControl)
-                    return true;
-            }
-
-            return false; // Player cannot be Passenger!
         }
 
         /// <summary>

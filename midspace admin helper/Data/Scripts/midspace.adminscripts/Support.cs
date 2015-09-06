@@ -859,22 +859,38 @@ namespace midspace.adminscripts
                 return MoveTo(sourcePlayer.Controller.ControlledEntity.Entity.GetTopMostParent(), target, safely, updatedPosition, emptySourceMessage, emptyTargetMessage, noSafeLocationMessage);
             }
 
+            // Player is free floating, we move the player only.
             if (target is IMyCubeGrid)
             {
-                // Move the player only.
-                var cockpits = target.FindWorkingCockpits();
-                // Station or Large ship grids.
-                if (cockpits.Length > 0 && ((IMyCubeGrid)target).GridSizeEnum != MyCubeSize.Small)
-                {
-                    // TODO: find primary cockpit.
-                    //var grid = (Sandbox.Game.Entities.MyCubeGrid)cubeGrid;
+                var grid = (Sandbox.Game.Entities.MyCubeGrid)target;
 
-                    //if (grid.HasMainCockpit())
-                    //    return (IMyControllableEntity)grid.MainCockpit;
-                    return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)cockpits[0], safely, updatedPosition, noSafeLocationMessage);
+                // Station or Large ship grids.
+                if (((IMyCubeGrid)target).GridSizeEnum != MyCubeSize.Small)
+                {
+                    IMyControllableEntity targetCockpit = null;
+
+                    if (grid.HasMainCockpit())
+                    {
+                        // Select the main cockpit.
+                        targetCockpit = (IMyControllableEntity)grid.MainCockpit;
+                    }
+                    else
+                    {
+                        var cockpits = target.FindWorkingCockpits();
+                        var operationalCockpit = cockpits.FirstOrDefault(c => ((Sandbox.ModAPI.Ingame.IMyCockpit)c).IsShipControlEnabled());
+
+                        if (operationalCockpit != null)
+                            // find a cockpit which is not a passenger seat.
+                            targetCockpit = operationalCockpit;
+                        else if (cockpits.Length > 0)
+                            targetCockpit = cockpits[0];
+                    }
+
+                    if (targetCockpit != null)
+                        return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)targetCockpit , safely, updatedPosition, noSafeLocationMessage);
                 }
 
-                // Small ship grids.
+                // Small ship grids. Also the fallback if a large ship does not have a cockpit.
                 return MovePlayerToShipGrid(sourcePlayer, (IMyCubeGrid)target, safely, updatedPosition, noSafeLocationMessage);
             }
 
@@ -1042,9 +1058,7 @@ namespace midspace.adminscripts
 
         public static bool MovePlayerToShipGrid(IMyPlayer sourcePlayer, IMyCubeGrid targetGrid, bool safely, Action<Vector3D> updatedPosition, Action noSafeLocationMessage)
         {
-            var destination = targetGrid.WorldAABB.GetCorners()[0];
-
-            var currentPosition = sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
+            Vector3D destination;
 
             if (safely)
             {
@@ -1061,6 +1075,12 @@ namespace midspace.adminscripts
                 var offset = sourcePlayer.Controller.ControlledEntity.Entity.WorldAABB.Center - sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
                 destination = freePos.Value - offset;
             }
+            else
+            {
+                destination = targetGrid.WorldAABB.GetCorners()[0];
+            }
+
+            var currentPosition = sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
 
             sourcePlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity = targetGrid.Physics.LinearVelocity;
             sourcePlayer.Controller.ControlledEntity.Entity.SetPosition(destination);
@@ -1140,8 +1160,12 @@ namespace midspace.adminscripts
             {
                 var asteroid = (IMyVoxelMap)targetVoxel;
                 position = asteroid.PositionLeftBottomCorner;
-                // TODO: have the player facing the asteroid.
-                matrix = MatrixD.CreateWorld(position, Vector3D.Forward, Vector3D.Up);
+                // have the player facing the asteroid.
+                var fwd = asteroid.WorldMatrix.Translation - asteroid.PositionLeftBottomCorner;
+                fwd.Normalize();
+                // calculate matrix to orient player to asteroid center.
+                var up = Vector3D.CalculatePerpendicularVector(fwd);
+                matrix = MatrixD.CreateWorld(position, fwd, up);
             }
             else if (targetVoxel is Sandbox.Game.Entities.MyPlanet)
             {
