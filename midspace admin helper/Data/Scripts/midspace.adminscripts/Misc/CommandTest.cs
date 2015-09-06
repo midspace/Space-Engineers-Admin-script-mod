@@ -513,6 +513,7 @@
 
             #region test10
 
+            // attached grid count test.
             if (messageText.Equals("/test10", StringComparison.InvariantCultureIgnoreCase))
             {
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false) as Sandbox.ModAPI.IMyCubeGrid;
@@ -523,10 +524,21 @@
                 var cubeGrid = (Sandbox.ModAPI.IMyCubeGrid)entity;
                 var grids = cubeGrid.GetAttachedGrids();
 
-                MyAPIGateway.Utilities.ShowMessage("Attached Count", string.Format("{0}", grids.Count));
+                MyAPIGateway.Utilities.ShowMessage("Attached Count", "{0}", grids.Count);
+                foreach (var grid in grids)
+                    MyAPIGateway.Utilities.ShowMessage("Attached", "Id:{0}", grid.EntityId);
 
-                //foreach (var grid in grids)
-                //    MyAPIGateway.Utilities.ShowMessage("Attached", string.Format("{0}", grid.EntityId));
+
+                // Terminal Groups....
+                var terminalsys = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid);
+                var groups = new List<Sandbox.ModAPI.Ingame.IMyBlockGroup>();
+                terminalsys.GetBlockGroups(groups); // may abide by the owner rules?
+
+                MyAPIGateway.Utilities.ShowMessage("BlockGroup Count", "{0}", groups.Count);
+                foreach (var group in groups)
+                    MyAPIGateway.Utilities.ShowMessage("BlockGroup", "name:{0} blocks:{1} Id:{2}", group.Name, group.Blocks.Count, group.Blocks.Count > 0 ? group.Blocks[0].CubeGrid.EntityId : 0);
+
+                //MyAPIGateway.Utilities.ShowMessage("Grid count", string.Format("{0} {1} {2}", cubeGrid.DisplayName, terminalsys.Blocks.Count, terminalsys.BlockGroups.Count));
 
                 return true;
             }
@@ -665,10 +677,10 @@
 
             #region test14
 
-            // Tag every floating object in player GPS.
             if (messageText.Equals("/test14", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entites = new HashSet<IMyEntity>();
+                // Tag every floating object in player GPS.
+                //var entites = new HashSet<IMyEntity>();
                 //MyAPIGateway.Entities.GetEntities(entites, e => (e is Sandbox.ModAPI.IMyFloatingObject));
 
                 //foreach (var entity in entites)
@@ -678,6 +690,8 @@
                 //    MyAPIGateway.Session.GPS.AddLocalGps(gps);
                 //}
 
+
+                // Tag the Head position, and current position of the player.
                 var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false, false); // dead center of player cross hairs.
 
                 var gps = MyAPIGateway.Session.GPS.Create("GetHeadMatrix", "", worldMatrix.Translation, true, false);
@@ -685,7 +699,6 @@
 
                 gps = MyAPIGateway.Session.GPS.Create("GetPosition", "", MyAPIGateway.Session.Player.GetPosition(), true, false);
                 //MyAPIGateway.Session.GPS.AddLocalGps(gps);
-
 
                 var pos1 = worldMatrix.Translation;
                 var pos2 = MyAPIGateway.Session.Player.GetPosition();
