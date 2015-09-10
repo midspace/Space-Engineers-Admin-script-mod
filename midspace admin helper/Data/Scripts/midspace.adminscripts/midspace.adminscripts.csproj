@@ -99,6 +99,7 @@
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />
     <Compile Include="PositionManagement\CommandSpeed.cs" />
+    <Compile Include="ShipManagement\CommandShipSwitch.cs" />
     <Compile Include="ShipManagement\CommandShipRepair.cs" />
     <Compile Include="ShipManagement\CommandShipDestructible.cs" />
     <Compile Include="UserCommands\CommandChatHistory.cs" />
