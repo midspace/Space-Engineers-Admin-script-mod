@@ -75,6 +75,7 @@
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
+    <Compile Include="Messages\Sync\MessageSyncGod.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />
     <Compile Include="Messages\MessagePardon.cs" />
     <Compile Include="Messages\MessageSave.cs" />
