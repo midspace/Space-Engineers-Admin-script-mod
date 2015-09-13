@@ -31,6 +31,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageSyncClaim))]
     [XmlInclude(typeof(MessageSyncEntity))]
     [XmlInclude(typeof(MessageSyncEntityPosition))]
+    [XmlInclude(typeof(MessageSyncGod))]
     [XmlInclude(typeof(MessageSyncSmite))]
     [XmlInclude(typeof(MessageSyncInvisible))]
     [ProtoContract]
