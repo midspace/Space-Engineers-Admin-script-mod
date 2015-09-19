@@ -111,6 +111,14 @@ namespace midspace.adminscripts
             base.UnloadData();
         }
 
+        public override void SaveData()
+        {
+            base.SaveData();
+
+            if (ServerCfg != null)
+                ServerCfg.Save();
+        }
+
         #endregion
 
         private void Init()
@@ -286,7 +294,6 @@ namespace midspace.adminscripts
 
             if (ServerCfg != null)
             { //only for clients it is null
-                ServerCfg.Close();
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
                 Logger.Debug("Unregistered MessageHandler");
             }

@@ -53,10 +53,6 @@ namespace midspace.adminscripts
         /// </summary>
         public static bool ServerIsClient = true;
 
-        /// <summary>
-        /// Saves the log at the same interval as the session saves...
-        /// </summary>
-        private Timer LogSaveTimer = null;
         private bool RegisteredIndestructibleDamageHandler = false;
 
         public ServerConfig(List<ChatCommand> commands)
@@ -95,14 +91,6 @@ namespace midspace.adminscripts
                 LoadOrCreatePmLog();
             }
 
-            if (MyAPIGateway.Session.AutoSaveInMinutes > 0)
-            {
-                double autotime = Math.Max(MyAPIGateway.Session.AutoSaveInMinutes * 60 * 1000, 300000d);
-                LogSaveTimer = new Timer(autotime);
-                LogSaveTimer.Elapsed += SaveTimer_Elapsed;
-                LogSaveTimer.Start();
-            }
-            
             if (Config.NoGrindIndestructible)
             {
                 MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, IndestructibleDamageHandler);
@@ -132,19 +120,6 @@ namespace midspace.adminscripts
             Logger.Debug("Config saved.");
         }
 
-        public void Close()
-        {
-            if (LogSaveTimer != null)
-            {
-                // Stop the timer first before Save, in case it calls Save in the split second between checks.
-                LogSaveTimer.Stop();
-                LogSaveTimer.Elapsed -= SaveTimer_Elapsed;
-                LogSaveTimer.Close();
-            }
-
-            Save();
-        }
-
         public void ReloadConfig()
         {
             LoadConfig();
@@ -157,11 +132,6 @@ namespace midspace.adminscripts
             if (Config.LogPrivateMessages)
                 SavePmLog();
             Logger.Debug("Logs saved.");
-        }
-
-        void SaveTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            SaveLogs();
         }
 
         #region server config
@@ -413,7 +383,6 @@ If you can't find the error, simply delete the file. The server will create a ne
                     Messages = new List<PrivateMessage>(new PrivateMessage[] { pm })
                 });
             }
-            //TODO save the log every 5 minutes
         }
 
         private void SavePmLog()
