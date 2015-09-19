@@ -16,6 +16,9 @@
         // Cannot use namespace "Sandbox.Game.Localization", as it's not whitelisted.
         //MyStringId WorldSaved = MySpaceTexts.WorldSaved;
 
+        // MySpaceTexts is not allowed in scripts. Last checked in version 01.100.024.
+        //var test = MyTexts.GetString(Sandbox.Game.Localization.MySpaceTexts.WorldSettings_Description);
+
         // Game resources.
         public const string WorldSaved = "WorldSaved";
 

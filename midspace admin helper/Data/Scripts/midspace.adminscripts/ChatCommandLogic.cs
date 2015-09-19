@@ -205,6 +205,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandGodMode());
             commands.Add(new CommandHeading());
             commands.Add(new CommandHelloWorld());
+            commands.Add(new CommandSettings());
             commands.Add(new CommandHelp());
             commands.Add(new CommandIdentify());
             commands.Add(new CommandDetail());

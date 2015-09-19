@@ -104,6 +104,7 @@
     <Compile Include="ShipManagement\CommandShipRepair.cs" />
     <Compile Include="ShipManagement\CommandShipDestructible.cs" />
     <Compile Include="UserCommands\CommandChatHistory.cs" />
+    <Compile Include="UserCommands\CommandSettings.cs" />
     <Compile Include="UserCommands\CommandPrivateMessage.cs" />
     <Compile Include="PlayerManagement\CommandPardon.cs" />
     <Compile Include="UserCommands\CommandMessageOfTheDay.cs" />
