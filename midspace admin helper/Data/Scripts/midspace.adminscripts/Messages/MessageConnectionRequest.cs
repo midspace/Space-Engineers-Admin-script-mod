@@ -14,7 +14,6 @@ namespace midspace.adminscripts.Messages
 
         public override void ProcessServer()
         {
-            var data = new Dictionary<string, string>();
             if (ServerConfig.IsServerAdmin(SenderSteamId))
                 AdminNotificator.SendEnqueuedNotifications(SenderSteamId);
 

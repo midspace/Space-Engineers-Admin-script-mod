@@ -1,4 +1,6 @@
-﻿namespace midspace.adminscripts
+﻿using Sandbox.Common;
+
+namespace midspace.adminscripts
 {
     using System;
 
@@ -17,14 +19,14 @@
         public override void Help(bool brief)
         {
             if (brief)
-                MyAPIGateway.Utilities.ShowMessage("/save <option>", "Saves the active game to the local computer or saves the game on the server. Options: server, s, local, l.");
+                MyAPIGateway.Utilities.ShowMessage("/save <option> [customSaveName]", "Saves the active game to the local computer or saves the game on the server. Options: server, s, local, l.");
             else
             {
                 StringBuilder description = new StringBuilder();
                 description.Append(@"This command saves the active game to the local computer or saves the game on the server. For showing the time since the last save no additional parameter is needed.
 
 Syntax:
-/save <option>
+/save <option> [customSaveName]
 
 Options:
 server, s, local, l
@@ -36,27 +38,43 @@ Example: /save server
 local or l:
 Saves the active game to your computer.
 Example: /save local
+
+Optionally you can save the world as [customSaveName]. Please note that the world might not appear in the 'Load World' screen if saved locally.
 ");
             }
         }
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/save(\s+(?<Key>.+)|)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/save(\s+(?<Key>[^\s]+)\s+(?<CustomName>.*))|(\s+(?<Key>.+)|)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
                 var setting = match.Groups["Key"].Value;
+                var customName = match.Groups["CustomName"].Value;
+
+                bool hasCustomName = !string.IsNullOrEmpty(customName);
+
                 if (!string.IsNullOrEmpty(setting))
                 {
                     if (setting.Equals("local", StringComparison.InvariantCultureIgnoreCase) || setting.Equals("l", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        MyAPIGateway.Session.Save();
-                        var msg = Localize.GetResource(Localize.WorldSaved, MyAPIGateway.Session.Name);
-                        MyAPIGateway.Utilities.ShowNotification(msg, 2500, Sandbox.Common.MyFontEnum.White);
+                        var msg = "";
+                        if (hasCustomName)
+                        {
+                            MyAPIGateway.Session.Save(customName);
+                            msg = String.Format("World saved as {0}", customName);
+                        }
+                        else
+                        {
+                            MyAPIGateway.Session.Save();
+                             msg = Localize.GetResource(Localize.WorldSaved, MyAPIGateway.Session.Name);
+                        }
+
+                        MyAPIGateway.Utilities.ShowNotification(msg, 2500);
                     }
                     else if (setting.Equals("server", StringComparison.InvariantCultureIgnoreCase) || setting.Equals("s", StringComparison.InvariantCultureIgnoreCase))
-                        ConnectionHelper.SendMessageToServer(new MessageSave());
+                        ConnectionHelper.SendMessageToServer(new MessageSave() { Name = hasCustomName ? customName : "" });
                     else
                         MyAPIGateway.Utilities.ShowMessage("Option", string.Format("{0} is no valid option. Options: server, s, local, l.", setting));
                 }
