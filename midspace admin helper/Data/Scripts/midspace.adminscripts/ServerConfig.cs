@@ -601,7 +601,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             return;
         }
 
-        private void SavePermissionFile(string customSaveName)
+        private void SavePermissionFile(string customSaveName = null)
         {
             string fileName;
 
