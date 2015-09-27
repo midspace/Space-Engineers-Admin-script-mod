@@ -1,3 +1,5 @@
+using midspace.adminscripts.Protection;
+
 namespace midspace.adminscripts
 {
     using System;
@@ -48,6 +50,7 @@ namespace midspace.adminscripts
         private static string[] _oreNames;
         private static List<string> _ingotNames;
         private static MyPhysicalItemDefinition[] _physicalItems;
+        private ProtectionHandler _protectionHandler;
 
         private Action<byte[]> MessageHandler = new Action<byte[]>(HandleMessage);
 
@@ -137,6 +140,8 @@ namespace midspace.adminscripts
             // Attach any other events here.
 
             ChatCommandService.Init();
+
+            //_protectionHandler = new ProtectionHandler();
 
             //MultiplayerActive is false when initializing host... extreamly weird
             if (MyAPIGateway.Multiplayer.MultiplayerActive || ServerCfg != null) //only need this in mp
@@ -295,6 +300,7 @@ namespace midspace.adminscripts
             if (ServerCfg != null)
             { //only for clients it is null
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
+                //_protectionHandler.Close();
                 Logger.Debug("Unregistered MessageHandler");
             }
 

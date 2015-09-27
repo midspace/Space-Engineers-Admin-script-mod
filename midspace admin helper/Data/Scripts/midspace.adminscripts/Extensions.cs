@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace midspace.adminscripts
 {
     using System;
@@ -483,6 +485,24 @@ namespace midspace.adminscripts
         public static double RoundUpToNearest(this double value, int scale)
         {
             return Math.Ceiling(value / scale) * scale;
+        }
+
+        /// <summary>
+        /// Replaces the chars from the given string that are not allowed for filenames with a whitespace.
+        /// </summary>
+        /// <returns>A string where the characters are replaced with a whitespace.</returns>
+        public static string ReplaceForbiddenChars(this string originalText)
+        {
+            if (String.IsNullOrWhiteSpace(originalText))
+                return originalText;
+
+            var convertedText = originalText;
+
+            foreach (char invalidChar in Path.GetInvalidFileNameChars())
+                if (convertedText.Contains(invalidChar))
+                    convertedText = convertedText.Replace(invalidChar, ' ');
+
+            return convertedText;
         }
     }
 }

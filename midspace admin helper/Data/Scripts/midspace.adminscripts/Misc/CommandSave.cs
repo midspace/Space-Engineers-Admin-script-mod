@@ -39,14 +39,14 @@ local or l:
 Saves the active game to your computer.
 Example: /save local
 
-Optionally you can save the world as [customSaveName]. Please note that the world might not appear in the 'Load World' screen if saved locally.
+Optionally you can save the world as [customSaveName]. Please note that the world might not appear in the 'Load World' screen if saved locally. Also the worldname itself is still the same, only the name of the save's folder is another one.
 ");
             }
         }
 
         public override bool Invoke(string messageText)
         {
-            var match = Regex.Match(messageText, @"/save(\s+(?<Key>[^\s]+)\s+(?<CustomName>.*))|(\s+(?<Key>.+)|)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/save(\s+((?<Key>[^\s]+)\s+(?<CustomName>.*)|(?<Key>.+))|)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -55,15 +55,20 @@ Optionally you can save the world as [customSaveName]. Please note that the worl
 
                 bool hasCustomName = !string.IsNullOrEmpty(customName);
 
+                if (hasCustomName)
+                    customName = customName.ReplaceForbiddenChars();
+
                 if (!string.IsNullOrEmpty(setting))
                 {
                     if (setting.Equals("local", StringComparison.InvariantCultureIgnoreCase) || setting.Equals("l", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        var msg = "";
+                        string msg;
                         if (hasCustomName)
                         {
                             MyAPIGateway.Session.Save(customName);
                             msg = String.Format("World saved as {0}", customName);
+                            if (ChatCommandLogic.Instance.ServerCfg != null)
+                                ChatCommandLogic.Instance.ServerCfg.Save(customName);
                         }
                         else
                         {

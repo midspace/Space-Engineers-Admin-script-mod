@@ -35,7 +35,7 @@ namespace midspace.adminscripts.Messages
             else
             {
                 MyAPIGateway.Session.Save(Name);
-                ChatCommandLogic.Instance.ServerCfg.SaveLogs();
+                ChatCommandLogic.Instance.ServerCfg.Save(Name);
                 ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Session saved as {0}.", Name));
             }
         }

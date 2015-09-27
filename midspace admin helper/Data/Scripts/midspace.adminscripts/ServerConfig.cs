@@ -1,6 +1,5 @@
 ﻿using midspace.adminscripts.Messages;
 using midspace.adminscripts.Messages.Permissions;
-using ProtoBuf;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using System;
@@ -8,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Timers;
 using System.Xml.Serialization;
 
 namespace midspace.adminscripts
@@ -103,7 +101,7 @@ namespace midspace.adminscripts
 
         public ServerConfigurationStruct Config { get { return m_Config; } private set { m_Config = value; } }
 
-        public void Save()
+        public void Save(string customSaveName = null)
         {
             //write values in cfg
             Config.MotdHeadLine = CommandMessageOfTheDay.HeadLine;
@@ -111,11 +109,15 @@ namespace midspace.adminscripts
 
             //cfg
             Config.WorldLocation = MyAPIGateway.Session.CurrentPath;
-            WriteConfig();
+
+            WriteConfig(customSaveName);
             //motd
             SaveMotd();
 
-            SaveLogs();
+            SaveLogs(customSaveName);
+
+            if (customSaveName != null)
+                SavePermissionFile(customSaveName);
 
             Logger.Debug("Config saved.");
         }
@@ -125,12 +127,12 @@ namespace midspace.adminscripts
             LoadConfig();
             LoadMotd();
         }
-        public void SaveLogs()
+        public void SaveLogs(string customSaveName = null)
         {
-            SaveGlobalChatLog();
+            SaveGlobalChatLog(customSaveName);
 
             if (Config.LogPrivateMessages)
-                SavePmLog();
+                SavePmLog(customSaveName);
             Logger.Debug("Logs saved.");
         }
 
@@ -187,9 +189,16 @@ If you can't find the error, simply delete the file. The server will create a ne
                 });
         }
 
-        private void WriteConfig()
+        private void WriteConfig(string customSaveName = null)
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(ConfigFileName, typeof(ServerConfig));
+            string fileName;
+
+            if (!string.IsNullOrEmpty(customSaveName))
+                fileName = String.Format(ConfigFileNameFormat, customSaveName);
+            else
+                fileName = ConfigFileName;
+
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
             writer.Write(MyAPIGateway.Utilities.SerializeToXML(Config));
             writer.Flush();
             writer.Close();
@@ -315,7 +324,8 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         private void SaveMotd()
         {
-            var file = string.Format(MotdFileNameFormat, ReplaceForbiddenChars(Config.MotdFileSuffix));
+            Config.MotdFileSuffix = Config.MotdFileSuffix.ReplaceForbiddenChars();
+            var file = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
 
             TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(file, typeof(ChatCommandLogic));
             if (CommandMessageOfTheDay.Content != null)
@@ -385,9 +395,16 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
         }
 
-        private void SavePmLog()
+        private void SavePmLog(string customSaveName = null)
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(PmLogFileName, typeof(ServerConfig));
+            string fileName;
+
+            if (!string.IsNullOrEmpty(customSaveName))
+                fileName = String.Format(PmLogFileNameFormat, customSaveName);
+            else
+                fileName = PmLogFileName;
+
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
             writer.Write(MyAPIGateway.Utilities.SerializeToXML<List<PrivateConversation>>(PrivateConversations));
             writer.Flush();
             writer.Close();
@@ -419,9 +436,16 @@ If you can't find the error, simply delete the file. The server will create a ne
                 ChatMessages = new List<ChatMessage>();
         }
 
-        private void SaveGlobalChatLog()
+        private void SaveGlobalChatLog(string customSaveName = null)
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(GcLogFileName, typeof(ServerConfig));
+            string fileName;
+
+            if (!string.IsNullOrEmpty(customSaveName))
+                fileName = String.Format(GcLogFileNameFormat, customSaveName);
+            else
+                fileName = GcLogFileName;
+
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
             writer.Write(MyAPIGateway.Utilities.SerializeToXML<List<ChatMessage>>(ChatMessages));
             writer.Flush();
             writer.Close();
@@ -577,9 +601,16 @@ If you can't find the error, simply delete the file. The server will create a ne
             return;
         }
 
-        private void SavePermissionFile()
+        private void SavePermissionFile(string customSaveName)
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(PermissionFileName, typeof(ServerConfig));
+            string fileName;
+
+            if (!string.IsNullOrEmpty(customSaveName))
+                fileName = String.Format(PermissionFileNameFormat, customSaveName);
+            else
+                fileName = PermissionFileName;
+
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
             writer.Write(MyAPIGateway.Utilities.SerializeToXML<Permissions>(Permissions));
             writer.Flush();
             writer.Close();
@@ -1298,29 +1329,6 @@ If you can't find the error, simply delete the file. The server will create a ne
         #endregion
 
         #region utils
-        /// <summary>
-        /// Replaces the chars from the given string that are not allowed for filenames with a whitespace.
-        /// </summary>
-        /// <param name="originalText">The text containing characters that shall not be used in filenames.</param>
-        /// <returns>A string where the characters are replaced with a whitespace.</returns>
-        public static string ReplaceForbiddenChars(string originalText)
-        {
-            if (string.IsNullOrWhiteSpace(originalText))
-                return originalText;
-
-            //could be done in one single line but like this we have a better overview
-            var convertedText = originalText.Replace('\\', ' ');
-            convertedText = convertedText.Replace('/', ' ');
-            convertedText = convertedText.Replace(':', ' ');
-            convertedText = convertedText.Replace('*', ' ');
-            convertedText = convertedText.Replace('?', ' ');
-            convertedText = convertedText.Replace('"', ' ');
-            convertedText = convertedText.Replace('<', ' ');
-            convertedText = convertedText.Replace('>', ' ');
-            convertedText = convertedText.Replace('|', ' ');
-
-            return convertedText;
-        }
 
         /// <summary>
         /// Determines if the client is an admin.
@@ -1371,7 +1379,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             //init default values
             WorldLocation = MyAPIGateway.Session.CurrentPath;
-            MotdFileSuffix = ServerConfig.ReplaceForbiddenChars(MyAPIGateway.Session.Name);
+            MotdFileSuffix =  MyAPIGateway.Session.Name.ReplaceForbiddenChars();
             MotdHeadLine = "";
             MotdShowInChat = false;
             LogPrivateMessages = true;
