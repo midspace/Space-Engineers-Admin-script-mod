@@ -22,11 +22,12 @@ namespace midspace.adminscripts
         {
             IMyEntity entity;
             double distance;
-            FindLookAtEntity(controlledEntity, out entity, out distance, findShips, findCubes, findPlayers, findAsteroids, findPlanets);
+            Vector3D hitPoint;
+            FindLookAtEntity(controlledEntity, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
         {
             const float range = 5000000;
             Matrix worldMatrix;
@@ -134,6 +135,7 @@ namespace midspace.adminscripts
             {
                 lookEntity = null;
                 lookDistance = 0;
+                hitPoint = Vector3D.Zero;
                 return;
             }
 
@@ -141,6 +143,7 @@ namespace midspace.adminscripts
             var item = list.OrderBy(f => f.Value).First();
             lookEntity = item.Key;
             lookDistance = item.Value;
+            hitPoint = startPosition + (Vector3D.Normalize(ray.Direction) * lookDistance);
         }
 
         public static HashSet<IMyEntity> FindShipsByName(string findShipName, bool searchTransmittingBlockNames = true, bool partNameMatch = true)

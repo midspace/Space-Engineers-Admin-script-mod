@@ -60,8 +60,7 @@
             var match = Regex.Match(messageText, @"/((invins)|(invinsert))\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
             if (match.Success && content == null)
             {
-                double distance;
-                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, out entity, out distance, false, true, false, false, false);
+                entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, true, false, false, false);
                 if (entity == null || !(entity is IMyInventoryOwner))
                 {
                     MyAPIGateway.Utilities.ShowMessage("Target", "Is not an inventory cube.");

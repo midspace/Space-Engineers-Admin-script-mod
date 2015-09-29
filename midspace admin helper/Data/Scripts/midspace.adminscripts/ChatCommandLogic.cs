@@ -1,16 +1,14 @@
-using midspace.adminscripts.Protection;
-
 namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Timers;
-
+    using midspace.adminscripts.Messages;
+    using midspace.adminscripts.Protection;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using midspace.adminscripts.Messages;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
@@ -218,6 +216,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandGodMode());
             commands.Add(new CommandHeading());
             commands.Add(new CommandHelloWorld());
+            commands.Add(new CommandLaserRangefinder());
             commands.Add(new CommandSettings());
             commands.Add(new CommandHelp());
             commands.Add(new CommandIdentify());
