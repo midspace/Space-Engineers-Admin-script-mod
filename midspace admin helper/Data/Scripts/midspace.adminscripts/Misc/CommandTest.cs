@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     using Sandbox.Common;
@@ -23,6 +24,7 @@
     using VRage.Voxels;
     using VRageMath;
     using Sandbox.Game.World;
+    using System.IO;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -134,17 +136,40 @@
                 MyAPIGateway.Utilities.ShowMessage("OnlineMode", "{0}", MyAPIGateway.Session.OnlineMode);
                 MyAPIGateway.Utilities.ShowMessage("IsDedicated", "{0}", MyAPIGateway.Utilities.IsDedicated);
                 //MyAPIGateway.Utilities.ShowMessage("Culture", "{0}", MyTexts.Culture.IetfLanguageTag);
-                MyAPIGateway.Utilities.ShowMessage("Culture", "{0} {1}", CultureInfo.CurrentUICulture, CultureInfo.CurrentUICulture.IetfLanguageTag);
+                MyAPIGateway.Utilities.ShowMessage("Culture", "{0}", MyAPIGateway.Session.Config.Language);
+                MyAPIGateway.Utilities.ShowMessage("Culture", "{0}-{1}", MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].CultureName, MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].SubcultureName);
+
+                var languageRu = MyTexts.Languages[(int)MyLanguagesEnum.Russian];
+
+                MyTexts.Clear();
+                MyTexts.LoadTexts(Path.Combine(MyAPIGateway.Utilities.GamePaths.ContentPath, "Data", "Localization"), languageRu.CultureName, languageRu.SubcultureName);
+                var yesRu = MyStringId.Get("DisplayName_Item_GoldIngot").GetString();
+
+                var languageEn = MyTexts.Languages[(int)MyLanguagesEnum.English];
+                MyTexts.Clear();
+                MyTexts.LoadTexts(Path.Combine(MyAPIGateway.Utilities.GamePaths.ContentPath, "Data", "Localization"), languageEn.CultureName, languageRu.SubcultureName);
+                var yesEn = MyStringId.Get("DisplayName_Item_GoldIngot").GetString();
+
+                MyAPIGateway.Utilities.ShowMessage("Language Test", "Ru={0} En={1}", yesRu, yesEn);
+
+                //MyAPIGateway.Utilities.ShowMessage("Culture", "'{0}' '{1}'", CultureInfo.CurrentUICulture, CultureInfo.CurrentUICulture.IetfLanguageTag); // is blank under 01.100.xxx
+                //MyAPIGateway.Utilities.ShowMessage("Culture", "'{0}'", System.Threading.Thread.CurrentThread.CurrentUICulture.IetfLanguageTag); // unaccessible
 
                 var ed = ((MyObjectBuilder_EnvironmentDefinition)MyDefinitionManager.Static.EnvironmentDefinition.GetObjectBuilder());
                 MyAPIGateway.Utilities.ShowMessage("LargeShipMaxSpeed", "{0}", ed.LargeShipMaxSpeed);
                 MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1} {2}", ed.SunDirection.X, ed.SunDirection.Y, ed.SunDirection.Z);
+                //MyAPIGateway.Utilities.ShowMessage("SunDirection2", "{0} {1} {2}", MySector.SunProperties.SunDirectionNormalized);  // MySector is not allowed.
                 MyAPIGateway.Utilities.ShowMessage("ViewDistance", "{0:N}m", MyAPIGateway.Session.SessionSettings.ViewDistance);
                 
 
-                // Environment is null for some reason.
-                //var environment = MyAPIGateway.Session.GetSector().Environment;
-                //MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1}", environment.SunAzimuth, environment.SunElevation);
+                // Environment is null for some reason. But not any more!!!!
+                var environment = MyAPIGateway.Session.GetSector().Environment;
+                //MyAPIGateway.Utilities.ShowMessage("SunDirection", "is null {0}", environment == null);
+
+                Vector3 sunDirection;
+                Vector3.CreateFromAzimuthAndElevation(environment.SunAzimuth, environment.SunElevation, out sunDirection);
+                //MyAPIGateway.Utilities.ShowMessage("SunDirection3", "{0} {1}", environment.SunAzimuth, environment.SunElevation);
+                MyAPIGateway.Utilities.ShowMessage("SunDirection4", "{0} {1} {2}", sunDirection.X, sunDirection.Y, sunDirection.Z);
 
                 // MySector is not whitelisted.
                 //var env = MySector.GetEnvironmentSettings();
@@ -230,6 +255,10 @@
                 //{
                 //    MyAPIGateway.Utilities.ShowMessage("Player", "other.");
                 //} 
+
+                MyAPIGateway.Utilities.ShowMessage("Controller", "ControlledEntity == ControlledObject : {0}", MyAPIGateway.Session.Player.Controller.ControlledEntity == MyAPIGateway.Session.ControlledObject);
+                MyAPIGateway.Utilities.ShowMessage("Controller", "ControlledEntity == ControlledObject : {0}", MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity == MyAPIGateway.Session.ControlledObject.Entity);
+
 
                 return true;
                 

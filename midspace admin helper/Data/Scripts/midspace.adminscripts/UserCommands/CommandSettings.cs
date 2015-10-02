@@ -28,7 +28,8 @@
 
             info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("Name"), MyAPIGateway.Session.Name);
             info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_Description"), MyAPIGateway.Session.Description);
-            info.AppendFormat("{0}: {1}\r\n", "Session Time", MyAPIGateway.Session.ElapsedPlayTime); // This is the local session, not the server.
+            info.AppendFormat("{0}: {1:%d} days {1:hh\\:mm\\:ss}\r\n", "Session Time", MyAPIGateway.Session.ElapsedPlayTime); // This is the local session, not the server.
+            info.AppendFormat("{0}: {1:%d} days {1:hh\\:mm\\:ss}\r\n", "Game Time", MyAPIGateway.Session.ElapsedGameTime()); // Total game time. Still in debate about sync with the server.
 
             info.AppendFormat("\r\n");
 

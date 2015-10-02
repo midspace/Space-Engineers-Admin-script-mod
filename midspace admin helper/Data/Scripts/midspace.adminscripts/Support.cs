@@ -23,25 +23,28 @@ namespace midspace.adminscripts
             IMyEntity entity;
             double distance;
             Vector3D hitPoint;
-            FindLookAtEntity(controlledEntity, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets);
+            FindLookAtEntity(controlledEntity, true, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
         {
             const float range = 5000000;
             Matrix worldMatrix;
             Vector3D startPosition;
             Vector3D endPosition;
-            if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
+            IMyCubeGrid occupiedGrid = null;
+
+            if (controlledEntity.Entity.Parent == null)
             {
-                worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs, or the direction the player is looking with ALT.
+                worldMatrix = controlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs, or the direction the player is looking with ALT.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
                 endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 0.5f);
             }
             else
             {
-                worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
+                occupiedGrid = controlledEntity.Entity.GetTopMostParent() as IMyCubeGrid;
+                worldMatrix = controlledEntity.Entity.WorldMatrix;
                 // TODO: need to adjust for position of cockpit within ship.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 1.5f;
                 endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 1.5f);
@@ -70,19 +73,25 @@ namespace midspace.adminscripts
                 {
                     var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
 
-                    // check if the ray comes anywhere near the Grid before continuing.
-                    if (cubeGrid != null && ray.Intersects(entity.WorldAABB).HasValue)
+                    if (cubeGrid != null)
                     {
-                        var hit = cubeGrid.RayCastBlocks(startPosition, endPosition);
-                        if (hit.HasValue)
-                        {
-                            var distance = (startPosition - cubeGrid.GridIntegerToWorld(hit.Value)).Length();
-                            var block = cubeGrid.GetCubeBlock(hit.Value);
+                        if (ignoreOccupiedGrid && occupiedGrid != null && occupiedGrid.EntityId == cubeGrid.EntityId)
+                            continue;
 
-                            if (block.FatBlock != null && findCubes)
-                                list.Add(block.FatBlock, distance);
-                            else if (findShips)
-                                list.Add(entity, distance);
+                        // check if the ray comes anywhere near the Grid before continuing.    
+                            if (ray.Intersects(entity.WorldAABB).HasValue)
+                        {
+                            var hit = cubeGrid.RayCastBlocks(startPosition, endPosition);
+                            if (hit.HasValue)
+                            {
+                                var distance = (startPosition - cubeGrid.GridIntegerToWorld(hit.Value)).Length();
+                                var block = cubeGrid.GetCubeBlock(hit.Value);
+
+                                if (block.FatBlock != null && findCubes)
+                                    list.Add(block.FatBlock, distance);
+                                else if (findShips)
+                                    list.Add(entity, distance);
+                            }
                         }
                     }
                 }
@@ -90,7 +99,7 @@ namespace midspace.adminscripts
                 if (findPlayers)
                 {
                     var controller = entity as IMyControllableEntity;
-                    if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId != entity.EntityId && controller != null && ray.Intersects(entity.WorldAABB).HasValue)
+                    if (controlledEntity.Entity.EntityId != entity.EntityId && controller != null && ray.Intersects(entity.WorldAABB).HasValue)
                     {
                         var distance = (startPosition - entity.GetPosition()).Length();
                         list.Add(entity, distance);
