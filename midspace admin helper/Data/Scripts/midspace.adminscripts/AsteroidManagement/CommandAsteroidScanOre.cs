@@ -161,7 +161,7 @@
                                 var index = Array.IndexOf(findMaterial, material);
                                 var name = materials[index].MinedOre;
                                 var gps = MyAPIGateway.Session.GPS.Create("Ore " + name, "scanore", position, true, false);
-                                MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                                MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
                                 hits++;
                             }
                         }

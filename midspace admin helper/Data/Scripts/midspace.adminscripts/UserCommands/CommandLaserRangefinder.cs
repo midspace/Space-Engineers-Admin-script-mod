@@ -25,7 +25,7 @@
             if (entity != null && distance < MyAPIGateway.Session.SessionSettings.ViewDistance)
             {
                 var gps = MyAPIGateway.Session.GPS.Create("Laser Range", "", hitPoint, true, false);
-                MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
                 return true;
             }
 
