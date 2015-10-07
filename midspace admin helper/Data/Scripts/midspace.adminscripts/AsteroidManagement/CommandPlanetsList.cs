@@ -39,7 +39,6 @@
 
                 var currentPlanetList = new List<IMyVoxelBase>();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentPlanetList, v => v is Sandbox.Game.Entities.MyPlanet && (planetName == null || v.StorageName.IndexOf(planetName, StringComparison.InvariantCultureIgnoreCase) >= 0));
-                //MyAPIGateway.Session.pl .. ????
 
                 PlanetCache.Clear();
 

@@ -1,11 +1,9 @@
-using System.IO;
-
 namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
-
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
@@ -405,9 +403,54 @@ namespace midspace.adminscripts
 
         public static IMyPlayer Player(this IMyIdentity identity)
         {
-            var listplayers = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == identity.PlayerId);
-            return listplayers.FirstOrDefault();
+            var listPlayers = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(listPlayers, p => p.PlayerID == identity.PlayerId);
+            return listPlayers.FirstOrDefault();
+        }
+
+        public static IMyIdentity Player(this IMyPlayer player)
+        {
+            var listIdentites = new List<IMyIdentity>();
+            MyAPIGateway.Players.GetAllIdentites(listIdentites, p => p.IdentityId == player.IdentityId);
+            return listIdentites.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Used to find the Character Entity (which is the physical representation in game) from the Player (the network connected human).
+        /// This is a kludge as a proper API doesn't exist, even though the game code could easily expose this and save all this processing we are forced to do.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static IMyCharacter GetCharacter(this IMyPlayer player)
+        {
+            var character = player.Controller.ControlledEntity as IMyCharacter;
+            if (character != null)
+                return character;
+
+            var cubeBlock = player.Controller.ControlledEntity as IMyCubeBlock;
+            if (cubeBlock == null)
+                return null;
+
+            var controller = cubeBlock as Sandbox.Game.Entities.MyShipController;
+            if (controller != null)
+                return controller.Pilot;
+
+            // TODO: test conditions for Cryochamber block.
+
+            // Cannot determine Character controlling MyLargeTurretBase as class is internal.
+            // TODO: find if the player is controlling a turret.
+
+            //var charComponent = cubeBlock.Components.Get<MyCharacterComponent>();
+
+            //if (charComponent != null)
+            //{
+            //    var entity = charComponent.Entity;
+            //    MyAPIGateway.Utilities.ShowMessage("Entity", "Good");
+            //}
+            //var turret = cubeBlock as Sandbox.Game.Weapons.MyLargeTurretBase;
+            //var turret = cubeBlock as IMyControllableEntity;
+
+            return null;
         }
 
         /// <summary>
@@ -503,6 +546,16 @@ namespace midspace.adminscripts
                     convertedText = convertedText.Replace(invalidChar, ' ');
 
             return convertedText;
+        }
+
+        /// <summary>
+        /// Time elapsed since the start of the game.
+        /// This is saved in checkpoint, instead of GameDateTime.
+        /// </summary>
+        /// <remarks>Copied from Sandbox.Game.World.MySession</remarks>
+        public static TimeSpan ElapsedGameTime(this IMySession session)
+        {
+            return MyAPIGateway.Session.GameDateTime - new DateTime(2081, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
     }
 }
