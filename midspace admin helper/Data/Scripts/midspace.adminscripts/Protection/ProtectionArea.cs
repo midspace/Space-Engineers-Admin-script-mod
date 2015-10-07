@@ -16,30 +16,37 @@ namespace midspace.adminscripts.Protection
     [ProtoContract]
     public class ProtectionArea
     {
-        [ProtoMember(1)]
-        public Vector3D Center;
+        [ProtoMember(1)] 
+        public string Name;
 
         [ProtoMember(2)]
-        public double Size;
+        public Vector3D Center;
 
         [ProtoMember(3)]
-        public ProtectionAreaType Type;
+        public double Size;
 
-        public ProtectionArea(Vector3D center, double size, ProtectionAreaType type)
+        [ProtoMember(4)]
+        public ProtectionAreaShape Shape;
+
+        // parameterless ctor for xml serialization
+        public ProtectionArea() { }
+
+        public ProtectionArea(string name, Vector3D center, double size, ProtectionAreaShape shape)
         {
+            Name = name;
             Center = center;
             Size = size;
-            Type = type;
+            Shape = shape;
         }
 
-        public bool IsInside(IMyEntity entity)
+        public bool Contains(IMyEntity entity)
         {
-            switch (Type)
+            switch (Shape)
             {
-                case ProtectionAreaType.Cube:
+                case ProtectionAreaShape.Cube:
                     var boundingBox = new BoundingBoxD(new Vector3D(Center.X - Size, Center.Y - Size, Center.Z - Size), new Vector3D(Center.X + Size, Center.Y + Size, Center.Z + Size));
                     return boundingBox.Intersects(entity.WorldAABB);
-                case ProtectionAreaType.Sphere:
+                case ProtectionAreaShape.Sphere:
                     var boundingSphere = new BoundingSphereD(Center, Size);
                     return entity.GetIntersectionWithSphere(ref boundingSphere); //return boundingSphere.Intersects(entity.WorldAABB);
             }
@@ -47,14 +54,14 @@ namespace midspace.adminscripts.Protection
             return false;
         }
 
-        public bool IsInside(IMySlimBlock block)
+        public bool Contains(IMySlimBlock block)
         {
             if (block.CubeGrid == null)
                 return false;
 
             // FatBlock is null for non functional blocks such as armor
             if (block.FatBlock != null)
-                return IsInside(block.FatBlock);
+                return Contains(block.FatBlock);
 
             // since some blocks aren't an entity we have to deal with them otherwise
             // we'll create an grid that acts as substitute for the block to get an entity that has a collision
@@ -90,7 +97,7 @@ namespace midspace.adminscripts.Protection
             {
                 // found block
                 var cubeBlock = blocks[0].FatBlock;
-                bool isInside = IsInside(cubeBlock);
+                bool isInside = Contains(cubeBlock);
                 grid.Close();
                 return isInside;
             }
@@ -99,7 +106,7 @@ namespace midspace.adminscripts.Protection
         }
     }
 
-    public enum ProtectionAreaType
+    public enum ProtectionAreaShape
     {
         Sphere,
         Cube

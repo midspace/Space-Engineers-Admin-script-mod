@@ -1,19 +1,25 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Sandbox.Game.Weapons;
 using Sandbox.ModAPI;
+using VRage.Library.Collections;
 using VRage.ModAPI;
+using VRageMath;
 
 namespace midspace.adminscripts.Protection
 {
     public class HandtoolCache
     {
         private Dictionary<IMyPlayer, IMyEntity> _cache;
+        private List<IMyEntity> _uninitializedHandTools; 
 
 
         public HandtoolCache()
         {
             _cache = new Dictionary<IMyPlayer, IMyEntity>();
+            _uninitializedHandTools = new List<IMyEntity>();
+
             MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd;
             MyAPIGateway.Entities.OnEntityRemove += Entities_OnEntityRemove;
         }
@@ -27,15 +33,10 @@ namespace midspace.adminscripts.Protection
         void Entities_OnEntityAdd(IMyEntity entity)
         {
             if (entity is MyEngineerToolBase)
-            {
-                MyAPIGateway.Utilities.ShowNotification("Toolbase added");
-                var player = FindPlayer(entity);
-
-                if (_cache.ContainsKey(player))
-                    _cache.Remove(player);
-
-                _cache.Add(player, entity);
-            }
+                // when the entity is created, it is not finished (pos is 0, boundingbox does not exist, etc.)
+                // therefore we need to wait a moment or two until we can build up the cache
+                // but don't worry we won't allow it to damage sth. in that time (if it is even possible)
+                _uninitializedHandTools.Add(entity);
         }
 
         // this method is called twice when switching weapon, idk why
@@ -43,8 +44,10 @@ namespace midspace.adminscripts.Protection
         {
             if (entity is MyEngineerToolBase)
             {
-                MyAPIGateway.Utilities.ShowNotification("Toolbase removed");
-                var player = FindPlayer(entity);
+                if (!_cache.ContainsValue(entity))
+                    return;
+
+                var player = _cache.First(p => p.Value.EntityId == entity.EntityId).Key;
 
                 if (_cache.ContainsKey(player))
                     _cache.Remove(player);
@@ -56,18 +59,25 @@ namespace midspace.adminscripts.Protection
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players);
 
+            double nearestDistance = 5; // usually the distance between player and handtool is about 2 to 3, 5 is plenty 
+            IMyPlayer nearestPlayer = null;
+
             foreach (IMyPlayer player in players)
             {
-                var controlledEntiy = player.Controller.ControlledEntity.Entity;
-                if (controlledEntiy != null && controlledEntiy is IMyCharacter)
+                var character = player.GetCharacter();
+                if (character != null)
                 {
-                    // the distance between the player entity and the grinder entity is about 2 to 3. Weird but true... I wonder if it is reasonable to add this check as well...
-                    if (controlledEntiy.WorldAABB.Intersects(entity.WorldAABB))
-                        return player;
+                    var distance = (((IMyEntity)character).GetPosition() - entity.GetPosition()).LengthSquared();
+
+                    if (distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        nearestPlayer = player;
+                    }
                 }
             }
 
-            return null;
+            return nearestPlayer;
         }
 
         public bool TryGetPlayer(long handToolEntityId, out IMyPlayer player)
@@ -76,5 +86,30 @@ namespace midspace.adminscripts.Protection
             return player != null;
         }
 
-    }
+        public void UpdateBeforeSimulation()
+        {
+            if (_uninitializedHandTools.Count == 0)
+                return;
+
+            var finished = new List<IMyEntity>();
+            foreach (IMyEntity handTool in _uninitializedHandTools)
+            {
+                if (handTool.GetPosition() == Vector3.Zero) // prototype check for not inited yet, need a better check for that
+                    continue;
+
+                var player = FindPlayer(handTool);
+
+                if (player == null)
+                    return;
+
+                if (_cache.ContainsKey(player))
+                    _cache.Remove(player);
+
+                _cache.Add(player, handTool);
+                finished.Add(handTool);
+            }
+
+            _uninitializedHandTools.RemoveAll(e => finished.Contains(e));
+        }
+     }
 }

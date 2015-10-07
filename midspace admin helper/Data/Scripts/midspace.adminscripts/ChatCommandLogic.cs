@@ -1,4 +1,5 @@
 using midspace.adminscripts.Protection;
+using midspace.adminscripts.Protection.Commands;
 
 namespace midspace.adminscripts
 {
@@ -50,7 +51,6 @@ namespace midspace.adminscripts
         private static string[] _oreNames;
         private static List<string> _ingotNames;
         private static MyPhysicalItemDefinition[] _physicalItems;
-        private ProtectionHandler _protectionHandler;
 
         private Action<byte[]> MessageHandler = new Action<byte[]>(HandleMessage);
 
@@ -104,6 +104,7 @@ namespace midspace.adminscripts
             }
 
             ChatCommandService.UpdateBeforeSimulation();
+            ProtectionHandler.UpdateBeforeSimulation();
         }
 
         protected override void UnloadData()
@@ -141,8 +142,6 @@ namespace midspace.adminscripts
 
             ChatCommandService.Init();
 
-            //_protectionHandler = new ProtectionHandler();
-
             //MultiplayerActive is false when initializing host... extreamly weird
             if (MyAPIGateway.Multiplayer.MultiplayerActive || ServerCfg != null) //only need this in mp
             {
@@ -172,6 +171,7 @@ namespace midspace.adminscripts
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
             AdminNotificator.Init();
+            ProtectionHandler.Init();
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
             Logger.Debug("Registered ProcessMessage");
 
@@ -249,6 +249,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandPrefabAddWireframe());
             commands.Add(new CommandPrefabPaste());
             commands.Add(new CommandPrivateMessage());
+            commands.Add(new CommandProtectionArea());
             commands.Add(new CommandSaveGame());
             commands.Add(new CommandSessionCargoShips());
             commands.Add(new CommandSessionCopyPaste());
@@ -297,10 +298,11 @@ namespace midspace.adminscripts
                 _timer100.Elapsed -= TimerOnElapsed100;
             }
 
+            // servers: listen and dedicated, MP
             if (ServerCfg != null)
-            { //only for clients it is null
+            {
                 MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
-                //_protectionHandler.Close();
+                ProtectionHandler.Close();
                 Logger.Debug("Unregistered MessageHandler");
             }
 
@@ -309,6 +311,7 @@ namespace midspace.adminscripts
 
             if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerConfig.ServerIsClient))
             {
+                // all clients, including hosts, MP
                 if (PermissionRequestTimer != null)
                 {
                     PermissionRequestTimer.Stop();
@@ -317,6 +320,7 @@ namespace midspace.adminscripts
                 MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
                 Logger.Debug("Detached Session_OnSessionReady");
                 
+                // only clients, not the host
                 if (ServerCfg == null)
                 {
                     MyAPIGateway.Multiplayer.UnregisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);

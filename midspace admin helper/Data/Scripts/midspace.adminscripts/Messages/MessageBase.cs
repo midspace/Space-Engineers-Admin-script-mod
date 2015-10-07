@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using midspace.adminscripts.Messages.Protection;
 
 namespace midspace.adminscripts.Messages
 {
@@ -21,6 +22,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessagePardon))]
     [XmlInclude(typeof(MessagePermissionRequest))]
     [XmlInclude(typeof(MessagePrivateMessage))]
+    [XmlInclude(typeof(MessageProtectionArea))]
     [XmlInclude(typeof(MessageSave))]
     [XmlInclude(typeof(MessageSession))]
     //permissions
@@ -28,6 +30,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageGroupPermission))]
     [XmlInclude(typeof(MessagePlayerPermission))]
     //sync
+    [XmlInclude(typeof(MessageSyncBlockOwner))]
     [XmlInclude(typeof(MessageSyncClaim))]
     [XmlInclude(typeof(MessageSyncEntity))]
     [XmlInclude(typeof(MessageSyncEntityPosition))]

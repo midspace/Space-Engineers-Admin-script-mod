@@ -75,6 +75,8 @@
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
+    <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
+    <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />
     <Compile Include="Messages\MessagePardon.cs" />
@@ -100,7 +102,9 @@
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />
     <Compile Include="PositionManagement\CommandSpeed.cs" />
+    <Compile Include="Protection\Commands\CommandProtectionArea.cs" />
     <Compile Include="Protection\HandtoolCache.cs" />
+    <Compile Include="Protection\ProtectedCubeGrid.cs" />
     <Compile Include="Protection\ProtectionArea.cs" />
     <Compile Include="Protection\ProtectionHandler.cs" />
     <Compile Include="ShipManagement\CommandShipSwitch.cs" />
@@ -203,6 +207,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rmdir /Q /S "$(ProjectDir)obj\"

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using midspace.adminscripts.Protection;
 
 namespace midspace.adminscripts
 {
@@ -119,6 +120,7 @@ namespace midspace.adminscripts
             if (customSaveName != null)
                 SavePermissionFile(customSaveName);
 
+            ProtectionHandler.SaveAreas(customSaveName);
             Logger.Debug("Config saved.");
         }
 
@@ -127,6 +129,7 @@ namespace midspace.adminscripts
             LoadConfig();
             LoadMotd();
         }
+
         public void SaveLogs(string customSaveName = null)
         {
             SaveGlobalChatLog(customSaveName);
