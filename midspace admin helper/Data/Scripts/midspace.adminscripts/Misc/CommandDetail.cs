@@ -223,24 +223,19 @@
                     }
 
             var assetNameCount = new Dictionary<string, long>();
-
             foreach (var kvp in assetCount)
             {
                 var name = MyDefinitionManager.Static.GetVoxelMaterialDefinition(kvp.Key).Id.SubtypeName;
-
                 if (assetNameCount.ContainsKey(name))
-                {
                     assetNameCount[name] += kvp.Value;
-                }
                 else
-                {
                     assetNameCount.Add(name, kvp.Value);
-                }
             }
+            assetNameCount = assetNameCount.OrderByDescending(e => e.Value).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             var sum = assetNameCount.Values.Sum();
-
             var ores = new StringBuilder();
+
             foreach (var kvp in assetNameCount)
                 ores.AppendFormat("{0}  {1:N}  {2:P}\r\n", kvp.Key, (double)kvp.Value / 255, (double)kvp.Value / (double)sum);
 
