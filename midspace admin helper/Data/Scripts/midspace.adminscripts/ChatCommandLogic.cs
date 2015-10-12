@@ -266,7 +266,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandShipDestructible());
             commands.Add(new CommandShipScaleDown());
             commands.Add(new CommandShipScaleUp());
-            //commands.Add(new CommandShipOwnerShare());  //not working
+            commands.Add(new CommandShipOwnerShare());
             commands.Add(new CommandStop());
             commands.Add(new CommandStopAll());
             commands.Add(new CommandTeleport());

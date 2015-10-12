@@ -557,5 +557,20 @@ namespace midspace.adminscripts
         {
             return MyAPIGateway.Session.GameDateTime - new DateTime(2081, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
+
+        /// <summary>
+        /// Changes owner of invividual cube block.
+        /// </summary>
+        /// <param name="cube"></param>
+        /// <param name="playerId">new owner id</param>
+        /// <param name="shareMode">new share mode</param>
+        public static void ChangeOwner(this IMyCubeBlock cube, long playerId, MyOwnershipShareModeEnum shareMode)
+        {
+            var block = (Sandbox.Game.Entities.MyCubeBlock)cube;
+
+            // TODO: Unsure which of these are required. needs further investigation.
+            block.ChangeOwner(playerId, shareMode);
+            block.ChangeBlockOwnerRequest(playerId, shareMode);
+        }
     }
 }
