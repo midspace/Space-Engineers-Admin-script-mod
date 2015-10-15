@@ -115,7 +115,7 @@ The following materials are available:
             }
 
             var oldStorage = originalAsteroid.Storage;
-            var oldCache = new MyStorageDataCache();
+            var oldCache = new MyStorageData();
             oldCache.Resize(oldStorage.Size);
             oldStorage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, Vector3I.Zero, oldStorage.Size - 1);
 

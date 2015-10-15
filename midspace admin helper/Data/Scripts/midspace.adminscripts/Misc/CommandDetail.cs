@@ -197,7 +197,7 @@
                     for (block.X = 0; block.X < voxelMap.Storage.Size.X; block.X += 64)
                     {
                         var cacheSize = new Vector3I(64);
-                        var oldCache = new MyStorageDataCache();
+                        var oldCache = new MyStorageData();
                         oldCache.Resize(cacheSize);
                         // LOD1 is not detailed enough for content information on asteroids.
                         voxelMap.Storage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, block, block + cacheSize - 1);

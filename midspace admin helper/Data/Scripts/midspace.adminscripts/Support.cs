@@ -648,7 +648,7 @@ namespace midspace.adminscripts
         /// <param name="position"></param>
         public static IMyVoxelMap CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
         {
-            var cache = new MyStorageDataCache();
+            var cache = new MyStorageData();
 
             // new storage is created completely full
             // no geometry will be created because that requires full-empty transition

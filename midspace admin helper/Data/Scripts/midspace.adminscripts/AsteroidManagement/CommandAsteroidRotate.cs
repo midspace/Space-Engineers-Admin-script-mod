@@ -70,7 +70,7 @@
                     var quaternion = Quaternion.CreateFromYawPitchRoll(rotateVector.X / (180 / MathHelper.Pi), rotateVector.Y / (180 / MathHelper.Pi), rotateVector.Z / (180 / MathHelper.Pi));
                     var oldStorage = originalAsteroid.Storage;
 
-                    var oldCache = new MyStorageDataCache();
+                    var oldCache = new MyStorageData();
                     oldCache.Resize(oldStorage.Size);
                     oldStorage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 0, Vector3I.Zero, oldStorage.Size - 1);
 
@@ -79,7 +79,7 @@
                     var newName = Support.CreateUniqueStorageName(originalAsteroid.StorageName);
                     var newVoxelMap = Support.CreateNewAsteroid(newName, newSize, originalAsteroid.PositionLeftBottomCorner);
 
-                    var cache = new MyStorageDataCache();
+                    var cache = new MyStorageData();
                     var min = Vector3I.Zero;
                     var max = newSize - 1;
                     cache.Resize(min, max);

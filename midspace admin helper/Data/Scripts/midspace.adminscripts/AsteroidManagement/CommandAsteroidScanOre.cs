@@ -123,7 +123,7 @@
                 return 0;
             }
 
-            var oldCache = new MyStorageDataCache();
+            var oldCache = new MyStorageData();
 
             //var smin = new Vector3I(0, 0, 0);
             //var smax = new Vector3I(31, 31, 31);
