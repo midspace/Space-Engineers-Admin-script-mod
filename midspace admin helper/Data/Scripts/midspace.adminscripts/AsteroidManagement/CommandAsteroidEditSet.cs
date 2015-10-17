@@ -120,7 +120,7 @@
                                 var point1 = new Vector3I(_activeVoxelSetterPositionA.Value - currentAsteroidList[0].PositionLeftBottomCorner);
                                 var point2 = new Vector3I(_activeVoxelSetterPositionB.Value - currentAsteroidList[0].PositionLeftBottomCorner);
 
-                                var cache = new MyStorageDataCache();
+                                var cache = new MyStorageData();
                                 var size = storage.Size;
                                 cache.Resize(size);
                                 storage.ReadRange(cache, MyStorageDataTypeFlags.ContentAndMaterial, (int)VRageRender.MyLodTypeEnum.LOD0, Vector3I.Zero, size - 1);
@@ -161,7 +161,7 @@
                                 var point1 = new Vector3I(_activeVoxelSetterPositionA.Value - currentAsteroidList[0].PositionLeftBottomCorner);
                                 var point2 = new Vector3I(_activeVoxelSetterPositionB.Value - currentAsteroidList[0].PositionLeftBottomCorner);
 
-                                var cache = new MyStorageDataCache();
+                                var cache = new MyStorageData();
                                 var size = storage.Size;
                                 cache.Resize(size);
                                 storage.ReadRange(cache, MyStorageDataTypeFlags.ContentAndMaterial, (int)VRageRender.MyLodTypeEnum.LOD0, Vector3I.Zero, size - 1);

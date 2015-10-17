@@ -95,7 +95,7 @@
             if (findMaterial.Length == 0)
                 return false;
 
-            var oldCache = new MyStorageDataCache();
+            var oldCache = new MyStorageData();
             oldCache.Resize(storage.Size);
             storage.ReadRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, 2, Vector3I.Zero, storage.Size - 1);
             //MyAPIGateway.Utilities.ShowMessage("check", string.Format("SizeLinear {0}  {1}.", oldCache.SizeLinear, oldCache.StepLinear));

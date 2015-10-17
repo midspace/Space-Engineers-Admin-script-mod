@@ -62,7 +62,7 @@ namespace midspace.adminscripts
                     var storage = currentAsteroidList[0].Storage;
 
                     var point = new Vector3I(position - currentAsteroidList[0].PositionLeftBottomCorner);
-                    var cache = new MyStorageDataCache();
+                    var cache = new MyStorageData();
                     var min = (point / 64) * 64;
                     var max = min + 63;
                     var size = max - min;

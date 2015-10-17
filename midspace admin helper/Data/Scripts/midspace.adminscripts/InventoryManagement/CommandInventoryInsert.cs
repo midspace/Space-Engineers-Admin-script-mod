@@ -7,6 +7,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
@@ -89,6 +90,10 @@
                     // must be whole numbers.
                     amount = Math.Round(amount, 0);
                 }
+
+                var gasContainer = content as MyObjectBuilder_GasContainerObject;
+                if (gasContainer != null)
+                    gasContainer.GasLevel = 1f;
 
                 MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
                 var inventoryOwnwer = entity as IMyInventoryOwner;

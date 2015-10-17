@@ -430,7 +430,7 @@ namespace midspace.adminscripts
             }
 
             // prefix the search term with 'ingot' to find this ingot name.
-            if (itemNames.Length > 0 && itemNames[0].Equals("ingot", StringComparison.InvariantCultureIgnoreCase))
+            if (itemNames.Length > 1 && itemNames[0].Equals("ingot", StringComparison.InvariantCultureIgnoreCase))
             {
                 var findName = itemName.Substring(6).Trim();
 
@@ -648,7 +648,7 @@ namespace midspace.adminscripts
         /// <param name="position"></param>
         public static IMyVoxelMap CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
         {
-            var cache = new MyStorageDataCache();
+            var cache = new MyStorageData();
 
             // new storage is created completely full
             // no geometry will be created because that requires full-empty transition
