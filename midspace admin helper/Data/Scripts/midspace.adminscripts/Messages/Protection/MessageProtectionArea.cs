@@ -30,6 +30,7 @@ namespace midspace.adminscripts.Messages.Protection
                         {
                             Config = ProtectionHandler.Config
                         });
+                        ProtectionHandler.SaveAreas();
                     }
                     else
                         ConnectionHelper.SendChatMessage(SenderSteamId, "An area with that name already exists.");
@@ -42,6 +43,7 @@ namespace midspace.adminscripts.Messages.Protection
                         {
                             Config = ProtectionHandler.Config
                         });
+                        ProtectionHandler.SaveAreas();
                     }
                     else
                         ConnectionHelper.SendChatMessage(SenderSteamId, "An area with that name could not be found.");
