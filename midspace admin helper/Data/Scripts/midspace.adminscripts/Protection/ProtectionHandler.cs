@@ -1,7 +1,5 @@
 ﻿using System;
 using Sandbox.ModAPI;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.ModAPI.Ingame;
@@ -13,27 +11,24 @@ namespace midspace.adminscripts.Protection
 {
     public static class ProtectionHandler
     {
-        public static List<ProtectionArea> Areas = new List<ProtectionArea>();
-        public static bool ProtectionEnabled;
+
+        public static ProtectionConfig Config;
 
         private static bool _isInitialized;
         private static HandtoolCache _handtoolCache;
-        private static string _fileName;
-
-        private const string _fileNameFormat = "Areas_{0}.xml";
 
         public static void Init()
         {
             if (_isInitialized)
                 return;
-            // TODO save and load areas
+
             _isInitialized = true;
-            _fileName = String.Format(_fileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
+            Config = new ProtectionConfig();
             LoadAreas();
 
             _handtoolCache = new HandtoolCache();
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
-            ProtectionEnabled = true;
+            Config.ProtectionEnabled = true;
         }
 
         public static void Close()
@@ -50,18 +45,7 @@ namespace midspace.adminscripts.Protection
             if (!_isInitialized)
                 return;
 
-            string fileName;
-
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(_fileNameFormat, customSaveName);
-            else
-                fileName = _fileName;
-
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML<List<ProtectionArea>>(Areas));
-            writer.Flush();
-            writer.Close();
-            Logger.Debug("Saved areas.");
+            Config.Save(customSaveName);
         }
 
         private static void LoadAreas()
@@ -69,19 +53,12 @@ namespace midspace.adminscripts.Protection
             if (!_isInitialized)
                 return;
 
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(_fileName, typeof(ServerConfig)))
-                return;
-
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(_fileName, typeof(ServerConfig));
-            var text = reader.ReadToEnd();
-            reader.Close();
-            Areas = MyAPIGateway.Utilities.SerializeFromXML<List<ProtectionArea>>(text);
-            Logger.Debug("Areas loaded.");
+            Config.Load();
         }
 
         private static void DamageHandler(object target, ref MyDamageInformation info)
         {
-            if (!ProtectionEnabled)
+            if (!Config.ProtectionEnabled)
                 return;
 
             IMySlimBlock block = target as IMySlimBlock;
@@ -100,7 +77,7 @@ namespace midspace.adminscripts.Protection
 
         private static bool CanDamageBlock(long attackerEntityId, IMySlimBlock block, MyStringHash type)
         {
-            foreach (ProtectionArea area in Areas)
+            foreach (ProtectionArea area in Config.Areas)
             {
                 if (!area.Contains(block)) 
                     continue;
@@ -139,7 +116,8 @@ namespace midspace.adminscripts.Protection
         /// <returns></returns>
         private static bool CanGrind(IMyPlayer player, IMySlimBlock block)
         {
-            return block.CubeGrid.SmallOwners.Count == 0 || block.CubeGrid.SmallOwners.Contains(player.IdentityId);
+            var allSmallOwners = block.CubeGrid.GetAllSmallOwners();
+            return allSmallOwners.Count == 0 || allSmallOwners.Contains(player.IdentityId);
         }
 
         /// <summary>
@@ -149,10 +127,10 @@ namespace midspace.adminscripts.Protection
         /// <returns>True if the entity is inside a protected area. If the entity is null it will return false.</returns>
         public static bool IsProtected(IMyEntity entity)
         {
-            if (entity == null)
+            if (entity == null || Config == null || Config.Areas == null)
                 return false;
 
-            return Areas.Any(area => area.Contains(entity));
+            return Config.Areas.Any(area => area.Contains(entity));
         }
 
         public static void UpdateBeforeSimulation()
@@ -165,19 +143,19 @@ namespace midspace.adminscripts.Protection
 
         public static bool AddArea(ProtectionArea area)
         {
-            if (Areas.Any(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (Config.Areas.Any(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase)))
                 return false;
 
-            Areas.Add(area);
+            Config.Areas.Add(area);
             return true;
         }
 
         public static bool RemoveArea(ProtectionArea area)
         {
-            if (!Areas.Any(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (!Config.Areas.Any(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase)))
                 return false;
 
-            Areas.RemoveAll(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase));
+            Config.Areas.RemoveAll(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase));
             return true;
         }
     }

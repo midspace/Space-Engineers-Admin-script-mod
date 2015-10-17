@@ -1,4 +1,6 @@
 
+using midspace.adminscripts.Messages.Protection;
+
 namespace midspace.adminscripts
 {
     using System;
@@ -40,6 +42,7 @@ namespace midspace.adminscripts
 
         public Timer PermissionRequestTimer;
         public bool BlockCommandExecution = false;
+        public bool AllowBuilding = false;
 
         private bool _permissionRequest;
         private bool _isInitialized;
@@ -156,7 +159,7 @@ namespace midspace.adminscripts
                 PermissionRequestTimer = new Timer(10000);
                 PermissionRequestTimer.Elapsed += PermissionRequestTimer_Elapsed;
                 PermissionRequestTimer.Start();
-                //let the server know we are ready for connections
+                // tell the server that we need everything now, permissions, protection, etc.
                 ConnectionHelper.SendMessageToServer(new MessageConnectionRequest());
             }
         }

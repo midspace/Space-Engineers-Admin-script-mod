@@ -76,6 +76,7 @@
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
     <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
+    <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />
@@ -105,7 +106,9 @@
     <Compile Include="Protection\Commands\CommandProtectionArea.cs" />
     <Compile Include="Protection\HandtoolCache.cs" />
     <Compile Include="Protection\ProtectedCubeGrid.cs" />
+    <Compile Include="Protection\ProtectedCubePlacer.cs" />
     <Compile Include="Protection\ProtectionArea.cs" />
+    <Compile Include="Protection\ProtectionConfig.cs" />
     <Compile Include="Protection\ProtectionHandler.cs" />
     <Compile Include="ShipManagement\CommandShipSwitch.cs" />
     <Compile Include="ShipManagement\CommandShipRepair.cs" />

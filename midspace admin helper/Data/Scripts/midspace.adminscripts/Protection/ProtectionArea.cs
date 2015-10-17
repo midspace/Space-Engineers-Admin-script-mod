@@ -1,10 +1,6 @@
 ﻿using Sandbox.Common.ObjectBuilders;
-using Sandbox.Common.ObjectBuilders.VRageData;
 using Sandbox.ModAPI;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ProtoBuf;
 using VRage;
 using VRage.ModAPI;

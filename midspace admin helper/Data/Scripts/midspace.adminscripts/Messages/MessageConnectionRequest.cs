@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using midspace.adminscripts.Messages.Protection;
+using midspace.adminscripts.Protection;
 
 namespace midspace.adminscripts.Messages
 {
@@ -30,6 +32,10 @@ namespace midspace.adminscripts.Messages
             });
 
             ChatCommandLogic.Instance.ServerCfg.SendPermissions(SenderSteamId);
+            ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageSyncProtection()
+            {
+                Config = ProtectionHandler.Config
+            });
 
             if (!ServerConfig.ServerIsClient)
             {

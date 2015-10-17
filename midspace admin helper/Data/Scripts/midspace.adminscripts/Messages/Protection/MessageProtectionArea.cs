@@ -7,7 +7,7 @@ namespace midspace.adminscripts.Messages.Protection
     [ProtoContract]
     public class MessageProtectionArea : MessageBase
     {
-        [ProtoMember(1)] 
+        [ProtoMember(1)]
         public ProtectionArea ProtectionArea;
 
         [ProtoMember(2)] 
@@ -15,7 +15,7 @@ namespace midspace.adminscripts.Messages.Protection
 
         public override void ProcessClient()
         {
-            // nothing to do here yet
+            // never processed
         }
 
         public override void ProcessServer()
@@ -24,13 +24,25 @@ namespace midspace.adminscripts.Messages.Protection
             {
                 case ProtectionAreaMessageType.Add:
                     if (ProtectionHandler.AddArea(ProtectionArea))
+                    {
                         ConnectionHelper.SendChatMessage(SenderSteamId, "Successfully created area.");
+                        ConnectionHelper.SendMessageToAllPlayers(new MessageSyncProtection()
+                        {
+                            Config = ProtectionHandler.Config
+                        });
+                    }
                     else
                         ConnectionHelper.SendChatMessage(SenderSteamId, "An area with that name already exists.");
                     break;
                 case ProtectionAreaMessageType.Remove:
                     if (ProtectionHandler.RemoveArea(ProtectionArea))
+                    {
                         ConnectionHelper.SendChatMessage(SenderSteamId, "Successfully removed area.");
+                        ConnectionHelper.SendMessageToAllPlayers(new MessageSyncProtection()
+                        {
+                            Config = ProtectionHandler.Config
+                        });
+                    }
                     else
                         ConnectionHelper.SendChatMessage(SenderSteamId, "An area with that name could not be found.");
                     break;
@@ -41,6 +53,6 @@ namespace midspace.adminscripts.Messages.Protection
     public enum ProtectionAreaMessageType
     {
         Add,
-        Remove,
+        Remove
     }
 }

@@ -2,9 +2,6 @@
 using midspace.adminscripts.Messages.Sync;
 using ProtoBuf;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using midspace.adminscripts.Messages.Protection;
 
@@ -22,13 +19,15 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessagePardon))]
     [XmlInclude(typeof(MessagePermissionRequest))]
     [XmlInclude(typeof(MessagePrivateMessage))]
-    [XmlInclude(typeof(MessageProtectionArea))]
     [XmlInclude(typeof(MessageSave))]
     [XmlInclude(typeof(MessageSession))]
     //permissions
     [XmlInclude(typeof(MessageCommandPermission))]
     [XmlInclude(typeof(MessageGroupPermission))]
     [XmlInclude(typeof(MessagePlayerPermission))]
+    //protection
+    [XmlInclude(typeof(MessageProtectionArea))]
+    [XmlInclude(typeof(MessageSyncProtection))]
     //sync
     [XmlInclude(typeof(MessageSyncBlockOwner))]
     [XmlInclude(typeof(MessageSyncClaim))]

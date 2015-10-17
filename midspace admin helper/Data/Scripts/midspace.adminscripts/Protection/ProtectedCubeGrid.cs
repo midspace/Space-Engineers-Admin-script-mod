@@ -51,6 +51,10 @@ namespace midspace.adminscripts.Protection
         {
             _initialized = true;
 
+            // only init in mp
+            if (MyAPIGateway.Multiplayer != null && !MyAPIGateway.Multiplayer.MultiplayerActive)
+                return;
+
             IMyCubeGrid cubeGrid = Entity as IMyCubeGrid;
             if (cubeGrid != null)
                 _cubeGrid = cubeGrid;
@@ -72,48 +76,55 @@ namespace midspace.adminscripts.Protection
             if (_firstOwnershipChange)
             {
                 _firstOwnershipChange = false;
-                _cachedOwners = new List<long>(cubeGrid.SmallOwners);
+                _cachedOwners = new List<long>(cubeGrid.GetAllSmallOwners());
                 return;
             }
 
-            if (_cachedOwners == cubeGrid.SmallOwners)
+            var allSmallOwners = cubeGrid.GetAllSmallOwners(); 
+
+            if (_cachedOwners == allSmallOwners)
                 return;
 
             // if the grid wasn't owned or a owner was removed, we dont need to do anything but update the cached owners
-            if (_cachedOwners.Count == 0 || _cachedOwners.Count > cubeGrid.SmallOwners.Count)
+            if (_cachedOwners.Count == 0 || _cachedOwners.Count > allSmallOwners.Count)
             {
-                _cachedOwners = new List<long>(cubeGrid.SmallOwners);
+                _cachedOwners = new List<long>(allSmallOwners);
                 return;
             }
 
-            var newOwners = cubeGrid.SmallOwners.Except(_cachedOwners).ToList();
+            var newOwners = allSmallOwners.Except(_cachedOwners).ToList();
 
             if (newOwners.Count == 0)
                 return;
 
             if (!ProtectionHandler.IsProtected(cubeGrid))
             {
-                _cachedOwners = new List<long>(cubeGrid.SmallOwners);
+                _cachedOwners = new List<long>(allSmallOwners);
                 return;
             }
 
-            List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-            cubeGrid.GetBlocks(blocks, b => b.FatBlock != null);
-
             Dictionary<long, int> blocksPerOwner = new Dictionary<long, int>();
 
-            foreach (IMySlimBlock block in blocks)
+            foreach (IMyCubeGrid attachedCubeGrid in cubeGrid.GetStaticallyAttachedGrids())
             {
-                long ownerId = block.FatBlock.OwnerId;
 
-                // we dont want the new owners, the small owners or the 'nobody' (0)
-                if (ownerId == 0 || !cubeGrid.BigOwners.Contains(ownerId) || newOwners.Contains(ownerId))
-                    continue;
+                List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+                attachedCubeGrid.GetBlocks(blocks, b => b.FatBlock != null);
 
-                if (!blocksPerOwner.ContainsKey(ownerId))
-                    blocksPerOwner.Add(ownerId, 1);
-                else
-                    blocksPerOwner[ownerId]++;
+
+                foreach (IMySlimBlock block in blocks)
+                {
+                    long ownerId = block.FatBlock.OwnerId;
+
+                    // we dont want the new owners, the small owners or the 'nobody' (0)
+                    if (ownerId == 0 || !attachedCubeGrid.BigOwners.Contains(ownerId) || newOwners.Contains(ownerId))
+                        continue;
+
+                    if (!blocksPerOwner.ContainsKey(ownerId))
+                        blocksPerOwner.Add(ownerId, 1);
+                    else
+                        blocksPerOwner[ownerId]++;
+                }
             }
 
             var sortedBpo = new List<KeyValuePair<long, int>>(blocksPerOwner.OrderBy(pair => pair.Value));
@@ -121,7 +132,7 @@ namespace midspace.adminscripts.Protection
             // if we cannot identify an owner we allow the change
             if (sortedBpo.Count == 0)
             {
-                _cachedOwners = new List<long>(cubeGrid.SmallOwners);
+                _cachedOwners = new List<long>(allSmallOwners);
                 return;
             }
 
