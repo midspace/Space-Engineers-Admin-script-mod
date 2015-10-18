@@ -105,7 +105,7 @@ namespace midspace.adminscripts.Protection
 
             Dictionary<long, int> blocksPerOwner = new Dictionary<long, int>();
 
-            foreach (IMyCubeGrid attachedCubeGrid in cubeGrid.GetStaticallyAttachedGrids())
+            foreach (IMyCubeGrid attachedCubeGrid in cubeGrid.GetAttachedGrids(AttachedGrids.Static))
             {
 
                 List<IMySlimBlock> blocks = new List<IMySlimBlock>();

@@ -16,60 +16,30 @@ namespace midspace.adminscripts
 
     public static class Extensions
     {
-        public static Vector3 ToHsvColor(this Color color)
-        {
-            var hsvColor = color.ColorToHSV();
-            return new Vector3(hsvColor.X, hsvColor.Y * 2f - 1f, hsvColor.Z * 2f - 1f);
-        }
+        #region grid
 
-        public static Color ToColor(this Vector3 hsv)
-        {
-            return new Vector3(hsv.X, (hsv.Y + 1f) / 2f, (hsv.Z + 1f) / 2f).HSVtoColor();
-        }
-
-        public static SerializableVector3 ToSerializableVector3(this Vector3D v)
-        {
-            return new SerializableVector3((float)v.X, (float)v.Y, (float)v.Z);
-        }
-
-        public static SerializableVector3D ToSerializableVector3D(this Vector3D v)
-        {
-            return new SerializableVector3D(v.X, v.Y, v.Z);
-        }
-
-        public static float ToGridLength(this MyCubeSize cubeSize)
-        {
-            return MyDefinitionManager.Static.GetCubeSize(cubeSize);
-        }
+        #region attached grids
 
         /// <summary>
         /// Find all grids attached to the specified grid, either by piston, rotor, connector or landing gear.
         /// This will iterate through all attached grids, until all are found.
         /// </summary>
         /// <param name="entity"></param>
+        /// <param name="type">Specifies if all attached grids will be found or only grids that are attached either by piston or rotor.</param>
         /// <returns>A list of all attached grids, including the original.</returns>
-        public static List<IMyCubeGrid> GetAttachedGrids(this IMyEntity entity)
+        public static List<IMyCubeGrid> GetAttachedGrids(this IMyEntity entity, AttachedGrids type = AttachedGrids.All)
         {
-            return GetAttachedGrids(entity as IMyCubeGrid);
-        }
+            var cubeGrid = entity as IMyCubeGrid;
 
-        /// <summary>
-        /// Find all grids attached to the specified grid, either by piston, rotor, connector or landing gear.
-        /// This will iterate through all attached grids, until all are found.
-        /// </summary>
-        /// <param name="cubeGrid"></param>
-        /// <returns>A list of all attached grids, including the original.</returns>
-        public static List<IMyCubeGrid> GetAttachedGrids(this IMyCubeGrid cubeGrid)
-        {
             if (cubeGrid == null)
                 return new List<IMyCubeGrid>();
 
             var results = new List<IMyCubeGrid> { cubeGrid };
-            GetAttachedGrids(cubeGrid, ref results);
+            GetAttachedGrids(cubeGrid, ref results, type);
             return results;
         }
 
-        private static void GetAttachedGrids(IMyCubeGrid cubeGrid, ref List<IMyCubeGrid> results)
+        private static void GetAttachedGrids(IMyCubeGrid cubeGrid, ref List<IMyCubeGrid> results, AttachedGrids type)
         {
             if (cubeGrid == null)
                 return;
@@ -96,7 +66,7 @@ namespace midspace.adminscripts
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
+                        GetAttachedGrids(entityParent, ref results, type);
                     }
                 }
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedRotor) ||
@@ -112,7 +82,7 @@ namespace midspace.adminscripts
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
+                        GetAttachedGrids(entityParent, ref results, type);
                     }
                 }
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
@@ -126,7 +96,7 @@ namespace midspace.adminscripts
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
+                        GetAttachedGrids(entityParent, ref results, type);
                     }
                 }
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase) ||
@@ -141,10 +111,10 @@ namespace midspace.adminscripts
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
+                        GetAttachedGrids(entityParent, ref results, type);
                     }
                 }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipConnector))
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipConnector) && type == AttachedGrids.All)
                 {
                     // There isn't a non-Ingame interface for IMyShipConnector at this time.
                     var connector = (Sandbox.ModAPI.Ingame.IMyShipConnector)block.FatBlock;
@@ -157,10 +127,10 @@ namespace midspace.adminscripts
                     if (!results.Any(e => e.EntityId == otherGrid.EntityId))
                     {
                         results.Add(otherGrid);
-                        GetAttachedGrids(otherGrid, ref results);
+                        GetAttachedGrids(otherGrid, ref results, type);
                     }
                 }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_LandingGear))
+                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_LandingGear) && type == AttachedGrids.All)
                 {
                     var landingGear = (IMyLandingGear)block.FatBlock;
                     if (landingGear.IsLocked == false)
@@ -174,7 +144,7 @@ namespace midspace.adminscripts
                     if (!results.Any(e => e.EntityId == otherGrid.EntityId))
                     {
                         results.Add(otherGrid);
-                        GetAttachedGrids(otherGrid, ref results);
+                        GetAttachedGrids(otherGrid, ref results, type);
                     }
                 }
             }
@@ -184,153 +154,38 @@ namespace midspace.adminscripts
             var checkList = results; // cannot use ref paramter in Lambada expression!?!.
             MyAPIGateway.Entities.GetEntities(allShips, e => e is IMyCubeGrid && !checkList.Contains(e));
 
-            foreach (IMyCubeGrid ship in allShips)
+            if (type == AttachedGrids.All)
             {
-                blocks = new List<IMySlimBlock>();
-                ship.GetBlocks(blocks, b => b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull && b.FatBlock is IMyLandingGear);
-
-                foreach (var block in blocks)
+                foreach (IMyCubeGrid ship in allShips)
                 {
-                    var landingGear = (IMyLandingGear)block.FatBlock;
-                    if (landingGear.IsLocked == false)
-                        continue;
+                    blocks = new List<IMySlimBlock>();
+                    ship.GetBlocks(blocks,
+                        b =>
+                            b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull &&
+                            b.FatBlock is IMyLandingGear);
 
-                    var entity = landingGear.GetAttachedEntity();
-
-                    if (entity == null || entity.EntityId != cubeGrid.EntityId)
-                        continue;
-
-                    if (!results.Any(e => e.EntityId == ship.EntityId))
+                    foreach (var block in blocks)
                     {
-                        results.Add(ship);
-                        GetAttachedGrids(ship, ref results);
+                        var landingGear = (IMyLandingGear) block.FatBlock;
+                        if (landingGear.IsLocked == false)
+                            continue;
+
+                        var entity = landingGear.GetAttachedEntity();
+
+                        if (entity == null || entity.EntityId != cubeGrid.EntityId)
+                            continue;
+
+                        if (!results.Any(e => e.EntityId == ship.EntityId))
+                        {
+                            results.Add(ship);
+                            GetAttachedGrids(ship, ref results, type);
+                        }
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// Find all grids attached to the specified grid, either by piston or rotor.
-        /// This will iterate through all attached grids, until all are found.
-        /// </summary>
-        /// <param name="cubeGrid"></param>
-        /// <returns>A list of all attached grids, including the original.</returns>
-        public static List<IMyCubeGrid> GetStaticallyAttachedGrids(this IMyCubeGrid cubeGrid)
-        {
-            if (cubeGrid == null)
-                return new List<IMyCubeGrid>();
-
-            var results = new List<IMyCubeGrid> { cubeGrid };
-            GetStaticallyAttachedGrids(cubeGrid, ref results);
-            return results;
-        }
-
-        private static void GetStaticallyAttachedGrids(IMyCubeGrid cubeGrid, ref List<IMyCubeGrid> results)
-        {
-            if (cubeGrid == null)
-                return;
-
-            var blocks = new List<IMySlimBlock>();
-            cubeGrid.GetBlocks(blocks, b => b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull);
-
-            foreach (var block in blocks)
-            {
-                //MyAPIGateway.Utilities.ShowMessage("Block", string.Format("{0}", block.FatBlock.BlockDefinition.TypeId));
-
-                if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase))
-                {
-                    // The MotorStator which inherits from MotorBase.
-                    var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
-                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
-                        continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(motorBase.RotorEntityId).Parent as IMyCubeGrid;
-                    if (entityParent == null)
-                        continue;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedRotor) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorRotor) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RealWheel) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Wheel))
-                {
-                    // The Rotor Part.
-                    var motorCube = Support.FindRotorBase(block.FatBlock.EntityId);
-                    if (motorCube == null)
-                        continue;
-                    var entityParent = (IMyCubeGrid)motorCube.Parent;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
-                {
-                    var pistonTop = block.GetObjectBuilder() as MyObjectBuilder_PistonTop;
-                    if (pistonTop == null || pistonTop.PistonBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonTop.PistonBlockId))
-                        continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(pistonTop.PistonBlockId).Parent as IMyCubeGrid;
-                    if (entityParent == null)
-                        continue;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase))
-                {
-                    var pistonBase = block.GetObjectBuilder() as MyObjectBuilder_PistonBase;
-                    if (pistonBase == null || pistonBase.TopBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonBase.TopBlockId))
-                        continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(pistonBase.TopBlockId).Parent as IMyCubeGrid;
-                    if (entityParent == null)
-                        continue;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results);
-                    }
-                }
-            }
-
-            // Loop through all other grids, find their Landing gear, and figure out if they are attached to <cubeGrid>.
-            var allShips = new HashSet<IMyEntity>();
-            var checkList = results; // cannot use ref paramter in Lambada expression!?!.
-            MyAPIGateway.Entities.GetEntities(allShips, e => e is IMyCubeGrid && !checkList.Contains(e));
-
-            foreach (IMyCubeGrid ship in allShips)
-            {
-                blocks = new List<IMySlimBlock>();
-                ship.GetBlocks(blocks, b => b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull && b.FatBlock is IMyLandingGear);
-
-                foreach (var block in blocks)
-                {
-                    var landingGear = (IMyLandingGear)block.FatBlock;
-                    if (landingGear.IsLocked == false)
-                        continue;
-
-                    var entity = landingGear.GetAttachedEntity();
-
-                    if (entity == null || entity.EntityId != cubeGrid.EntityId)
-                        continue;
-
-                    if (!results.Any(e => e.EntityId == ship.EntityId))
-                    {
-                        results.Add(ship);
-                        GetAttachedGrids(ship, ref results);
-                    }
-                }
-            }
-        }
+        #endregion
 
         public static IMyControllableEntity[] FindWorkingCockpits(this IMyEntity entity)
         {
@@ -346,21 +201,6 @@ namespace midspace.adminscripts
             }
 
             return new IMyControllableEntity[0];
-        }
-
-        public static bool IsShipControlEnabled(this Sandbox.ModAPI.Ingame.IMyCubeBlock cockpitBlock)
-        {
-            var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpitBlock.BlockDefinition);
-            var cockpitDefintion = definition as MyCockpitDefinition;
-            var remoteDefintion = definition as MyRemoteControlDefinition;
-
-            if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
-                return true;
-            if (remoteDefintion != null && remoteDefintion.EnableShipControl)
-                return true;
-
-            // is Passenger chair.
-            return false;
         }
 
         public static void EjectControllingPlayers(this IMyCubeGrid cubeGrid)
@@ -400,6 +240,94 @@ namespace midspace.adminscripts
                 }
             }
         }
+
+        public static bool StopShip(this IMyEntity shipEntity)
+        {
+            var grids = shipEntity.GetAttachedGrids();
+
+            foreach (var grid in grids)
+            {
+                var shipCubeGrid = grid.GetObjectBuilder(false) as MyObjectBuilder_CubeGrid;
+
+                if (shipCubeGrid.IsStatic)
+                    continue;
+
+                var cockPits = grid.FindWorkingCockpits();
+
+                if (!shipCubeGrid.DampenersEnabled && cockPits.Length > 0)
+                {
+                    cockPits[0].SwitchDamping();
+                }
+
+                foreach (var cockPit in cockPits)
+                {
+                    cockPit.MoveAndRotateStopped();
+                }
+
+                grid.Physics.ClearSpeed();
+
+                // TODO : may need to iterate through thrusters and turn off any thrust override.
+                // 01.064.010 requires using the Action("DecreaseOverride") repeatbly until override is 0.
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Generates a list of all owners of the cubegrid and all grids that are statically attached to it.
+        /// </summary>
+        /// <param name="cubeGrid"></param>
+        /// <returns></returns>
+        public static List<long> GetAllSmallOwners(this IMyCubeGrid cubeGrid)
+        {
+            List<IMyCubeGrid> allGrids = cubeGrid.GetAttachedGrids(AttachedGrids.Static);
+            HashSet<long> allSmallOwners = new HashSet<long>();
+
+            foreach (var owner in allGrids.SelectMany(myCubeGrid => myCubeGrid.SmallOwners))
+            {
+                allSmallOwners.Add(owner);
+            }
+
+            return allSmallOwners.ToList();
+        }
+
+        #endregion
+
+        #region block
+
+        public static bool IsShipControlEnabled(this Sandbox.ModAPI.Ingame.IMyCubeBlock cockpitBlock)
+        {
+            var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpitBlock.BlockDefinition);
+            var cockpitDefintion = definition as MyCockpitDefinition;
+            var remoteDefintion = definition as MyRemoteControlDefinition;
+
+            if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
+                return true;
+            if (remoteDefintion != null && remoteDefintion.EnableShipControl)
+                return true;
+
+            // is Passenger chair.
+            return false;
+        }
+
+        /// <summary>
+        /// Changes owner of invividual cube block.
+        /// </summary>
+        /// <param name="cube"></param>
+        /// <param name="playerId">new owner id</param>
+        /// <param name="shareMode">new share mode</param>
+        public static void ChangeOwner(this IMyCubeBlock cube, long playerId, MyOwnershipShareModeEnum shareMode)
+        {
+            var block = (Sandbox.Game.Entities.MyCubeBlock)cube;
+
+            // TODO: Unsure which of these are required. needs further investigation.
+            block.ChangeOwner(playerId, shareMode);
+            block.ChangeBlockOwnerRequest(playerId, shareMode);
+        }
+
+        #endregion
+
+        #region player
 
         /// <summary>
         /// Determines if the player is an Administrator of the active game session.
@@ -456,25 +384,6 @@ namespace midspace.adminscripts
         }
 
         /// <summary>
-        /// Adds an element with the provided key and value to the System.Collections.Generic.IDictionary&gt;TKey,TValue&lt;.
-        /// If the provide key already exists, then the existing key is updated with the newly supplied value.
-        /// </summary>
-        /// <typeparam name="TKey"></typeparam>
-        /// <typeparam name="TValue"></typeparam>
-        /// <param name="dictionary"></param>
-        /// <param name="key">The object to use as the key of the element to add.</param>
-        /// <param name="value">The object to use as the value of the element to add.</param>
-        /// <exception cref="System.ArgumentNullException">key is null</exception>
-        /// <exception cref="System.NotSupportedException">The System.Collections.Generic.IDictionary&gt;TKey,TValue&lt; is read-only.</exception>
-        public static void Update<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
-        {
-            if (dictionary.ContainsKey(key))
-                dictionary[key] = value;
-            else
-                dictionary.Add(key, value);
-        }
-
-        /// <summary>
         /// Deals 1000 hp of damage to player, killing them instantly.
         /// </summary>
         /// <param name="player"></param>
@@ -487,11 +396,6 @@ namespace midspace.adminscripts
 
             destroyable.DoDamage(1000f, damageType, true);
             return true;
-        }
-
-        public static void ShowMessage(this IMyUtilities utilities, string sender, string messageText, params object[] args)
-        {
-            utilities.ShowMessage(sender, string.Format(messageText, args));
         }
 
         public static bool TryGetPlayer(this IMyPlayerCollection collection, string name, out IMyPlayer player)
@@ -576,6 +480,15 @@ namespace midspace.adminscripts
             return null;
         }
 
+        public static bool IsHost(this IMyPlayer player)
+        {
+            return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
+        }
+
+        #endregion
+
+        #region entity
+
         /// <summary>
         /// Creates the objectbuilder in game, and syncs it to the server and all clients.
         /// </summary>
@@ -611,41 +524,34 @@ namespace midspace.adminscripts
             return false;
         }
 
-        public static bool StopShip(this IMyEntity shipEntity)
+        #endregion
+
+        #region misc/util
+
+        public static Vector3 ToHsvColor(this Color color)
         {
-            var grids = shipEntity.GetAttachedGrids();
-
-            foreach (var grid in grids)
-            {
-                var shipCubeGrid = grid.GetObjectBuilder(false) as MyObjectBuilder_CubeGrid;
-
-                if (shipCubeGrid.IsStatic)
-                    continue;
-
-                var cockPits = grid.FindWorkingCockpits();
-
-                if (!shipCubeGrid.DampenersEnabled && cockPits.Length > 0)
-                {
-                    cockPits[0].SwitchDamping();
-                }
-
-                foreach (var cockPit in cockPits)
-                {
-                    cockPit.MoveAndRotateStopped();
-                }
-
-                grid.Physics.ClearSpeed();
-
-                // TODO : may need to iterate through thrusters and turn off any thrust override.
-                // 01.064.010 requires using the Action("DecreaseOverride") repeatbly until override is 0.
-            }
-
-            return true;
+            var hsvColor = color.ColorToHSV();
+            return new Vector3(hsvColor.X, hsvColor.Y * 2f - 1f, hsvColor.Z * 2f - 1f);
         }
 
-        public static bool IsHost(this IMyPlayer player)
+        public static Color ToColor(this Vector3 hsv)
         {
-            return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
+            return new Vector3(hsv.X, (hsv.Y + 1f) / 2f, (hsv.Z + 1f) / 2f).HSVtoColor();
+        }
+
+        public static SerializableVector3 ToSerializableVector3(this Vector3D v)
+        {
+            return new SerializableVector3((float)v.X, (float)v.Y, (float)v.Z);
+        }
+
+        public static SerializableVector3D ToSerializableVector3D(this Vector3D v)
+        {
+            return new SerializableVector3D(v.X, v.Y, v.Z);
+        }
+
+        public static float ToGridLength(this MyCubeSize cubeSize)
+        {
+            return MyDefinitionManager.Static.GetCubeSize(cubeSize);
         }
 
         public static double RoundUpToNearest(this double value, int scale)
@@ -682,36 +588,44 @@ namespace midspace.adminscripts
         }
 
         /// <summary>
-        /// Generates a list of all owners of the cubegrid and all grids that are statically attached to it.
+        /// Adds an element with the provided key and value to the System.Collections.Generic.IDictionary&gt;TKey,TValue&lt;.
+        /// If the provide key already exists, then the existing key is updated with the newly supplied value.
         /// </summary>
-        /// <param name="cubeGrid"></param>
-        /// <returns></returns>
-        public static List<long> GetAllSmallOwners(this IMyCubeGrid cubeGrid)
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key">The object to use as the key of the element to add.</param>
+        /// <param name="value">The object to use as the value of the element to add.</param>
+        /// <exception cref="System.ArgumentNullException">key is null</exception>
+        /// <exception cref="System.NotSupportedException">The System.Collections.Generic.IDictionary&gt;TKey,TValue&lt; is read-only.</exception>
+        public static void Update<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
-            List<IMyCubeGrid> allGrids = cubeGrid.GetStaticallyAttachedGrids();
-            HashSet<long> allSmallOwners = new HashSet<long>();
-
-            foreach (var owner in allGrids.SelectMany(myCubeGrid => myCubeGrid.SmallOwners))
-            {
-                allSmallOwners.Add(owner);
-            }
-
-            return allSmallOwners.ToList();
+            if (dictionary.ContainsKey(key))
+                dictionary[key] = value;
+            else
+                dictionary.Add(key, value);
         }
 
+        public static void ShowMessage(this IMyUtilities utilities, string sender, string messageText, params object[] args)
+        {
+            utilities.ShowMessage(sender, string.Format(messageText, args));
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Specifies which attached grids are found.
+    /// </summary>
+    public enum AttachedGrids
+    {
         /// <summary>
-        /// Changes owner of invividual cube block.
+        /// All attached grids will be found.
         /// </summary>
-        /// <param name="cube"></param>
-        /// <param name="playerId">new owner id</param>
-        /// <param name="shareMode">new share mode</param>
-        public static void ChangeOwner(this IMyCubeBlock cube, long playerId, MyOwnershipShareModeEnum shareMode)
-        {
-            var block = (Sandbox.Game.Entities.MyCubeBlock)cube;
-
-            // TODO: Unsure which of these are required. needs further investigation.
-            block.ChangeOwner(playerId, shareMode);
-            block.ChangeBlockOwnerRequest(playerId, shareMode);
-        }
+        All,
+        /// <summary>
+        /// Only grids statically attached to that grid, such as by piston or rotor will be found.
+        /// </summary>
+        Static
     }
 }
