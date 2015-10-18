@@ -10,7 +10,7 @@
     public class CommandForceBan : ChatCommand
     {
         public CommandForceBan()
-            : base(ChatCommandSecurity.Admin, "forceban", new string[] { "/forceban" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "forceban", new string[] { "/forceban" })
         {
         }
 
@@ -21,9 +21,6 @@
 
         public override bool Invoke(string messageText)
         {
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                return false;
-
             var match = Regex.Match(messageText, @"/forceban\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {

@@ -95,7 +95,7 @@
         /// <returns>Returns true if the command has the given flag.</returns>
         public bool HasFlag(ChatCommandFlag flag)
         {
-            return Flag.Equals(flag);
+            return Flag.HasFlag(flag);
         }
     }
 
@@ -110,6 +110,16 @@
         /// <summary>
         /// Shows that this command is not ready for use, thus only accessible for experimental users.
         /// </summary>
-        Experimental = 0x1
+        Experimental = 0x1,
+
+        /// <summary>
+        /// Shows that this command can only be used in singleplayer.
+        /// </summary>
+        SingleplayerOnly = 0x2,
+
+        /// <summary>
+        /// Shows that this command can only be used in multiplayer.
+        /// </summary>
+        MultiplayerOnly = 0x4
     }
 }

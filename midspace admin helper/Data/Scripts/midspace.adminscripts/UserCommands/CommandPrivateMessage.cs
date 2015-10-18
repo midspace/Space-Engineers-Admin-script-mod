@@ -15,7 +15,7 @@ namespace midspace.adminscripts
         public static bool LogPrivateMessages = false;
 
         public CommandPrivateMessage()
-            : base(ChatCommandSecurity.User, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
+            : base(ChatCommandSecurity.User, ChatCommandFlag.MultiplayerOnly, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
         {
         }
 
@@ -60,12 +60,6 @@ The logging of private messages is {1}.
 
         public override bool Invoke(string messageText)
         {
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-            {
-                MyAPIGateway.Utilities.ShowMessage("PM System", "Command disabled in offline mode.");
-                return true;
-            }
-
             //TODO: matching playernames
             var match = Regex.Match(messageText, @"@@@@@\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)

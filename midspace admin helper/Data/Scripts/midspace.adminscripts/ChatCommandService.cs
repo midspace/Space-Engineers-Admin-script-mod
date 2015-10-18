@@ -131,6 +131,18 @@
                     return true;
                 }
 
+                if (command.Value.HasFlag(ChatCommandFlag.SingleplayerOnly) && MyAPIGateway.Session.OnlineMode != MyOnlineModeEnum.OFFLINE)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Command Service", "Command disabled in online mode.");
+                    return true;
+                }
+
+                if (command.Value.HasFlag(ChatCommandFlag.MultiplayerOnly) && MyAPIGateway.Session.OnlineMode == MyOnlineModeEnum.OFFLINE)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Command Service", "Command disabled in offline mode.");
+                    return true;
+                }
+
                 try
                 {
                     if (command.Value.Invoke(messageText))

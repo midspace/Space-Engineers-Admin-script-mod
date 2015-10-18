@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
         public static bool DropPlayer;
 
         public CommandForceKick()
-            : base(ChatCommandSecurity.Admin, "forcekick", new string[] { "/forcekick" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "forcekick", new string[] { "/forcekick" })
         {
         }
 
@@ -23,9 +23,6 @@ using System.Text.RegularExpressions;
 
         public override bool Invoke(string messageText)
         {
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                return false;
-
             var match = Regex.Match(messageText, @"/forcekick\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {

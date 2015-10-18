@@ -29,7 +29,7 @@ namespace midspace.adminscripts
         public static bool ShowInChat = false;
 
         public CommandMessageOfTheDay()
-            : base(ChatCommandSecurity.User, "motd", new[] { "/motd" })
+            : base(ChatCommandSecurity.User, ChatCommandFlag.MultiplayerOnly, "motd", new[] { "/motd" })
         {
 
         }

@@ -13,7 +13,7 @@ namespace midspace.adminscripts
     {
 
         public CommandChatHistory()
-            : base (ChatCommandSecurity.User, "chat", new string[] { "/chat" })
+            : base(ChatCommandSecurity.User, ChatCommandFlag.MultiplayerOnly, "chat", new string[] { "/chat" })
         {
 
         }
@@ -37,12 +37,6 @@ Example:
 
         public override bool Invoke(string messageText)
         {
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-            {
-                MyAPIGateway.Utilities.ShowMessage("Chat", "Command disabled in offline mode.");
-                return true;
-            }
-
             var match = Regex.Match(messageText, @"/chat(\s+(?<Entries>.+)|)", RegexOptions.IgnoreCase);
 
             if (match.Success)

@@ -12,7 +12,7 @@ namespace midspace.adminscripts
     {
 
         public CommandConfig()
-            : base(ChatCommandSecurity.Admin, "cfg", new string[] { "/config", "/cfg" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "cfg", new string[] { "/config", "/cfg" })
         {
         }
 
@@ -63,12 +63,6 @@ Examples:
 
         public override bool Invoke(string messageText)
         {
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-            {
-                MyAPIGateway.Utilities.ShowMessage("Config", "Command disabled in offline mode.");
-                return true;
-            }
-
             var match = Regex.Match(messageText, @"(/config|/cfg)\s+(?<Key>[^\s]+)((\s+(?<Value>.+))|)", RegexOptions.IgnoreCase); 
             if (match.Success)
             {

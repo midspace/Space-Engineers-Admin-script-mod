@@ -11,7 +11,7 @@ namespace midspace.adminscripts.Protection.Commands
     {
         public CommandProtectionArea()
             : base(
-                ChatCommandSecurity.Admin, "protectionarea", new string[] { "/protectionarea", "/pa" }) { }
+                ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "protectionarea", new string[] { "/protectionarea", "/pa" }) { }
 
         public override void Help(bool brief)
         {
