@@ -62,6 +62,7 @@ namespace midspace.adminscripts.Protection
                 return;
 
             IMySlimBlock block = target as IMySlimBlock;
+
             if (block != null)
             {
                 IMyEntity attacker;
@@ -72,6 +73,13 @@ namespace midspace.adminscripts.Protection
                 }
 
                 info.Amount = 0;
+                return;
+            }
+
+            IMyCharacter character = target as IMyCharacter;
+            if (character != null)
+            {
+                // TODO prevent pvp damage
             }
         }
 
