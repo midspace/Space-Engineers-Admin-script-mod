@@ -39,7 +39,6 @@ namespace midspace.adminscripts.Protection
 
         public override void UpdateBeforeSimulation()
         {
-
             if (_multiplayerActive && MyAPIGateway.CubeBuilder != null &&
                 MyAPIGateway.CubeBuilder.BlockCreationIsActivated && MyAPIGateway.Session.Player != null &&
                 MyAPIGateway.Session.Player.Controller.ControlledEntity != null)
@@ -71,6 +70,9 @@ namespace midspace.adminscripts.Protection
                 else
                     Deactivate();
             }
+            else if (!_multiplayerActive && (_multiplayerActive != (MyAPIGateway.Session.OnlineMode != MyOnlineModeEnum.OFFLINE))) 
+                // we need to update it because it is not correctly initialized if the cube placer is created when the game loads
+                _multiplayerActive = MyAPIGateway.Session.OnlineMode != MyOnlineModeEnum.OFFLINE;
 
             base.UpdateBeforeSimulation();
         }

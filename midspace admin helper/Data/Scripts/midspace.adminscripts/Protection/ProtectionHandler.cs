@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Sandbox.ModAPI;
 using System.Linq;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -79,7 +80,23 @@ namespace midspace.adminscripts.Protection
             IMyCharacter character = target as IMyCharacter;
             if (character != null)
             {
-                // TODO prevent pvp damage
+                var players = new List<IMyPlayer>();
+                MyAPIGateway.Players.GetPlayers(players, p => p == null || p.Controller.ControlledEntity == null || p.Controller.ControlledEntity.Entity == null);
+
+                var player = players.FirstOrDefault(p => p.GetCharacter() == character);
+                if (player == null)
+                    return;
+
+                if (!Config.Areas.Any(a => a.Contains(player.Controller.ControlledEntity.Entity)))
+                    return;
+
+                if (info.Type == MyDamageType.LowPressure || info.Type == MyDamageType.Asphyxia ||
+                    info.Type == MyDamageType.Environment || info.Type == MyDamageType.Fall ||
+                    info.Type == MyDamageType.Fire || info.Type == MyDamageType.Radioactivity ||
+                    info.Type == MyDamageType.Suicide || info.Type == MyDamageType.Unknown)
+                    return;
+
+                info.Amount = 0;
             }
         }
 
