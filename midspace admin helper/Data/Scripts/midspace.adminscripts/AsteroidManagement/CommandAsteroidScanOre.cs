@@ -48,7 +48,7 @@
                 {
                     if (gps.Description == "scanore" && Regex.IsMatch(gps.Name, @"^Ore [^\s]*$") && Math.Sqrt((gps.Coords - position).LengthSquared()) < scanRange)
                     {
-                        MyAPIGateway.Session.GPS.RemoveLocalGps(gps);
+                        MyAPIGateway.Session.GPS.RemoveGps(MyAPIGateway.Session.Player.IdentityId, gps);
                         counter++;
                     }
                 }
