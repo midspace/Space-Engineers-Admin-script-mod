@@ -1023,7 +1023,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     return;
                 }
             }
-
+            players = new List<PlayerPermission>(players.OrderBy(p => p.Player.PlayerName));
             if (!PlayerCache.ContainsKey(sender))
                 PlayerCache.Add(sender, players);
             else
@@ -1032,7 +1032,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             ConnectionHelper.SendMessageToPlayer(sender, new MessagePlayerPermission()
             {
                 Action = PlayerPermissionAction.List,
-                PlayerPermissions = new List<PlayerPermission>(players.OrderBy(p => p.Player.PlayerName)),
+                PlayerPermissions = players
             });
         }
 
