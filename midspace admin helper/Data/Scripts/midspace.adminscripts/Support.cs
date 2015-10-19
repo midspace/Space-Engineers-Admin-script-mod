@@ -79,7 +79,7 @@ namespace midspace.adminscripts
                             continue;
 
                         // check if the ray comes anywhere near the Grid before continuing.    
-                            if (ray.Intersects(entity.WorldAABB).HasValue)
+                        if (ray.Intersects(entity.WorldAABB).HasValue)
                         {
                             var hit = cubeGrid.RayCastBlocks(startPosition, endPosition);
                             if (hit.HasValue)

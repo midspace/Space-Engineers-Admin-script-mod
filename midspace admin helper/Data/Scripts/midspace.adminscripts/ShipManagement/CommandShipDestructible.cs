@@ -45,14 +45,11 @@
                 if (string.IsNullOrEmpty(shipName))
                 {
                     var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false);
-                    if (entity != null)
+                    var shipEntity = entity as IMyCubeGrid;
+                    if (shipEntity != null)
                     {
-                        var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
-                        if (shipEntity != null)
-                        {
-                            SetDestructible(shipEntity, switchOn);
-                            return true;
-                        }
+                        SetDestructible(shipEntity, switchOn);
+                        return true;
                     }
 
                     MyAPIGateway.Utilities.ShowMessage("destructible", "No ship targeted.");
@@ -96,7 +93,7 @@
             var gridObjectBuilder = shipEntity.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
             if (gridObjectBuilder.DestructibleBlocks == destructible)
             {
-                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible is already set to {1}.",  shipEntity.DisplayName, destructible ? "On" : "Off");
+                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible is already set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
                 return;
             }
 
