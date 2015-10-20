@@ -81,7 +81,7 @@ namespace midspace.adminscripts.Protection
             if (character != null)
             {
                 var players = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(players, p => p == null || p.Controller.ControlledEntity == null || p.Controller.ControlledEntity.Entity == null);
+                MyAPIGateway.Players.GetPlayers(players, p => p != null && p.Controller.ControlledEntity != null && p.Controller.ControlledEntity.Entity != null);
 
                 var player = players.FirstOrDefault(p => p.GetCharacter() == character);
                 if (player == null)
