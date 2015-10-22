@@ -11,7 +11,7 @@
     public class CommandShipDelete : ChatCommand
     {
         public CommandShipDelete()
-            : base(ChatCommandSecurity.Admin, "deleteship", new[] { "/deleteship" })
+            : base(ChatCommandSecurity.Admin, "deleteship", new[] { "/deleteship", "/delship" })
         {
         }
 
@@ -22,8 +22,9 @@
 
         public override bool Invoke(string messageText)
         {
-            if (messageText.Equals("/deleteship", StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (messageText.Equals("/deleteship", StringComparison.InvariantCultureIgnoreCase)||
+                messageText.Equals("/delship", StringComparison.InvariantCultureIgnoreCase))
+                {
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false);
                 if (entity != null)
                 {
@@ -39,7 +40,7 @@
                 return true;
             }
 
-            var match = Regex.Match(messageText, @"/deleteship\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/((delship)|(deleteship))\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 var shipName = match.Groups["Key"].Value;
