@@ -58,9 +58,9 @@ namespace midspace.adminscripts
                 {
                     // The MotorStator which inherits from MotorBase.
                     var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
-                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
+                    if (motorBase == null || !motorBase.RotorEntityId.HasValue || motorBase.RotorEntityId.Value == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId.Value))
                         continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(motorBase.RotorEntityId).Parent as IMyCubeGrid;
+                    var entityParent = MyAPIGateway.Entities.GetEntityById(motorBase.RotorEntityId.Value).Parent as IMyCubeGrid;
                     if (entityParent == null)
                         continue;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
@@ -87,12 +87,11 @@ namespace midspace.adminscripts
                 }
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
                 {
-                    var pistonTop = block.GetObjectBuilder() as MyObjectBuilder_PistonTop;
-                    if (pistonTop == null || pistonTop.PistonBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonTop.PistonBlockId))
+                    // The Piston Top.
+                    var pistonCube = Support.FindPistonBase(block.FatBlock.EntityId);
+                    if (pistonCube == null)
                         continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(pistonTop.PistonBlockId).Parent as IMyCubeGrid;
-                    if (entityParent == null)
-                        continue;
+                    var entityParent = (IMyCubeGrid)pistonCube.Parent;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);

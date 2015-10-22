@@ -56,11 +56,11 @@
                         var planet = (Sandbox.Game.Entities.MyPlanet)entity;
                         displayType = "planet";
                         displayName = planet.StorageName;
-                        description = string.Format("Distance: {0:N} m\r\nCenter: [X:{1:N} Y:{2:N} Z:{3:N}]\r\nMinimum Surface Radius: {4:N} m\r\nAverage Surface Radius: {5:N} m\r\nAtmosphere Radius: {6:N} m\r\nHas Atmosphere: {7}",
+                        description = string.Format("Distance: {0:N} m\r\nCenter: [X:{1:N} Y:{2:N} Z:{3:N}]\r\nMinimum Radius: {4:N} m\r\nAverage Radius: {5:N} m\r\nAtmosphere Radius: {6:N} m\r\nHas Atmosphere: {7}",
                             distance,
                             planet.WorldMatrix.Translation.X, planet.WorldMatrix.Translation.Y, planet.WorldMatrix.Translation.Z,
-                            planet.MinimumSurfaceRadius,
-                            planet.AveragePlanetRadius,
+                            planet.MinimumRadius,
+                            planet.AverageRadius,
                             planet.AtmosphereRadius,
                             planet.HasAtmosphere);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");

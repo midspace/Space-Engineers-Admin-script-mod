@@ -601,10 +601,41 @@ namespace midspace.adminscripts
                 {
                     var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
 
-                    if (motorBase == null || motorBase.RotorEntityId == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId))
+                    if (motorBase == null || !motorBase.RotorEntityId.HasValue || motorBase.RotorEntityId.Value == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId.Value))
                         continue;
 
                     if (motorBase.RotorEntityId == entityId)
+                        return block.FatBlock;
+                }
+            }
+
+            return null;
+        }
+
+        public static IMyCubeBlock FindPistonBase(long entityId, IMyCubeGrid parent = null)
+        {
+            var entities = new HashSet<IMyEntity>();
+            MyAPIGateway.Entities.GetEntities(entities, e => e is IMyCubeGrid);
+
+            foreach (var entity in entities)
+            {
+                var cubeGrid = (IMyCubeGrid)entity;
+
+                if (cubeGrid == null)
+                    continue;
+
+                var blocks = new List<IMySlimBlock>();
+                cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null &&
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase));
+
+                foreach (var block in blocks)
+                {
+                    var pistonBase = block.GetObjectBuilder() as MyObjectBuilder_PistonBase;
+
+                    if (pistonBase == null || pistonBase.TopBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonBase.TopBlockId))
+                        continue;
+
+                    if (pistonBase.TopBlockId == entityId)
                         return block.FatBlock;
                 }
             }
