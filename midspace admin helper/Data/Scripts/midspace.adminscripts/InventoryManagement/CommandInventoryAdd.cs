@@ -5,13 +5,13 @@
     using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
     using VRage;
+    using VRage.ModAPI;
     using VRage.ObjectBuilders;
 
     public class CommandInventoryAdd : ChatCommand
@@ -57,7 +57,7 @@
             decimal amount = 1;
 
             var match = Regex.Match(messageText, @"/invadd\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
-            if (match.Success && content == null)
+            if (match.Success)
             {
                 var itemName = match.Groups["Key"].Value;
                 var strAmount = match.Groups["Value"].Value;
@@ -82,18 +82,29 @@
                     amount = Math.Round(amount, 0);
                 }
 
-                var gasContainer = content as MyObjectBuilder_GasContainerObject;
-                if (gasContainer != null)
-                    gasContainer.GasLevel = 1f;
+                if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                {
+                    var gasContainer = content as MyObjectBuilder_GasContainerObject;
+                    if (gasContainer != null)
+                        gasContainer.GasLevel = 1f;
 
-                MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
-                var inventoryOwnwer = MyAPIGateway.Session.Player.Controller.ControlledEntity as IMyInventoryOwner;
-                var inventory = inventoryOwnwer.GetInventory(0) as Sandbox.ModAPI.IMyInventory;
-                var definitionId = new MyDefinitionId(inventoryItem.Content.GetType(), inventoryItem.Content.SubtypeName);
-                if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
-                    inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                    MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
+                    var inventory = MyAPIGateway.Session.Player.GetPlayerInventory();
+                    var definitionId = new MyDefinitionId(inventoryItem.Content.GetType(), inventoryItem.Content.SubtypeName);
+                    if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
+                        inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                    else
+                        MyAPIGateway.Utilities.ShowMessage("Failed", "Inventory full. Could not add the item.");
+                }
                 else
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Inventory full. Could not add the item.");
+                    ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
+                    {
+                        EntityId = ((IMyEntity)MyAPIGateway.Session.Player.GetCharacter()).EntityId,
+                        Type = SyncCreateObjectType.Inventory,
+                        TypeId = content.TypeId.ToString(),
+                        SubtypeName = content.SubtypeName,
+                        Amount = amount
+                    });
                 return true;
             }
 

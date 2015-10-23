@@ -51,8 +51,7 @@
                 if (player != null)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Clearing inventory", player.DisplayName);
-                    var inventoryOwnwer = player.Controller.ControlledEntity as IMyInventoryOwner;
-                    var inventory = inventoryOwnwer.GetInventory(0) as Sandbox.ModAPI.IMyInventory;
+                    var inventory = player.GetPlayerInventory();
                     inventory.Clear();
                     return true;
                 }

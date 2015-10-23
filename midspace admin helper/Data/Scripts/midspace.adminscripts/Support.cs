@@ -4,11 +4,12 @@ namespace midspace.adminscripts
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
     using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
+    using VRage;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Voxels;
@@ -930,7 +931,7 @@ namespace midspace.adminscripts
                     }
 
                     if (targetCockpit != null)
-                        return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)targetCockpit , safely, updatedPosition, noSafeLocationMessage);
+                        return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)targetCockpit, safely, updatedPosition, noSafeLocationMessage);
                 }
 
                 // Small ship grids. Also the fallback if a large ship does not have a cockpit.
@@ -1284,6 +1285,81 @@ namespace midspace.adminscripts
             position = freePos.Value - offset;
 
             return true;
+        }
+
+        #endregion
+
+        #region Inventory
+
+        public static bool InventoryAdd(Sandbox.ModAPI.IMyInventory inventory, MyFixedPoint amount, MyDefinitionId definitionId)
+        {
+            var content = (MyObjectBuilder_PhysicalObject)MyObjectBuilderSerializer.CreateNewObject(definitionId);
+
+            var gasContainer = content as MyObjectBuilder_GasContainerObject;
+            if (gasContainer != null)
+                gasContainer.GasLevel = 1f;
+
+            MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem { Amount = amount, Content = content };
+
+            if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
+            {
+                inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                return true;
+            }
+
+            // Inventory full. Could not add the item.
+            return false;
+        }
+
+        public static void InventoryDrop(IMyEntity entity, MyFixedPoint amount, MyDefinitionId definitionId)
+        {
+            Vector3D position;
+
+            if (entity is IMyCharacter)
+                position = entity.WorldMatrix.Translation + entity.WorldMatrix.Forward * 1.5f + entity.WorldMatrix.Up * 1.5f; // Spawn item 1.5m in front of player.
+            else
+                position = entity.WorldMatrix.Translation + entity.WorldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player in cockpit.
+
+            MyObjectBuilder_FloatingObject floatingBuilder = new MyObjectBuilder_FloatingObject();
+            var content = (MyObjectBuilder_PhysicalObject)MyObjectBuilderSerializer.CreateNewObject(definitionId);
+
+            var gasContainer = content as MyObjectBuilder_GasContainerObject;
+            if (gasContainer != null)
+                gasContainer.GasLevel = 1f;
+
+            floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = amount, Content = content };
+            floatingBuilder.PersistentFlags = MyPersistentEntityFlags2.InScene; // Very important
+
+            floatingBuilder.PositionAndOrientation = new MyPositionAndOrientation()
+            {
+                Position = position,
+                Forward = entity.WorldMatrix.Forward.ToSerializableVector3(),
+                Up = entity.WorldMatrix.Up.ToSerializableVector3(),
+            };
+
+            floatingBuilder.CreateAndSyncEntity();
+        }
+
+        public static void InventoryDrop(Vector3D position, MyFixedPoint amount, MyDefinitionId definitionId)
+        {
+            MyObjectBuilder_FloatingObject floatingBuilder = new MyObjectBuilder_FloatingObject();
+            var content = (MyObjectBuilder_PhysicalObject)MyObjectBuilderSerializer.CreateNewObject(definitionId);
+
+            var gasContainer = content as MyObjectBuilder_GasContainerObject;
+            if (gasContainer != null)
+                gasContainer.GasLevel = 1f;
+
+            floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = amount, Content = content };
+            floatingBuilder.PersistentFlags = MyPersistentEntityFlags2.InScene; // Very important
+
+            floatingBuilder.PositionAndOrientation = new MyPositionAndOrientation()
+            {
+                Position = position,
+                Forward = Vector3D.Forward.ToSerializableVector3(),
+                Up = Vector3D.Up.ToSerializableVector3(),
+            };
+
+            floatingBuilder.CreateAndSyncEntity();
         }
 
         #endregion

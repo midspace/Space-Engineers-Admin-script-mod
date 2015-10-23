@@ -165,7 +165,7 @@ namespace midspace.adminscripts
 
                     foreach (var block in blocks)
                     {
-                        var landingGear = (IMyLandingGear) block.FatBlock;
+                        var landingGear = (IMyLandingGear)block.FatBlock;
                         if (landingGear.IsLocked == false)
                             continue;
 
@@ -482,6 +482,39 @@ namespace midspace.adminscripts
         public static bool IsHost(this IMyPlayer player)
         {
             return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
+        }
+
+        public static Sandbox.ModAPI.IMyInventory GetPlayerInventory(this IMyPlayer player)
+        {
+            var character = player.GetCharacter();
+            if (character == null)
+                return null;
+            return character.GetPlayerInventory();
+        }
+
+        public static Sandbox.ModAPI.IMyInventory GetPlayerInventory(this IMyCharacter character)
+        {
+            if (character == null)
+                return null;
+
+            return ((Sandbox.Game.Entities.MyEntity)character).GetInventory();
+        }
+
+        #endregion
+
+        #region Definition
+
+        public static MyPhysicalItemDefinition GetDefinition(this MyDefinitionManager definitionManager, string typeId, string subtypeName)
+        {
+            MyPhysicalItemDefinition definition = null;
+            MyObjectBuilderType result;
+            if (MyObjectBuilderType.TryParse(typeId, out result))
+            {
+                var id = new MyDefinitionId(result, subtypeName);
+                MyDefinitionManager.Static.TryGetPhysicalItemDefinition(id, out definition);
+            }
+
+            return definition;
         }
 
         #endregion

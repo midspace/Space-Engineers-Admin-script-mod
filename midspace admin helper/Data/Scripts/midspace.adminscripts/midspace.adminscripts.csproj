@@ -79,6 +79,7 @@
     <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
+    <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />
     <Compile Include="Messages\MessagePardon.cs" />

@@ -2,12 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage;
@@ -57,7 +55,7 @@
             decimal amount = 1;
 
             var match = Regex.Match(messageText, @"/drop\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
-            if (match.Success && content == null)
+            if (match.Success)
             {
                 var itemName = match.Groups["Key"].Value;
                 var strAmount = match.Groups["Value"].Value;
@@ -82,14 +80,6 @@
                     amount = Math.Round(amount, 0);
                 }
 
-                var gasContainer = content as MyObjectBuilder_GasContainerObject;
-                if (gasContainer != null)
-                    gasContainer.GasLevel = 1f;
-
-                MyObjectBuilder_FloatingObject floatingBuilder = new MyObjectBuilder_FloatingObject();
-                floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
-                floatingBuilder.PersistentFlags = MyPersistentEntityFlags2.InScene; // Very important
-
                 var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 Vector3D position;
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
@@ -101,14 +91,23 @@
                     position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player in cockpit.
                 }
 
-                floatingBuilder.PositionAndOrientation = new MyPositionAndOrientation()
+                if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    Position = position,
-                    Forward = worldMatrix.Forward.ToSerializableVector3(),
-                    Up = worldMatrix.Up.ToSerializableVector3(),
-                };
+                    var id = new MyDefinitionId(content.TypeId, content.SubtypeName);
+                    var definition = MyDefinitionManager.Static.GetDefinition(id);
+                    Support.InventoryDrop(position, (MyFixedPoint)amount, definition.Id);
+                }
+                else
+                    ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
+                    {
+                        Type = SyncCreateObjectType.Floating,
+                        TypeId = content.TypeId.ToString(),
+                        SubtypeName = content.SubtypeName,
+                        Amount = amount,
+                        Position = position
+                    });
 
-                floatingBuilder.CreateAndSyncEntity();
+
                 return true;
             }
 

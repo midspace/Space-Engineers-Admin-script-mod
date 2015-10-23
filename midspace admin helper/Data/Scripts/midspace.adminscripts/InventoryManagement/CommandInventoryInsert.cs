@@ -5,12 +5,11 @@
     using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
     using VRage;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
@@ -59,10 +58,17 @@
             IMyEntity entity = null;
 
             var match = Regex.Match(messageText, @"/((invins)|(invinsert))\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
-            if (match.Success && content == null)
+            if (match.Success)
             {
                 entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, true, false, false, false);
-                if (entity == null || !(entity is IMyInventoryOwner))
+                if (entity == null)
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Target", "Nothing is targeted.");
+                    return true;
+                }
+
+                Sandbox.Game.MyInventory inventory;
+                if (!((Sandbox.Game.Entities.MyEntity)entity).TryGetInventory(out inventory))
                 {
                     MyAPIGateway.Utilities.ShowMessage("Target", "Is not an inventory cube.");
                     return true;
@@ -91,28 +97,42 @@
                     amount = Math.Round(amount, 0);
                 }
 
-                var gasContainer = content as MyObjectBuilder_GasContainerObject;
-                if (gasContainer != null)
-                    gasContainer.GasLevel = 1f;
-
-                MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
-                var inventoryOwnwer = entity as IMyInventoryOwner;
-                var itemAdded = false;
-
-                for (int i = 0; i < inventoryOwnwer.InventoryCount; i++)
+                if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    var inventory = inventoryOwnwer.GetInventory(i) as Sandbox.ModAPI.IMyInventory;
-                    var definitionId = new MyDefinitionId(inventoryItem.Content.GetType(), inventoryItem.Content.SubtypeName);
+                    var gasContainer = content as MyObjectBuilder_GasContainerObject;
+                    if (gasContainer != null)
+                        gasContainer.GasLevel = 1f;
 
-                    if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
+                    MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
+                    var itemAdded = false;
+
+                    var count = ((Sandbox.Game.Entities.MyEntity)entity).InventoryCount;
+
+                    for (int i = 0; i < count; i++)
                     {
-                        itemAdded = true;
-                        inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
-                        break;
+                        var inventory = ((Sandbox.Game.Entities.MyEntity)entity).GetInventory(i);
+                        var definitionId = new MyDefinitionId(inventoryItem.Content.GetType(), inventoryItem.Content.SubtypeName);
+
+                        if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
+                        {
+                            itemAdded = true;
+                            inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                            break;
+                        }
                     }
+                    if (!itemAdded)
+                        MyAPIGateway.Utilities.ShowMessage("Failed", "Invalid container or Full container. Could not add the item.");
                 }
-                if (!itemAdded)
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Invalid container or Full container. Could not add the item.");
+                else
+                    ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
+                    {
+                        EntityId = entity.EntityId,
+                        Type = SyncCreateObjectType.Inventory,
+                        TypeId = content.TypeId.ToString(),
+                        SubtypeName = content.SubtypeName,
+                        Amount = amount
+                    });
+
                 return true;
             }
 
