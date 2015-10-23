@@ -88,7 +88,7 @@
 
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_AutoHealing"), MyAPIGateway.Session.AutoHealing ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableCopyPaste"), MyAPIGateway.Session.EnableCopyPaste ? yes : no));
-            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_ClientCanSave"), MyAPIGateway.Session.ClientCanSave ? yes : no));
+            //list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_ClientCanSave"), MyAPIGateway.Session.ClientCanSave ? yes : no)); // Obsolete.
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWeapons"), MyAPIGateway.Session.WeaponsEnabled ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_RemoveTrash"), MyAPIGateway.Session.SessionSettings.RemoveTrash ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygen"), MyAPIGateway.Session.SessionSettings.EnableOxygen ? yes : no));
