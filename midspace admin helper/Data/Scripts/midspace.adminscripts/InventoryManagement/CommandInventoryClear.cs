@@ -4,9 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
+    using VRage.ModAPI;
 
     public class CommandInventoryClear : ChatCommand
     {
@@ -32,7 +32,7 @@
                 IMyIdentity selectedPlayer = null;
 
                 var identities = new List<IMyIdentity>();
-                MyAPIGateway.Players.GetAllIdentites(identities, delegate(IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
+                MyAPIGateway.Players.GetAllIdentites(identities, delegate (IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
                 selectedPlayer = identities.FirstOrDefault();
 
                 int index;
@@ -50,9 +50,18 @@
 
                 if (player != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Clearing inventory", player.DisplayName);
-                    var inventory = player.GetPlayerInventory();
-                    inventory.Clear();
+                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                    {
+                        MyAPIGateway.Utilities.ShowMessage("Clearing inventory", player.DisplayName);
+                        var inventory = player.GetPlayerInventory();
+                        inventory.Clear();
+                    }
+                    else
+                        ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
+                        {
+                            EntityId = ((IMyEntity)player.GetCharacter()).EntityId,
+                            Type = SyncCreateObjectType.Clear,
+                        });
                     return true;
                 }
             }

@@ -83,13 +83,9 @@
                 var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldMatrix;
                 Vector3D position;
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
-                {
                     position = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 1.5f; // Spawn item 1.5m in front of player.
-                }
                 else
-                {
                     position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player in cockpit.
-                }
 
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {

@@ -1,5 +1,6 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
+    using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
@@ -47,29 +48,38 @@
                     Support.InventoryDrop(Position, amount, definition.Id);
                     break;
                 case SyncCreateObjectType.Inventory:
-                    if (!MyAPIGateway.Entities.EntityExists(EntityId))
-                        return;
-
-                    var itemAdded = false;
-                    var entity = MyAPIGateway.Entities.GetEntityById(EntityId);
-                    var count = ((MyEntity)entity).InventoryCount;
-
-                    // Try to find the right inventory to put the item into.
-                    // Ie., Refinery has 2 inventories. One for ore, one for ingots.
-                    for (int i = 0; i < count; i++)
                     {
-                        var inventory = ((MyEntity)entity).GetInventory(i);
-                        if (inventory.CanItemsBeAdded(amount, definition.Id))
+                        if (!MyAPIGateway.Entities.EntityExists(EntityId))
                         {
-                            itemAdded = true;
-                            Support.InventoryAdd(inventory, amount, definition.Id);
-                            break;
+                            MessageClientTextMessage.SendMessage(SenderSteamId, "Failed", "Cannot find the specified Entity.");
+                            return;
+                        }
+
+                        var entity = (MyEntity)MyAPIGateway.Entities.GetEntityById(EntityId);
+                       
+                        if (!Support.InventoryAdd(entity, amount, definition.Id))
+                            // Send message to player.
+                            MessageClientTextMessage.SendMessage(SenderSteamId, "Failed", "Invalid container or Full container. Could not add the item.");
+                    }
+                    break;
+                case SyncCreateObjectType.Clear:
+                    {
+                        if (!MyAPIGateway.Entities.EntityExists(EntityId))
+                        {
+                            MessageClientTextMessage.SendMessage(SenderSteamId, "Failed", "Cannot find the specified Entity.");
+                            return;
+                        }
+
+                        var entity = MyAPIGateway.Entities.GetEntityById(EntityId);
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Clearing inventory", entity.DisplayName);
+
+                        var count = ((MyEntity)entity).InventoryCount;
+                        for (int i = 0; i < count; i++)
+                        {
+                            var inventory = ((MyEntity)entity).GetInventory(i);
+                            inventory.Clear();
                         }
                     }
-
-                    // TODO: no messaging to players yet.
-                    //if (!itemAdded)
-                    //    MyAPIGateway.Utilities.ShowMessage("Failed", "Invalid container or Full container. Could not add the item.");
                     break;
             }
         }
@@ -78,6 +88,7 @@
     public enum SyncCreateObjectType
     {
         Floating,
-        Inventory
+        Inventory,
+        Clear
     }
 }

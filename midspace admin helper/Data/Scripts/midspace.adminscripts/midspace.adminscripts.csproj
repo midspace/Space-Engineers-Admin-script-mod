@@ -68,6 +68,8 @@
     <Compile Include="ChatCommandService.cs" />
     <Compile Include="InventoryManagement\CommandInventoryInsert.cs" />
     <Compile Include="Localize.cs" />
+    <Compile Include="Messages\Communication\MessageClientDialogMessage.cs" />
+    <Compile Include="Messages\Communication\MessageClientTextMessage.cs" />
     <Compile Include="Messages\MessageAdminNotification.cs" />
     <Compile Include="Messages\MessageBase.cs" />
     <Compile Include="Messages\MessageChatHistory.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
+    <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />

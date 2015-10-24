@@ -1,9 +1,10 @@
-﻿using midspace.adminscripts.Messages.Permissions;
+﻿using System;
+using System.Xml.Serialization;
+using midspace.adminscripts.Messages.Communication;
+using midspace.adminscripts.Messages.Permissions;
+using midspace.adminscripts.Messages.Protection;
 using midspace.adminscripts.Messages.Sync;
 using ProtoBuf;
-using System;
-using System.Xml.Serialization;
-using midspace.adminscripts.Messages.Protection;
 
 namespace midspace.adminscripts.Messages
 {
@@ -37,6 +38,10 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageSyncSmite))]
     [XmlInclude(typeof(MessageSyncInvisible))]
     [XmlInclude(typeof(MessageSyncCreateObject))]
+    [XmlInclude(typeof(MessageSyncCreatePrefab))]
+    //communication
+    [XmlInclude(typeof(MessageClientTextMessage))]
+    [XmlInclude(typeof(MessageClientDialogMessage))]
     [ProtoContract]
     public abstract class MessageBase
     {

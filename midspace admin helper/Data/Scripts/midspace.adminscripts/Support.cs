@@ -1291,6 +1291,27 @@ namespace midspace.adminscripts
 
         #region Inventory
 
+        public static bool InventoryAdd(Sandbox.Game.Entities.MyEntity entity, MyFixedPoint amount, MyDefinitionId definitionId)
+        {
+            var itemAdded = false;
+            var count = entity.InventoryCount;
+
+            // Try to find the right inventory to put the item into.
+            // Ie., Refinery has 2 inventories. One for ore, one for ingots.
+            for (int i = 0; i < count; i++)
+            {
+                var inventory = entity.GetInventory(i);
+                if (inventory.CanItemsBeAdded(amount, definitionId))
+                {
+                    itemAdded = true;
+                    Support.InventoryAdd(inventory, amount, definitionId);
+                    break;
+                }
+            }
+
+            return itemAdded;
+        }
+
         public static bool InventoryAdd(Sandbox.ModAPI.IMyInventory inventory, MyFixedPoint amount, MyDefinitionId definitionId)
         {
             var content = (MyObjectBuilder_PhysicalObject)MyObjectBuilderSerializer.CreateNewObject(definitionId);

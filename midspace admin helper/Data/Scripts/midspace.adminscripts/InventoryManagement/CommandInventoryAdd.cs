@@ -84,16 +84,8 @@
 
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    var gasContainer = content as MyObjectBuilder_GasContainerObject;
-                    if (gasContainer != null)
-                        gasContainer.GasLevel = 1f;
-
-                    MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem() { Amount = MyFixedPoint.DeserializeString(amount.ToString(CultureInfo.InvariantCulture)), Content = content };
-                    var inventory = MyAPIGateway.Session.Player.GetPlayerInventory();
-                    var definitionId = new MyDefinitionId(inventoryItem.Content.GetType(), inventoryItem.Content.SubtypeName);
-                    if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
-                        inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
-                    else
+                    var definitionId = new MyDefinitionId(content.GetType(), content.SubtypeName);
+                    if (!Support.InventoryAdd((Sandbox.Game.Entities.MyEntity)MyAPIGateway.Session.Player.GetCharacter(), (MyFixedPoint)amount, definitionId))
                         MyAPIGateway.Utilities.ShowMessage("Failed", "Inventory full. Could not add the item.");
                 }
                 else
