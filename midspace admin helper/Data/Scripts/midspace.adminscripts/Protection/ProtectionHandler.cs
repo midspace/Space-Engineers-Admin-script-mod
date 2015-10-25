@@ -127,8 +127,8 @@ namespace midspace.adminscripts.Protection
 
                     return _handtoolCache.TryGetPlayer(attackerEntity.EntityId, out player) && CanGrind(player, block);
                 }
-
-                return true;
+                // we don't want players to destroy things in protection areas...
+                return false; 
             }
             return true;
         }
