@@ -4,11 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
-    using Sandbox.Common.ObjectBuilders;
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
-    using VRage.ObjectBuilders;
 
     public class CommandShipDestructible : ChatCommand
     {
@@ -48,7 +46,15 @@
                     var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        SetDestructible(shipEntity, switchOn);
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                            MessageSyncSetDestructable.SetDestructible(shipEntity, switchOn);
+                        else
+                            ConnectionHelper.SendMessageToServer(new MessageSyncSetDestructable()
+                            {
+                                EntityId = shipEntity.EntityId,
+                                Destructable = switchOn
+                            });
+                        
                         return true;
                     }
 
@@ -62,7 +68,15 @@
 
                 if (currentShipList.Count == 1)
                 {
-                    SetDestructible(currentShipList.First(), switchOn);
+                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        MessageSyncSetDestructable.SetDestructible(currentShipList.First(), switchOn);
+                    else
+                        ConnectionHelper.SendMessageToServer(new MessageSyncSetDestructable()
+                        {
+                            EntityId = currentShipList.First().EntityId,
+                            Destructable = switchOn
+                        });
+
                     return true;
                 }
                 else if (currentShipList.Count == 0)
@@ -70,7 +84,16 @@
                     int index;
                     if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count && CommandListShips.ShipCache[index - 1] != null)
                     {
-                        SetDestructible(CommandListShips.ShipCache[index - 1], switchOn);
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                            MessageSyncSetDestructable.SetDestructible(CommandListShips.ShipCache[index - 1], switchOn);
+                        else
+                            ConnectionHelper.SendMessageToServer(new MessageSyncSetDestructable()
+                            {
+                                EntityId = CommandListShips.ShipCache[index - 1].EntityId,
+                                Destructable = switchOn
+                            });
+
+
                         CommandListShips.ShipCache[index - 1] = null;
                         return true;
                     }
@@ -86,29 +109,6 @@
             }
 
             return false;
-        }
-
-        private void SetDestructible(IMyEntity shipEntity, bool destructible)
-        {
-            var gridObjectBuilder = shipEntity.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
-            if (gridObjectBuilder.DestructibleBlocks == destructible)
-            {
-                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible is already set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
-                return;
-            }
-
-            gridObjectBuilder.EntityId = 0;
-            gridObjectBuilder.DestructibleBlocks = destructible;
-
-            // This will Delete the entity and sync to all.
-            // Using this, also works with player ejection in the same Tick.
-            shipEntity.SyncObject.SendCloseRequest();
-
-            var tempList = new List<MyObjectBuilder_EntityBase>();
-            tempList.Add(gridObjectBuilder);
-            tempList.CreateAndSyncEntities();
-
-            MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible has been set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
         }
     }
 }
