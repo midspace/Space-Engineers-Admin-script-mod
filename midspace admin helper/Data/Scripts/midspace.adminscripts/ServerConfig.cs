@@ -120,7 +120,7 @@ namespace midspace.adminscripts
             if (customSaveName != null)
                 SavePermissionFile(customSaveName);
 
-            ProtectionHandler.SaveAreas(customSaveName);
+            ProtectionHandler.Save(customSaveName);
             Logger.Debug("Config saved.");
         }
 

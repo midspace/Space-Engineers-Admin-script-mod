@@ -79,6 +79,7 @@
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
     <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
+    <Compile Include="Messages\Protection\MessageProtectionConfig.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncSetDestructable.cs" />
@@ -110,9 +111,10 @@
     <Compile Include="Misc\CommandPermission.cs" />
     <Compile Include="PositionManagement\CommandSpeed.cs" />
     <Compile Include="Protection\Commands\CommandProtectionArea.cs" />
+    <Compile Include="Protection\GameLogicComponents\ProtectedLandingGear.cs" />
     <Compile Include="Protection\HandtoolCache.cs" />
-    <Compile Include="Protection\ProtectedCubeGrid.cs" />
-    <Compile Include="Protection\ProtectedCubePlacer.cs" />
+    <Compile Include="Protection\GameLogicComponents\ProtectedCubeGrid.cs" />
+    <Compile Include="Protection\GameLogicComponents\ProtectedCubePlacer.cs" />
     <Compile Include="Protection\ProtectionArea.cs" />
     <Compile Include="Protection\ProtectionConfig.cs" />
     <Compile Include="Protection\ProtectionHandler.cs" />
@@ -217,6 +219,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rmdir /Q /S "$(ProjectDir)obj\"

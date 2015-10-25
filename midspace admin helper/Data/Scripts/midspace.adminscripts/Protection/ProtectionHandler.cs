@@ -25,7 +25,7 @@ namespace midspace.adminscripts.Protection
 
             _isInitialized = true;
             Config = new ProtectionConfig();
-            LoadAreas();
+            Load();
 
             _handtoolCache = new HandtoolCache();
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
@@ -41,7 +41,7 @@ namespace midspace.adminscripts.Protection
             _handtoolCache.Close();
         }
 
-        public static void SaveAreas(string customSaveName = null)
+        public static void Save(string customSaveName = null)
         {
             if (!_isInitialized)
                 return;
@@ -49,7 +49,7 @@ namespace midspace.adminscripts.Protection
             Config.Save(customSaveName);
         }
 
-        private static void LoadAreas()
+        private static void Load()
         {
             if (!_isInitialized)
                 return;
@@ -87,7 +87,7 @@ namespace midspace.adminscripts.Protection
                 if (player == null)
                     return;
 
-                if (!Config.Areas.Any(a => a.Contains(player.Controller.ControlledEntity.Entity)))
+                if (!IsProtected(player.Controller.ControlledEntity.Entity))
                     return;
 
                 if (info.Type == MyDamageType.LowPressure || info.Type == MyDamageType.Asphyxia ||
@@ -104,10 +104,10 @@ namespace midspace.adminscripts.Protection
         {
             foreach (ProtectionArea area in Config.Areas)
             {
-                if (!area.Contains(block)) 
+                if (IsProtected(block)) 
                     continue;
 
-                // if we can't find out who attacks and the entity is inside the area, we don't apply the damage
+                // if we can't find out who attacks and the block is inside the area, we don't apply the damage
                 IMyEntity attackerEntity;
                 if (!MyAPIGateway.Entities.TryGetEntityById(attackerEntityId, out attackerEntity))
                     return false;
@@ -122,10 +122,10 @@ namespace midspace.adminscripts.Protection
                         if (player == null)
                             return false;
 
-                        return CanGrind(player, block);
+                        return CanModify(player, block);
                     }
 
-                    return _handtoolCache.TryGetPlayer(attackerEntity.EntityId, out player) && CanGrind(player, block);
+                    return _handtoolCache.TryGetPlayer(attackerEntity.EntityId, out player) && CanModify(player, block);
                 }
                 // we don't want players to destroy things in protection areas...
                 return false; 
@@ -139,23 +139,47 @@ namespace midspace.adminscripts.Protection
         /// <param name="player"></param>
         /// <param name="block"></param>
         /// <returns></returns>
-        private static bool CanGrind(IMyPlayer player, IMySlimBlock block)
+        public static bool CanModify(IMyPlayer player, IMySlimBlock block)
         {
-            var allSmallOwners = block.CubeGrid.GetAllSmallOwners();
+            return CanModify(player, block.CubeGrid);
+        }
+
+        /// <summary>
+        /// Any player who owns a block on the grid can modify it. If noone owns a block everyone can modify it.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="cubeGrid"></param>
+        /// <returns></returns>
+        public static bool CanModify(IMyPlayer player, Sandbox.ModAPI.IMyCubeGrid cubeGrid)
+        {
+            var allSmallOwners = cubeGrid.GetAllSmallOwners();
             return allSmallOwners.Count == 0 || allSmallOwners.Contains(player.IdentityId);
         }
 
         /// <summary>
-        /// Used to find out whether an entity is inside a protected area or not. 
+        /// Used to find out whether an block is inside a protected area or not. 
         /// </summary>
         /// <param name="entity"></param>
-        /// <returns>True if the entity is inside a protected area. If the entity is null it will return false.</returns>
+        /// <returns>True if the block is inside a protected area. If the block is null it will return false.</returns>
         public static bool IsProtected(IMyEntity entity)
         {
-            if (entity == null || Config == null || Config.Areas == null)
+            if (entity == null || Config == null || Config.Areas == null || !Config.ProtectionEnabled)
                 return false;
 
-            return Config.Areas.Any(area => area.Contains(entity));
+            return Config.Areas.Any(area => area.Contains(entity)) ^ Config.ProtectionInverted;
+        }
+
+        /// <summary>
+        /// Used to find out whether an block is inside a protected area or not. 
+        /// </summary>
+        /// <param name="block"></param>
+        /// <returns>True if the block is inside a protected area. If the block is null it will return false.</returns>
+        public static bool IsProtected(IMySlimBlock block)
+        {
+            if (block == null || Config == null || Config.Areas == null || !Config.ProtectionEnabled)
+                return false;
+
+            return Config.Areas.Any(area => area.Contains(block)) ^ Config.ProtectionInverted;
         }
 
         public static void UpdateBeforeSimulation()

@@ -28,6 +28,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessagePlayerPermission))]
     //protection
     [XmlInclude(typeof(MessageProtectionArea))]
+    [XmlInclude(typeof(MessageProtectionConfig))]
     [XmlInclude(typeof(MessageSyncProtection))]
     //sync
     [XmlInclude(typeof(MessageSyncBlockOwner))]

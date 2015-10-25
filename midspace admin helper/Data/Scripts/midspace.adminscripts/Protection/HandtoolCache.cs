@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Sandbox.Game.Weapons;
 using Sandbox.ModAPI;
-using VRage.Library.Collections;
 using VRage.ModAPI;
 using VRageMath;
 

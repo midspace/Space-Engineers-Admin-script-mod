@@ -43,6 +43,16 @@ Example: /pa remove Safezone
 /protectionarea list
 Lists all protection areas.
 
+/protectionarea config <setting> <value>
+Sets the specified setting to the given value.
+Example: /pa cfg invert true
+
+Settings:
+- invert
+    Inverts the protection so that everything is protected but objects inside protection areas.
+- enable
+    Enables or disables the whole protection.
+
 Alias: /pa
 We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happy!
 ");
@@ -55,7 +65,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
 
             if (match.Success)
             {
-                var commandParts = match.Groups["CommandParts"].Value.Split(' ');
+                var commandParts = match.Groups["CommandParts"].Value.Split(new []{ ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (commandParts.Length < 1)
                 {
                     MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Not enough parameters.");
@@ -147,6 +157,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                         break;
                     }
                     case "list":
+                    {
                         if (ProtectionHandler.Config == null || ProtectionHandler.Config.Areas == null)
                         {
                             MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
@@ -171,6 +182,45 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                         MyAPIGateway.Utilities.ShowMissionScreen("Protection Areas",
                             String.Format("Count: {0}", ProtectionHandler.Config.Areas.Count), null, areaList.ToString());
                         break;
+                    }
+                    case "config":
+                    case "cfg":
+                    {
+                        if (commandParts.Length != 3)
+                        {
+                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
+                                "Wrong parameters. /protectionarea cfg <setting> <value>");
+                            return true;
+                        }
+
+                        var setting = commandParts[1].ToLowerInvariant();
+
+                        bool value;
+                        if (!bool.TryParse(commandParts[2], out value))
+                        {
+                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse value. It must be either true or false.");
+                            return true;
+                        }
+
+                        var message = new MessageProtectionConfig() { Value = value};
+
+                        switch (setting)
+                        {
+                            case "invert":
+                                message.Type = ProtectionConfigType.Invert;
+                                break;
+                            case "enable":
+                                message.Type = ProtectionConfigType.Enable;
+                                break;
+                            default:
+                                MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
+                                    String.Format("{0} is no valid setting. Actions: invert, enable", setting));
+                                return true;
+                        }
+
+                        ConnectionHelper.SendMessageToServer(message);
+                        break;
+                    }
                     default:
                         MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
                             String.Format("{0} is no valid action. Actions: add, remove, list", action));

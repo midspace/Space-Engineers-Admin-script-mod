@@ -3,10 +3,9 @@ using Sandbox.Common.Components;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using VRage.Components;
-using VRage.ModAPI;
 using VRage.ObjectBuilders;
 
-namespace midspace.adminscripts.Protection
+namespace midspace.adminscripts.Protection.GameLogicComponents
 {
     [MyEntityComponentDescriptor(typeof (MyObjectBuilder_CubePlacer))]
     public class ProtectedCubePlacer : MyGameLogicComponent
@@ -58,8 +57,7 @@ namespace midspace.adminscripts.Protection
                     if (cubeGrid != null && MyAPIGateway.Session.Player != null)
                     {
                         // TODO consider permission request from server instead of client side check... downside: might take a while
-                        var allSmallOwners = cubeGrid.GetAllSmallOwners();
-                        if (allSmallOwners.Count > 0 && !allSmallOwners.Contains(MyAPIGateway.Session.Player.IdentityId) &&
+                        if (!ProtectionHandler.CanModify(MyAPIGateway.Session.Player, cubeGrid) &&
                             ProtectionHandler.IsProtected(cubeGrid))
                         {
                             _cachedGrid = cubeGrid;

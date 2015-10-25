@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using midspace.adminscripts.Messages.Sync;
 using Sandbox.Common.Components;
@@ -7,9 +6,8 @@ using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using VRage.Components;
 using VRage.ObjectBuilders;
-using VRage.Utils;
 
-namespace midspace.adminscripts.Protection
+namespace midspace.adminscripts.Protection.GameLogicComponents
 {
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]
     public class ProtectedCubeGrid : MyGameLogicComponent
