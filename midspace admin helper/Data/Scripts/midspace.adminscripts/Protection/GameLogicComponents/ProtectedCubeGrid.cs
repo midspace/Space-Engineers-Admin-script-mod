@@ -13,7 +13,7 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
     public class ProtectedCubeGrid : MyGameLogicComponent
     {
         private IMyCubeGrid _cubeGrid;
-        private bool _initialized;
+        private bool _isInitialized;
         private MyObjectBuilder_EntityBase _objectBuilder;
 
         private List<long> _cachedOwners;
@@ -29,7 +29,7 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
         {
             _objectBuilder = objectBuilder;
 
-            if (!_initialized)
+            if (MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive)
                 _Init();
 
             base.Init(objectBuilder);
@@ -47,11 +47,12 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
 
         private void _Init()
         {
-            _initialized = true;
+            if (_isInitialized)
+                return;
+            
+            _isInitialized = true;
 
             // only init in mp
-            if (MyAPIGateway.Multiplayer != null && !MyAPIGateway.Multiplayer.MultiplayerActive)
-                return;
 
             IMyCubeGrid cubeGrid = Entity as IMyCubeGrid;
             if (cubeGrid != null)
@@ -63,6 +64,14 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
             // cannot be init with cubeGrid.SmallOwners as it is null, I suspect that there are thread safety issues that's why I read it when the event is called
             _cachedOwners = new List<long>();
             _cubeGrid.OnBlockOwnershipChanged += _cubeGrid_OnBlockOwnershipChanged;
+        }
+
+        public override void UpdateBeforeSimulation()
+        {
+            if (!_isInitialized &&  MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive)
+                _Init();
+
+            base.UpdateBeforeSimulation();
         }
 
         private void _cubeGrid_OnBlockOwnershipChanged(IMyCubeGrid cubeGrid)

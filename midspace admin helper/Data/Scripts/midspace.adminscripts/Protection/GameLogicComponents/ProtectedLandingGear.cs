@@ -18,6 +18,7 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
     {
         private MyObjectBuilder_EntityBase _objectBuilder;
         private IMyLandingGear _landingGear;
+        private bool _isInitialized;
 
         public override MyObjectBuilder_EntityBase GetObjectBuilder(bool copy = false)
         {
@@ -28,17 +29,32 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
         {
             _objectBuilder = objectBuilder;
 
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+            if ( MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive)
+               _Init();
+
+            base.Init(objectBuilder);
+        }
+
+        private void _Init()
+        {
+            if (_isInitialized)
                 return;
 
+            _isInitialized = true;
             _landingGear = Entity as IMyLandingGear;
 
             if (_landingGear == null)
                 return;
 
             _landingGear.StateChanged += LandingGearOnStateChanged;
+        }
 
-            base.Init(objectBuilder);
+        public override void UpdateBeforeSimulation()
+        {
+            if (!_isInitialized && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive)
+                _Init();
+
+            base.UpdateBeforeSimulation();
         }
 
         private void LandingGearOnStateChanged(bool state)
@@ -47,7 +63,6 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
                 return;
 
             var ship = _landingGear.GetTopMostParent(typeof(IMyCubeGrid));
-
             if (ship == null)
                 return;
 
@@ -71,18 +86,22 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
             if (player == null)
             {
                 _landingGear.ApplyAction("Unlock");
+                // we turn it off to prevent 'spamming'
+                _landingGear.RequestEnable(false);
                 return;
             }
-            
+
             if (ProtectionHandler.CanModify(player, attachedEntity))
                 return;
 
             _landingGear.ApplyAction("Unlock");
+            // we turn it off to prevent 'spamming'
+            _landingGear.RequestEnable(false);
         }
 
         public override void Close()
         {
-            if (_landingGear == null)
+            if (!_isInitialized || _landingGear == null)
                 return;
 
             _landingGear.StateChanged -= LandingGearOnStateChanged;
