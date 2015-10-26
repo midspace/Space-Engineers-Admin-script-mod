@@ -44,8 +44,7 @@ namespace midspace.adminscripts.Protection
                     return boundingBox.Intersects(entity.WorldAABB);
                 case ProtectionAreaShape.Sphere:
                     var boundingSphere = new BoundingSphereD(Center, Size);
-                    // TODO improve performance, too slow...
-                    return entity.GetIntersectionWithSphere(ref boundingSphere); //return boundingSphere.Intersects(entity.WorldAABB);
+                    return boundingSphere.Intersects(entity.WorldAABB);
             }
 
             return false;
