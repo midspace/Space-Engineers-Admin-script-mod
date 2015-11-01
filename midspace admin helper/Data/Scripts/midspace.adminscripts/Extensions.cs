@@ -4,6 +4,7 @@ namespace midspace.adminscripts
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Messages.Communication;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
@@ -547,7 +548,8 @@ namespace midspace.adminscripts
             {
                 return entity.StopShip();
             }
-            else if (entity.Physics != null)
+
+            if (entity.Physics != null)
             {
                 entity.Physics.ClearSpeed();
                 entity.Physics.UpdateAccelerations();
@@ -641,6 +643,17 @@ namespace midspace.adminscripts
         public static void ShowMessage(this IMyUtilities utilities, string sender, string messageText, params object[] args)
         {
             utilities.ShowMessage(sender, string.Format(messageText, args));
+        }
+
+        /// <summary>
+        /// Sends a message to an specific player.  If steamId is set as 0, then it is sent to the current player.
+        /// </summary>
+        public static void SendMessage(this IMyUtilities utilities, ulong steamId, string sender, string messageText, params object[] args)
+        {
+            if (steamId == 0)
+                MyAPIGateway.Utilities.ShowMessage(sender, messageText, args);
+            else
+                MessageClientTextMessage.SendMessage(steamId, sender, messageText, args);
         }
 
         #endregion

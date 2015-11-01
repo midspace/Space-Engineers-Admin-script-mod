@@ -36,6 +36,8 @@
 
         public override void ProcessServer()
         {
+            // TODO: check security
+
             var definition = MyDefinitionManager.Static.GetDefinition(TypeId, SubtypeName);
             if (definition == null)
                 return;
@@ -56,30 +58,14 @@
                         }
 
                         var entity = (MyEntity)MyAPIGateway.Entities.GetEntityById(EntityId);
-                       
+
                         if (!Support.InventoryAdd(entity, amount, definition.Id))
                             // Send message to player.
                             MessageClientTextMessage.SendMessage(SenderSteamId, "Failed", "Invalid container or Full container. Could not add the item.");
                     }
                     break;
                 case SyncCreateObjectType.Clear:
-                    {
-                        if (!MyAPIGateway.Entities.EntityExists(EntityId))
-                        {
-                            MessageClientTextMessage.SendMessage(SenderSteamId, "Failed", "Cannot find the specified Entity.");
-                            return;
-                        }
-
-                        var entity = MyAPIGateway.Entities.GetEntityById(EntityId);
-                        MessageClientTextMessage.SendMessage(SenderSteamId, "Clearing inventory", entity.DisplayName);
-
-                        var count = ((MyEntity)entity).InventoryCount;
-                        for (int i = 0; i < count; i++)
-                        {
-                            var inventory = ((MyEntity)entity).GetInventory(i);
-                            inventory.Clear();
-                        }
-                    }
+                    new CommandInventoryClear().ClearInventory(SenderSteamId, EntityId);
                     break;
             }
         }

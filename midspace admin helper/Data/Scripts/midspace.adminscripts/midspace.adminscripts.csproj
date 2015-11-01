@@ -101,6 +101,7 @@
     <Compile Include="Messages\Sync\MessageSyncClaim.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntityPosition.cs" />
+    <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
     <Compile Include="Messages\Sync\MessageSyncSmite.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />

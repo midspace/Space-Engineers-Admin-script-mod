@@ -38,11 +38,7 @@
             var gridObjectBuilder = shipEntity.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
             if (gridObjectBuilder.DestructibleBlocks == destructible)
             {
-                // TODO: Should make a better wrapper, to send message local or remote.
-                if (steamId == 0)
-                    MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible is already set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
-                else
-                    MessageClientTextMessage.SendMessage(steamId, "destructible", "Ship '{0}' destructible is already set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
+                MyAPIGateway.Utilities.SendMessage(steamId, "destructible", "Ship '{0}' destructible is already set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
                 return;
             }
 
@@ -57,11 +53,7 @@
             tempList.Add(gridObjectBuilder);
             tempList.CreateAndSyncEntities();
 
-            // TODO: Should make a better wrapper, to send message local or remote.
-            if (steamId == 0)
-                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship '{0}' destructible has been set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
-            else
-                MessageClientTextMessage.SendMessage(steamId, "destructible", "Ship '{0}' destructible has been set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
+            MyAPIGateway.Utilities.SendMessage(steamId, "destructible", "Ship '{0}' destructible has been set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
         }
     }
 }

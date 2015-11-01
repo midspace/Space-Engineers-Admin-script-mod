@@ -2,14 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
 
     public class CommandObjectsCount : ChatCommand
     {
         public CommandObjectsCount()
-            : base(ChatCommandSecurity.Admin, "countobjects", new[] { "/countobjects" })
+            : base(ChatCommandSecurity.Admin, "countobjects", new[] {"/countobjects"})
         {
         }
 
@@ -22,16 +22,27 @@
         {
             if (messageText.Equals("/countobjects", StringComparison.InvariantCultureIgnoreCase))
             {
-                var floatingList = new HashSet<IMyEntity>();
-
-                // Meteor or FloatingObject??  have to use GetObjectBuilder().TypeId, as there isn't an interface to determine the difference.
-                //MyAPIGateway.Entities.GetEntities(floatingList, e => !(e is Sandbox.ModAPI.IMyCubeGrid) && !(e is Sandbox.ModAPI.IMyVoxelBase) && !(e is IMyControllableEntity) && e.GetObjectBuilder().TypeId == typeof(MyObjectBuilder_FloatingObject));
-                MyAPIGateway.Entities.GetEntities(floatingList, e => (e is Sandbox.ModAPI.IMyFloatingObject));
-                MyAPIGateway.Utilities.ShowMessage("Floating objects", String.Format("{0}/{1}", floatingList.Count, MyAPIGateway.Session.SessionSettings.MaxFloatingObjects));
+                if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                    CountObjects(0);
+                else
+                    ConnectionHelper.SendMessageToServer(new MessageSyncFloatingObjects { Type = SyncFloatingObject.Count });
                 return true;
             }
 
             return false;
+        }
+
+        public static void CountObjects(ulong steamId)
+        {
+            var floatingList = new HashSet<IMyEntity>();
+            MyAPIGateway.Entities.GetEntities(floatingList, e => (e is Sandbox.ModAPI.IMyFloatingObject));
+            var replicableList = new HashSet<IMyEntity>();
+            MyAPIGateway.Entities.GetEntities(replicableList, e => (e is Sandbox.Game.Entities.MyReplicableEntity));
+
+            MyAPIGateway.Utilities.SendMessage(steamId, "Floating objects", "{0}/{1}", floatingList.Count, MyAPIGateway.Session.SessionSettings.MaxFloatingObjects);
+
+            if (replicableList.Count > 0)
+                MyAPIGateway.Utilities.SendMessage(steamId, "Floating backpakcs", "{0}", replicableList.Count);
         }
     }
 }

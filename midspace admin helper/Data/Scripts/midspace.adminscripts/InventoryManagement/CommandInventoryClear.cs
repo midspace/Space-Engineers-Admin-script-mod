@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages.Sync;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
 
@@ -44,29 +45,56 @@
                 if (selectedPlayer == null)
                     return false;
 
-                var listplayers = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == selectedPlayer.PlayerId);
-                var player = listplayers.FirstOrDefault();
-
-                if (player != null)
+                if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                    {
-                        MyAPIGateway.Utilities.ShowMessage("Clearing inventory", player.DisplayName);
-                        var inventory = player.GetPlayerInventory();
-                        inventory.Clear();
-                    }
-                    else
-                        ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
-                        {
-                            EntityId = ((IMyEntity)player.GetCharacter()).EntityId,
-                            Type = SyncCreateObjectType.Clear,
-                        });
-                    return true;
+                    ClearInventory(0, selectedPlayer.PlayerId);
                 }
+                else
+                {
+                    ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
+                    {
+                        EntityId = selectedPlayer.PlayerId,
+                        Type = SyncCreateObjectType.Clear,
+                    });
+                }
+                return true;
             }
 
             return false;
+        }
+
+        public void ClearInventory(ulong steamId, long entityId)
+        {
+            IMyEntity entity = null;
+
+            if (MyAPIGateway.Entities.EntityExists(entityId))
+            {
+                entity = MyAPIGateway.Entities.GetEntityById(entityId);
+            }
+            else
+            {
+                var listplayers = new List<IMyPlayer>();
+                MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == entityId);
+                
+                var player = listplayers.FirstOrDefault();
+                if (player != null)
+                    entity = (IMyEntity)player.GetCharacter();
+            }
+
+            if (entity == null)
+            {
+                MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Cannot find the specified Entity.");
+                return;
+            }
+
+            MyAPIGateway.Utilities.SendMessage(steamId, "Clearing inventory", entity.DisplayName);
+            var count = ((MyEntity)entity).InventoryCount;
+
+            for (int i = 0; i < count; i++)
+            {
+                var inventory = ((MyEntity)entity).GetInventory(i);
+                inventory.Clear();
+            }
         }
     }
 }
