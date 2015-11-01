@@ -477,7 +477,7 @@
 
             if (messageText.Equals("/test8B", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, false, false, true) as Sandbox.ModAPI.IMyCubeGrid;
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, false, false, true, false) as Sandbox.ModAPI.IMyCubeGrid;
 
                 if (entity == null)
                     return false;
@@ -545,7 +545,7 @@
             // attached grid count test.
             if (messageText.Equals("/test10", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false) as Sandbox.ModAPI.IMyCubeGrid;
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false) as Sandbox.ModAPI.IMyCubeGrid;
 
                 if (entity == null)
                     return false;
@@ -613,7 +613,7 @@
 
             if (messageText.Equals("/test12", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, true, true, true);
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, true, true, true, true);
                 var resultList = new List<ITerminalAction>();
                 if (entity != null)
                 {

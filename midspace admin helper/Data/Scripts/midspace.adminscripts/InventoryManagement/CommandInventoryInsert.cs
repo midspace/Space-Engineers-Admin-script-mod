@@ -2,12 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage;
@@ -47,7 +45,7 @@
 
         public override void Help(bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/invins <type name|name> <amount>", "Adds a specified item to the targeted cube (ore, ingot, or item), <name>, <amount>. ie, \"ore gold 98.23\", \"steel plate 25\"");
+            MyAPIGateway.Utilities.ShowMessage("/invins <type name|name> <amount>", "Adds a specified item to the targeted player, backpack, cube (ore, ingot, or item), <name>, <amount>. ie, \"ore gold 98.23\", \"steel plate 25\"");
         }
 
         public override bool Invoke(string messageText)
@@ -60,7 +58,7 @@
             var match = Regex.Match(messageText, @"/((invins)|(invinsert))\s{1,}(?:(?<Key>.+)\s(?<Value>[+-]?((\d+(\.\d*)?)|(\.\d+)))|(?<Key>.+))", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, true, false, false, false);
+                entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, true, true, false, false, true);
                 if (entity == null)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Target", "Nothing is targeted.");
@@ -70,7 +68,7 @@
                 Sandbox.Game.MyInventory inventory;
                 if (!((Sandbox.Game.Entities.MyEntity)entity).TryGetInventory(out inventory))
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Target", "Is not an inventory cube.");
+                    MyAPIGateway.Utilities.ShowMessage("Target", "Cannot hold inventory.");
                     return true;
                 }
 

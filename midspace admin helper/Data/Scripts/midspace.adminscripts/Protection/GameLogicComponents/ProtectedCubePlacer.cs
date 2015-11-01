@@ -42,7 +42,7 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
                 MyAPIGateway.CubeBuilder.BlockCreationIsActivated && MyAPIGateway.Session.Player != null &&
                 MyAPIGateway.Session.Player.Controller.ControlledEntity != null)
             {
-                var cubeGrid = Support.FindLookAtEntity(MyAPIGateway.Session.Player.Controller.ControlledEntity, true, false, false, false, false) as IMyCubeGrid;
+                var cubeGrid = Support.FindLookAtEntity(MyAPIGateway.Session.Player.Controller.ControlledEntity, true, false, false, false, false, false) as IMyCubeGrid;
 
                 if (ChatCommandLogic.Instance != null && !ChatCommandLogic.Instance.AllowBuilding)
                 {

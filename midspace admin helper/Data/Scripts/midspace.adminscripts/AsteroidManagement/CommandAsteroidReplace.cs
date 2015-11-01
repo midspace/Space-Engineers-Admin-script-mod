@@ -79,7 +79,7 @@ The following materials are available:
             match = Regex.Match(messageText, @"/roidreplace\s+(?<Material1>[^\s]+)\s+(?<Material2>[^\s]+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                IMyEntity entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, false, false, true, true);
+                IMyEntity entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, false, false, true, true, false);
 
                 if (entity != null && entity is IMyVoxelMap)
                 {

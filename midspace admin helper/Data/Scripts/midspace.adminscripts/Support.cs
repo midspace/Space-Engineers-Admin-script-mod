@@ -19,16 +19,16 @@ namespace midspace.adminscripts
     {
         #region Find Assets
 
-        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
+        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable)
         {
             IMyEntity entity;
             double distance;
             Vector3D hitPoint;
-            FindLookAtEntity(controlledEntity, true, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets);
+            FindLookAtEntity(controlledEntity, true, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets, findReplicable);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable)
         {
             const float range = 5000000;
             Matrix worldMatrix;
@@ -101,6 +101,16 @@ namespace midspace.adminscripts
                 {
                     var controller = entity as IMyControllableEntity;
                     if (controlledEntity.Entity.EntityId != entity.EntityId && controller != null && ray.Intersects(entity.WorldAABB).HasValue)
+                    {
+                        var distance = (startPosition - entity.GetPosition()).Length();
+                        list.Add(entity, distance);
+                    }
+                }
+
+                if (findReplicable)
+                {
+                    var replicable = entity as Sandbox.Game.Entities.MyReplicableEntity;
+                    if (replicable != null && ray.Intersects(entity.WorldAABB).HasValue)
                     {
                         var distance = (startPosition - entity.GetPosition()).Length();
                         list.Add(entity, distance);

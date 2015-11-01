@@ -25,7 +25,7 @@
         {
             if (messageText.Equals("/stop", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false);
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (entity != null)
                 {
                     var shipEntity = entity as IMyCubeGrid;

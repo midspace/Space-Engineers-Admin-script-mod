@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-
     using Sandbox.Definitions;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
     using VRage.Voxels;
@@ -30,7 +30,7 @@
                 IMyEntity entity;
                 double distance;
                 Vector3D hitPoint;
-                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, out entity, out distance, out hitPoint, true, true, true, true, true);
+                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, out entity, out distance, out hitPoint, true, true, true, true, true, true);
                 if (entity != null)
                 {
                     string displayType;
@@ -51,7 +51,7 @@
 
                             // use IMyParallelTask to process in the background.
                             MyAPIGateway.Parallel.StartBackground(
-                                delegate() { ProcessAsteroid(displayType, displayName, voxelMap, distance, aabb); });
+                                delegate () { ProcessAsteroid(displayType, displayName, voxelMap, distance, aabb); });
                         }
                         else
                         {
@@ -168,11 +168,34 @@
 
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
-                    else
+                    else if (entity is IMyCharacter)
                     {
                         displayType = "player";
                         displayName = entity.DisplayName;
                         description = string.Format("Distance: {0:N}", distance);
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                    }
+                    else if (entity is MyReplicableEntity)
+                    {
+                        displayType = "Unknown";
+
+                        var replicable = (MyReplicableEntity)entity;
+                        if (replicable.DefinitionId.HasValue)
+                        {
+                            MyDefinitionBase defintion;
+                            if (MyDefinitionManager.Static.TryGetDefinition(replicable.DefinitionId.Value, out defintion))
+                                displayType = defintion.Id.SubtypeName;
+                        }
+
+                        displayName = entity.DisplayName;
+                        description = string.Format("Distance: {0:N} m", distance);
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                    }
+                    else
+                    {
+                        displayType = "unknown";
+                        displayName = entity.DisplayName;
+                        description = string.Format("Distance: {0:N} m", distance);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
 
