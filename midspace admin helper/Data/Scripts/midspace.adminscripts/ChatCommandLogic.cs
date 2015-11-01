@@ -1,6 +1,3 @@
-
-using midspace.adminscripts.Messages.Protection;
-
 namespace midspace.adminscripts
 {
     using System;
@@ -172,6 +169,10 @@ namespace midspace.adminscripts
             //Debug = true;
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
+
+            // TODO: restructure the ChatCommandLogic to encapsulate ChatCommandService on the server side.
+            // Required to check security for user calls on the Server side, and call the UpdateBeforeSimulation...() methods for each command.
+
             AdminNotificator.Init();
             ProtectionHandler.Init();
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
