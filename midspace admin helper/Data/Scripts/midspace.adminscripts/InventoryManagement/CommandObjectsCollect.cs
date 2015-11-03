@@ -106,20 +106,23 @@
                         // Need to queue the objects, and relocate them over a number of frames, otherwise if they 
                         // are all moved simultaneously to the same point in space, they will become stuck.
 
-                        _instance._workQueue.Enqueue(delegate ()
+                        _instance._workQueue.Enqueue(delegate()
                         {
                             //item.SyncObject.UpdatePosition(); // causes Null exception.
 
-                            if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                            if (item.Physics != null)
                             {
-                                item.Physics.ClearSpeed();
-                                item.SetPosition(destination); // Doesn't sync to the server.
-                                ConnectionHelper.SendMessageToAllPlayers(new MessageSyncEntityPosition() { EntityId = item.EntityId, Position = destination });
-                            }
-                            else if (item.Physics != null)
-                            {
-                                item.Physics.ClearSpeed();
-                                item.SetPosition(destination); // Doesn't sync to the server.
+                                if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                                {
+                                    item.Physics.ClearSpeed();
+                                    item.SetPosition(destination); // Doesn't sync to the server.
+                                    ConnectionHelper.SendMessageToAllPlayers(new MessageSyncEntityPosition() {EntityId = item.EntityId, Position = destination});
+                                }
+                                else if (item.Physics != null)
+                                {
+                                    item.Physics.ClearSpeed();
+                                    item.SetPosition(destination); // Doesn't sync to the server.
+                                }
                             }
                         });
                     }
