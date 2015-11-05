@@ -12,7 +12,7 @@
     public class CommandPrefabPaste : ChatCommand
     {
         public CommandPrefabPaste()
-            : base(ChatCommandSecurity.Admin, "pasteprefab", new[] { "/pasteprefab" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "pasteprefab", new[] { "/pasteprefab" })
         {
         }
 
@@ -75,7 +75,9 @@
                     }
 
                     // only works in Creative mode, both Single and Server (even with paste disabled).
-                    MyAPIGateway.CubeBuilder.ActivateShipCreationClipboard(prefab.CubeGrids, worldMatrix.Forward, distance);
+                    //MyAPIGateway.CubeBuilder.ActivateShipCreationClipboard(prefab.CubeGrids, worldMatrix.Forward, distance);
+
+
 
                     return true;
                 }

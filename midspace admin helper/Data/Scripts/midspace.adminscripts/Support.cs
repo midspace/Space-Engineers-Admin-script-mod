@@ -1231,8 +1231,12 @@ namespace midspace.adminscripts
                 Vector3D closestSurfacePoint;
                 MyVoxelCoordSystems.WorldPositionToLocalPosition(planet.PositionLeftBottomCorner, ref findFromPoint, out closestSurfacePoint);
                 Vector3D vector3D = planet.GetWorldGravityNormalized(ref findFromPoint);
-                closestSurfacePoint = planet.GetClosestSurfacePoint(ref closestSurfacePoint, ref vector3D, 20, 0);
-                MyVoxelCoordSystems.LocalPositionToWorldPosition(planet.PositionLeftBottomCorner, ref closestSurfacePoint, out position);
+
+                //closestSurfacePoint = planet.GetClosestSurfacePoint(ref closestSurfacePoint, ref vector3D, 20, 0);
+                //MyVoxelCoordSystems.LocalPositionToWorldPosition(planet.PositionLeftBottomCorner, ref closestSurfacePoint, out position);
+
+                // TODO: Untested.
+                position = planet.GetClosestSurfacePointGlobal(ref closestSurfacePoint);
 
                 var up = position - planet.WorldMatrix.Translation;
                 up.Normalize();
