@@ -42,7 +42,7 @@
             MyAPIGateway.Utilities.SendMessage(steamId, "Floating objects", "{0}/{1}", floatingList.Count, MyAPIGateway.Session.SessionSettings.MaxFloatingObjects);
 
             if (replicableList.Count > 0)
-                MyAPIGateway.Utilities.SendMessage(steamId, "Floating backpakcs", "{0}", replicableList.Count);
+                MyAPIGateway.Utilities.SendMessage(steamId, "Floating backpacks", "{0}", replicableList.Count);
         }
     }
 }
