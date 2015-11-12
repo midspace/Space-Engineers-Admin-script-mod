@@ -16,12 +16,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/on <#>", "Turns on all reactor and battery power in the specified <#> ship.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/on", StringComparison.InvariantCultureIgnoreCase))
             {

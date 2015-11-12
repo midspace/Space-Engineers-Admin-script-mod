@@ -15,12 +15,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/stopall <range>", "Stops all motion of everything in the specified <range>. Range will default to 100m if not specified.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/stopall(?:\s{1,}(?<RANGE>[^\s]*)){0,1}", RegexOptions.IgnoreCase);
             if (match.Success)

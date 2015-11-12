@@ -9,11 +9,11 @@
     public class CommandSessionCargoShips : ChatCommand
     {
         public CommandSessionCargoShips()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "cargoships", new[] { "/cargoships" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "cargoships", new[] { "/cargoships" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/CargoShips <on|off> [private]", "Turns spawning of Cargo ships and Exploration ships mode on or off.");
 
@@ -24,7 +24,7 @@
             // On a dedicated server it has no effect, as Cargo Ships are spawned by the server or host.
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             var priv = strings.Contains("private", StringComparer.InvariantCultureIgnoreCase);

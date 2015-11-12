@@ -18,13 +18,14 @@
             Name = name;
             Security = security;
             Commands = commands;
-            Flag = ChatCommandFlag.None;
+            Flag = ChatCommandFlag.Client;
         }
 
         /// <summary>
         /// The constructor defines the basics of chat command, and security access.
         /// </summary>
         /// <param name="security">Allowed level of access to this command</param>
+        /// <param name="flag"></param>
         /// <param name="name">Name that appears in the help listing</param>
         /// <param name="commands">Command text</param>
         protected ChatCommand(uint security, ChatCommandFlag flag, string name, string[] commands)
@@ -58,14 +59,16 @@
         /// <summary>
         /// Runs the Chat command's specific help.
         /// </summary>
-        public abstract void Help(bool brief);
+        public abstract void Help(ulong steamId, bool brief);
 
         /// <summary>
         /// Tests the Chat command for validility, and executes its content.
         /// </summary>
-        /// <param name="messageText"></param>
+        /// <param name="steamId">SteamId of the player that invoked the command.</param>
+        /// <param name="playerId">PlayerId of the player that invoked the command.</param>
+        /// <param name="messageText">The command text.</param>
         /// <returns>Returns true if the chat command was valid and processed successfully, otherwise returns false.</returns>
-        public abstract bool Invoke(string messageText);
+        public abstract bool Invoke(ulong steamId, long playerId, string messageText);
 
         /// <summary>
         /// Optional method that is called on every frame Before Simulation.
@@ -120,6 +123,16 @@
         /// <summary>
         /// Shows that this command can only be used in multiplayer.
         /// </summary>
-        MultiplayerOnly = 0x4
+        MultiplayerOnly = 0x4,
+
+        /// <summary>
+        /// Command runs Client side.
+        /// </summary>
+        Client = 0x8,
+
+        /// <summary>
+        /// Command runs Server side.
+        /// </summary>
+        Server = 0x10
     }
 }

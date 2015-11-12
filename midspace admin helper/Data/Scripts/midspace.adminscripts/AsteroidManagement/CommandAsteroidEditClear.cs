@@ -13,12 +13,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/voxelclear [on|off]", "Voxel cell clearing, will remove single voxel cells that the tip of the hand drill touches.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             // voxelclear [on] [off]
             if (messageText.StartsWith("/voxelclear ", StringComparison.InvariantCultureIgnoreCase))

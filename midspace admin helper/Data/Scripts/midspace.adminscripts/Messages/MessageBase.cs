@@ -11,6 +11,7 @@ namespace midspace.adminscripts.Messages
     // ALL CLASSES DERIVED FROM MessageBase MUST BE ADDED HERE
     [XmlInclude(typeof(MessageAdminNotification))]
     [XmlInclude(typeof(MessageChatHistory))]
+    [XmlInclude(typeof(MessageChatCommand))]
     [XmlInclude(typeof(MessageConfig))]
     [XmlInclude(typeof(MessageConnectionRequest))]
     [XmlInclude(typeof(MessageForceDisconnect))]
@@ -80,15 +81,15 @@ namespace midspace.adminscripts.Messages
 
         public void InvokeProcessing()
         {
-                switch (Side)
-                {
-                    case MessageSide.ClientSide:
-                        InvokeClientProcessing();
-                        break;
-                    case MessageSide.ServerSide:
-                        InvokeServerProcessing();
-                        break;
-                }
+            switch (Side)
+            {
+                case MessageSide.ClientSide:
+                    InvokeClientProcessing();
+                    break;
+                case MessageSide.ServerSide:
+                    InvokeServerProcessing();
+                    break;
+            }
         }
 
         private void InvokeClientProcessing()

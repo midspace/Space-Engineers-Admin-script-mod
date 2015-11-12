@@ -16,12 +16,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pasteprefab <#>", "Pastes the specified <#> prefab from clipboard (Works only in Creative mode, ignores disabled Copy/Paste.)");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/pasteprefab\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 
@@ -76,8 +76,6 @@
 
                     // only works in Creative mode, both Single and Server (even with paste disabled).
                     //MyAPIGateway.CubeBuilder.ActivateShipCreationClipboard(prefab.CubeGrids, worldMatrix.Forward, distance);
-
-
 
                     return true;
                 }

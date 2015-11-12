@@ -15,11 +15,11 @@ namespace midspace.adminscripts
         public static bool LogPrivateMessages = false;
 
         public CommandPrivateMessage()
-            : base(ChatCommandSecurity.User, ChatCommandFlag.MultiplayerOnly, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
+            : base(ChatCommandSecurity.User, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             string pmLogging = LogPrivateMessages ? "on" : "off";
             if (brief)
@@ -58,7 +58,7 @@ The logging of private messages is {1}.
             }
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             //TODO: matching playernames
             var match = Regex.Match(messageText, @"@@@@@\s+(?<Key>.+)", RegexOptions.IgnoreCase);

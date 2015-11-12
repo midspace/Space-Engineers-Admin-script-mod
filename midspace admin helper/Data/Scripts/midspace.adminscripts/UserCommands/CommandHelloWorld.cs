@@ -12,12 +12,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/hello", "A simple Hello World test.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/hello", StringComparison.InvariantCultureIgnoreCase))
             {

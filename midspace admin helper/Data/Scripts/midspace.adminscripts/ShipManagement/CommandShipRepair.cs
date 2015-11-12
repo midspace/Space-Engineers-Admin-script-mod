@@ -13,16 +13,16 @@
     public class CommandShipRepair : ChatCommand
     {
         public CommandShipRepair()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "repair", new[] { "/repair" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "repair", new[] { "/repair" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/repair <#>", "Repairs the specified <#> ship.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/repair", StringComparison.InvariantCultureIgnoreCase))
             {

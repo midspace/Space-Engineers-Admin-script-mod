@@ -21,7 +21,7 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             if (brief)
             {
@@ -58,7 +58,7 @@ The following materials are available:
             }
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/roidreplace\s+(?<Asteroid>[^\s]+)\s+(?<Material1>[^\s]+)\s+(?<Material2>[^\s]+)", RegexOptions.IgnoreCase);
             if (match.Success)

@@ -21,12 +21,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/id", "Identifies the name of the object the player is looking at.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/id", StringComparison.InvariantCultureIgnoreCase))
             {

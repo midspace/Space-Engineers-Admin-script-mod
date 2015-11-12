@@ -10,16 +10,16 @@
     public class CommandForceBan : ChatCommand
     {
         public CommandForceBan()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "forceban", new string[] { "/forceban" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "forceban", new string[] { "/forceban" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/forceban <#>", "Forces the specified player <#> to disconnect and bans him. Only use this if normal ban does not work.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/forceban\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)

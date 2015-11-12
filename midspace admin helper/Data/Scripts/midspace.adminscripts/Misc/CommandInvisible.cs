@@ -18,14 +18,14 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/invisible <on|off>", "Turns invisible mode on or off for you only. Other players will still see your shadow, chest thrusters, and held weapons. Automated weapons will still target you.");
         }
 
         MyPersistentEntityFlags2? store = null;
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             bool? state = null;

@@ -12,16 +12,16 @@ using System.Text.RegularExpressions;
         public static bool DropPlayer;
 
         public CommandForceKick()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "forcekick", new string[] { "/forcekick" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "forcekick", new string[] { "/forcekick" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/forcekick <#>", "Forces the specified player <#> to disconnect. Only use this if normal kick does not work.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/forcekick\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)

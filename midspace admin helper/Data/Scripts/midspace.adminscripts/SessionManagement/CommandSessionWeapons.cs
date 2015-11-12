@@ -13,7 +13,7 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/weapons <on|off> [private]", "Turns weapons on or off for all players. Add the word \"private\" for you only.");
 
@@ -22,7 +22,7 @@
             // Will have adverse affects if only one player is turned on or off.
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var strings = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             var priv = strings.Contains("private", StringComparer.InvariantCultureIgnoreCase);

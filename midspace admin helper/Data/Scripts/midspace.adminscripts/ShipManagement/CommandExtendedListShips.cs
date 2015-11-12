@@ -15,12 +15,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/elistships <filter>", "List in-game ships/stations, including postion and distance. Optional <filter> to refine your search by ship name or antenna/beacon name.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             string shipName = null;
             var match = Regex.Match(messageText, @"/(elistships|extendedlistships|listships2)(\s{1,}(?<Key>.+)|)", RegexOptions.IgnoreCase);

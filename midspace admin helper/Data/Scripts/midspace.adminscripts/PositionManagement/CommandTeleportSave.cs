@@ -12,12 +12,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tpsave <name>", "Saves the current position under the <name> for later teleporting to with command /tpfav.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/tpsave\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 

@@ -20,16 +20,16 @@
         public readonly static List<MyDefinitionBase> BlueprintCache = new List<MyDefinitionBase>();
 
         public CommandListBlueprints()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "listblueprints", new[] { "/listblueprints" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "listblueprints", new[] { "/listblueprints" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/listblueprints <filter>", "List ships in the Blueprints. Optional <filter> to refine your search by name.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.StartsWith("/listblueprints", StringComparison.InvariantCultureIgnoreCase))
             {

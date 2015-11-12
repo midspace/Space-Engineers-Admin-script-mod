@@ -11,9 +11,9 @@ namespace midspace.adminscripts.Protection.Commands
     {
         public CommandProtectionArea()
             : base(
-                ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "protectionarea", new string[] { "/protectionarea", "/pa" }) { }
+                ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "protectionarea", new string[] { "/protectionarea", "/pa" }) { }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             if (brief)
             {
@@ -59,7 +59,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
             MyAPIGateway.Utilities.ShowMissionScreen(Name, "/protectionarea <action> [options]", null, builder.ToString());
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/(pa|protectionarea)\s+(?<CommandParts>.*)", RegexOptions.IgnoreCase);
 
@@ -69,7 +69,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                 if (commandParts.Length < 1)
                 {
                     MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Not enough parameters.");
-                    Help(true);
+                    Help(steamId, true);
                     return true;
                 }
 
@@ -228,7 +228,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                 }
             }
             else
-                Help(true);
+                Help(steamId, true);
 
             return true;
         }

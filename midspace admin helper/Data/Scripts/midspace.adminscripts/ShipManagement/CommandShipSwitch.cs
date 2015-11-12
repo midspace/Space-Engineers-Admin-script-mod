@@ -30,12 +30,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/switch [power] [production] [program] [projection] [sensor] [spot] [timer] [weapon] on/off", "Turns globally on/off the selected systems.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/switch(?:\s+(?<control>[^\s]+))+\s+(?<mode>[^\s]+)\s*$", RegexOptions.IgnoreCase);
             if (match.Success)

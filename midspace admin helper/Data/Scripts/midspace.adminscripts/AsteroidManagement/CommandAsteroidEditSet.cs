@@ -22,12 +22,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/voxelset [on|off|A|B|Clear|Fill]", "Voxel editing. Will clear/fill blocks of voxel cells. Select hand drill. [on] to turn on. [A] to set point A. [B]. to set point B. [C] to clear between points A and B. [F] to fill between points A and B. [off] to turn off.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             // voxelset [0/off] [1/on] [A] [B] [C/Clear]
             if (messageText.StartsWith("/voxelset ", StringComparison.InvariantCultureIgnoreCase))

@@ -20,13 +20,13 @@ namespace midspace.adminscripts
 
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             if (brief)
                 MyAPIGateway.Utilities.ShowMessage("/god <on|off>", "Turns god mode on or off");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/god(\s{1,}(?<Key>.+)|)", RegexOptions.IgnoreCase);
 

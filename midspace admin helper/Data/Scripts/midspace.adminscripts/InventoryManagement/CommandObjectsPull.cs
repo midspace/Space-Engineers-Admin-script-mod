@@ -16,12 +16,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pullobjects <range> <speed>", "Draws any floating objects in <range> of the player at specified <speed>. Negative speed will push objects. Zero speed will stop objects.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.StartsWith("/pullobjects ", StringComparison.InvariantCultureIgnoreCase))
             {

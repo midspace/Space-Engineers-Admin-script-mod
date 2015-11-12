@@ -14,13 +14,13 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/pos", "Displays your position.");
             MyAPIGateway.Utilities.ShowMessage("/pos <on|off>", "Turn <on> to continue displaying your position, updating once a second.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
 
             if (messageText.Equals("/pos", StringComparison.InvariantCultureIgnoreCase))

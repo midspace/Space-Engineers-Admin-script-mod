@@ -13,16 +13,16 @@
     public class CommandGameName : ChatCommand
     {
         public CommandGameName()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "gamename", new[] { "/gamename" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "gamename", new[] { "/gamename" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/gamename <name>", "Displays or changes the game name permanently to <name>.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/gamename", StringComparison.InvariantCultureIgnoreCase))
             {

@@ -35,16 +35,16 @@
     public class CommandTest : ChatCommand
     {
         public CommandTest()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13", "/test14" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "test", new[] { "/test", "/test2", "/test3", "/test4", "/test5", "/test6", "/test7", "/test8A", "/test8B", "/test9", "/test10", "/test11", "/test12", "/test13", "/test14", "/test15", "/test16" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/test", "test commands");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             #region test
 
@@ -720,20 +720,42 @@
                 //}
 
 
-                // Tag the Head position, and current position of the player.
-                var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false, false); // dead center of player cross hairs.
+                //// Tag the Head position, and current position of the player.
+                //var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false, false); // dead center of player cross hairs.
 
-                var gps = MyAPIGateway.Session.GPS.Create("GetHeadMatrix", "", worldMatrix.Translation, true, false);
-                //MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                //var gps = MyAPIGateway.Session.GPS.Create("GetHeadMatrix", "", worldMatrix.Translation, true, false);
+                ////MyAPIGateway.Session.GPS.AddLocalGps(gps);
 
-                gps = MyAPIGateway.Session.GPS.Create("GetPosition", "", MyAPIGateway.Session.Player.GetPosition(), true, false);
-                //MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                //gps = MyAPIGateway.Session.GPS.Create("GetPosition", "", MyAPIGateway.Session.Player.GetPosition(), true, false);
+                ////MyAPIGateway.Session.GPS.AddLocalGps(gps);
 
-                var pos1 = worldMatrix.Translation;
-                var pos2 = MyAPIGateway.Session.Player.GetPosition();
-                var pos = pos2 - pos1;
+                //var pos1 = worldMatrix.Translation;
+                //var pos2 = MyAPIGateway.Session.Player.GetPosition();
+                //var pos = pos2 - pos1;
 
-                MyAPIGateway.Utilities.ShowMessage("Distance", "{0}", pos.Length());
+                //MyAPIGateway.Utilities.ShowMessage("Distance", "{0}", pos.Length());
+
+
+                var clients = MyAPIGateway.Session.GetCheckpoint("null").Clients;
+                if (clients != null)
+                {
+                    IMyPlayer player = MyAPIGateway.Session.Player;
+
+                    MyObjectBuilder_Client client = clients.FirstOrDefault(c => c.SteamId == player.SteamUserId && c.IsAdmin);
+                    if (client == null)
+                    {
+                        client = new MyObjectBuilder_Client()
+                        {
+                            IsAdmin = true,
+                            SteamId = player.SteamUserId,
+                            Name =  player.DisplayName
+                        };
+                        clients.Add(client);
+                        MyAPIGateway.Utilities.ShowMessage("Check", "added admin");
+                    }
+                    else
+                        MyAPIGateway.Utilities.ShowMessage("Check", "already admin");
+                }
                 return true;
             }
 

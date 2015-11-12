@@ -11,12 +11,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/range", "Sets a GPS coordinate on the targeted item under the player crosshairs, showing the range.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             IMyEntity entity;
             double distance;

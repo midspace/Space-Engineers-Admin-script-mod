@@ -20,12 +20,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/scaleup <#>", "Converts a small ship into a large ship, also converts all cubes to large.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/scaleup", StringComparison.InvariantCultureIgnoreCase))
             {

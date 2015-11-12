@@ -24,12 +24,12 @@
             _defaultOreName = defaultOreName;
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/smite <#>", "Drops meteor on the specified <#> player. Instant death in Survival mode. Cockpits do protect a little, but can become collateral damage.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/smite\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)

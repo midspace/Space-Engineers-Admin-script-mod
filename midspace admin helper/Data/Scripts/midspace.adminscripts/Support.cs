@@ -968,7 +968,7 @@ namespace midspace.adminscripts
         /// <param name="emptyTargetMessage"></param>
         /// <param name="noSafeLocationMessage"></param>
         /// <returns></returns>
-        public static bool MoveTo(IMyPlayer sourcePlayer, IMyPlayer targetPlayer, bool safely, bool agressivePosition,
+        public static bool MoveTo(ulong steamId, IMyPlayer sourcePlayer, IMyPlayer targetPlayer, bool safely, bool agressivePosition,
             Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
         {
             if (sourcePlayer == null)
@@ -987,13 +987,13 @@ namespace midspace.adminscripts
 
             if (sourcePlayer.PlayerID == targetPlayer.PlayerID)
             {
-                MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Cannot teleport player to themself.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Cannot teleport player to themself.");
                 return false;
             }
 
             if (targetPlayer.Controller == null || targetPlayer.Controller.ControlledEntity == null)
             {
-                MyAPIGateway.Utilities.ShowMessage("Failed", "Player does not have body to teleport to.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Player does not have body to teleport to.");
                 return false;
             }
 

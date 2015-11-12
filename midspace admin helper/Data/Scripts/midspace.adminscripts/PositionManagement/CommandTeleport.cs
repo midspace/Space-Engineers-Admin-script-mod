@@ -20,7 +20,7 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             if (brief)
                 MyAPIGateway.Utilities.ShowMessage("/tp <location>", "Teleport an specified <player character> or <ship> to another <player character>, <ship>, <asteroid>, <planet>, <id> or location <GPS> or <X Y Z>.");
@@ -131,7 +131,7 @@ asteroidname - complete asteroid name without spaces.
             MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
         };
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, teleportPattern, RegexOptions.IgnoreCase);
 
@@ -174,7 +174,7 @@ asteroidname - complete asteroid name without spaces.
 
                         if (CommandIdentify.IdentifyCache is IMyIdentity)
                         {
-                            Support.MoveTo(player, ((IMyIdentity)CommandIdentify.IdentifyCache).Player(), safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                            Support.MoveTo(steamId, player, ((IMyIdentity)CommandIdentify.IdentifyCache).Player(), safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             return true;
                         }
 
@@ -224,7 +224,7 @@ asteroidname - complete asteroid name without spaces.
                         if (Int32.TryParse(match.Groups["Character1"].Value.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
                         {
                             IMyIdentity selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
-                            Support.MoveTo(player, selectedPlayer.Player(), safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                            Support.MoveTo(steamId, player, selectedPlayer.Player(), safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             return true;
                         }
                     }
@@ -268,7 +268,7 @@ asteroidname - complete asteroid name without spaces.
                         if (Support.FindEntitiesNamed(entityName, true, true, true, true, true, out foundPlayer, out foundEntity, out foundGps))
                         {
                             if (foundPlayer != null)
-                                Support.MoveTo(player, foundPlayer, safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                                Support.MoveTo(steamId, player, foundPlayer, safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundEntity != null)
                                 Support.MoveTo(player, foundEntity, safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundGps != null)
@@ -454,7 +454,7 @@ asteroidname - complete asteroid name without spaces.
                         if (Int32.TryParse(match.Groups["Character1"].Value.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
                         {
                             IMyIdentity selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
-                            Support.MoveTo(selectedPlayer.Player(), targetPlayer.Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                            Support.MoveTo(steamId, selectedPlayer.Player(), targetPlayer.Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             return true;
                         }
                     }
@@ -478,7 +478,7 @@ asteroidname - complete asteroid name without spaces.
                         if (Support.FindEntitiesNamed(entityName1, true, true, false, false, false, out foundPlayer, out foundEntity, out foundGps))
                         {
                             if (foundPlayer != null)
-                                Support.MoveTo(foundPlayer, targetPlayer.Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                                Support.MoveTo(steamId, foundPlayer, targetPlayer.Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundEntity != null)
                                 Support.MoveTo(foundEntity, targetPlayer.Player(), safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                         }
@@ -506,7 +506,7 @@ asteroidname - complete asteroid name without spaces.
                             if (Support.FindEntitiesNamed(entityName2, true, true, true, true, true, out foundPlayer, out foundEntity, out foundGps))
                             {
                                 if (foundPlayer != null)
-                                    Support.MoveTo(selectedPlayer.Player(), foundPlayer, safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                                    Support.MoveTo(steamId, selectedPlayer.Player(), foundPlayer, safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                                 if (foundEntity != null)
                                     Support.MoveTo(selectedPlayer.Player(), foundEntity, safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                                 if (foundGps != null)
@@ -554,7 +554,7 @@ asteroidname - complete asteroid name without spaces.
                         if (result1 && result2)
                         {
                             if (foundPlayer1 != null && foundPlayer2 != null)
-                                Support.MoveTo(foundPlayer1, foundPlayer2, safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                                Support.MoveTo(steamId, foundPlayer1, foundPlayer2, safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundPlayer1 != null && foundEntity2 != null)
                                 Support.MoveTo(foundPlayer1, foundEntity2, safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundPlayer1 != null && foundGps2 != null)
@@ -598,7 +598,7 @@ asteroidname - complete asteroid name without spaces.
                         {
                             IMyIdentity selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
                             if (CommandIdentify.IdentifyCache is IMyIdentity)
-                                Support.MoveTo(selectedPlayer.Player(), ((IMyIdentity)CommandIdentify.IdentifyCache).Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                                Support.MoveTo(steamId, selectedPlayer.Player(), ((IMyIdentity)CommandIdentify.IdentifyCache).Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (CommandIdentify.IdentifyCache is IMyCubeGrid)
                                 Support.MoveTo(selectedPlayer.Player(), CommandIdentify.IdentifyCache, safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (CommandIdentify.IdentifyCache is IMyCubeBlock)
@@ -635,7 +635,7 @@ asteroidname - complete asteroid name without spaces.
                         if (Support.FindEntitiesNamed(entityName1, true, true, false, false, false, out foundPlayer, out foundEntity, out foundGps))
                         {
                             if (foundPlayer != null && CommandIdentify.IdentifyCache is IMyIdentity)
-                                Support.MoveTo(foundPlayer, ((IMyIdentity)CommandIdentify.IdentifyCache).Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                                Support.MoveTo(steamId, foundPlayer, ((IMyIdentity)CommandIdentify.IdentifyCache).Player(), safely, false, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundPlayer != null && CommandIdentify.IdentifyCache is IMyCubeGrid)
                                 Support.MoveTo(foundPlayer, CommandIdentify.IdentifyCache, safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                             if (foundPlayer != null && CommandIdentify.IdentifyCache is IMyCubeBlock)

@@ -18,16 +18,16 @@
     public class CommandPlayerRespawn : ChatCommand
     {
         public CommandPlayerRespawn()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "respawn", new[] { "/respawn" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "respawn", new[] { "/respawn" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/respawn", "Respawns the player");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             //if (messageText.StartsWith("/respawn", StringComparison.InvariantCultureIgnoreCase))
             //{

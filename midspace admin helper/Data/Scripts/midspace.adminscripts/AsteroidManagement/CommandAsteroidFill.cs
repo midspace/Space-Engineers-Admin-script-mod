@@ -16,12 +16,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/roidfill <name> <material>", "Fill the specified Asteroid <name> will the <material>. ie, \"/roidfill baseasteroid1 gold_01\"");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/roidfill\s+(?<Asteroid>[^\s]+)\s+(?<Material>[^\s]+)", RegexOptions.IgnoreCase);
             if (match.Success)

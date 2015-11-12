@@ -16,12 +16,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/eject <#>", "The specified <#> player is removed from control of any ship. This includes Remote Control and cockpits, thus ejecting them into space.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/eject\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)

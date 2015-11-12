@@ -13,12 +13,12 @@ namespace midspace.adminscripts
     {
 
         public CommandChatHistory()
-            : base(ChatCommandSecurity.User, ChatCommandFlag.MultiplayerOnly, "chat", new string[] { "/chat" })
+            : base(ChatCommandSecurity.User, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "chat", new string[] { "/chat" })
         {
 
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             if (brief)
                 MyAPIGateway.Utilities.ShowMessage("/chat [entries]", "Shows the chat's history. By default it shows the last 100 entries.");
@@ -35,7 +35,7 @@ Example:
             }
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/chat(\s+(?<Entries>.+)|)", RegexOptions.IgnoreCase);
 

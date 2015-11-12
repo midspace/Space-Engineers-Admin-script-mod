@@ -16,7 +16,7 @@ namespace midspace.adminscripts
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             if (brief)
                 MyAPIGateway.Utilities.ShowMessage("/save <option> [customSaveName]", "Saves the active game to the local computer or saves the game on the server. Options: server, s, local, l.");
@@ -44,7 +44,7 @@ Optionally you can save the world as [customSaveName]. Please note that the worl
             }
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/save(\s+((?<Key>[^\s]+)\s+(?<CustomName>.*)|(?<Key>.+))|)", RegexOptions.IgnoreCase);
 

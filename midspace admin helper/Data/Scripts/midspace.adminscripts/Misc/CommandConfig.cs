@@ -12,12 +12,12 @@ namespace midspace.adminscripts
     {
 
         public CommandConfig()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.MultiplayerOnly, "cfg", new string[] { "/config", "/cfg" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "cfg", new string[] { "/config", "/cfg" })
         {
         }
 
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             var syntax = "/config <setting|action> [value]";
             if (brief)
@@ -61,7 +61,7 @@ Examples:
             }
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"(/config|/cfg)\s+(?<Key>[^\s]+)((\s+(?<Value>.+))|)", RegexOptions.IgnoreCase); 
             if (match.Success)

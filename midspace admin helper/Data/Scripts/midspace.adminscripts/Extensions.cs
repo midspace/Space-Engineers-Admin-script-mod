@@ -363,6 +363,9 @@ namespace midspace.adminscripts
             return false;
         }
 
+        // TODO: don't like this here. It should be a set of constants somewhere else.
+        public static ulong[] ExperimentalCreatorList = { 76561197961224864UL, 76561198048142826UL };
+
         /// <summary>
         /// Determines if the player is an Author/Creator.
         /// This is used expressly for testing of commands that are not yet ready 
@@ -372,15 +375,7 @@ namespace midspace.adminscripts
         /// <returns></returns>
         public static bool IsExperimentalCreator(this IMyPlayer player)
         {
-            switch (player.SteamUserId)
-            {
-                case 76561197961224864L:
-                    return true;
-                case 76561198048142826L:
-                    return true;
-            }
-
-            return false;
+            return ExperimentalCreatorList.Contains(player.SteamUserId);
         }
 
         /// <summary>
@@ -650,10 +645,18 @@ namespace midspace.adminscripts
         /// </summary>
         public static void SendMessage(this IMyUtilities utilities, ulong steamId, string sender, string messageText, params object[] args)
         {
-            if (steamId == 0)
-                MyAPIGateway.Utilities.ShowMessage(sender, messageText, args);
+            if (steamId == 0 || (MyAPIGateway.Session.Player != null && steamId == MyAPIGateway.Session.Player.SteamUserId))
+                utilities.ShowMessage(sender, messageText, args);
             else
                 MessageClientTextMessage.SendMessage(steamId, sender, messageText, args);
+        }
+
+        public static void SendMissionScreen(this IMyUtilities utilities, ulong steamId, string screenTitle = null, string currentObjectivePrefix = null, string currentObjective = null, string screenDescription = null, Action<ResultEnum> callback = null, string okButtonCaption = null)
+        {
+            if (steamId == 0 || (MyAPIGateway.Session.Player != null && steamId == MyAPIGateway.Session.Player.SteamUserId))
+                utilities.ShowMissionScreen(screenTitle, currentObjectivePrefix, currentObjective, screenDescription, callback, okButtonCaption);
+            else
+                MessageClientDialogMessage.SendMessage(steamId, screenTitle, currentObjectivePrefix, screenDescription);
         }
 
         #endregion

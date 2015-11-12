@@ -16,12 +16,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/fj <faction> <#|B>", "The specified <#> player or <B> bot joins <faction>.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/fj\s{1,}(?<Faction>.+)\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 

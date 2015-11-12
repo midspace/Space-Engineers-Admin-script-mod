@@ -26,12 +26,12 @@
             _oreNames = oreNames;
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/scanore ['clear'] <range>", "Looks for ore within <range> in all nearby asteroids and tags them with GPS. Optional word 'clear' to remove gps.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/scanore\s+clear\s+(?<RANGE>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
 

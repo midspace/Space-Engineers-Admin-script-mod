@@ -78,6 +78,7 @@
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
+    <Compile Include="Messages\MessageChatCommand.cs" />
     <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
     <Compile Include="Messages\Protection\MessageProtectionConfig.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />

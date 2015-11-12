@@ -20,12 +20,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tpp <#>", "Teleport you to the specified player <#>.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/tpp\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
 
@@ -83,7 +83,7 @@
                     MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
                 };
 
-                Support.MoveTo(MyAPIGateway.Session.Player, player, true, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                Support.MoveTo(0, MyAPIGateway.Session.Player, player, true, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
                 return true;
             }
 

@@ -28,12 +28,12 @@
             LoadPoints();
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/tplist <filter>", "List the current favorite save points. Optional <filter> to refine your search name.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/tplist\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
             string saveName = null;

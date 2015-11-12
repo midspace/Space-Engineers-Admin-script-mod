@@ -13,19 +13,19 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/help <name>", "Displays help on the specified command <name>.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var brief = messageText.StartsWith("/?", StringComparison.InvariantCultureIgnoreCase);
 
             var match = Regex.Match(messageText, @"(/help|/?)\s{1,}(?<Key>[^\s]+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                var ret = ChatCommandService.Help(match.Groups["Key"].Value, brief);
+                var ret = ChatCommandService.Help(steamId, match.Groups["Key"].Value, brief);
                 if (!ret)
                     MyAPIGateway.Utilities.ShowMessage("help", "could not find specified command.");
                 return true;
@@ -34,7 +34,7 @@
             if (ChatCommandService.UserSecurity == ChatCommandSecurity.User)
             {
                 // Split help details. Regular users, get one list.
-                var commands = new List<string>(ChatCommandService.GetListCommands());
+                var commands = new List<string>(ChatCommandService.GetListCommands(steamId));
                 commands.Sort();
 
                 if (brief)
@@ -45,10 +45,10 @@
             else
             {
                 // Split help details. Admins users, get two lists.
-                var commands = new List<string>(ChatCommandService.GetUserListCommands());
+                var commands = new List<string>(ChatCommandService.GetUserListCommands(steamId));
                 commands.Sort();
 
-                var nonUserCommands = new List<string>(ChatCommandService.GetNonUserListCommands());
+                var nonUserCommands = new List<string>(ChatCommandService.GetNonUserListCommands(steamId));
                 nonUserCommands.Sort();
 
                 if (brief)

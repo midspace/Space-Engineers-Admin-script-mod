@@ -17,7 +17,7 @@ namespace midspace.adminscripts
 
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             string syntax = "/perm <domain> <action> [<subject> [<parameter>]]";
             if (brief)
@@ -109,7 +109,7 @@ Example: /perm group list
             }
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (!MyAPIGateway.Multiplayer.MultiplayerActive)
             {
@@ -131,15 +131,15 @@ Example: /perm group list
                 {
                     case "command":
                     case "commands":
-                        ProcessCommandPermission(commandParts);
+                        ProcessCommandPermission(steamId, commandParts);
                         break;
                     case "player":
                     case "players":
-                        ProcessPlayerPermission(commandParts);
+                        ProcessPlayerPermission(steamId, commandParts);
                         break;
                     case "group":
                     case "groups":
-                        ProcessGroupPermission(commandParts);
+                        ProcessGroupPermission(steamId, commandParts);
                         break;
                     default:
                         MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no domain named {0}. Available domains: command, player, group.", commandParts[0]));
@@ -152,7 +152,7 @@ Example: /perm group list
             return false;
         }
 
-        public void ProcessCommandPermission(string[] args)
+        public void ProcessCommandPermission(ulong steamId, string[] args)
         {
             var commandMessage = new MessageCommandPermission();
             switch (args[1].ToLowerInvariant())
@@ -196,7 +196,7 @@ Example: /perm group list
             ConnectionHelper.SendMessageToServer(commandMessage);
         }
 
-        public void ProcessPlayerPermission(string[] args)
+        public void ProcessPlayerPermission(ulong steamId, string[] args)
         {
             var playerMessage = new MessagePlayerPermission();
             switch (args[1].ToLowerInvariant())
@@ -227,7 +227,7 @@ Example: /perm group list
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
                         MyAPIGateway.Utilities.ShowMessage("Player extend", "/perm player extend <playerName> <commandName>");
-                        Help(true);
+                        Help(steamId, true);
                         return;
                     }
 
@@ -253,7 +253,7 @@ Example: /perm group list
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
                         MyAPIGateway.Utilities.ShowMessage("Player useplayerlevel", "/perm player upl <playerName> <true|false>");
-                        Help(true);
+                        Help(steamId, true);
                         return;
                     }
 
@@ -287,7 +287,7 @@ Example: /perm group list
             ConnectionHelper.SendMessageToServer(playerMessage);
         }
 
-        public void ProcessGroupPermission(string[] args)
+        public void ProcessGroupPermission(ulong steamId, string[] args)
         {
             var groupMessage = new MessageGroupPermission();
             switch (args[1].ToLowerInvariant())
@@ -297,7 +297,7 @@ Example: /perm group list
                     {
                         MyAPIGateway.Utilities.ShowMessage("Permissions", "Not enough arguments.");
                         MyAPIGateway.Utilities.ShowMessage("Group setlevel", "/perm group setlevel <groupName> <level>");
-                        Help(true);
+                        Help(steamId, true);
                         return;
                     }
 

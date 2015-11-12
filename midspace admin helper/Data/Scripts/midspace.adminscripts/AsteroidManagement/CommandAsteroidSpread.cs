@@ -15,16 +15,16 @@
         /// I'm not sure if the API ever will. KeenSWH may just implement the feature in game and then this will become redundant.
         /// </summary>
         public CommandAsteroidSpread()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Experimental, "spreadasteroids", new[] { "/spreadasteroids" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "spreadasteroids", new[] { "/spreadasteroids" })
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/spreadasteroids <distance>", "Will spread all asteroids out the specified <distance> from origin (0,0,0). + or - to move out or in.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.StartsWith("/spreadasteroids", StringComparison.InvariantCultureIgnoreCase))
             {

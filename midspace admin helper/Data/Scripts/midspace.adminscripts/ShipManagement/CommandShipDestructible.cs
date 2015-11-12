@@ -15,12 +15,12 @@
         {
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/destructible On|Off <#>", "Set the specified <#> ship as destructible. Ship will be removed and regenerated.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, @"/((destructible)|(destruct))\s+(?<switch>(on)|(off)|1|2)(\s+|$)(?<Name>.*)|$", RegexOptions.IgnoreCase);
             if (match.Success)

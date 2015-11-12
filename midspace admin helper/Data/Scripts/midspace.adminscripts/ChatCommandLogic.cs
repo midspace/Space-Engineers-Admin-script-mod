@@ -43,6 +43,7 @@ namespace midspace.adminscripts
 
         private bool _permissionRequest;
         private bool _isInitialized;
+        private bool _commandsRegistered;
         private Timer _timer100;
         private bool _100MsTimerElapsed;
         private bool _1000MsTimerElapsed;
@@ -131,15 +132,20 @@ namespace midspace.adminscripts
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
             Logger.Debug("Attach MessageEntered");
 
-            foreach (ChatCommand command in GetAllChatCommands())
-                ChatCommandService.Register(command);
 
             _timer100 = new Timer(100);
             _timer100.Elapsed += TimerOnElapsed100;
             _timer100.Start();
             // Attach any other events here.
 
-            ChatCommandService.Init();
+            if (!_commandsRegistered)
+            {
+                foreach (ChatCommand command in GetAllChatCommands())
+                    ChatCommandService.Register(command);
+                _commandsRegistered = true;
+
+                ChatCommandService.Init();
+            }
 
             //MultiplayerActive is false when initializing host... extreamly weird
             if (MyAPIGateway.Multiplayer.MultiplayerActive || ServerCfg != null) //only need this in mp
@@ -169,9 +175,18 @@ namespace midspace.adminscripts
             //Debug = true;
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
+            Logger.Debug("Server Logger started");
 
             // TODO: restructure the ChatCommandLogic to encapsulate ChatCommandService on the server side.
             // Required to check security for user calls on the Server side, and call the UpdateBeforeSimulation...() methods for each command.
+            if (!_commandsRegistered)
+            {
+                foreach (ChatCommand command in GetAllChatCommands())
+                    ChatCommandService.Register(command);
+                _commandsRegistered = true;
+
+                ChatCommandService.Init();
+            }
 
             AdminNotificator.Init();
             ProtectionHandler.Init();
@@ -365,7 +380,7 @@ namespace midspace.adminscripts
 
         private void Utilities_MessageEntered(string messageText, ref bool sendToOthers)
         {
-            if (ChatCommandService.ProcessMessage(messageText))
+            if (ChatCommandService.ProcessClientMessage(messageText))
                 sendToOthers = false;
             else
             {

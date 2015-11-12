@@ -18,12 +18,12 @@
 
         }
 
-        public override void Help(bool brief)
+        public override void Help(ulong steamId, bool brief)
         {
             MyAPIGateway.Utilities.ShowMessage("/back", "Teleports you back to your previous location.");
         }
 
-        public override bool Invoke(string messageText)
+        public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             if (messageText.Equals("/back", StringComparison.InvariantCultureIgnoreCase))
             {
