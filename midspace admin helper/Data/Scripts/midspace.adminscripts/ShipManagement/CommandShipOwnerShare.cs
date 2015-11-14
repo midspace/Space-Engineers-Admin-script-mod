@@ -20,7 +20,7 @@
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/share <#>", "Share ownership of the <#> specified ship to All.");
+            MyAPIGateway.Utilities.ShowMessage("/share <#>", "Share ownership of the <#> specified ship to All, without removing the original owner.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
