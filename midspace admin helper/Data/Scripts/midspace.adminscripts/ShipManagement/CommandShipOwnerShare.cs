@@ -3,23 +3,24 @@
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
 
     /// <summary>
-    /// This changes of permissions of single blocks owned by the player only to shared.
+    /// This changes of permissions of all blocks to shared.
     /// </summary>
     public class CommandShipOwnerShare : ChatCommand
     {
         public CommandShipOwnerShare()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.Experimental, "share", new[] { "/share" })
+            : base(ChatCommandSecurity.Admin, "share", new[] { "/share" })
         {
         }
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/share <#>", "Share ownership of the <#> specified ship.");
+            MyAPIGateway.Utilities.ShowMessage("/share <#>", "Share ownership of the <#> specified ship to All.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
@@ -34,11 +35,11 @@
                     {
                         if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                         {
-                            ChangeCubeShareMode(shipEntity, MyAPIGateway.Session.Player.PlayerID, MyAPIGateway.Session.Player.PlayerID, MyOwnershipShareModeEnum.All);
+                            ChangeCubeShareMode(shipEntity, MyOwnershipShareModeEnum.All);
                         }
                         else
                         {
-                            // TODO: ConnectionHelper.SendMessageToServer(new MessageSyncShare() { EntityId = shipEntity.EntityId, PlayerId = MyAPIGateway.Session.Player.PlayerID });
+                            ConnectionHelper.SendMessageToServer(new MessageSyncShare { EntityId = shipEntity.EntityId });
                         }
                         MyAPIGateway.Utilities.ShowMessage("Share", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
                         return true;
@@ -69,16 +70,16 @@
                 // There may be more than one ship with a matching name.
                 foreach (var selectedShip in currentShipList)
                 {
-                    var grids = selectedShip.GetAttachedGrids();
+                    var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
                     foreach (var grid in grids)
                     {
                         if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                         {
-                            ChangeCubeShareMode(grid, MyAPIGateway.Session.Player.PlayerID, MyAPIGateway.Session.Player.PlayerID, MyOwnershipShareModeEnum.All);
+                            ChangeCubeShareMode(grid, MyOwnershipShareModeEnum.All);
                         }
                         else
                         {
-// TODO: ConnectionHelper.SendMessageToServer(new MessageSyncShare() { EntityId = grid.EntityId, PlayerId = MyAPIGateway.Session.Player.PlayerID });
+                            ConnectionHelper.SendMessageToServer(new MessageSyncShare { EntityId = grid.EntityId });
                         }
                         MyAPIGateway.Utilities.ShowMessage("Share", "Changing ownership of ship '{0}'.", grid.DisplayName);
                     }
@@ -90,17 +91,16 @@
             return false;
         }
 
-        private void ChangeCubeShareMode(IMyEntity selectedShip, long oldPlayer, long newPlayer, MyOwnershipShareModeEnum shareMode)
+        private void ChangeCubeShareMode(IMyEntity selectedShip, MyOwnershipShareModeEnum shareMode)
         {
-            var grids = selectedShip.GetAttachedGrids();
+            var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
             foreach (var grid in grids)
             {
                 var blocks = new List<IMySlimBlock>();
-                // we only want to change the share of blocks you own currently.
-                grid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.OwnerId == oldPlayer);
+                grid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.OwnerId != 0);
 
                 foreach (var block in blocks)
-                    block.FatBlock.ChangeOwner(newPlayer, shareMode);
+                    block.FatBlock.ChangeOwner(block.FatBlock.OwnerId, shareMode);
             }
         }
     }

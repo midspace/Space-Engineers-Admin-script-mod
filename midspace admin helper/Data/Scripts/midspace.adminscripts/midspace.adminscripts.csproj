@@ -83,6 +83,7 @@
     <Compile Include="Messages\Protection\MessageProtectionConfig.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
+    <Compile Include="Messages\Sync\MessageSyncShare.cs" />
     <Compile Include="Messages\Sync\MessageSyncSetDestructable.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
