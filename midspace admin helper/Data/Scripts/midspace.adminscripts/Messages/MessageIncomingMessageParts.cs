@@ -1,9 +1,5 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Linq;
+using ProtoBuf;
 
 namespace midspace.adminscripts.Messages
 {
@@ -29,7 +25,10 @@ namespace midspace.adminscripts.Messages
 
         public override void ProcessServer()
         {
-            ConnectionHelper.Server_MessageCache[SenderSteamId].AddRange(Content.ToList());
+            if (ConnectionHelper.Server_MessageCache.ContainsKey(SenderSteamId))
+                ConnectionHelper.Server_MessageCache[SenderSteamId].AddRange(Content.ToList());
+            else
+                ConnectionHelper.Server_MessageCache.Add(SenderSteamId, Content.ToList());
 
             if (LastPart)
             {
