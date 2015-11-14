@@ -10,7 +10,7 @@ using VRage.ObjectBuilders;
 namespace midspace.adminscripts.Protection.GameLogicComponents
 {
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]
-    public class ProtectedCubeGrid :  MyGameLogicComponent
+    public class ProtectedCubeGrid : MyGameLogicComponent
     {
         private IMyCubeGrid _cubeGrid;
         private bool _isInitialized;
