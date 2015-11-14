@@ -19,7 +19,7 @@
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/cuberename <name>", "Renames and renumbers the custom names of terminal blocks back to their orignal. Use '*' for wildcards.");
+            MyAPIGateway.Utilities.ShowMessage("/cuberename <name>", "Renames and renumbers the custom names of terminal blocks back to their original. Use '*' for wildcards.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
