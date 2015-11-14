@@ -298,12 +298,12 @@ namespace midspace.adminscripts
         public static bool IsShipControlEnabled(this Sandbox.ModAPI.Ingame.IMyCubeBlock cockpitBlock)
         {
             var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpitBlock.BlockDefinition);
-            var cockpitDefintion = definition as MyCockpitDefinition;
-            var remoteDefintion = definition as MyRemoteControlDefinition;
+            var cockpitDefinition = definition as MyCockpitDefinition;
+            var remoteDefinition = definition as MyRemoteControlDefinition;
 
-            if (cockpitDefintion != null && cockpitDefintion.EnableShipControl)
+            if (cockpitDefinition != null && cockpitDefinition.EnableShipControl)
                 return true;
-            if (remoteDefintion != null && remoteDefintion.EnableShipControl)
+            if (remoteDefinition != null && remoteDefinition.EnableShipControl)
                 return true;
 
             // is Passenger chair.

@@ -1002,8 +1002,8 @@ namespace midspace.adminscripts
                 var cockpit = (IMyCubeBlock)targetPlayer.Controller.ControlledEntity;
 
                 var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpit.BlockDefinition);
-                var cockpitDefintion = definition as MyCockpitDefinition;
-                var remoteDefintion = definition as MyRemoteControlDefinition;
+                var cockpitDefinition = definition as MyCockpitDefinition;
+                var remoteDefinition = definition as MyRemoteControlDefinition;
 
                 if (cockpit.CubeGrid.GridSizeEnum != MyCubeSize.Small)
                     // station and large ship grids.
@@ -1016,11 +1016,11 @@ namespace midspace.adminscripts
                     updatedPosition, noSafeLocationMessage);
 
                 //// target is a pilot in cockpit.
-                //if (cockpitDefintion != null)
+                //if (cockpitDefinition != null)
                 //{
                 //    // TODO: the code from above.
                 //}
-                //else if (remoteDefintion != null)
+                //else if (remoteDefinition != null)
                 //{
                 //    // TODO: find player position.
                 //    // Cannot determine player location. Is Remote controlling '{0}'", cockpit.CubeGrid.DisplayName);

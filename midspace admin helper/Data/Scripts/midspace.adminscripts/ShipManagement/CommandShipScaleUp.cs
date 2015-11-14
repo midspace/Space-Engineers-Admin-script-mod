@@ -134,7 +134,7 @@
 
                 foreach (var block in gridObjectBuilder.CubeBlocks)
                 {
-                    MyCubeBlockDefinition defintion; 
+                    MyCubeBlockDefinition definition; 
                     string newSubType = null;
                     if (newScale == MyCubeSize.Small && LargeToSmall.ContainsKey(block.SubtypeName))
                         newSubType = LargeToSmall[block.SubtypeName];
@@ -145,14 +145,14 @@
                         newSubType = rgx.Replace(block.SubtypeName, rgxScale, 1);
 
                         // Match using the BlockPairName if there is a matching cube.
-                        if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), block.SubtypeName), out defintion))
+                        if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), block.SubtypeName), out definition))
                         {
-                            var newDef = MyDefinitionManager.Static.GetAllDefinitions().Where(d => d is MyCubeBlockDefinition && ((MyCubeBlockDefinition)d).BlockPairName == defintion.BlockPairName && ((MyCubeBlockDefinition)d).CubeSize == newScale).FirstOrDefault();
+                            var newDef = MyDefinitionManager.Static.GetAllDefinitions().Where(d => d is MyCubeBlockDefinition && ((MyCubeBlockDefinition)d).BlockPairName == definition.BlockPairName && ((MyCubeBlockDefinition)d).CubeSize == newScale).FirstOrDefault();
                             if (newDef != null)
                                 newSubType = newDef.Id.SubtypeName;
                         }
                     }
-                    if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), newSubType), out defintion) && defintion.CubeSize == newScale)
+                    if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), newSubType), out definition) && definition.CubeSize == newScale)
                     {
                         block.SubtypeName = newSubType;
                         //block.EntityId = 0;

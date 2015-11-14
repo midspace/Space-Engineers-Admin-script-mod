@@ -176,9 +176,9 @@
                         var replicable = (MyReplicableEntity)entity;
                         if (replicable.DefinitionId.HasValue)
                         {
-                            MyDefinitionBase defintion;
-                            if (MyDefinitionManager.Static.TryGetDefinition(replicable.DefinitionId.Value, out defintion))
-                                displayType = defintion.Id.SubtypeName;
+                            MyDefinitionBase definition;
+                            if (MyDefinitionManager.Static.TryGetDefinition(replicable.DefinitionId.Value, out definition))
+                                displayType = definition.Id.SubtypeName;
                         }
 
                         displayName = entity.DisplayName;
