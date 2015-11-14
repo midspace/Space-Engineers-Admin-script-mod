@@ -1,8 +1,11 @@
 ﻿namespace midspace.adminscripts
 {
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using Sandbox.ModAPI;
+    using VRage.ObjectBuilders;
 
     /// <summary>
     /// This renames the custom names of terminal cubes.
@@ -16,7 +19,7 @@
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/cuberenumber <#>", "Renumbers the custom names of terminal blocks.");
+            MyAPIGateway.Utilities.ShowMessage("/cuberenumber <name>", "Renumbers the custom names of terminal blocks. Use '*' for wildcards.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
@@ -46,12 +49,14 @@
 
                 var ship = occupiedBlock.GetTopMostParent();
                 var grids = ship.GetAttachedGrids(AttachedGrids.Static);
+                var description = new StringBuilder();
                 foreach (var grid in grids)
                 {
                     var blocks = new List<IMySlimBlock>();
-                    grid.GetBlocks(blocks, b => b.FatBlock != null && b.FatBlock is IMyTerminalBlock);
+                    grid.GetBlocks(blocks, b => b.FatBlock is IMyTerminalBlock);
+                    blocks = blocks.OrderBy(b => b.FatBlock.BlockDefinition.TypeId.ToString()).ThenBy(b => b.FatBlock.BlockDefinition.SubtypeName).ToList();
 
-                    int blockCounter = 1;
+                    var counters = new Dictionary<SerializableDefinitionId, int>();
 
                     foreach (var block in blocks)
                     {
@@ -59,17 +64,24 @@
                         match = Regex.Match(terminal.CustomName, blockPattern, RegexOptions.IgnoreCase);
                         if (match.Success)
                         {
+                            int blockCounter = 1;
+                            if (counters.ContainsKey(block.FatBlock.BlockDefinition))
+                                blockCounter = counters[block.FatBlock.BlockDefinition];
+                            else
+                                counters.Add(block.FatBlock.BlockDefinition, blockCounter);
+
                             // newName is from existing name.
                             var newName = match.Groups["name"].Value.Trim() + " " + blockCounter;
-                            MyAPIGateway.Utilities.ShowMessage("namechange", "'{0}' => '{1}'", terminal.CustomName, newName);
+                            description.AppendFormat("Changed '{0}' => '{1}'\r\n", terminal.CustomName, newName);
                             terminal.SetCustomName(newName);
                             counter++;
-                            blockCounter++;
+                            counters[block.FatBlock.BlockDefinition] = blockCounter + 1;
                         }
                     }
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("Renumber", "check='{0}'.  {1} blocks renumber.", searchNameExpression, counter);
+                MyAPIGateway.Utilities.ShowMissionScreen("Cube Renumber", string.Format("{0} cubes changed", counter), " ", description.ToString());
+
                 return true;
             }
 
