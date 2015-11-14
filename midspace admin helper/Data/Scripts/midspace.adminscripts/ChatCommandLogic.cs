@@ -288,6 +288,8 @@ namespace midspace.adminscripts
             commands.Add(new CommandShipScaleDown());
             commands.Add(new CommandShipScaleUp());
             commands.Add(new CommandShipOwnerShare());
+            commands.Add(new CommandShipCubeRename());
+            commands.Add(new CommandShipCubeRenumber());
             commands.Add(new CommandStop());
             commands.Add(new CommandStopAll());
             commands.Add(new CommandTeleport());
