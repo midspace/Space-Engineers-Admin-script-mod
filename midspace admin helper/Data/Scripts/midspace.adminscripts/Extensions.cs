@@ -437,6 +437,13 @@ namespace midspace.adminscripts
             return listIdentites.FirstOrDefault();
         }
 
+        public static IMyPlayer FindPlayerBySteamId(this IMyPlayerCollection collection, ulong steamId)
+        {
+            var listplayers = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(listplayers, p => p.SteamUserId == steamId);
+            return listplayers.FirstOrDefault();
+        }
+
         /// <summary>
         /// Used to find the Character Entity (which is the physical representation in game) from the Player (the network connected human).
         /// This is a kludge as a proper API doesn't exist, even though the game code could easily expose this and save all this processing we are forced to do.
@@ -657,6 +664,19 @@ namespace midspace.adminscripts
                 utilities.ShowMissionScreen(screenTitle, currentObjectivePrefix, currentObjective, screenDescription, callback, okButtonCaption);
             else
                 MessageClientDialogMessage.SendMessage(steamId, screenTitle, currentObjectivePrefix, screenDescription);
+        }
+
+
+        public static string GetDisplayName(this SerializableDefinitionId serializableDefinitionId)
+        {
+            var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(serializableDefinitionId);
+            return definition.DisplayNameEnum.HasValue ? MyTexts.GetString(definition.DisplayNameEnum.Value) : definition.DisplayNameString;
+        }
+        
+
+        public static string GetDisplayName(this MyPhysicalItemDefinition definition)
+        {
+            return definition.DisplayNameEnum.HasValue ? MyTexts.GetString(definition.DisplayNameEnum.Value) : definition.DisplayNameString;
         }
 
         #endregion
