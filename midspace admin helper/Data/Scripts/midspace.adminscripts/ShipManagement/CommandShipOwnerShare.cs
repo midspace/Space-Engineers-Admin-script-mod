@@ -36,12 +36,12 @@
                         if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                         {
                             ChangeCubeShareMode(shipEntity, MyOwnershipShareModeEnum.All);
+                            MyAPIGateway.Utilities.ShowMessage("Share", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(new MessageSyncShare { EntityId = shipEntity.EntityId });
+                            MessageSyncGridOwner.SendMessage(shipEntity.EntityId, SyncOwnershipType.ShareAll);
                         }
-                        MyAPIGateway.Utilities.ShowMessage("Share", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
                         return true;
                     }
                 }
@@ -76,12 +76,12 @@
                         if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                         {
                             ChangeCubeShareMode(grid, MyOwnershipShareModeEnum.All);
+                            MyAPIGateway.Utilities.ShowMessage("Share", "Changing ownership of ship '{0}'.", grid.DisplayName);
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(new MessageSyncShare { EntityId = grid.EntityId });
+                            MessageSyncGridOwner.SendMessage(grid.EntityId, SyncOwnershipType.ShareAll);
                         }
-                        MyAPIGateway.Utilities.ShowMessage("Share", "Changing ownership of ship '{0}'.", grid.DisplayName);
                     }
                 }
 

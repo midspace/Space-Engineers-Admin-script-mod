@@ -34,10 +34,6 @@ namespace midspace.adminscripts.Messages.Sync
                 case SyncEntityType.Stop:
                     entity.Stop();
                     break;
-                case SyncEntityType.Revoke:
-                    if (entity is IMyCubeGrid)
-                        ((IMyCubeGrid)entity).ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
-                    break;
             }
         }
     }
@@ -45,6 +41,5 @@ namespace midspace.adminscripts.Messages.Sync
     public enum SyncEntityType
     {
         Stop,
-        Revoke
     }
 }

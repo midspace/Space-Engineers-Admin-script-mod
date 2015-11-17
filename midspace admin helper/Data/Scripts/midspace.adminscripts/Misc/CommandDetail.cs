@@ -85,7 +85,7 @@
                             gridCube = (IMyCubeGrid)cubeBlock.GetTopMostParent();
                         }
 
-                        var attachedGrids = gridCube.GetAttachedGrids();
+                        var attachedGrids = gridCube.GetAttachedGrids(AttachedGrids.Static);
                         var blocks = new List<IMySlimBlock>();
                         gridCube.GetBlocks(blocks);
                         //var cockpits = entity.FindWorkingCockpits(); // TODO: determine if any cockpits are occupied.

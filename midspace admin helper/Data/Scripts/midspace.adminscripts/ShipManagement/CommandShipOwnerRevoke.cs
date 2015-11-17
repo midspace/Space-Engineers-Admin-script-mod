@@ -37,7 +37,7 @@
                         }
                         else
                         {
-                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = shipEntity.EntityId, Type = SyncEntityType.Revoke});
+                            MessageSyncGridOwner.SendMessage(shipEntity.EntityId, SyncOwnershipType.Revoke);
                         }
                         MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", shipEntity.DisplayName);
                         return true;
@@ -68,18 +68,18 @@
                 // There may be more than one ship with a matching name.
                 foreach (var selectedShip in currentShipList)
                 {
-                    var grids = selectedShip.GetAttachedGrids();
-                    foreach (var grid in grids)
+                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                     {
-                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
+                        foreach (var grid in grids)
                         {
                             grid.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
+                            MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", grid.DisplayName);
                         }
-                        else
-                        {
-                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = grid.EntityId, Type = SyncEntityType.Revoke });
-                        }
-                        MyAPIGateway.Utilities.ShowMessage("Revoke", "Changing ownership of ship '{0}'.", grid.DisplayName);
+                    }
+                    else
+                    {
+                        MessageSyncGridOwner.SendMessage(selectedShip.EntityId, SyncOwnershipType.Revoke);
                     }
                 }
 

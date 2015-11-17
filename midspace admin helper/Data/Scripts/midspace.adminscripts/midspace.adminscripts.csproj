@@ -83,7 +83,6 @@
     <Compile Include="Messages\Protection\MessageProtectionConfig.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
-    <Compile Include="Messages\Sync\MessageSyncShare.cs" />
     <Compile Include="Messages\Sync\MessageSyncSetDestructable.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
@@ -100,7 +99,7 @@
     <Compile Include="Messages\MessagePrivateMessage.cs" />
     <Compile Include="Messages\MessageSession.cs" />
     <Compile Include="Messages\MessageSide.cs" />
-    <Compile Include="Messages\Sync\MessageSyncClaim.cs" />
+    <Compile Include="Messages\Sync\MessageSyncGridOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntityPosition.cs" />
     <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
