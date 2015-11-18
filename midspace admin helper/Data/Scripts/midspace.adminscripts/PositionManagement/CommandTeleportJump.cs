@@ -2,7 +2,7 @@
 {
     using System.Globalization;
     using System.Text.RegularExpressions;
-
+    using Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandTeleportJump : ChatCommand
@@ -36,7 +36,7 @@
                     // Dead center of player cross hairs, except in thrid person where the view can be shifted with ALT.
                     var worldMatrix = entity.GetHeadMatrix(true, true, false, false);
                     var position = entity.Entity.GetPosition() + (worldMatrix.Forward * distance);
-                    entity.Entity.SetPosition(position);
+                    MessageSyncEntity.Process(entity.Entity, SyncEntityType.Position, position);
                 }
                 else
                 {
@@ -47,7 +47,7 @@
                     // Use cockpit/chair WorldMatrix to calculate direction of Jump.
                     var worldOffset = (entity.Entity.WorldMatrix.Forward * distance);
                     foreach (var grid in grids)
-                        grid.SetPosition(grid.GetPosition() + worldOffset);
+                        MessageSyncEntity.Process(grid, SyncEntityType.Position, grid.GetPosition() + worldOffset);
                 }
 
                 // save teleport in history

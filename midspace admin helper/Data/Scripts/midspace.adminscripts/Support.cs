@@ -4,6 +4,7 @@ namespace midspace.adminscripts
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
@@ -788,7 +789,7 @@ namespace midspace.adminscripts
 
             var currentPosition = sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
 
-            sourcePlayer.Controller.ControlledEntity.Entity.SetPosition(targetLocation);
+            MessageSyncEntity.Process(sourcePlayer.Controller.ControlledEntity.Entity, SyncEntityType.Position, targetLocation);
 
             if (updatedPosition != null)
                 updatedPosition.Invoke(currentPosition);
@@ -1054,9 +1055,7 @@ namespace midspace.adminscripts
 
             var linearVelocity = targetPlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity;
 
-            sourcePlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;
-            sourcePlayer.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
-            sourcePlayer.Controller.ControlledEntity.Entity.SetPosition(position);
+            MessageSyncEntity.Process(sourcePlayer.Controller.ControlledEntity.Entity, SyncEntityType.Position | SyncEntityType.Matrix | SyncEntityType.Velocity, linearVelocity, position, matrix);
 
             if (updatedPosition != null)
                 updatedPosition.Invoke(currentPosition);
@@ -1094,15 +1093,7 @@ namespace midspace.adminscripts
             var matrix = MatrixD.CreateWorld(position, worldMatrix.Forward, worldMatrix.Up);
             var linearVelocity = targetCube.Parent.Physics == null ? Vector3.Zero : targetCube.Parent.Physics.LinearVelocity;
 
-            // The Physics.LinearVelocity doesn't change the player speed quickly enough before SetPosition is called, as
-            // the player will smack into the other obejct before it's correct velocity is actually registered.
-            sourcePlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity = linearVelocity;
-
-            sourcePlayer.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
-
-            // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
-            // the player will bounce off objects before it's correct orentation is actually registered.
-            sourcePlayer.Controller.ControlledEntity.Entity.SetPosition(position);
+            MessageSyncEntity.Process(sourcePlayer.Controller.ControlledEntity.Entity, SyncEntityType.Position | SyncEntityType.Matrix | SyncEntityType.Velocity, linearVelocity, position, matrix);
 
             if (updatedPosition != null)
                 updatedPosition.Invoke(currentPosition);
@@ -1136,8 +1127,7 @@ namespace midspace.adminscripts
 
             var currentPosition = sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
 
-            sourcePlayer.Controller.ControlledEntity.Entity.Physics.LinearVelocity = targetGrid.Physics.LinearVelocity;
-            sourcePlayer.Controller.ControlledEntity.Entity.SetPosition(destination);
+            MessageSyncEntity.Process(sourcePlayer.Controller.ControlledEntity.Entity, SyncEntityType.Position | SyncEntityType.Velocity, targetGrid.Physics.LinearVelocity, destination);
 
             if (updatedPosition != null)
                 updatedPosition.Invoke(currentPosition);
@@ -1169,9 +1159,7 @@ namespace midspace.adminscripts
             }
 
             foreach (var grid in grids)
-            {
-                grid.SetPosition(position);
-            }
+                MessageSyncEntity.Process(grid, SyncEntityType.Position, position);
 
             if (updatedPosition != null)
                 updatedPosition.Invoke(currentPosition);
@@ -1260,10 +1248,7 @@ namespace midspace.adminscripts
 
             var currentPosition = sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
 
-            // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
-            // the player will bounce off objects before it's correct orentation is actually registered.
-            sourcePlayer.Controller.ControlledEntity.Entity.SetWorldMatrix(matrix);
-            sourcePlayer.Controller.ControlledEntity.Entity.SetPosition(position);
+            MessageSyncEntity.Process(sourcePlayer.Controller.ControlledEntity.Entity, SyncEntityType.Position | SyncEntityType.Matrix, Vector3.Zero, position, matrix);
 
             if (updatedPosition != null)
                 updatedPosition.Invoke(currentPosition);

@@ -111,19 +111,7 @@
                             //item.SyncObject.UpdatePosition(); // causes Null exception.
 
                             if (item.Physics != null)
-                            {
-                                if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                                {
-                                    item.Physics.ClearSpeed();
-                                    item.SetPosition(destination); // Doesn't sync to the server.
-                                    ConnectionHelper.SendMessageToAllPlayers(new MessageSyncEntityPosition() {EntityId = item.EntityId, Position = destination});
-                                }
-                                else if (item.Physics != null)
-                                {
-                                    item.Physics.ClearSpeed();
-                                    item.SetPosition(destination); // Doesn't sync to the server.
-                                }
-                            }
+                                MessageSyncEntity.Process(item, SyncEntityType.Position | SyncEntityType.Stop, destination);
                         });
                     }
                 }

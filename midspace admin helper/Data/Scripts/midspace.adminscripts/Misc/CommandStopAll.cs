@@ -45,10 +45,10 @@
                     // Check for null physics and IsPhantom, to prevent picking up primitives.
                     if (item.Physics != null && !item.Physics.IsPhantom)
                     {
-                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                            item.Stop();
+                        if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                            MessageSyncEntity.Process(item, SyncEntityType.Stop);
                         else
-                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = item.EntityId, Type = SyncEntityType.Stop });
+                            item.Stop();
                         counter++;
                     }
                 }

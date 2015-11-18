@@ -101,7 +101,6 @@
     <Compile Include="Messages\MessageSide.cs" />
     <Compile Include="Messages\Sync\MessageSyncGridOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
-    <Compile Include="Messages\Sync\MessageSyncEntityPosition.cs" />
     <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
     <Compile Include="Messages\Sync\MessageSyncSaveToolbar.cs" />
     <Compile Include="Messages\Sync\MessageSyncSmite.cs" />

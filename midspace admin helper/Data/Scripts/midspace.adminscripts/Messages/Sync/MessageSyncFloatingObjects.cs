@@ -1,7 +1,6 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
     using ProtoBuf;
-    using Sandbox.ModAPI;
     using VRageMath;
 
     public enum SyncFloatingObject

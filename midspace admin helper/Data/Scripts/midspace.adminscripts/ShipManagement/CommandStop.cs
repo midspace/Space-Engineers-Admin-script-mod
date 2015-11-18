@@ -26,24 +26,19 @@
             if (messageText.Equals("/stop", StringComparison.InvariantCultureIgnoreCase))
             {
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
-                if (entity != null)
+                var shipEntity = entity as IMyCubeGrid;
+                if (shipEntity != null)
                 {
-                    var shipEntity = entity as IMyCubeGrid;
-                    if (shipEntity != null)
+                    if (MyAPIGateway.Multiplayer.MultiplayerActive)
                     {
-                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                        {
-                            var ret = entity.StopShip();
-                            MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
-                            return ret;
-                        }
-                        else
-                        {
-                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = shipEntity.EntityId, Type = SyncEntityType.Stop});
-                            MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, "Is stopping.");
-                            return true;
-                        }
+                        MessageSyncEntity.Process(shipEntity, SyncEntityType.Stop);
+                        MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, "Is stopping.");
+                        return true;
                     }
+
+                    var ret = entity.StopShip();
+                    MyAPIGateway.Utilities.ShowMessage(shipEntity.DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
+                    return ret;
                 }
                 MyAPIGateway.Utilities.ShowMessage("Stop", "No ship targeted.");
                 return true;
@@ -68,21 +63,17 @@
                         }
                     }
 
-                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                    {
-                        var ret = StopShips(currentShipList);
-                        MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
-                        return ret;
-                    }
-                    else
+                    if (MyAPIGateway.Multiplayer.MultiplayerActive)
                     {
                         foreach (var selectedShip in currentShipList)
-                        {
-                            ConnectionHelper.SendMessageToServer(new MessageSyncEntity() { EntityId = selectedShip.EntityId, Type = SyncEntityType.Stop });
-                        }
+                            MessageSyncEntity.Process(selectedShip, SyncEntityType.Stop);
                         MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, "Is stopping.");
                         return true;
                     }
+
+                    var ret = StopShips(currentShipList);
+                    MyAPIGateway.Utilities.ShowMessage(currentShipList.First().DisplayName, ret ? "Is stopping." : "Cannot be stopped.");
+                    return ret;
                 }
             }
 

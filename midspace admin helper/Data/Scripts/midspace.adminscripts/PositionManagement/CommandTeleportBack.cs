@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-
+    using Messages.Sync;
     using Sandbox.ModAPI;
     using VRageMath;
 
@@ -44,7 +44,7 @@
                 if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                 {
                     // Move the player only.
-                    MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.SetPosition(position);
+                    MessageSyncEntity.Process(MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity, SyncEntityType.Position, position);
                 }
                 else
                 {
@@ -54,9 +54,7 @@
                     var worldOffset = position - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
                     foreach (var grid in grids)
-                    {
-                        grid.SetPosition(grid.GetPosition() + worldOffset);
-                    }
+                        MessageSyncEntity.Process(grid, SyncEntityType.Position, grid.GetPosition() + worldOffset);
                 }
                 return true;
             }

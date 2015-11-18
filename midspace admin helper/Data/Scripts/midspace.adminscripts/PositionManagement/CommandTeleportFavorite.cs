@@ -1,7 +1,7 @@
 ﻿namespace midspace.adminscripts
 {
     using System.Text.RegularExpressions;
-
+    using Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandTeleportFavorite : ChatCommand
@@ -34,7 +34,7 @@
                     {
                         // Move the player only.
                         var offset = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.WorldAABB.Center - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
-                        MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.SetPosition(position - offset);
+                        MessageSyncEntity.Process(MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity, SyncEntityType.Position, position - offset);
                     }
                     else
                     {
@@ -45,9 +45,7 @@
                         var worldOffset = position - MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
 
                         foreach (var grid in grids)
-                        {
-                            grid.SetPosition(grid.GetPosition() + worldOffset);
-                        }
+                            MessageSyncEntity.Process(grid, SyncEntityType.Position, grid.GetPosition() + worldOffset);
                     }
 
                     // save teleport in history
