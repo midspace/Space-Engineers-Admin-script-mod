@@ -35,6 +35,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageSyncBlockOwner))]
     [XmlInclude(typeof(MessageSyncGridOwner))]
     [XmlInclude(typeof(MessageSyncEntity))]
+    [XmlInclude(typeof(MessageSyncBlock))]
     [XmlInclude(typeof(MessageSyncGod))]
     [XmlInclude(typeof(MessageSyncSmite))]
     [XmlInclude(typeof(MessageSyncInvisible))]

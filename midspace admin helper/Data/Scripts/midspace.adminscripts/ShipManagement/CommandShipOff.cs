@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
@@ -87,7 +87,7 @@
         {
             reactorCounter = 0;
             batteryCounter = 0;
-            var grids = shipEntity.GetAttachedGrids();
+            var grids = shipEntity.GetAttachedGrids(AttachedGrids.Static);
 
             foreach (var cubeGrid in grids)
             {
@@ -101,7 +101,7 @@
 
                 foreach (var item in list)
                 {
-                    item.RequestEnable(false);
+                    MessageSyncBlock.Process(item, SyncBlockType.PowerOff);
 
                     if (item.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor))
                         reactorCounter++;
