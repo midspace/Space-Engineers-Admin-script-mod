@@ -30,7 +30,8 @@ namespace midspace.adminscripts
         public static void SendMessageToServer(MessageBase message)
         {
             message.Side = MessageSide.ServerSide;
-            message.SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
+            if (MyAPIGateway.Session.Player != null)
+                message.SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
             var xml = MyAPIGateway.Utilities.SerializeToXML<MessageContainer>(new MessageContainer() { Content = message });
             byte[] byteData = System.Text.Encoding.Unicode.GetBytes(xml);
             if (byteData.Length <= MAX_MESSAGE_SIZE)
@@ -47,11 +48,12 @@ namespace midspace.adminscripts
         /// Creates and sends an entity with the given information for the server and all players.
         /// </summary>
         /// <param name="content"></param>
-        public static void SendMessageToAll(MessageBase message)
+        public static void SendMessageToAll(MessageBase message, bool syncAll = true)
         {
-            message.SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
+            if (MyAPIGateway.Session.Player != null)
+                message.SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
 
-            if (!MyAPIGateway.Multiplayer.IsServer)
+            if (syncAll || !MyAPIGateway.Multiplayer.IsServer)
                 SendMessageToServer(message);
             SendMessageToAllPlayers(message);
         }
