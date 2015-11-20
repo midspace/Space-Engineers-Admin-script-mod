@@ -9,9 +9,12 @@ namespace midspace.adminscripts.Protection
     [ProtoContract(UseProtoMembersOnly = true)]
     public class ProtectionConfig
     {
-        [ProtoMember(1)] public List<ProtectionArea> Areas = new List<ProtectionArea>();
-        [ProtoMember(2)] public bool ProtectionEnabled;
-        [ProtoMember(3)] public bool ProtectionInverted;
+        [ProtoMember(1)]
+        public List<ProtectionArea> Areas = new List<ProtectionArea>();
+        [ProtoMember(2)]
+        public bool ProtectionEnabled;
+        [ProtoMember(3)]
+        public bool ProtectionInverted;
 
         private static string _fileName;
 
@@ -31,7 +34,7 @@ namespace midspace.adminscripts.Protection
             else
                 fileName = _fileName;
 
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof (ServerConfig));
+            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
             writer.Write(MyAPIGateway.Utilities.SerializeToXML(this));
             writer.Flush();
             writer.Close();
@@ -47,11 +50,23 @@ namespace midspace.adminscripts.Protection
             var text = reader.ReadToEnd();
             reader.Close();
 
-            var cfg = MyAPIGateway.Utilities.SerializeFromXML<ProtectionConfig>(text);
+            ProtectionConfig cfg;
+            try
+            {
+                cfg = MyAPIGateway.Utilities.SerializeFromXML<ProtectionConfig>(text);
+            }
+            catch
+            {
+                Logger.Debug("Protection was corrupt and will not be loaded.");
+                return;
+            }
 
-            Areas = cfg.Areas;
-            ProtectionEnabled = cfg.ProtectionEnabled;
-            ProtectionInverted = cfg.ProtectionInverted;
+            if (cfg != null)
+            {
+                Areas = cfg.Areas;
+                ProtectionEnabled = cfg.ProtectionEnabled;
+                ProtectionInverted = cfg.ProtectionInverted;
+            }
 
             Logger.Debug("Protection loaded.");
         }
