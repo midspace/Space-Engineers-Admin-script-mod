@@ -78,7 +78,7 @@
 
         private void DeleteShip(IMyEntity shipEntity)
         {
-            var grids = shipEntity.GetAttachedGrids();
+            var grids = shipEntity.GetAttachedGrids(AttachedGrids.Static);
 
             foreach (var cubeGrid in grids)
             {
