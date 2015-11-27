@@ -674,7 +674,7 @@ namespace midspace.adminscripts
         }
         
 
-        public static string GetDisplayName(this MyPhysicalItemDefinition definition)
+        public static string GetDisplayName(this MyDefinitionBase definition)
         {
             return definition.DisplayNameEnum.HasValue ? MyTexts.GetString(definition.DisplayNameEnum.Value) : definition.DisplayNameString;
         }
