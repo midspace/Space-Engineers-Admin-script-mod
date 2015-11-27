@@ -71,7 +71,7 @@ Example:
             if (chatMessages.Count == 0)
                 content.Append("There are no messages in the chat history.");
             else
-                foreach (ChatMessage chatMessage in chatMessages.OrderByDescending(m => m.Date))
+                foreach (ChatMessage chatMessage in chatMessages.OrderBy(m => m.Date))
                     content.AppendLine(string.Format("[{0:yyyy-MM-dd HH:mm:ss}] {1}: {2}", chatMessage.Date, chatMessage.Sender.PlayerName, chatMessage.Text));
 
             MyAPIGateway.Utilities.ShowMissionScreen("Chat History", "Displayed messages: ", chatMessages.Count.ToString(), content.ToString());

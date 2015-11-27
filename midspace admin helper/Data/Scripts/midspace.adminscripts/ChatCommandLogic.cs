@@ -395,7 +395,6 @@ namespace midspace.adminscripts
                             SteamId = MyAPIGateway.Session.Player.SteamUserId,
                             PlayerName = MyAPIGateway.Session.Player.DisplayName
                         },
-                        Date = DateTime.Now
                     }
                 };
                 ConnectionHelper.SendMessageToServer(globalMessage);
