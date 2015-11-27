@@ -6,21 +6,21 @@
     using Messages.Sync;
     using Sandbox.ModAPI;
 
-    public class CommandFactionRemove : ChatCommand
+    public class CommandFactionPeace : ChatCommand
     {
-        public CommandFactionRemove()
-            : base(ChatCommandSecurity.Admin, "fr", new[] { "/fr" })
+        public CommandFactionPeace()
+            : base(ChatCommandSecurity.Admin, "fa", new[] { "/fa" })
         {
         }
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/fr <faction>", "The specified <faction> is removed.");
+            MyAPIGateway.Utilities.ShowMessage("/fa <faction>", "The specified <faction> will accept all proposed peace treaties.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/fr\s{1,}(?<Faction>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/fa\s{1,}(?<Faction>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 var factionName = match.Groups["Faction"].Value;
@@ -42,8 +42,8 @@
                     return true;
                 }
 
-                MessageSyncFaction.RemoveFaction(factionCollectionBuilder.FactionId);
-                MyAPIGateway.Utilities.ShowMessage("faction", "{0} has been removed.", factionName);
+                MessageSyncFaction.AcceptPeace(factionCollectionBuilder.FactionId);
+                MyAPIGateway.Utilities.ShowMessage("faction", "{0} has accepted peace.", factionName);
                 return true;
             }
 

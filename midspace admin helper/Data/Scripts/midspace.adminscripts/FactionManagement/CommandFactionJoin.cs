@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandFactionJoin : ChatCommand
@@ -31,11 +31,10 @@
                 var playerName = match.Groups["Key"].Value;
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null);
-                IMyIdentity selectedPlayer = null;
 
                 var identities = new List<IMyIdentity>();
-                MyAPIGateway.Players.GetAllIdentites(identities, delegate(IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
-                selectedPlayer = identities.FirstOrDefault();
+                MyAPIGateway.Players.GetAllIdentites(identities, delegate (IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
+                IMyIdentity selectedPlayer = identities.FirstOrDefault();
 
                 int index;
                 if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
@@ -43,7 +42,7 @@
                     selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
                 }
 
-                if (playerName.Substring(0, 1) == "B" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
+                if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
                 {
                     selectedPlayer = CommandListBots.BotCache[index - 1];
                 }
@@ -51,10 +50,10 @@
                 if (selectedPlayer == null)
                     return false;
 
-                if (!MyAPIGateway.Session.Factions.FactionTagExists(factionName, null) &&
-                    !MyAPIGateway.Session.Factions.FactionNameExists(factionName, null))
+                if (!MyAPIGateway.Session.Factions.FactionTagExists(factionName) &&
+                    !MyAPIGateway.Session.Factions.FactionNameExists(factionName))
                 {
-                    MyAPIGateway.Utilities.ShowMessage("faction", string.Format("{0} does not exist.", factionName));
+                    MyAPIGateway.Utilities.ShowMessage("faction", "{0} does not exist.", factionName);
                     return true;
                 }
 
@@ -63,35 +62,18 @@
                 var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.PlayerId));
                 if (factionBuilder != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("player", string.Format("{0} is already in faction {1}.{2}", selectedPlayer.DisplayName, factionBuilder.Tag, factionBuilder.Name));
+                    MyAPIGateway.Utilities.ShowMessage("player", "{0} is already in faction {1}.{2}", selectedPlayer.DisplayName, factionBuilder.Tag, factionBuilder.Name);
                     return true;
                 }
 
                 var factionCollectionBuilder = fc.Factions.FirstOrDefault(f => f.Name.Equals(factionName, StringComparison.InvariantCultureIgnoreCase) ||
-                f.Tag.Equals(factionName, StringComparison.InvariantCultureIgnoreCase));
+                    f.Tag.Equals(factionName, StringComparison.InvariantCultureIgnoreCase));
 
-                // AddPlayerToFaction() Doesn't work right on dedicated servers. To be removed by Keen in future.
-                //MyAPIGateway.Session.Factions.AddPlayerToFaction(selectedPlayer.PlayerId, factionCollectionBuilder.FactionId);
-
-                var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == selectedPlayer.PlayerId));
-
-                if (request != null && request.FactionId != factionCollectionBuilder.FactionId)
+                if (factionCollectionBuilder != null)
                 {
-                    // Cancel join request to other faction.
-                    MyAPIGateway.Session.Factions.CancelJoinRequest(request.FactionId, selectedPlayer.PlayerId);
+                    MessageSyncFaction.JoinFaction(factionCollectionBuilder.FactionId, selectedPlayer.PlayerId);
+                    MyAPIGateway.Utilities.ShowMessage("join", "{0} has been addded to faction.", selectedPlayer.DisplayName);
                 }
-                else if (request != null && request.FactionId == factionCollectionBuilder.FactionId)
-                {
-                    MyAPIGateway.Session.Factions.AcceptJoin(factionCollectionBuilder.FactionId, selectedPlayer.PlayerId);
-                    MyAPIGateway.Utilities.ShowMessage("join", string.Format("{0} has been addded to faction.", selectedPlayer.DisplayName));
-                    return true;
-                }
-
-                // The SendJoinRequest and AcceptJoin cannot be called consecutively as the second call fails to work, so they must be run on individual game frames.
-                _workQueue.Enqueue(delegate() { MyAPIGateway.Session.Factions.SendJoinRequest(factionCollectionBuilder.FactionId, selectedPlayer.PlayerId); });
-                _workQueue.Enqueue(delegate() { MyAPIGateway.Session.Factions.AcceptJoin(factionCollectionBuilder.FactionId, selectedPlayer.PlayerId); });
-
-                MyAPIGateway.Utilities.ShowMessage("join", string.Format("{0} has been addded to faction.", selectedPlayer.DisplayName));
 
                 return true;
             }

@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandFactionDemote : ChatCommand
@@ -52,7 +52,7 @@
 
                 if (factionBuilder == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("demote", string.Format("{0} not in faction.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("demote", "{0} not in faction.", selectedPlayer.DisplayName);
                     return true;
                 }
 
@@ -60,17 +60,18 @@
 
                 if (fm.IsFounder)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("demote", string.Format("{0} is Founder and cannot be demoted.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("demote", "{0} is Founder and cannot be demoted.", selectedPlayer.DisplayName);
                     return true;
                 }
 
                 if (fm.IsLeader)
                 {
-                    MyAPIGateway.Session.Factions.DemoteMember(factionBuilder.FactionId, selectedPlayer.PlayerID);
-                    MyAPIGateway.Utilities.ShowMessage("demote", string.Format("{0} from Leader to Member.", selectedPlayer.DisplayName));
+                    MessageSyncFaction.DemotePlayer(factionBuilder.FactionId, selectedPlayer.PlayerID);
+                    MyAPIGateway.Utilities.ShowMessage("demote", "{0} from Leader to Member.", selectedPlayer.DisplayName);
                     return true;
                 }
 
+                MyAPIGateway.Utilities.ShowMessage("demote", "{0} cannot be demoted further.", selectedPlayer.DisplayName);
                 return true;
             }
 

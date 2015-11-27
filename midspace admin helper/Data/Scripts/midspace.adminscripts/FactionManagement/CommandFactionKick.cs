@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandFactionKick : ChatCommand
@@ -31,7 +31,7 @@
                 IMyIdentity selectedPlayer = null;
 
                 var identities = new List<IMyIdentity>();
-                MyAPIGateway.Players.GetAllIdentites(identities, delegate(IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
+                MyAPIGateway.Players.GetAllIdentites(identities, delegate (IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
                 selectedPlayer = identities.FirstOrDefault();
 
                 int index;
@@ -40,7 +40,7 @@
                     selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
                 }
 
-                if (playerName.Substring(0, 1) == "B" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
+                if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
                 {
                     selectedPlayer = CommandListBots.BotCache[index - 1];
                 }
@@ -53,8 +53,9 @@
                 var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == selectedPlayer.PlayerId));
                 if (request != null)
                 {
-                    MyAPIGateway.Session.Factions.CancelJoinRequest(request.FactionId, selectedPlayer.PlayerId);
-                    MyAPIGateway.Utilities.ShowMessage("kick", string.Format("{0} has had join request cancelled.", selectedPlayer.DisplayName));
+                    MessageSyncFaction.CancelJoinFaction(request.FactionId, selectedPlayer.PlayerId);
+                    //MyAPIGateway.Session.Factions.CancelJoinRequest(request.FactionId, selectedPlayer.PlayerId);
+                    MyAPIGateway.Utilities.ShowMessage("kick", "{0} has had join request cancelled.", selectedPlayer.DisplayName);
                     return true;
                 }
 
@@ -62,13 +63,12 @@
 
                 if (factionBuilder == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("kick", string.Format("{0} is not in faction.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("kick", "{0} is not in faction.", selectedPlayer.DisplayName);
                     return true;
                 }
 
-                MyAPIGateway.Session.Factions.KickMember(factionBuilder.FactionId, selectedPlayer.PlayerId);
-                MyAPIGateway.Utilities.ShowMessage("kick", string.Format("{0} has been removed from faction.", selectedPlayer.DisplayName));
-
+                MessageSyncFaction.KickFaction(factionBuilder.FactionId, selectedPlayer.PlayerId);
+                MyAPIGateway.Utilities.ShowMessage("kick", "{0} has been removed from faction.", selectedPlayer.DisplayName);
                 return true;
             }
 

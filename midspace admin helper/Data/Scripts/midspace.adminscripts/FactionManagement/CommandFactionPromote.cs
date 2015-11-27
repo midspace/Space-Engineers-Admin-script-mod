@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandFactionPromote : ChatCommand
@@ -51,7 +51,7 @@
 
                 if (factionBuilder == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("promote", string.Format("{0} is not in faction.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("promote", "{0} is not in faction.", selectedPlayer.DisplayName);
                     return true;
                 }
 
@@ -59,18 +59,18 @@
 
                 if (fm.IsFounder)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("promote", string.Format("{0} is Founder and cannot be promoted.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("promote", "{0} is Founder and cannot be promoted.", selectedPlayer.DisplayName);
                     return true;
                 }
 
                 if (fm.IsLeader)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("promote", string.Format("{0} is Leader and cannot be promoted.", selectedPlayer.DisplayName));
+                    MyAPIGateway.Utilities.ShowMessage("promote", "{0} is Leader and cannot be promoted.", selectedPlayer.DisplayName);
                     return true;
                 }
 
-                MyAPIGateway.Session.Factions.PromoteMember(factionBuilder.FactionId, selectedPlayer.PlayerID);
-                MyAPIGateway.Utilities.ShowMessage("promote", string.Format("{0} from Member to Leader.", selectedPlayer.DisplayName));
+                MessageSyncFaction.PromotePlayer(factionBuilder.FactionId, selectedPlayer.PlayerID);
+                MyAPIGateway.Utilities.ShowMessage("promote", "{0} from Member to Leader.", selectedPlayer.DisplayName);
                 return true;
             }
 

@@ -229,6 +229,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandFactionKick());
             commands.Add(new CommandFactionPromote());
             commands.Add(new CommandFactionRemove());
+            commands.Add(new CommandFactionPeace());
             commands.Add(new CommandForceBan());
             commands.Add(new CommandForceKick());
             commands.Add(new CommandFlyTo());
