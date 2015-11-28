@@ -67,9 +67,9 @@
                 terminalBlock.SetCustomName(oldName);
                 MessageClientTextMessage.SendMessage(SenderSteamId, "Cockpit", "Toolbar updated!");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                AdminNotificator.StoreExceptionAndNotify(ex);
                 MessageClientTextMessage.SendMessage(SenderSteamId, "Cockpit", "Toolbar failed to save.");
             }
         }

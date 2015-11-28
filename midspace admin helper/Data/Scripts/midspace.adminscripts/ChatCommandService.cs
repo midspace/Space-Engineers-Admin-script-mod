@@ -175,7 +175,7 @@
 
                         var message = ex.Message.Replace("\r", " ").Replace("\n", " ");
                         message = message.Substring(0, Math.Min(message.Length, 50));
-                        MyAPIGateway.Utilities.ShowMessage("Error", String.Format("Occured attempting to run {0}.\r\n{1}", command, message));
+                        MyAPIGateway.Utilities.ShowMessage("Error", "Occured attempting to run {0}.\r\n{1}", command, message);
                     }
                 }
                 else if (command.Value.HasFlag(ChatCommandFlag.Server))
@@ -271,7 +271,7 @@
 
                         var message = ex.Message.Replace("\r", " ").Replace("\n", " ");
                         message = message.Substring(0, Math.Min(message.Length, 50));
-                        MyAPIGateway.Utilities.SendMessage(steamId, "Error", String.Format("Occured attempting to run {0}.\r\n{1}", command, message));
+                        MyAPIGateway.Utilities.SendMessage(steamId, "Error", "Occured attempting to run {0}.\r\n{1}", command, message);
                     }
                 }
                 else
