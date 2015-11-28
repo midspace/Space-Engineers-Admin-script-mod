@@ -85,6 +85,7 @@
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlock.cs" />
+    <Compile Include="Messages\Sync\MessageSyncAres.cs" />
     <Compile Include="Messages\Sync\MessageSyncFaction.cs" />
     <Compile Include="Messages\Sync\MessageSyncSetDestructable.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
@@ -106,7 +107,6 @@
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
     <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
     <Compile Include="Messages\Sync\MessageSyncSaveToolbar.cs" />
-    <Compile Include="Messages\Sync\MessageSyncSmite.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />
     <Compile Include="Misc\CommandBomb.cs" />

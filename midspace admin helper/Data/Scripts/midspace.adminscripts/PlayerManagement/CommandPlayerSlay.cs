@@ -4,8 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
-    using Sandbox.Common.ObjectBuilders.Definitions;
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandPlayerSlay : ChatCommand
@@ -50,10 +49,7 @@
                     return true;
                 }
 
-                if (selectedPlayer.KillPlayer(MyDamageType.Environment))
-                    MyAPIGateway.Utilities.ShowMessage("slaying", selectedPlayer.DisplayName);
-                else
-                    MyAPIGateway.Utilities.ShowMessage("could not slay", "{0} as player is Pilot. Use /eject first.", selectedPlayer.DisplayName);
+                MessageSyncAres.Slay(selectedPlayer.SteamUserId);
                 return true;
             }
 

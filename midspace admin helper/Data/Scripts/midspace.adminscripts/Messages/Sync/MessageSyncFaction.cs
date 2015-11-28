@@ -60,8 +60,7 @@ namespace midspace.adminscripts.Messages.Sync
         private static void Process(MessageSyncFaction syncEntity)
         {
             if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                ConnectionHelper.SendMessageToServer(syncEntity);  // TODO: determine if it needs to run on Server, or ALL connected sessions.
-                                                                   //ConnectionHelper.SendMessageToAll(syncEntity);
+                ConnectionHelper.SendMessageToServer(syncEntity);
             else
                 syncEntity.CommonProcess(syncEntity.SyncType, syncEntity.FactionId, syncEntity.PlayerId);
         }
