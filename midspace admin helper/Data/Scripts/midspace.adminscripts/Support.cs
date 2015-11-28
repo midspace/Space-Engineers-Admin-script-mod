@@ -25,11 +25,11 @@ namespace midspace.adminscripts
             IMyEntity entity;
             double distance;
             Vector3D hitPoint;
-            FindLookAtEntity(controlledEntity, true, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets, findReplicable);
+            FindLookAtEntity(controlledEntity, true, false, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets, findReplicable);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, bool ignoreProjection, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable)
         {
             const float range = 5000000;
             Matrix worldMatrix;
@@ -78,6 +78,10 @@ namespace midspace.adminscripts
                     if (cubeGrid != null)
                     {
                         if (ignoreOccupiedGrid && occupiedGrid != null && occupiedGrid.EntityId == cubeGrid.EntityId)
+                            continue;
+
+                        // Will ignore Projected grids, new grid/cube placement, and grids in middle of copy/paste.
+                        if (ignoreProjection && cubeGrid.Physics == null)
                             continue;
 
                         // check if the ray comes anywhere near the Grid before continuing.    
