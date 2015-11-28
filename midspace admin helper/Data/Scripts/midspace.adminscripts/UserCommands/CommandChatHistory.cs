@@ -24,7 +24,7 @@ namespace midspace.adminscripts
                 MyAPIGateway.Utilities.ShowMessage("/chat [entries]", "Shows the chat's history. By default it shows the last 100 entries.");
             else
             {
-                MyAPIGateway.Utilities.ShowMissionScreen("Help", null, Name, @"Shows the chat's history. The argument 'entries' is optional, by default the command shows the last 100 entries.
+                MyAPIGateway.Utilities.ShowMissionScreen("Admin Helper Commands", "Help : ", Name, @"Shows the chat's history. The argument 'entries' is optional, by default the command shows the last 100 entries.
 
 Syntax:
 /chat [entries]

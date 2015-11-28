@@ -106,7 +106,7 @@ A123 - asteroid hotlist number.
 asteroidname - complete asteroid name without spaces.
 
 "); // add empty line at the end -> looks better.
-                MyAPIGateway.Utilities.ShowMissionScreen("Help", null, Name, description.ToString(), null, null);
+                MyAPIGateway.Utilities.ShowMissionScreen("Admin Helper Commands", "Help : ", Name, description, null, null);
             }
         }
 

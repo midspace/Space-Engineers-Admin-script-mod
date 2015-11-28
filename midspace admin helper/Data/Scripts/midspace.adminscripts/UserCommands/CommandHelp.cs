@@ -38,9 +38,9 @@
                 commands.Sort();
 
                 if (brief)
-                    MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", commands));
+                    MyAPIGateway.Utilities.ShowMessage("help", string.Join(", ", commands));
                 else
-                    MyAPIGateway.Utilities.ShowMissionScreen("Help", "Available commands", " ", "Commands: " + String.Join(", ", commands), null, "OK");
+                    MyAPIGateway.Utilities.ShowMissionScreen("Admin Helper Commands", "Help : Available commands", " ", "Commands: " + string.Join(", ", commands), null, "OK");
             }
             else
             {
@@ -53,13 +53,13 @@
 
                 if (brief)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("user help", String.Join(", ", commands));
-                    MyAPIGateway.Utilities.ShowMessage("help", String.Join(", ", nonUserCommands));
+                    MyAPIGateway.Utilities.ShowMessage("user help", string.Join(", ", commands));
+                    MyAPIGateway.Utilities.ShowMessage("help", string.Join(", ", nonUserCommands));
                 }
                 else
                 {
-                    MyAPIGateway.Utilities.ShowMissionScreen("Help", "Available commands", " ",
-                        string.Format("User commands:\r\n{0}\r\n\r\nAdmin commands:\r\n{1}", String.Join(", ", commands), String.Join(", ", nonUserCommands))
+                    MyAPIGateway.Utilities.ShowMissionScreen("Admin Helper Commands", "Help : Available commands", " ",
+                        string.Format("User commands:\r\n{0}\r\n\r\nAdmin commands:\r\n{1}", string.Join(", ", commands), string.Join(", ", nonUserCommands))
                         , null, "OK");
                 }
             }

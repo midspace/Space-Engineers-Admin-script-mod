@@ -57,7 +57,7 @@ Available actions:
 Examples:
 - '/cfg motdhl Welcome on the server!' -> This will set the headline of the motd to 'Welcome on the server!'. Note that it won't be saved until the server shuts down even though it is active. If someone reloads the config before it is saved (manually or at shutdown) the headline will be changed back to that one in the config file.
 - '/cfg reload' -> This will reload the config from the file and reverts any changes you made since the last save.");
-                MyAPIGateway.Utilities.ShowMissionScreen("Help", null, Name, description.ToString(), null, null);
+                MyAPIGateway.Utilities.ShowMissionScreen("Admin Helper Commands", "Help : ", Name, description.ToString(), null, null);
             }
         }
 

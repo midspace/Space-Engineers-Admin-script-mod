@@ -105,7 +105,7 @@ Creates a hotlist containing all groups and provides information about them. Use
 Example: /perm group list
 ", MyAPIGateway.Session.Player.DisplayName, syntax));
 
-                MyAPIGateway.Utilities.ShowMissionScreen("Help", null, Name, description.ToString(), null, null);
+                MyAPIGateway.Utilities.ShowMissionScreen("Admin Helper Commands", "Help : ", Name, description.ToString(), null, null);
             }
         }
 
