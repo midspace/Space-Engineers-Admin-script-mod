@@ -14,17 +14,20 @@ More details about the "Space Engineeers" game is available here:
 This mod is published and publicly available on the [Steam Community here](
 http://steamcommunity.com/sharedfiles/filedetails/?id=316190120).
 
-
-The offical github repository for this mod is available here:
-https://github.com/midspace/Space-Engineers-Admin-script-mod
-
-
 Visit the Keen Software House modding forums for more detail on modding Space Engineers:
 http://forums.keenswh.com/?forum=325599
 
 
+How to use Admin helper mod...
+-----------------------
+All chat commands and examples on how to use them are described in our [wiki documentation](http://github.com/midspace/Space-Engineers-Admin-script-mod/wiki).
+
+
 Working with the code.
 ---------------------
+If you have download this elsewhere, the offical github repository for this mod is available here:
+http://github.com/midspace/Space-Engineers-Admin-script-mod
+
 A copy of the game is required to work with or develop the script mod.
 
 Working on the github repository.
