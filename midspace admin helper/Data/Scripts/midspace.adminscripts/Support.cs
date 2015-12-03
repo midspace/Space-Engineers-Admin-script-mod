@@ -131,9 +131,32 @@ namespace midspace.adminscripts
                         var hit = ray.Intersects(aabb);
                         if (hit.HasValue)
                         {
-                            var center = voxelMap.PositionLeftBottomCorner + (voxelMap.Storage.Size / 2);
-                            var distance = (startPosition - center).Length();  // use distance to center of asteroid.
-                            list.Add(entity, distance);
+                            Vector3D? hitIngoing;
+                            Vector3D? hitOutgoing;
+
+                            // May not be asteroid that is blocking ray, so am doing additional checks. It's still not reliable.
+                            if (voxelMap.WorldAABB.IntersectPoints(startPosition, endPosition, out hitIngoing, out hitOutgoing)
+                                && Sandbox.Game.Entities.MyEntities.IsRaycastBlocked(hitIngoing.Value, hitOutgoing.Value))
+                            {
+                                Vector3 lastOutsidePos;
+                                // TODO: IsInsideVoxel doesn't appear to be reliable. Need to find an improved method.
+
+                                //List<Sandbox.Engine.Physics.MyPhysics.HitInfo> m_hits = new List<Sandbox.Engine.Physics.MyPhysics.HitInfo>();
+                                //Sandbox.Engine.Physics.MyPhysics.CastRay(startPosition, endPosition, m_hits, 0);   // MyPhysics is not whitelisted.
+
+                                if (Sandbox.Game.Entities.MyEntities.IsInsideVoxel(startPosition, endPosition, out lastOutsidePos))
+                                {
+                                    list.Add(entity, Vector3D.Distance(startPosition, lastOutsidePos));
+                                    //MyAPIGateway.Utilities.ShowMessage("Range", "CheckA");
+                                }
+                                else
+                                {
+                                    var center = voxelMap.PositionLeftBottomCorner + (voxelMap.Storage.Size / 2);
+                                    // use distance to center of asteroid as an approximation.
+                                    //MyAPIGateway.Utilities.ShowMessage("Range", "CheckB");
+                                    list.Add(entity, Vector3D.Distance(startPosition, center));
+                                }
+                            }
                         }
                     }
                 }
@@ -1222,12 +1245,6 @@ namespace midspace.adminscripts
 
                 Vector3D closestSurfacePoint;
                 MyVoxelCoordSystems.WorldPositionToLocalPosition(planet.PositionLeftBottomCorner, ref findFromPoint, out closestSurfacePoint);
-                Vector3D vector3D = planet.GetWorldGravityNormalized(ref findFromPoint);
-
-                //closestSurfacePoint = planet.GetClosestSurfacePoint(ref closestSurfacePoint, ref vector3D, 20, 0);
-                //MyVoxelCoordSystems.LocalPositionToWorldPosition(planet.PositionLeftBottomCorner, ref closestSurfacePoint, out position);
-
-                // TODO: Untested.
                 position = planet.GetClosestSurfacePointGlobal(ref closestSurfacePoint);
 
                 var up = position - planet.WorldMatrix.Translation;

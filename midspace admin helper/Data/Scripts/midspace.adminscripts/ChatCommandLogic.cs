@@ -237,6 +237,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandGodMode());
             commands.Add(new CommandHeading());
             commands.Add(new CommandHelloWorld());
+            commands.Add(new CommandLaserUpDown());
             commands.Add(new CommandLaserRangefinder());
             commands.Add(new CommandSettings());
             commands.Add(new CommandHelp());
