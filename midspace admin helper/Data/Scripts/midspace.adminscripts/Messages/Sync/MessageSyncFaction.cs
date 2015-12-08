@@ -84,7 +84,7 @@ namespace midspace.adminscripts.Messages.Sync
                 case SyncFactionType.Join:
                     {
                         var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
-                        var faction = MyAPIGateway.Session.Factions.TryGetFactionById(factionId);
+                        //var faction = MyAPIGateway.Session.Factions.TryGetFactionById(factionId);
 
                         // AddPlayerToFaction() Doesn't work right on dedicated servers. To be removed by Keen in future. Is Depriated.
                         //MyAPIGateway.Session.Factions.AddPlayerToFaction(selectedPlayer.PlayerId, factionCollectionBuilder.FactionId);

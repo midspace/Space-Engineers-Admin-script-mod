@@ -123,6 +123,7 @@
     <Compile Include="Protection\ProtectionArea.cs" />
     <Compile Include="Protection\ProtectionConfig.cs" />
     <Compile Include="Protection\ProtectionHandler.cs" />
+    <Compile Include="ShipManagement\CommandPrefabAddDrone.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRenumber.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRename.cs" />
     <Compile Include="ShipManagement\CommandShipSwitch.cs" />

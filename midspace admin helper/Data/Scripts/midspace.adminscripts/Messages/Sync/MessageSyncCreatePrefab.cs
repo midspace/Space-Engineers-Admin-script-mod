@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
@@ -30,16 +31,28 @@
 
         public override void ProcessServer()
         {
-            if (AddPrefab(PrefabName, PositionEntityId, Type == SyncCreatePrefabType.Wireframe))
+            if (AddPrefab(PrefabName, PositionEntityId, Type))
                 MessageClientTextMessage.SendMessage(SenderSteamId, "Success", "The Prefab {0} is spawning.", PrefabName);
             else
                 MessageClientTextMessage.SendMessage(SenderSteamId, "Failed", "Could not create the specified prefab.");
         }
 
-        public static bool AddPrefab(string prefabName, long positionEntityId, bool wireframe, ulong messageId = 0)
+        public static bool AddPrefab(string prefabName, long positionEntityId, SyncCreatePrefabType prefabType, ulong messageId = 0)
         {
             if (!MyAPIGateway.Entities.EntityExists(positionEntityId))
                 return false;
+
+            long piratePlayerId = 0;
+            if (prefabType == SyncCreatePrefabType.Pirate)
+            {
+                var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
+                var faction = fc.Factions.FirstOrDefault(f => f.Tag =="SPRT");
+                if (faction != null)
+                {
+                    var pirateMember = faction.Members.FirstOrDefault();
+                    piratePlayerId = pirateMember.PlayerId;
+                }
+            }
 
             var entity = MyAPIGateway.Entities.GetEntityById(positionEntityId);
 
@@ -63,6 +76,9 @@
                 max = Vector3I.Max(b.Min, max);
             }
             var size = new Vector3(max - min);
+
+            // TODO: find a empty spot in space to spawn the prefab safely.
+
             var distance = (Math.Sqrt(size.LengthSquared()) * prefab.CubeGrids[0].GridSizeEnum.ToGridLength() / 2) + 2;
             var position = worldMatrix.Translation + worldMatrix.Forward * distance; // offset the position out in front of player by 2m.
             var offset = position - prefab.CubeGrids[0].PositionAndOrientation.Value.Position;
@@ -74,12 +90,21 @@
                 var gridBuilder = (MyObjectBuilder_CubeGrid)grid.Clone();
                 gridBuilder.PositionAndOrientation = new MyPositionAndOrientation(grid.PositionAndOrientation.Value.Position + offset, grid.PositionAndOrientation.Value.Forward, grid.PositionAndOrientation.Value.Up);
 
-                if (wireframe)
+                if (prefabType == SyncCreatePrefabType.Wireframe)
                     foreach (var cube in gridBuilder.CubeBlocks)
                     {
                         cube.IntegrityPercent = 0.01f;
                         cube.BuildPercent = 0.01f;
                     }
+
+                if (prefabType == SyncCreatePrefabType.Pirate)
+                {
+                    foreach (var cube in gridBuilder.CubeBlocks)
+                    {
+                        cube.Owner = piratePlayerId;
+                        cube.ShareMode = MyOwnershipShareModeEnum.None;
+                    }
+                }
 
                 tempList.Add(gridBuilder);
             }
@@ -92,6 +117,7 @@
     public enum SyncCreatePrefabType
     {
         Stock,
-        Wireframe
+        Wireframe,
+        Pirate
     }
 }
