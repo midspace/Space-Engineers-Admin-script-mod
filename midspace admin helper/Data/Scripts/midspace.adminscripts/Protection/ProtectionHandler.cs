@@ -102,35 +102,30 @@ namespace midspace.adminscripts.Protection
 
         private static bool CanDamageBlock(long attackerEntityId, IMySlimBlock block, MyStringHash type)
         {
-            foreach (ProtectionArea area in Config.Areas)
+            if (!IsProtected(block)) 
+                return true;
+
+            IMyEntity attackerEntity;
+            if (!MyAPIGateway.Entities.TryGetEntityById(attackerEntityId, out attackerEntity))
+                return false;
+
+            if (type == MyDamageType.Grind)
             {
-                if (IsProtected(block)) 
-                    continue;
-
-                // if we can't find out who attacks and the block is inside the area, we don't apply the damage
-                IMyEntity attackerEntity;
-                if (!MyAPIGateway.Entities.TryGetEntityById(attackerEntityId, out attackerEntity))
-                    return false;
-
-                if (type == MyDamageType.Grind)
+                IMyPlayer player;
+                if (attackerEntity is IMyShipGrinder)
                 {
-                    IMyPlayer player;
-                    if (attackerEntity is IMyShipGrinder)
-                    {
-                        player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity.GetTopMostParent());
+                    player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity.GetTopMostParent());
 
-                        if (player == null)
-                            return false;
+                    if (player == null)
+                        return false;
 
-                        return CanModify(player, block);
-                    }
-
-                    return _handtoolCache.TryGetPlayer(attackerEntity.EntityId, out player) && CanModify(player, block);
+                    return CanModify(player, block);
                 }
-                // we don't want players to destroy things in protection areas...
-                return false; 
+
+                return _handtoolCache.TryGetPlayer(attackerEntity.EntityId, out player) && CanModify(player, block);
             }
-            return true;
+            // we don't want players to destroy things in protection areas...
+            return false;
         }
 
         /// <summary>

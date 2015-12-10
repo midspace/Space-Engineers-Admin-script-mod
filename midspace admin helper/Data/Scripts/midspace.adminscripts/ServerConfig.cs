@@ -613,7 +613,6 @@ If you can't find the error, simply delete the file. The server will create a ne
             Permissions.Commands = new List<CommandStruct>(Permissions.Commands.OrderByDescending(c => c.NeededLevel).ThenBy(c => c.Name));
 
             SavePermissionFile();
-            return;
         }
 
         private void SavePermissionFile(string customSaveName = null)
