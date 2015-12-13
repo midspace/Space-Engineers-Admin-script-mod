@@ -237,6 +237,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandGodMode());
             commands.Add(new CommandHeading());
             commands.Add(new CommandHelloWorld());
+            commands.Add(new CommandLaserUpDown());
             commands.Add(new CommandLaserRangefinder());
             commands.Add(new CommandSettings());
             commands.Add(new CommandHelp());
@@ -266,6 +267,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandPlayerStatus());
             commands.Add(new CommandPosition());
             commands.Add(new CommandPrefabAdd());
+            commands.Add(new CommandPrefabAddDrone());
             commands.Add(new CommandPrefabAddWireframe());
             commands.Add(new CommandPrefabPaste());
             commands.Add(new CommandPrivateMessage());

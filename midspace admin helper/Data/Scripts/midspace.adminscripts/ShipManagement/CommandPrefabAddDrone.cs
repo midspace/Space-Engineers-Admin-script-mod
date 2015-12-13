@@ -7,21 +7,21 @@
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
 
-    public class CommandPrefabAdd : ChatCommand
+    public class CommandPrefabAddDrone : ChatCommand
     {
-        public CommandPrefabAdd()
-            : base(ChatCommandSecurity.Admin, "addprefab", new[] { "/addprefab" })
+        public CommandPrefabAddDrone()
+            : base(ChatCommandSecurity.Admin, "adddrone", new[] { "/adddrone", "/addpirate" })
         {
         }
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/addprefab <#>", "Add the specified <#> prefab. Spawns the specified a ship 2m directly in front of player.");
+            MyAPIGateway.Utilities.ShowMessage("/adddrone <#>", "Add the specified <#> prefab. Spawns the specified a ship 2m directly in front of player.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/addprefab\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/((adddrone)|(addpirate))\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 var prefabName = match.Groups["Key"].Value;
@@ -39,7 +39,7 @@
                 {
                     if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                     {
-                        if (!MessageSyncCreatePrefab.AddPrefab(prefab.Id.SubtypeName, MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId, SyncCreatePrefabType.Stock))
+                        if (!MessageSyncCreatePrefab.AddPrefab(prefab.Id.SubtypeName, MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId, SyncCreatePrefabType.Pirate))
                             MyAPIGateway.Utilities.ShowMessage("Failed", "Could not create the specified prefab.");
                     }
                     else
@@ -47,7 +47,7 @@
                         {
                             PrefabName = prefab.Id.SubtypeName,
                             PositionEntityId = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId,
-                            Type = SyncCreatePrefabType.Stock,
+                            Type = SyncCreatePrefabType.Pirate,
                         });
                     return true;
                 }

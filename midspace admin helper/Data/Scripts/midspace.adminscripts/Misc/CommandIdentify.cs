@@ -33,7 +33,7 @@
                 IMyEntity entity;
                 double distance;
                 Vector3D hitPoint;
-                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, out entity, out distance, out hitPoint, true, true, true, true, true, true);
+                Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, out entity, out distance, out hitPoint, true, true, true, true, true, true);
                 if (entity != null)
                 {
                     IdentifyCache = entity;

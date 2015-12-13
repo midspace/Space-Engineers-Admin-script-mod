@@ -123,12 +123,14 @@
     <Compile Include="Protection\ProtectionArea.cs" />
     <Compile Include="Protection\ProtectionConfig.cs" />
     <Compile Include="Protection\ProtectionHandler.cs" />
+    <Compile Include="ShipManagement\CommandPrefabAddDrone.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRenumber.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRename.cs" />
     <Compile Include="ShipManagement\CommandShipSwitch.cs" />
     <Compile Include="ShipManagement\CommandShipRepair.cs" />
     <Compile Include="ShipManagement\CommandShipDestructible.cs" />
     <Compile Include="UserCommands\CommandChatHistory.cs" />
+    <Compile Include="UserCommands\CommandLaserUpDown.cs" />
     <Compile Include="UserCommands\CommandLaserRangefinder.cs" />
     <Compile Include="UserCommands\CommandSettings.cs" />
     <Compile Include="UserCommands\CommandPrivateMessage.cs" />

@@ -679,6 +679,38 @@ namespace midspace.adminscripts
             return definition.DisplayNameEnum.HasValue ? MyTexts.GetString(definition.DisplayNameEnum.Value) : definition.DisplayNameString;
         }
 
+        public static bool IntersectPoints(this BoundingBoxD boundingBox, Vector3D position, Vector3D target, out Vector3D? hitIngoing, out Vector3D? hitOutgoing)
+        {
+            //if (!Sandbox.Game.Entities.MyEntities.IsRaycastBlocked(position, target))
+            //{
+            //    hitIngoing = null;
+            //    hitOutgoing = null;
+            //    return false;
+            //}
+
+            // big enough for planets
+            double outbound = 200000;
+
+            var direction = Vector3D.Normalize(target - position);
+            var ray = new RayD(position + direction * -outbound, Vector3D.Normalize(direction * outbound));
+            var interset = boundingBox.Intersects(ray);
+            if (interset.HasValue)
+                hitIngoing = position + direction * -outbound + (direction * interset.Value);
+            else
+                hitIngoing = null;
+
+            direction = Vector3D.Normalize(position - target);
+            ray = new RayD(target + direction * -outbound, Vector3D.Normalize(direction * outbound));
+            interset = boundingBox.Intersects(ray);
+            if (interset.HasValue)
+                hitOutgoing = target + direction * -outbound + (direction * interset.Value);
+            else
+                hitOutgoing = null;
+
+
+            return hitIngoing.HasValue && hitOutgoing.HasValue;
+        }
+
         #endregion
     }
 
