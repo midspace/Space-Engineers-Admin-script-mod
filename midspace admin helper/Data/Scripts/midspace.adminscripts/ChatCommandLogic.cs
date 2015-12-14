@@ -238,6 +238,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandHeading());
             commands.Add(new CommandHelloWorld());
             commands.Add(new CommandLaserUpDown());
+            commands.Add(new CommandSunTrack());
             commands.Add(new CommandLaserRangefinder());
             commands.Add(new CommandSettings());
             commands.Add(new CommandHelp());
@@ -269,7 +270,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandPrefabAdd());
             commands.Add(new CommandPrefabAddDrone());
             commands.Add(new CommandPrefabAddWireframe());
-            commands.Add(new CommandPrefabPaste());
+            //commands.Add(new CommandPrefabPaste());  //not working any more
             commands.Add(new CommandPrivateMessage());
             commands.Add(new CommandProtectionArea());
             commands.Add(new CommandSaveGame());
