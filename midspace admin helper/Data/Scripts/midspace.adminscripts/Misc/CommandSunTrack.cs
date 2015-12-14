@@ -30,6 +30,8 @@
             baseSunDirection = -baseSunDirection;
 
             var origin = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false).Translation;
+            // TODO: figure out why the RPM doesn't match.
+            //IMyGps gps = MyAPIGateway.Session.GPS.Create("Sun observation " + (1.0d / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes).ToString("N") + " RPM", "", origin, true, false);
             IMyGps gps = MyAPIGateway.Session.GPS.Create("Sun observation", "", origin, true, false);
             MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
@@ -38,20 +40,35 @@
             // Sun interval for 360 degrees.
             for (long rotation = 0; rotation < sunRotationInterval; rotation += stage)
             {
-                // copied from Sandbox.Game.Gui.MyGuiScreenGamePlay.Draw()
                 var stageTime = new TimeSpan(rotation);
-                float angle = MathHelper.TwoPi * (float)(stageTime.TotalMinutes / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes);
-                var sunDirection = baseSunDirection;
-                float originalSunCosAngle = Math.Abs(Vector3.Dot(sunDirection, Vector3.Up));
-                Vector3 sunRotationAxis = Vector3.Cross(Vector3.Cross(sunDirection, originalSunCosAngle > 0.95f ? Vector3.Left : Vector3.Up), sunDirection);
-                sunDirection = Vector3.Normalize(Vector3.Transform(sunDirection, Matrix.CreateFromAxisAngle(sunRotationAxis, angle)));
-                var finalSunDirection = -sunDirection;
+                var finalSunDirection = GetSunDirection(baseSunDirection, stageTime.TotalMinutes);
 
-                gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), "", origin + (finalSunDirection * 100000), true, false);
+                gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), "", origin + (finalSunDirection * 10000), true, false);
                 MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
             }
 
+            var vector1 = GetSunDirection(baseSunDirection, 0);
+            var vector2 = GetSunDirection(baseSunDirection, new TimeSpan(sunRotationInterval / 4).TotalMinutes);
+
+            var zenith = Vector3D.Normalize(Vector3D.Cross(vector1, vector2));
+            gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", "", origin + (zenith * 10000), true, false);
+            MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
+
+            gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", "", origin + (-zenith * 10000), true, false);
+            MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
+
             return true;
+        }
+
+        private Vector3D GetSunDirection(Vector3D baseSunDirection, double elapsedMinutes)
+        {
+            // copied from Sandbox.Game.Gui.MyGuiScreenGamePlay.Draw()
+            double angle = MathHelper.TwoPi * (elapsedMinutes / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes);
+            var sunDirection = baseSunDirection;
+            double originalSunCosAngle = Math.Abs(Vector3D.Dot(sunDirection, Vector3D.Up));
+            Vector3D sunRotationAxis = Vector3D.Cross(Vector3D.Cross(sunDirection, originalSunCosAngle > 0.95f ? Vector3D.Left : Vector3D.Up), sunDirection);
+            sunDirection = Vector3D.Normalize(Vector3D.Transform(sunDirection, MatrixD.CreateFromAxisAngle(sunRotationAxis, angle)));
+            return -sunDirection;
         }
     }
 }
