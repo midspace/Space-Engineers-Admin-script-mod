@@ -29,7 +29,6 @@ namespace midspace.adminscripts.Protection
 
             _handtoolCache = new HandtoolCache();
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
-            Config.ProtectionEnabled = true;
         }
 
         public static void Close()
