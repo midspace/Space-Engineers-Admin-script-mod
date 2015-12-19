@@ -80,7 +80,12 @@ namespace midspace.adminscripts
                         if (ignoreOccupiedGrid && occupiedGrid != null && occupiedGrid.EntityId == cubeGrid.EntityId)
                             continue;
 
+                        // TODO: ignore construction. New cube, new ship, new station, new paste.
+                        //if (ignoreConstruction && (MyAPIGateway.CubeBuilder.BlockCreationIsActivated || MyAPIGateway.CubeBuilder.ShipCreationIsActivated || MyAPIGateway.CubeBuilder.CopyPasteIsActivated))
+                        //    continue;
+
                         // Will ignore Projected grids, new grid/cube placement, and grids in middle of copy/paste.
+                        // TODO: need a better way of determining projection other than Physics, as constructions have no physics either..
                         if (ignoreProjection && cubeGrid.Physics == null)
                             continue;
 
@@ -665,7 +670,8 @@ namespace midspace.adminscripts
 
                 var blocks = new List<IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null &&
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase));
+                    (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase)));
 
                 foreach (var block in blocks)
                 {

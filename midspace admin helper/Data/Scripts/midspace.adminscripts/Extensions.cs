@@ -213,7 +213,6 @@ namespace midspace.adminscripts
 
             foreach (var block in blocks)
             {
-                var objectBuilder = block.GetObjectBuilder();
                 var cockpitBuilder = block.GetObjectBuilder() as MyObjectBuilder_Cockpit;
                 if (cockpitBuilder != null)
                 {
