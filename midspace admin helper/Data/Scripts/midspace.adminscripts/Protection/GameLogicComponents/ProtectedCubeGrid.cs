@@ -149,7 +149,7 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
             cubeGrid.GetBlocks(ownershipChangedBlocks, b => b.FatBlock != null && newOwners.Contains(b.FatBlock.OwnerId));
             foreach (IMySlimBlock slimBlock in ownershipChangedBlocks)
             {
-                var block = (Sandbox.Game.Entities.MyCubeBlock)slimBlock.FatBlock;
+                var block = (Sandbox.Game.Entities.MyCubeBlock)slimBlock.FatBlock; // TODO check if the block was created/built just moments ago, do not change owner otherwise
                 block.ChangeOwner(bigOwner, MyOwnershipShareModeEnum.None);
                 ConnectionHelper.SendMessageToAllPlayers(new MessageSyncBlockOwner() {OwnerId = bigOwner, EntityId = block.EntityId});
                 // no need to update the cached owners as we don't want them to change

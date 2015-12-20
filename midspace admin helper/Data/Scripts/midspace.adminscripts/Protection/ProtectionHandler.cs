@@ -65,12 +65,8 @@ namespace midspace.adminscripts.Protection
 
             if (block != null)
             {
-                IMyEntity attacker;
-                if (MyAPIGateway.Entities.TryGetEntityById(info.AttackerId, out attacker))
-                {
-                    if (CanDamageBlock(info.AttackerId, block, info.Type))
-                        return;
-                }
+                if (CanDamageBlock(info.AttackerId, block, info.Type))
+                    return;
 
                 info.Amount = 0;
                 return;
