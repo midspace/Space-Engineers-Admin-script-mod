@@ -12,7 +12,7 @@ namespace midspace.adminscripts
     class CommandPermission : ChatCommand
     {
         public CommandPermission()
-            : base(ChatCommandSecurity.Admin, "perm", new string[] { "/permission", "/perm" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "perm", new string[] { "/permission", "/perm" })
         {
 
         }
@@ -45,6 +45,9 @@ Actions:
     setlevel:
 Sets the needed level for a command to the specified level.
 Example: /perm command setlevel help 100
+
+Example to remove access:
+/perm command setlevel motd none
 
     list:
 Creates a hotlist containing all commands and provides information about the needed level of the commands. Use a keyword to refine your search
@@ -111,12 +114,6 @@ Example: /perm group list
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-            {
-                MyAPIGateway.Utilities.ShowMessage("Permissions", "Command disabled in offline mode.");
-                return true;
-            }
-
             var match = Regex.Match(messageText, @"/(perm|permission)\s+(?<CommandParts>.*)", RegexOptions.IgnoreCase);
 
             if (match.Success)
@@ -175,6 +172,17 @@ Example: /perm group list
                         {
                             Name = args[2],
                             NeededLevel = level
+                        });
+                    }
+                    else if (string.Equals(args[3], "none", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        commandMessage.Commands = new List<CommandStruct>();
+                        commandMessage.CommandAction = CommandActions.Level;
+
+                        commandMessage.Commands.Add(new CommandStruct()
+                        {
+                            Name = args[2],
+                            NeededLevel = uint.MaxValue
                         });
                     }
                     else

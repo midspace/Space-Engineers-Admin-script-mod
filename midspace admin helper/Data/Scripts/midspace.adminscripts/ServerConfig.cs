@@ -799,7 +799,10 @@ If you can't find the error, simply delete the file. The server will create a ne
                 SendPermissionChange(player.SteamUserId, commandStruct);
             }
 
-            ConnectionHelper.SendChatMessage(sender, string.Format("The level of command {0} was set to {1}.", commandStruct.Name, commandStruct.NeededLevel));
+            if (commandStruct.NeededLevel == uint.MaxValue)
+                ConnectionHelper.SendChatMessage(sender, string.Format("The command '{0}' was disabled.", commandStruct.Name));
+            else
+                ConnectionHelper.SendChatMessage(sender, string.Format("The level of command '{0}' was set to {1}.", commandStruct.Name, commandStruct.NeededLevel));
 
             SavePermissionFile();
         }

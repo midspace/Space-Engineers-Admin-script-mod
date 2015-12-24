@@ -131,6 +131,12 @@
                     return true;
                 }
 
+                if (command.Value.Security == uint.MaxValue)
+                {
+                    // this command has been disabled from use.
+                    return false;
+                }
+
                 if (!HasRight(MyAPIGateway.Session.Player.SteamUserId, command.Value))
                 {
                     MyAPIGateway.Utilities.ShowMessage("Permission", "You do not have the permission to use this command.");
