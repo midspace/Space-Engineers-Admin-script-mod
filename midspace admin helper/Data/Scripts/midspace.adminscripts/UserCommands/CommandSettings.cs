@@ -109,6 +109,9 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableToolShake"), MyAPIGateway.Session.SessionSettings.EnableToolShake ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_Encounters"), MyAPIGateway.Session.SessionSettings.EnableEncounters ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableStationVoxel"), MyAPIGateway.Session.SessionSettings.EnableStationVoxelSupport ? yes : no));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableCyberhounds"), MyAPIGateway.Session.SessionSettings.EnableCyberhounds.HasValue? (MyAPIGateway.Session.SessionSettings.EnableCyberhounds.Value ? yes : no) : no));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableSpiders"), MyAPIGateway.Session.SessionSettings.EnableSpiders.HasValue ? (MyAPIGateway.Session.SessionSettings.EnableSpiders.Value ? yes : no) : no));
+            list.Add(string.Format("{0}: {1}", "Maximum Drones", MyAPIGateway.Session.SessionSettings.MaxDrones));
 
             // add the remaining settings as a sorted list (according to the localizaed labels).
             foreach (var str in list.OrderBy(e => e))

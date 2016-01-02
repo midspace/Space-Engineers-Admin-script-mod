@@ -216,6 +216,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandAsteroidCreateSphere());
             commands.Add(new CommandAsteroidsList());
             commands.Add(new CommandPlanetsList());
+            commands.Add(new CommandPlanetDelete());
             commands.Add(new CommandAsteroidRotate());
             //commands.Add(new CommandAsteroidSpread()); //not working
             commands.Add(new CommandChatHistory());

@@ -16,7 +16,7 @@
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/adddrone <#>", "Add the specified <#> prefab. Spawns the specified a ship 2m directly in front of player.");
+            MyAPIGateway.Utilities.ShowMessage("/adddrone <#>", "Add the specified {#} prefab as a pirate owned and controlled ship. Spawns the specified a ship 2m directly in front of player.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
