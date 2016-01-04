@@ -53,6 +53,12 @@ namespace midspace.adminscripts.Messages
                 case SessionSetting.Weapons:
                     MyAPIGateway.Session.SessionSettings.WeaponsEnabled = State;
                     break;
+                case SessionSetting.Cyberhounds:
+                    MyAPIGateway.Session.SessionSettings.EnableCyberhounds = State;
+                    break;
+                case SessionSetting.Spiders:
+                    MyAPIGateway.Session.SessionSettings.EnableSpiders = State;
+                    break;
             }
         }
     }
@@ -63,6 +69,8 @@ namespace midspace.adminscripts.Messages
         CopyPaste,
         Creative,
         Spectator,
-        Weapons
+        Weapons,
+        Cyberhounds,
+        Spiders
     }
 }

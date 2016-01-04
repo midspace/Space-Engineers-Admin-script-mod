@@ -280,6 +280,8 @@ namespace midspace.adminscripts
             commands.Add(new CommandSessionCreative());
             commands.Add(new CommandSessionSpectator());
             commands.Add(new CommandSessionWeapons());
+            commands.Add(new CommandSessionSpiders());
+            commands.Add(new CommandSessionCyberHounds());
             commands.Add(new CommandSetVector());
             commands.Add(new CommandSpeed());
             commands.Add(new CommandShipOff());
