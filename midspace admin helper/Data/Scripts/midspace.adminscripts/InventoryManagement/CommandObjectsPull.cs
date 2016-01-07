@@ -48,7 +48,7 @@
         {
             var sphere = new BoundingSphereD(destination, range);
             var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-            floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.Game.Entities.MyReplicableEntity) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
+            floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.Game.Entities.MyInventoryBagEntity) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
 
             foreach (var item in floatingList)
             {

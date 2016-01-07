@@ -79,7 +79,7 @@
             var sphere = new BoundingSphereD(destination, range);
             var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
             //floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
-            floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.Game.Entities.MyReplicableEntity)).ToList();
+            floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.Game.Entities.MyInventoryBagEntity)).ToList();
 
             _instance._timer100.Stop();
             _instance._workQueue.Clear();
@@ -101,7 +101,7 @@
                             //_workQueue.Enqueue(delegate() { item.SetPosition(destination); });
                         }
                     }
-                    else if (item is IMyFloatingObject || item is Sandbox.Game.Entities.MyReplicableEntity)
+                    else if (item is IMyFloatingObject || item is Sandbox.Game.Entities.MyInventoryBagEntity)
                     {
                         // Need to queue the objects, and relocate them over a number of frames, otherwise if they 
                         // are all moved simultaneously to the same point in space, they will become stuck.

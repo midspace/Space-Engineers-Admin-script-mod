@@ -37,7 +37,7 @@
             var floatingList = new HashSet<IMyEntity>();
             MyAPIGateway.Entities.GetEntities(floatingList, e => (e is Sandbox.ModAPI.IMyFloatingObject));
             var replicableList = new HashSet<IMyEntity>();
-            MyAPIGateway.Entities.GetEntities(replicableList, e => (e is Sandbox.Game.Entities.MyReplicableEntity));
+            MyAPIGateway.Entities.GetEntities(replicableList, e => (e is Sandbox.Game.Entities.MyInventoryBagEntity));
 
             MyAPIGateway.Utilities.SendMessage(steamId, "Floating objects", "{0}/{1}", floatingList.Count, MyAPIGateway.Session.SessionSettings.MaxFloatingObjects);
 

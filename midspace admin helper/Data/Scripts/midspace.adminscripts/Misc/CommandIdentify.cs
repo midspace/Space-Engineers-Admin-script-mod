@@ -157,7 +157,7 @@
                             var owner = identities.FirstOrDefault(p => p.PlayerId == cubeBlock.OwnerId);
                             if (owner != null)
                                 ownerName = owner.DisplayName;
-                            description += string.Format("\r\n\r\nCube;\r\n  Type : {0}\r\n  Name : {1}\r\n  Owner : {2}", cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName);
+                            description += string.Format("\r\n\r\nCube;\r\n  Type : {1}\r\n  SubType : {0}\r\n  Name : {2}\r\n  Owner : {3}", cubeBlock.BlockDefinition.SubtypeName, cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName);
                         }
 
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
@@ -169,11 +169,11 @@
                         description = string.Format("Distance: {0:N} m", distance);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
-                    else if (entity is MyReplicableEntity)
+                    else if (entity is MyInventoryBagEntity)
                     {
                         displayType = "Unknown";
 
-                        var replicable = (MyReplicableEntity)entity;
+                        var replicable = (MyInventoryBagEntity)entity;
                         if (replicable.DefinitionId.HasValue)
                         {
                             MyDefinitionBase definition;

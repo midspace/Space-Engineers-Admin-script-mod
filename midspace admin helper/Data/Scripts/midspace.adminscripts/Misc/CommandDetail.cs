@@ -175,11 +175,11 @@
                         description = string.Format("Distance: {0:N}", distance);
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
                     }
-                    else if (entity is MyReplicableEntity)
+                    else if (entity is MyInventoryBagEntity)
                     {
                         displayType = "Unknown";
 
-                        var replicable = (MyReplicableEntity)entity;
+                        var replicable = (MyInventoryBagEntity)entity;
                         if (replicable.DefinitionId.HasValue)
                         {
                             MyDefinitionBase definition;

@@ -39,16 +39,19 @@
       <HintPath>C:\Program Files\Reference Assemblies\SpaceEngineers\Sandbox.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SpaceEngineers.ObjectBuilders">
+      <HintPath>C:\Program Files\Reference Assemblies\SpaceEngineers\SpaceEngineers.ObjectBuilders.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="VRage">
-      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files\Reference Assemblies\SpaceEngineers\VRage.dll</HintPath>
+      <HintPath>C:\Program Files\Reference Assemblies\SpaceEngineers\VRage.dll</HintPath>
     </Reference>
     <Reference Include="VRage.Game">
-      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files\Reference Assemblies\SpaceEngineers\VRage.Game.dll</HintPath>
+      <HintPath>C:\Program Files\Reference Assemblies\SpaceEngineers\VRage.Game.dll</HintPath>
     </Reference>
     <Reference Include="VRage.Library">
       <HintPath>C:\Program Files\Reference Assemblies\SpaceEngineers\VRage.Library.dll</HintPath>
