@@ -40,10 +40,8 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
         {
             if (_multiplayerActive && MyAPIGateway.CubeBuilder != null &&
                 MyAPIGateway.CubeBuilder.BlockCreationIsActivated && MyAPIGateway.Session.Player != null &&
-                MyAPIGateway.Session.Player.Controller.ControlledEntity != null && ProtectionHandler.Config.ProtectionEnabled)
+                MyAPIGateway.Session.Player.Controller.ControlledEntity != null)
             {
-                var cubeGrid = Support.FindLookAtEntity(MyAPIGateway.Session.Player.Controller.ControlledEntity, true, false, false, false, false, false) as IMyCubeGrid;
-
                 if (ChatCommandLogic.Instance != null && !ChatCommandLogic.Instance.AllowBuilding)
                 {
                     MyAPIGateway.CubeBuilder.DeactivateBlockCreation();
@@ -52,21 +50,26 @@ namespace midspace.adminscripts.Protection.GameLogicComponents
                         2000,
                         MyFontEnum.Red);
                 }
-                else if (_cachedGrid == null || (_cachedGrid != null && cubeGrid != _cachedGrid))
+                else if (ProtectionHandler.Config.ProtectionEnabled)
                 {
-                    if (cubeGrid != null && MyAPIGateway.Session.Player != null)
+                    var cubeGrid = Support.FindLookAtEntity(MyAPIGateway.Session.Player.Controller.ControlledEntity, true, false, false, false, false, false) as IMyCubeGrid;
+
+                    if (_cachedGrid == null || (_cachedGrid != null && cubeGrid != _cachedGrid))
                     {
-                        // TODO consider permission request from server instead of client side check... downside: might take a while
-                        if (!ProtectionHandler.CanModify(MyAPIGateway.Session.Player, cubeGrid) &&
-                            ProtectionHandler.IsProtected(cubeGrid))
+                        if (cubeGrid != null && MyAPIGateway.Session.Player != null)
                         {
-                            _cachedGrid = cubeGrid;
-                            Deactivate();
+                            // TODO consider permission request from server instead of client side check... downside: might take a while
+                            if (!ProtectionHandler.CanModify(MyAPIGateway.Session.Player, cubeGrid) &&
+                                ProtectionHandler.IsProtected(cubeGrid))
+                            {
+                                _cachedGrid = cubeGrid;
+                                Deactivate();
+                            }
                         }
                     }
+                    else
+                        Deactivate();
                 }
-                else
-                    Deactivate();
             }
             else if (!_multiplayerActive && (_multiplayerActive != (MyAPIGateway.Session.OnlineMode != MyOnlineModeEnum.OFFLINE))) 
                 // we need to update it because it is not correctly initialized if the cube placer is created when the game loads
