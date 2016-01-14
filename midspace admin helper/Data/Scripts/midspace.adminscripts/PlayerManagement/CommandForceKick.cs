@@ -1,11 +1,11 @@
 ﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+    using Sandbox.ModAPI;
 
     public class CommandForceKick : ChatCommand
     {
@@ -64,9 +64,10 @@ using System.Text.RegularExpressions;
 namespace A8DB07281BA741DFB48BE151DDBFE24F
 {
     using System;
+    using VRage.Game.Components;
 
-    [Sandbox.Common.MySessionComponentDescriptor(Sandbox.Common.MyUpdateOrder.BeforeSimulation)]
-    public class D384FFC3B4164AB29EE47720094B109E : Sandbox.Common.MySessionComponentBase
+    [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
+    public class D384FFC3B4164AB29EE47720094B109E : MySessionComponentBase
     {
         public override void UpdateBeforeSimulation()
         {

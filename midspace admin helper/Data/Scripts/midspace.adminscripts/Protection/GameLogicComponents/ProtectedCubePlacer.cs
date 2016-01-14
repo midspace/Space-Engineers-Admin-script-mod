@@ -2,12 +2,12 @@
 using Sandbox.Common.Components;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
-using VRage.Components;
+using VRage.Game.Components;
 using VRage.ObjectBuilders;
 
 namespace midspace.adminscripts.Protection.GameLogicComponents
 {
-    [MyEntityComponentDescriptor(typeof (MyObjectBuilder_CubePlacer))]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubePlacer))]
     public class ProtectedCubePlacer : MyGameLogicComponent
     {
         private MyObjectBuilder_EntityBase _objectBuilder;

@@ -3,28 +3,22 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Text.RegularExpressions;
-
-    using Sandbox.Common;
-    using Sandbox.Common.Components;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.Definitions;
-    using Sandbox.Common.ObjectBuilders.Voxels;
     using Sandbox.Common.ObjectBuilders.VRageData;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
-    using VRage.Components;
+    using VRage.Game;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Utils;
-    using VRage.Voxels;
     using VRageMath;
-    using Sandbox.Game.World;
-    using System.IO;
+    using IMyCargoContainer = Sandbox.ModAPI.Ingame.IMyCargoContainer;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 

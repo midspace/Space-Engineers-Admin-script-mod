@@ -177,7 +177,6 @@
     <Compile Include="PositionManagement\CommandTeleportToPlayer.cs" />
     <Compile Include="UserCommands\CommandSaveToolbar.cs" />
     <Compile Include="UserCommands\CommandTime.cs" />
-    <Compile Include="UserCommands\CommandVersion.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidEditClear.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidEditSet.cs" />
     <Compile Include="AsteroidManagement\CommandVoxelAdd.cs" />

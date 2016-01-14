@@ -7,6 +7,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRage.ModAPI;
 
     public class CommandPlanetsList : ChatCommand
     {

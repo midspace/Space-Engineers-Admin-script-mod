@@ -7,9 +7,11 @@ namespace midspace.adminscripts
     using midspace.adminscripts.Messages;
     using midspace.adminscripts.Protection;
     using midspace.adminscripts.Protection.Commands;
+    using Sandbox.Common;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using VRage.Game.Components;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
@@ -27,8 +29,8 @@ namespace midspace.adminscripts
     /// Chat commands do not have to start with "/". This model allows practically any text to become a command.
     /// Each ChatCommand can determine what it's own allowable command is.
     /// </example>
-    [Sandbox.Common.MySessionComponentDescriptor(Sandbox.Common.MyUpdateOrder.BeforeSimulation)]
-    public class ChatCommandLogic : Sandbox.Common.MySessionComponentBase
+    [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
+    public class ChatCommandLogic : MySessionComponentBase
     {
         #region fields and constants
 
@@ -311,7 +313,6 @@ namespace midspace.adminscripts
             commands.Add(new CommandTeleportToShip());
             commands.Add(new CommandTest());
             commands.Add(new CommandTime());
-            commands.Add(new CommandVersion());
             commands.Add(new CommandSaveToolbar());
 
             return commands;

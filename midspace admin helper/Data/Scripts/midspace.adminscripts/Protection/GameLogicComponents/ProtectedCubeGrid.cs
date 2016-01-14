@@ -4,7 +4,7 @@ using midspace.adminscripts.Messages.Sync;
 using Sandbox.Common.Components;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
-using VRage.Components;
+using VRage.Game.Components;
 using VRage.ObjectBuilders;
 
 namespace midspace.adminscripts.Protection.GameLogicComponents

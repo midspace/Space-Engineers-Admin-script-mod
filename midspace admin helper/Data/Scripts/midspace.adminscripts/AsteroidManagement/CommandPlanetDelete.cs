@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using Sandbox.ModAPI;
+    using VRage.ModAPI;
 
     public class CommandPlanetDelete : ChatCommand
     {

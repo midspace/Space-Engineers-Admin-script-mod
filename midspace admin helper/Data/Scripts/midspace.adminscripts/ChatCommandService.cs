@@ -176,6 +176,7 @@
                         if (MyAPIGateway.Session.Player.IsExperimentalCreator())
                         {
                             MyAPIGateway.Utilities.ShowMissionScreen(string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
+                            VRage.Utils.MyLog.Default.WriteLine(String.Format("## Admin Helper mod Exception caught. Message: {0}", ex));
                             continue;
                         }
 
@@ -272,6 +273,7 @@
                         if (MyAPIGateway.Session.Player.IsExperimentalCreator())
                         {
                             MyAPIGateway.Utilities.ShowMissionScreen(string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
+                            VRage.Utils.MyLog.Default.WriteLine(String.Format("## Admin Helper mod Exception caught. Message: {0}", ex));
                             continue;
                         }
 
