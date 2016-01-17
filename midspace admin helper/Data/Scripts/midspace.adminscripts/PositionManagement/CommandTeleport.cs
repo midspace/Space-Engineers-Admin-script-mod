@@ -277,7 +277,7 @@ asteroidname - complete asteroid name without spaces.
                         return true; // FindEntitiesNamed should have displayed a message.
                     }
 
-                    MyAPIGateway.Utilities.ShowMessage("Error", "Could not find requested object");
+                    MyAPIGateway.Utilities.ShowMessage("Error", "Could not find specified object");
                     return true;
                 }
 

@@ -418,6 +418,8 @@ namespace midspace.adminscripts
             // In reality, this is equivilant to:
             // if (playerList.Count == 0 && shipList.Count == 0 && asteroidList.Count == 0 && planetList.Count == 0 && gpsList.Count == 0)
 
+            MyAPIGateway.Utilities.ShowMessage("Error", "Could not find specified object");
+
             player = null;
             entity = null;
             gps = null;
