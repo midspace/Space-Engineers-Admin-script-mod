@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    using Messages.Sync;
     using Sandbox.ModAPI;
 
     public class CommandPlayerEject : ChatCommand
@@ -23,10 +23,10 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/eject\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/eject\s+(?:(?:""(?<name>[^""]|.*?)"")|(?<name>.*))", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                var playerName = match.Groups["Key"].Value;
+                var playerName = match.Groups["name"].Value;
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null);
                 IMyPlayer selectedPlayer = null;
@@ -38,7 +38,7 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
                     MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
@@ -47,31 +47,33 @@
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Eject", string.Format("No player named {0} found.", playerName));
+                    MyAPIGateway.Utilities.ShowMessage("Eject", "No player named '{0}' found.", playerName);
                     return true;
                 }
 
-                if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("ejecting", selectedPlayer.DisplayName);
-                    selectedPlayer.Controller.ControlledEntity.Use();
+                MessageSyncAres.Eject(selectedPlayer.SteamUserId);
 
-                    // Enqueue the command a second time, to make sure the player is ejected from a remote controlled ship and a piloted ship.
-                    _workQueue.Enqueue(delegate() {
-                        if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
-                        {
-                            selectedPlayer.Controller.ControlledEntity.Use();
-                        }
-                    });
+                //if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
+                //{
+                //    MyAPIGateway.Utilities.ShowMessage("ejecting", selectedPlayer.DisplayName);
+                //    selectedPlayer.Controller.ControlledEntity.Use();
 
-                    // Neither of these do what I expect them to. In fact, I'm not sure what they do.
-                    //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity);
-                    //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity.Parent);
-                }
-                else
-                {
-                    MyAPIGateway.Utilities.ShowMessage("player", string.Format("{0} is not a pilot", selectedPlayer.DisplayName));
-                }
+                //    // Enqueue the command a second time, to make sure the player is ejected from a remote controlled ship and a piloted ship.
+                //    _workQueue.Enqueue(delegate() {
+                //        if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
+                //        {
+                //            selectedPlayer.Controller.ControlledEntity.Use();
+                //        }
+                //    });
+
+                //    // Neither of these do what I expect them to. In fact, I'm not sure what they do.
+                //    //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity);
+                //    //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity.Parent);
+                //}
+                //else
+                //{
+                //    MyAPIGateway.Utilities.ShowMessage("player", string.Format("{0} is not a pilot", selectedPlayer.DisplayName));
+                //}
                 return true;
 
                 // NPC's do not appears as Players, but Identities.

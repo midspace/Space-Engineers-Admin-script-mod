@@ -266,6 +266,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandPermission());
             commands.Add(new CommandPlayerEject());
             commands.Add(new CommandPlayerSlay());
+            commands.Add(new CommandPlayerSlap());
             commands.Add(new CommandPlayerSmite(_oreNames[0]));
             //commands.Add(new CommandPlayerRespawn());  //not working any more
             commands.Add(new CommandPlayerStatus());

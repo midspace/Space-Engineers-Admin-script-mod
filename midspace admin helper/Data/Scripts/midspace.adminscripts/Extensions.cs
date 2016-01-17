@@ -384,7 +384,8 @@ namespace midspace.adminscripts
         /// <param name="damageType"></param>
         public static bool KillPlayer(this IMyPlayer player, MyStringHash damageType)
         {
-            var destroyable = player.Controller.ControlledEntity as IMyDestroyableObject;
+            var character = player.GetCharacter();
+            var destroyable = character as IMyDestroyableObject;
             if (destroyable == null)
                 return false;
 
@@ -459,14 +460,17 @@ namespace midspace.adminscripts
             if (cubeBlock == null)
                 return null;
 
-            var controller = cubeBlock as Sandbox.Game.Entities.MyShipController;
-            if (controller != null)
-                return controller.Pilot;
+            var shipController = cubeBlock as Sandbox.Game.Entities.MyShipController;
+            if (shipController != null)
+                return shipController.Pilot;
 
-            // TODO: test conditions for Cryochamber block.
+            // TODO: test conditions for MyCryoChamber block.
 
-            // Cannot determine Character controlling MyLargeTurretBase as class is internal.
+            // Cannot determine Character controlling MyLargeTurretBase as class is not whitelisted.
             // TODO: find if the player is controlling a turret.
+            //var turretTontroller = cubeBlock as Sandbox.Game.Weapons.MyLargeTurretBase;
+            //if (turretTontroller != null)
+            //    return turretTontroller.Pilot;
 
             //var charComponent = cubeBlock.Components.Get<MyCharacterComponent>();
 
@@ -475,7 +479,7 @@ namespace midspace.adminscripts
             //    var entity = charComponent.Entity;
             //    MyAPIGateway.Utilities.ShowMessage("Entity", "Good");
             //}
-            //var turret = cubeBlock as Sandbox.Game.Weapons.MyLargeTurretBase;
+            //var turret = cubeBlock as Sandbox.Game.Weapons.MyLargeTurretBase; // not whitelisted.
             //var turret = cubeBlock as IMyControllableEntity;
 
             return null;

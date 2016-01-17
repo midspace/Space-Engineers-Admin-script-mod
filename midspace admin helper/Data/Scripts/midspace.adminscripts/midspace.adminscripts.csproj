@@ -118,6 +118,7 @@
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />
+    <Compile Include="PlayerManagement\CommandPlayerSlap.cs" />
     <Compile Include="PositionManagement\CommandSpeed.cs" />
     <Compile Include="Protection\Commands\CommandProtectionArea.cs" />
     <Compile Include="Protection\GameLogicComponents\ProtectedLandingGear.cs" />

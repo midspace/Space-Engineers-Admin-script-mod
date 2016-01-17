@@ -7,21 +7,21 @@
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
 
-    public class CommandPlayerSlay : ChatCommand
+    public class CommandPlayerSlap : ChatCommand
     {
-        public CommandPlayerSlay()
-            : base(ChatCommandSecurity.Admin, "slay", new[] { "/slay" })
+        public CommandPlayerSlap()
+            : base(ChatCommandSecurity.Admin, "slap", new[] { "/slap" })
         {
         }
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/slay <#>", "Kills the specified <#> player. Instant death in Survival mode for any player.");
+            MyAPIGateway.Utilities.ShowMessage("/slap <#>", "Slaps the specified <#> player. Pushs the player around with 1hp health loss. Cannot slap pilots.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/slay\s+(?:(?:""(?<name>[^""]|.*?)"")|(?<name>.*))", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/slap\s+(?:(?:""(?<name>[^""]|.*?)"")|(?<name>.*))", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 var playerName = match.Groups["name"].Value;
@@ -45,11 +45,11 @@
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Slay", "No player named '{0}' found.", playerName);
+                    MyAPIGateway.Utilities.ShowMessage("Slap", string.Format("No player named '{0}' found.", playerName));
                     return true;
                 }
 
-                MessageSyncAres.Slay(selectedPlayer.SteamUserId);
+                MessageSyncAres.Slap(selectedPlayer.SteamUserId);
                 return true;
             }
 

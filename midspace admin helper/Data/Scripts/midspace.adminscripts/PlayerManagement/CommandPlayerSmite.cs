@@ -26,10 +26,10 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/smite\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/smite\s+(?:(?:""(?<name>[^""]|.*?)"")|(?<name>.*))", RegexOptions.IgnoreCase);
             if (match.Success)
             {
-                var playerName = match.Groups["Key"].Value;
+                var playerName = match.Groups["name"].Value;
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null);
                 IMyPlayer selectedPlayer = null;
@@ -50,7 +50,7 @@
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Smite", string.Format("No player named {0} found.", playerName));
+                    MyAPIGateway.Utilities.ShowMessage("Smite", "No player named '{0}' found.", playerName);
                     return true;
                 }
 
