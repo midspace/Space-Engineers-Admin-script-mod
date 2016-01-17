@@ -15,6 +15,8 @@
     public class CommandTeleport : ChatCommand
     {
         private static readonly string teleportPattern = @"(?<command>(/tp)|(/tpx))\s+(?:(?<ID1>ID)|(?<Ship1>S\d+)|(?<Character1>C\d+)|(?<Asteroid1>A\d+)|(?<Planet1>P\d+)|(?:GPS:([^:]{0,32}):(?<GX1>[\d\.-]*):(?<GY1>[\d\.-]*):(?<GZ1>[\d\.-]*):)|(?:""(?<Quote1>[^""]|.*?)"")|(?<Word1>[^\s]*)|(?:(?<X1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y1>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z1>[+-]?((\d+(\.\d*)?)|(\.\d+)))))(\s+(?:(?<ID2>ID)|(?<Ship2>S\d+)|(?<Character2>C\d+)|(?<Asteroid2>A\d+)|(?<Planet2>P\d+)|(?:GPS:([^:]{0,32}):(?<GX2>[\d\.-]*):(?<GY2>[\d\.-]*):(?<GZ2>[\d\.-]*):)|(?:""(?<Quote2>[^""]|.*?)"")|(?<Word2>[^\s]*)|(?:(?<X2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Y2>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<Z2>[+-]?((\d+(\.\d*)?)|(\.\d+)))))|)\s*$";
+        private static readonly string teleportPattern2 = @"(?<command>(/tp)|(/tpx))\s+(?<Word1>.*)$";
+
         public CommandTeleport()
             : base(ChatCommandSecurity.Admin, "tp", new[] { "/tp", "/tpx" })
         {
@@ -134,7 +136,6 @@ asteroidname - complete asteroid name without spaces.
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
             var match = Regex.Match(messageText, teleportPattern, RegexOptions.IgnoreCase);
-
             if (match.Success)
             {
                 var safely = match.Groups["command"].Value.Equals("/tp", StringComparison.InvariantCultureIgnoreCase);
@@ -771,6 +772,28 @@ asteroidname - complete asteroid name without spaces.
 
                 MyAPIGateway.Utilities.ShowMessage("Incomplete", "This function of teleport is not complete.");
                 return true;
+            }
+
+            match = Regex.Match(messageText, teleportPattern2, RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                var safely = match.Groups["command"].Value.Equals("/tp", StringComparison.InvariantCultureIgnoreCase);
+                var entityName = match.Groups["Word1"].Value;
+                var player = MyAPIGateway.Session.Player;
+
+                IMyPlayer foundPlayer;
+                IMyEntity foundEntity;
+                IMyGps foundGps;
+                if (Support.FindEntitiesNamed(entityName, true, true, true, true, true, out foundPlayer, out foundEntity, out foundGps))
+                {
+                    if (foundPlayer != null)
+                        Support.MoveTo(steamId, player, foundPlayer, safely, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                    if (foundEntity != null)
+                        Support.MoveTo(player, foundEntity, safely, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                    if (foundGps != null)
+                        Support.MoveTo(player, foundGps.Coords, safely, saveTeleportBack, noSafeLocationMsg);
+                }
+                return true; // FindEntitiesNamed should have displayed a message.
             }
 
             return false;
