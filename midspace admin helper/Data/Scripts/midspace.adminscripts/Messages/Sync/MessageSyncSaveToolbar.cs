@@ -6,6 +6,7 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
+    using VRage.Game;
 
     [ProtoContract]
     public class MessageSyncSaveToolbar : MessageBase
@@ -51,9 +52,14 @@
                 return;
             }
 
-            if (terminalBlock.OwnerId != 0 && terminalBlock.OwnerId != player.PlayerID)
+            // Check for player access to block.
+            // This is basically the same as, if you can get into the cockpit, you can save the toolbar.
+            // But the check is needed regardless in case this command is spoofed.
+            var relation = terminalBlock.GetUserRelationToOwner(player.PlayerID);
+            if (relation == MyRelationsBetweenPlayerAndBlock.Enemies
+                || relation == MyRelationsBetweenPlayerAndBlock.Neutral)
             {
-                MessageClientTextMessage.SendMessage(SenderSteamId, "Cockpit", "You cannot update the cockpit. You must own it.");
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Cockpit", "You cannot update the cockpit. You must have access to it.");
                 return;
             }
 
