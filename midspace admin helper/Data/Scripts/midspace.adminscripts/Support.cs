@@ -11,7 +11,6 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
-    using VRage.Game.Entity;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Voxels;
@@ -1320,7 +1319,7 @@ namespace midspace.adminscripts
 
         #region Inventory
 
-        public static bool InventoryAdd(MyEntity entity, MyFixedPoint amount, MyDefinitionId definitionId)
+        public static bool InventoryAdd(Sandbox.Game.Entities.MyEntity entity, MyFixedPoint amount, MyDefinitionId definitionId)
         {
             var itemAdded = false;
             var count = entity.InventoryCount;

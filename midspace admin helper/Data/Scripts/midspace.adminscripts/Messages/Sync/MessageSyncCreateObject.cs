@@ -7,7 +7,6 @@
     using Sandbox.ModAPI;
     using VRage;
     using VRageMath;
-    using VRage.Game.Entity;
 
     [ProtoContract]
     public class MessageSyncCreateObject : MessageBase
