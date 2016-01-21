@@ -6,6 +6,7 @@
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage;
+    using VRage.Game.Entity;
     using VRageMath;
 
     [ProtoContract]

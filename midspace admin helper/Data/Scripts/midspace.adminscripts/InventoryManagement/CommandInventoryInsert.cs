@@ -7,8 +7,10 @@
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage;
+    using VRage.Game.Entity;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
 
@@ -66,7 +68,7 @@
                 }
 
                 Sandbox.Game.MyInventory inventory;
-                if (!((Sandbox.Game.Entities.MyEntity)entity).TryGetInventory(out inventory))
+                if (!((MyEntity)entity).TryGetInventory(out inventory))
                 {
                     MyAPIGateway.Utilities.ShowMessage("Target", "Cannot hold inventory.");
                     return true;
@@ -98,7 +100,7 @@
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
                     var definitionId = new MyDefinitionId(content.GetType(), content.SubtypeName);
-                    if (!Support.InventoryAdd((Sandbox.Game.Entities.MyEntity)entity, (MyFixedPoint)amount, definitionId))
+                    if (!Support.InventoryAdd((MyEntity)entity, (MyFixedPoint)amount, definitionId))
                         MyAPIGateway.Utilities.ShowMessage("Failed", "Invalid container or Full container. Could not add the item.");
                 }
                 else

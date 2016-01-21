@@ -7,13 +7,16 @@ namespace midspace.adminscripts
     using Messages.Communication;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
+    using VRage.Game.Entity;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Utils;
     using VRageMath;
+    using IMyControllableEntity = Sandbox.ModAPI.Interfaces.IMyControllableEntity;
 
     public static class Extensions
     {
@@ -503,7 +506,7 @@ namespace midspace.adminscripts
             if (character == null)
                 return null;
 
-            return ((Sandbox.Game.Entities.MyEntity)character).GetInventory();
+            return ((MyEntity)character).GetInventory();
         }
 
         #endregion
@@ -675,7 +678,7 @@ namespace midspace.adminscripts
             var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(serializableDefinitionId);
             return definition.DisplayNameEnum.HasValue ? MyTexts.GetString(definition.DisplayNameEnum.Value) : definition.DisplayNameString;
         }
-        
+
 
         public static string GetDisplayName(this MyDefinitionBase definition)
         {
@@ -715,6 +718,13 @@ namespace midspace.adminscripts
         }
 
         #endregion
+
+        // just in case 1.118 doesn't work with extensions.
+        //public static Sandbox.Game.MyInventory GetInventory(this MyEntity thisEntity, int index = 0)
+        //{
+        //    MyInventoryBase inventoryBase = thisEntity.GetInventoryBase(index);
+        //    return inventoryBase as Sandbox.Game.MyInventory;
+        //}
     }
 
     /// <summary>

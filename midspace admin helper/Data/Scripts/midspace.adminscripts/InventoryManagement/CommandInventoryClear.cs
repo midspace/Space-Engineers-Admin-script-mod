@@ -7,6 +7,7 @@
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
+    using VRage.Game.Entity;
     using VRage.ModAPI;
 
     public class CommandInventoryClear : ChatCommand

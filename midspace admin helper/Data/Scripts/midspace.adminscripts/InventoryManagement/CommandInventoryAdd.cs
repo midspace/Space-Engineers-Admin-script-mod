@@ -11,6 +11,7 @@
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage;
+    using VRage.Game.Entity;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
 
@@ -85,7 +86,7 @@
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
                     var definitionId = new MyDefinitionId(content.GetType(), content.SubtypeName);
-                    if (!Support.InventoryAdd((Sandbox.Game.Entities.MyEntity)MyAPIGateway.Session.Player.GetCharacter(), (MyFixedPoint)amount, definitionId))
+                    if (!Support.InventoryAdd((MyEntity)MyAPIGateway.Session.Player.GetCharacter(), (MyFixedPoint)amount, definitionId))
                         MyAPIGateway.Utilities.ShowMessage("Failed", "Inventory full. Could not add the item.");
                 }
                 else
