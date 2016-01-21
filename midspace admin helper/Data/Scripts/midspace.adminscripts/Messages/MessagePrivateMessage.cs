@@ -24,7 +24,8 @@ namespace midspace.adminscripts.Messages
             // we do not want to set the server as whisper partner
             if (ChatMessage.Sender.SteamId != 0)
                 CommandPrivateMessage.LastWhisperId = ChatMessage.Sender.SteamId;
-            MyAPIGateway.Utilities.ShowMessage(senderName, ChatMessage.Text);
+
+            MyAPIGateway.Utilities.ShowMessage(string.Format("{0}{1}", senderName, senderName.Equals("Server") ? "" : " whispers"), ChatMessage.Text);
         }
 
         public override void ProcessServer()
