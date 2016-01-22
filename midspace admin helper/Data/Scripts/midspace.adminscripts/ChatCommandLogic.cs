@@ -191,7 +191,7 @@ namespace midspace.adminscripts
             }
 
             AdminNotificator.Init();
-            ProtectionHandler.Init();
+            ProtectionHandler.Init_Server();
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
             Logger.Debug("Registered ProcessMessage");
 

@@ -18,7 +18,7 @@ namespace midspace.adminscripts.Protection
         private static bool _isInitialized;
         private static HandtoolCache _handtoolCache;
 
-        public static void Init()
+        public static void Init_Server()
         {
             if (_isInitialized)
                 return;
@@ -29,6 +29,14 @@ namespace midspace.adminscripts.Protection
 
             _handtoolCache = new HandtoolCache();
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
+        }
+
+        public static void Init_Client(ProtectionConfig config)
+        {
+            Config = config;
+
+            if (!ChatCommandLogic.Instance.AllowBuilding)
+                ChatCommandLogic.Instance.AllowBuilding = true;
         }
 
         public static void Close()

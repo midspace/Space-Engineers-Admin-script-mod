@@ -190,6 +190,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                     },
                     Action = ConfigAction.LogPrivateMessages
                 });
+
+            Config.MotdFileSuffix = Config.MotdFileSuffix.ReplaceForbiddenChars();
         }
 
         private void WriteConfig(string customSaveName = null)

@@ -10,9 +10,7 @@ namespace midspace.adminscripts.Messages.Protection
 
         public override void ProcessClient()
         {
-            ProtectionHandler.Config = Config;
-            if (!ChatCommandLogic.Instance.AllowBuilding)
-                ChatCommandLogic.Instance.AllowBuilding = true;
+            ProtectionHandler.Init_Client(Config);
         }
 
         public override void ProcessServer()
