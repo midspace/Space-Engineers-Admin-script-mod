@@ -30,7 +30,7 @@ namespace midspace.adminscripts
                 description.AppendFormat(
 @"This command is used for private communication. Beware that it can be logged on the server. It can only be used in multiplayer.
 If you can't type a name, e.g. because it contains symbols, use /status to create a player hotlist. 
-There are several enhancements in this command to make private communication easier. Here is a list of all commands and their funcitons:
+There are several enhancements in this command to make private communication easier. Here is a list of all commands and their functions:
 
   /msg <player> <message>
 Aliases: /tell, @
@@ -178,7 +178,7 @@ The logging of private messages is {1}.
             return false;
         }
 
-        void SendPrivateMessage(IMyPlayer receiver, string message)
+        private void SendPrivateMessage(IMyPlayer receiver, string message)
         {
             if (string.IsNullOrEmpty(message))
                 MyAPIGateway.Utilities.ShowMessage("PM System", "Message too short.");

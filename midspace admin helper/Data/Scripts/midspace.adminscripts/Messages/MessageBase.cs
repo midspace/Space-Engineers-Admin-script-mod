@@ -14,6 +14,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageChatCommand))]
     [XmlInclude(typeof(MessageConfig))]
     [XmlInclude(typeof(MessageConnectionRequest))]
+    [XmlInclude(typeof(MessageFactionMessage))]
     [XmlInclude(typeof(MessageForceDisconnect))]
     [XmlInclude(typeof(MessageGlobalMessage))]
     [XmlInclude(typeof(MessageIncomingMessageParts))]
@@ -21,7 +22,6 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessagePardon))]
     [XmlInclude(typeof(MessagePermissionRequest))]
     [XmlInclude(typeof(MessagePrivateMessage))]
-    [XmlInclude(typeof(MessageFactionMessage))]
     [XmlInclude(typeof(MessageSave))]
     [XmlInclude(typeof(MessageSession))]
     //permissions

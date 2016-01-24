@@ -22,7 +22,6 @@ namespace midspace.adminscripts.Messages
             {
                 case ConfigAction.LogPrivateMessages:
                     CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
-                    CommandFactionChat.LogPrivateMessages = Config.LogPrivateMessages;
                     break;
                 case ConfigAction.Show:
                     Config.Show();
