@@ -276,6 +276,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandPrefabAddWireframe());
             //commands.Add(new CommandPrefabPaste());  //not working any more
             commands.Add(new CommandPrivateMessage());
+            commands.Add(new CommandFactionChat());
             commands.Add(new CommandProtectionArea());
             commands.Add(new CommandSaveGame());
             commands.Add(new CommandSessionCargoShips());

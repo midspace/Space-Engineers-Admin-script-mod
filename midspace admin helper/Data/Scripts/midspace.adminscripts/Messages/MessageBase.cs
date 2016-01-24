@@ -21,6 +21,7 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessagePardon))]
     [XmlInclude(typeof(MessagePermissionRequest))]
     [XmlInclude(typeof(MessagePrivateMessage))]
+    [XmlInclude(typeof(MessageFactionMessage))]
     [XmlInclude(typeof(MessageSave))]
     [XmlInclude(typeof(MessageSession))]
     //permissions
