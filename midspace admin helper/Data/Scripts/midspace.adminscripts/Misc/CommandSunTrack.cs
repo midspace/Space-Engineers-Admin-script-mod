@@ -1,6 +1,7 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
+    using System.ComponentModel;
     using Sandbox.ModAPI;
     using VRageMath;
 
@@ -32,7 +33,47 @@
                 return true;
             }
 
+            const string description = "/suntrack clear";
+            bool clear = false;
+            int counters = 0;
+
+            var parameters = messageText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string parameter in parameters)
+            {
+                if (parameter.Equals("clear", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    clear = true;
+                    break;
+                }
+
+                if (int.TryParse(parameter, out counters))
+                    break;
+            }
+
+            if (clear)
+            {
+                var list = MyAPIGateway.Session.GPS.GetGpsList(MyAPIGateway.Session.Player.IdentityId);
+
+                foreach (IMyGps clearGps in list)
+                {
+                    if (clearGps.Name.StartsWith("Sun") && clearGps.Description == description)
+                        MyAPIGateway.Session.GPS.RemoveGps(MyAPIGateway.Session.Player.IdentityId, clearGps);
+                }
+
+                MyAPIGateway.Utilities.ShowMessage("Suntrack", "Cleared all gps coordinates.");
+                return true;
+            }
+
+            if (counters == 0)
+                counters = 20;
+            else if (counters < 4)
+                counters = 4;
+            else if (counters > 24)
+                counters = 24;
+
+
             var environment = MyAPIGateway.Session.GetSector().Environment;
+            
 
             Vector3D baseSunDirection;
             Vector3D.CreateFromAzimuthAndElevation(environment.SunAzimuth, environment.SunElevation, out baseSunDirection);
@@ -40,30 +81,30 @@
 
             var origin = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false).Translation;
             // TODO: figure out why the RPM doesn't match.
-            IMyGps gps = MyAPIGateway.Session.GPS.Create("Sun observation " + (1.0d / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes).ToString("0.000000") + " RPM", "", origin, true, false);
-            MyAPIGateway.Session.GPS.AddLocalGps(gps);
+            IMyGps gps = MyAPIGateway.Session.GPS.Create("Sun observation " + (1.0d / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes).ToString("0.000000") + " RPM", description, origin, true, false);
+            MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
             long sunRotationInterval = (long)(TimeSpan.TicksPerMinute * (decimal)MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes);
-            long stage = sunRotationInterval / 20;
+            long stage = sunRotationInterval / counters;
             // Sun interval for 360 degrees.
             for (long rotation = 0; rotation < sunRotationInterval; rotation += stage)
             {
                 var stageTime = new TimeSpan(rotation);
                 var finalSunDirection = GetSunDirection(baseSunDirection, stageTime.TotalMinutes);
 
-                gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), "", origin + (finalSunDirection * 10000), true, false);
-                MyAPIGateway.Session.GPS.AddLocalGps(gps);
+                gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), description, origin + (finalSunDirection * 10000), true, false);
+                MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
             }
 
             var vector1 = GetSunDirection(baseSunDirection, 0);
             var vector2 = GetSunDirection(baseSunDirection, new TimeSpan(sunRotationInterval / 4).TotalMinutes);
 
             var zenith = Vector3D.Normalize(Vector3D.Cross(vector1, vector2));
-            gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", "", origin + (zenith * 10000), true, false);
-            MyAPIGateway.Session.GPS.AddLocalGps(gps);
+            gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", description, origin + (zenith * 10000), true, false);
+            MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
-            gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", "", origin + (-zenith * 10000), true, false);
-            MyAPIGateway.Session.GPS.AddLocalGps(gps);
+            gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", description, origin + (-zenith * 10000), true, false);
+            MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
             return true;
         }
