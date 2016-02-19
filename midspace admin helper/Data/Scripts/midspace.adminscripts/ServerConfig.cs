@@ -499,7 +499,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(PermissionFileName, typeof(ServerConfig)))
             {
-                Permissions = new Permissions()
+                Permissions = new Permissions
                 {
                     Commands = new List<CommandStruct>(),
                     Groups = new List<PermissionGroup>(),
@@ -524,7 +524,35 @@ If you can't find the error, simply delete the file. The server will create a ne
             var text = reader.ReadToEnd();
             reader.Close();
 
-            Permissions = MyAPIGateway.Utilities.SerializeFromXML<Permissions>(text);
+            Permissions = new Permissions
+            {
+                Commands = new List<CommandStruct>(),
+                Groups = new List<PermissionGroup>(),
+                Players = new List<PlayerPermission>()
+            };
+
+            if (!string.IsNullOrEmpty(text))
+            {
+                try
+                {
+                    Permissions = MyAPIGateway.Utilities.SerializeFromXML<Permissions>(text);
+                }
+                catch (Exception ex)
+                {
+                    AdminNotification notification = new AdminNotification()
+                    {
+                        Date = DateTime.Now,
+                        Content = string.Format(@"There is an error in the Permissions file. It couldn't be read. The server was started with default Permissions.
+
+Message:
+{0}
+
+If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message)
+                    };
+
+                    AdminNotificator.StoreAndNotify(notification);
+                }
+            }
 
             //create a copy of the commands in the file
             var invalidCommands = new List<CommandStruct>(Permissions.Commands);
