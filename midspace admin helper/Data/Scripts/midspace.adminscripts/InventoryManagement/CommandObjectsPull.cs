@@ -7,6 +7,7 @@
     using Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRageMath;
 
     public class CommandObjectsPull : ChatCommand

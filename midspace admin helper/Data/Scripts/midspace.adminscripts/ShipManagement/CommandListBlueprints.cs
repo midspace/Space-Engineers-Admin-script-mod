@@ -7,7 +7,7 @@
 
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using System.Collections;
+    using VRage.Game;
 
     /// <summary>
     /// An attempt to fetch Ship Blueprints, except there does not appear to be any classes to expose them.

@@ -1,11 +1,12 @@
-﻿using ProtoBuf;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.Game.Entities;
-using Sandbox.ModAPI;
-using VRage.ModAPI;
-
-namespace midspace.adminscripts.Messages.Sync
+﻿namespace midspace.adminscripts.Messages.Sync
 {
+    using ProtoBuf;
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Game.Entities;
+    using Sandbox.ModAPI;
+    using VRage.Game;
+    using VRage.ModAPI;
+
     [ProtoContract]
     public class MessageSyncBlockOwner : MessageBase
     {

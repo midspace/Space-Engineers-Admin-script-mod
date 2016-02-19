@@ -7,10 +7,10 @@ namespace midspace.adminscripts
     using midspace.adminscripts.Messages;
     using midspace.adminscripts.Protection;
     using midspace.adminscripts.Protection.Commands;
-    using Sandbox.Common;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRage.Game.Components;
 
     /// <summary>

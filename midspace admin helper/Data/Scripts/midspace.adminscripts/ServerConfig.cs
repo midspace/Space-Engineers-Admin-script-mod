@@ -1,17 +1,18 @@
-﻿using midspace.adminscripts.Messages;
-using midspace.adminscripts.Messages.Permissions;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-using midspace.adminscripts.Protection;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Xml.Serialization;
+    using midspace.adminscripts.Messages;
+    using midspace.adminscripts.Messages.Permissions;
+    using midspace.adminscripts.Protection;
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.ModAPI;
+    using VRage.Game;
+
     /// <summary>
     /// Represents the server configuration of the mod.
     /// </summary>

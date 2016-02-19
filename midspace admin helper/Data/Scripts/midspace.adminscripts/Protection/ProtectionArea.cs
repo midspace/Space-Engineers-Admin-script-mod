@@ -1,14 +1,15 @@
-﻿using Sandbox.Common.ObjectBuilders;
-using Sandbox.ModAPI;
-using System.Collections.Generic;
-using ProtoBuf;
-using VRage;
-using VRage.ModAPI;
-using VRage.ObjectBuilders;
-using VRageMath;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
+    using System.Collections.Generic;
+    using ProtoBuf;
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.ModAPI;
+    using VRage;
+    using VRage.Game;
+    using VRage.ModAPI;
+    using VRage.ObjectBuilders;
+    using VRageMath;
+
     [ProtoContract]
     public class ProtectionArea
     {

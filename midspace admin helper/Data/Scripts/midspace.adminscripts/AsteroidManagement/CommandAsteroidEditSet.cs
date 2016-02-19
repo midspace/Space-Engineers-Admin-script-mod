@@ -2,12 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-
     using Sandbox.Common;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRage.ModAPI;
-    using VRageMath;
     using VRage.Voxels;
+    using VRageMath;
 
     public class CommandAsteroidEditSet: ChatCommand
     {

@@ -10,6 +10,7 @@
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage;
+    using VRage.Game;
     using VRage.Game.Entity;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;

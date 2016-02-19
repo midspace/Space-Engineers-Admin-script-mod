@@ -11,6 +11,7 @@ namespace midspace.adminscripts
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage;
+    using VRage.Game;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Voxels;
@@ -1341,7 +1342,7 @@ namespace midspace.adminscripts
             return itemAdded;
         }
 
-        public static bool InventoryAdd(IMyInventory inventory, MyFixedPoint amount, MyDefinitionId definitionId)
+        public static bool InventoryAdd(Sandbox.ModAPI.IMyInventory inventory, MyFixedPoint amount, MyDefinitionId definitionId)
         {
             var content = (MyObjectBuilder_PhysicalObject)MyObjectBuilderSerializer.CreateNewObject(definitionId);
 

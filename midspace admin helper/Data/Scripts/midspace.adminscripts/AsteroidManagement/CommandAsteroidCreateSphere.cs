@@ -6,10 +6,10 @@
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
-
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRageMath;
 
     public class CommandAsteroidCreateSphere : ChatCommand

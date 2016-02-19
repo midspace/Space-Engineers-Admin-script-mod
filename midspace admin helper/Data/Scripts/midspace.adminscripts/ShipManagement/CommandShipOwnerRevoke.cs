@@ -3,11 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
-
+    using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRage.ModAPI;
-    using midspace.adminscripts.Messages.Sync;
 
     public class CommandShipOwnerRevoke : ChatCommand
     {

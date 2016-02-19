@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using midspace.adminscripts.Messages;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.Common.ObjectBuilders.Definitions;
-using Sandbox.ModAPI;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using midspace.adminscripts.Messages;
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.Definitions;
+    using Sandbox.ModAPI;
+    using VRage.Game;
+
     public class CommandFactionChat : ChatCommand
     {
         public CommandFactionChat()

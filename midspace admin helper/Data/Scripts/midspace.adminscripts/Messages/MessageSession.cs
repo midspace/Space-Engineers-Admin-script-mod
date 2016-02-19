@@ -1,13 +1,10 @@
-﻿using ProtoBuf;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.ModAPI;
+    using VRage.Game;
+
     [ProtoContract]
     public class MessageSession : MessageBase
     {

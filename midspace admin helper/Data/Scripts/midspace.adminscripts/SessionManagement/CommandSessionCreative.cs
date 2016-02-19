@@ -2,10 +2,10 @@
 {
     using System;
     using System.Linq;
-
+    using midspace.adminscripts.Messages;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
-    using midspace.adminscripts.Messages;
+    using VRage.Game;
 
     public class CommandSessionCreative : ChatCommand
     {

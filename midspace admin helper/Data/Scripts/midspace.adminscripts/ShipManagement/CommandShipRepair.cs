@@ -4,11 +4,22 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    //using Sandbox.Game.Entities.Cube;
+    //using Sandbox.Game.Multiplayer;
+    using Sandbox.ModAPI.Interfaces;
+    using VRage.Utils;
+    using VRageMath;
 
     using Sandbox.ModAPI;
     using VRage.ModAPI;
     using Sandbox.Common.ObjectBuilders;
     using VRage.ObjectBuilders;
+    using Sandbox.Common.ObjectBuilders.Definitions;
+    using Sandbox.Game.Entities;
+    using Sandbox.Game.Weapons;
+    using Sandbox.Game.Multiplayer;
+    using Sandbox.Definitions;
+    using VRage.Game;
 
     public class CommandShipRepair : ChatCommand
     {

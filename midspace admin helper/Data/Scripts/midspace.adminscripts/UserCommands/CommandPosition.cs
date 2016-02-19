@@ -1,9 +1,9 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-
     using Sandbox.Common;
     using Sandbox.ModAPI;
+    using VRage.Game;
 
     public class CommandPosition : ChatCommand
     {

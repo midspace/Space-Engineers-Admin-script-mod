@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
 

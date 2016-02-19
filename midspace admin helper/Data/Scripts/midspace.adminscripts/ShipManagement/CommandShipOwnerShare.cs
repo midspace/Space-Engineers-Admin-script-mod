@@ -6,6 +6,7 @@
     using Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRage.ModAPI;
 
     /// <summary>

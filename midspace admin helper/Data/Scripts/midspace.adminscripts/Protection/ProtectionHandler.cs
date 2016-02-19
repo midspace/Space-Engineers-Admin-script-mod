@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using Sandbox.ModAPI;
-using System.Linq;
-using Sandbox.Common.ObjectBuilders.Definitions;
-using Sandbox.ModAPI.Ingame;
-using VRage.ModAPI;
-using VRage.Utils;
-using IMySlimBlock = Sandbox.ModAPI.IMySlimBlock;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Sandbox.Common.ObjectBuilders.Definitions;
+    using Sandbox.ModAPI;
+    using Sandbox.ModAPI.Ingame;
+    using VRage.Game;
+    using VRage.ModAPI;
+    using VRage.Utils;
+    using IMySlimBlock = Sandbox.ModAPI.IMySlimBlock;
+
     public static class ProtectionHandler
     {
 

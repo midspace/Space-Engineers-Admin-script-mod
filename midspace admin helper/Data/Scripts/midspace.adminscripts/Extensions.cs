@@ -11,6 +11,7 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
+    using VRage.Game;
     using VRage.Game.Entity;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;

@@ -9,6 +9,7 @@
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRageMath;
 
     public class CommandObjectsCollect : ChatCommand

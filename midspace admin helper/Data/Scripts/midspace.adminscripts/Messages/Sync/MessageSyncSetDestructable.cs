@@ -1,10 +1,10 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
     using System.Collections.Generic;
-    using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
 
