@@ -5,9 +5,6 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
@@ -17,7 +14,6 @@
     using VRage.ObjectBuilders;
     using VRage.Utils;
     using VRageMath;
-    using IMyCargoContainer = Sandbox.ModAPI.Ingame.IMyCargoContainer;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
