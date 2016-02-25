@@ -5,10 +5,6 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
-    using Sandbox.Common.ObjectBuilders.VRageData;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
@@ -18,7 +14,6 @@
     using VRage.ObjectBuilders;
     using VRage.Utils;
     using VRageMath;
-    using IMyCargoContainer = Sandbox.ModAPI.Ingame.IMyCargoContainer;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -193,7 +188,8 @@
                 var remoteControl = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyRemoteControl;
                 var character = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCharacter;
                 var character2 = MyAPIGateway.Session.ControlledObject as Sandbox.Game.Entities.Character.MyCharacter;
-                var camera = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCamera;
+                // @midspace idk what the Sandbox.ModAPI.IMyCamera did/was ... I hope this one does/is the same...
+                var camera = MyAPIGateway.Session.ControlledObject as IMyCamera;
                 var cameraBlock = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyCameraBlock;
                 var cameraController = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Interfaces.IMyCameraController;
                 var spectator = MyAPIGateway.Session.ControlledObject as VRage.MySpectator;
@@ -441,14 +437,14 @@
                     DisplayName = "test grid"
                 };
 
-                Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock cube = new Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock();
+                MyObjectBuilder_CubeBlock cube = new MyObjectBuilder_CubeBlock();
                 cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
                 cube.EntityId = 0;
                 cube.Owner = 0;
                 cube.BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Forward, Base6Directions.Direction.Up);
-                cube.ShareMode = Sandbox.Common.ObjectBuilders.MyOwnershipShareModeEnum.All;
+                cube.ShareMode = MyOwnershipShareModeEnum.All;
                 gridBuilder.CubeBlocks.Add(cube);
 
 
@@ -487,14 +483,14 @@
                     DisplayName = "test grid"
                 };
 
-                Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock cube = new Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock();
+                MyObjectBuilder_CubeBlock cube = new MyObjectBuilder_CubeBlock();
                 cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
                 cube.ShareMode = MyOwnershipShareModeEnum.None;
                 cube.Owner = 0;
                 cube.BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Forward, Base6Directions.Direction.Up);
-                cube.ShareMode = Sandbox.Common.ObjectBuilders.MyOwnershipShareModeEnum.All;
+                cube.ShareMode = MyOwnershipShareModeEnum.All;
                 gridBuilder.CubeBlocks.Add(cube);
 
                 //var tempList = new List<MyObjectBuilder_EntityBase>();
