@@ -8,7 +8,6 @@
     using System.Text;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Common.ObjectBuilders.Definitions;
-    using Sandbox.Common.ObjectBuilders.VRageData;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
@@ -193,7 +192,7 @@
                 var remoteControl = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyRemoteControl;
                 var character = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCharacter;
                 var character2 = MyAPIGateway.Session.ControlledObject as Sandbox.Game.Entities.Character.MyCharacter;
-                var camera = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCamera;
+                var camera = MyAPIGateway.Session.ControlledObject as IMyCamera;
                 var cameraBlock = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyCameraBlock;
                 var cameraController = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Interfaces.IMyCameraController;
                 var spectator = MyAPIGateway.Session.ControlledObject as VRage.MySpectator;
@@ -441,14 +440,14 @@
                     DisplayName = "test grid"
                 };
 
-                Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock cube = new Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock();
+                MyObjectBuilder_CubeBlock cube = new MyObjectBuilder_CubeBlock();
                 cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
                 cube.EntityId = 0;
                 cube.Owner = 0;
                 cube.BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Forward, Base6Directions.Direction.Up);
-                cube.ShareMode = Sandbox.Common.ObjectBuilders.MyOwnershipShareModeEnum.All;
+                cube.ShareMode = MyOwnershipShareModeEnum.All;
                 gridBuilder.CubeBlocks.Add(cube);
 
 
@@ -487,14 +486,14 @@
                     DisplayName = "test grid"
                 };
 
-                Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock cube = new Sandbox.Common.ObjectBuilders.MyObjectBuilder_CubeBlock();
+                MyObjectBuilder_CubeBlock cube = new MyObjectBuilder_CubeBlock();
                 cube.Min = new SerializableVector3I(0, 0, 0);
                 cube.SubtypeName = "LargeBlockArmorBlock";
                 cube.ColorMaskHSV = new SerializableVector3(0, -1, 0);
                 cube.ShareMode = MyOwnershipShareModeEnum.None;
                 cube.Owner = 0;
                 cube.BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Forward, Base6Directions.Direction.Up);
-                cube.ShareMode = Sandbox.Common.ObjectBuilders.MyOwnershipShareModeEnum.All;
+                cube.ShareMode = MyOwnershipShareModeEnum.All;
                 gridBuilder.CubeBlocks.Add(cube);
 
                 //var tempList = new List<MyObjectBuilder_EntityBase>();
@@ -553,9 +552,10 @@
 
 
                 // Terminal Groups....
-                var terminalsys = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid);
+                var gridTerminalSystem = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid);
                 var groups = new List<Sandbox.ModAPI.Ingame.IMyBlockGroup>();
-                terminalsys.GetBlockGroups(groups); // may abide by the owner rules?
+                gridTerminalSystem.GetBlockGroups(groups); // may abide by the owner rules?
+
 
                 MyAPIGateway.Utilities.ShowMessage("BlockGroup Count", "{0}", groups.Count);
                 foreach (var group in groups)
