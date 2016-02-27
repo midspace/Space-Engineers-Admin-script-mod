@@ -68,7 +68,7 @@ namespace midspace.adminscripts
 
         private void GodModeDamageHandler_Client(object target, ref MyDamageInformation info)
         {
-            if (GodModeEnabled && target is IMyCharacter && target == MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity)
+            if (GodModeEnabled && target is IMyCharacter && target == MyAPIGateway.Session.Player.GetCharacter())
                 info.Amount = 0;
         }
 
@@ -103,7 +103,7 @@ namespace midspace.adminscripts
 
         private static void GodModeDamageHandler_Server(object target, ref MyDamageInformation info)
         {
-            if (target is IMyCharacter && Players.Any(p => target == p.Controller.ControlledEntity))
+            if (target is IMyCharacter && Players.Any(p => target == p.GetCharacter()))
                 info.Amount = 0;
         }
     }
