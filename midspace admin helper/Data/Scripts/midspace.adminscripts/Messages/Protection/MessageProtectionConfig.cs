@@ -1,4 +1,5 @@
-﻿using midspace.adminscripts.Protection;
+﻿using midspace.adminscripts.Messages.Communication;
+using midspace.adminscripts.Protection;
 using ProtoBuf;
 
 namespace midspace.adminscripts.Messages.Protection
@@ -26,7 +27,7 @@ namespace midspace.adminscripts.Messages.Protection
                     {
                         sync = true;
                         ProtectionHandler.Config.ProtectionInverted = Value;
-                        ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("The protection is {0} now.", Value ? "inverted" : "normal"));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("The protection is {0} now.", Value ? "inverted" : "normal"));
                     }
                     break;
                 case ProtectionConfigType.Enable:
@@ -34,7 +35,7 @@ namespace midspace.adminscripts.Messages.Protection
                     {
                         sync = true;
                         ProtectionHandler.Config.ProtectionEnabled = Value;
-                        ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("The protection is {0} now", Value ? "enabled" : "disabled"));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("The protection is {0} now", Value ? "enabled" : "disabled"));
                     }
                     break;
             }
@@ -45,7 +46,7 @@ namespace midspace.adminscripts.Messages.Protection
                 ConnectionHelper.SendMessageToAllPlayers(new MessageSyncProtection {Config = ProtectionHandler.Config});
             }
             else
-                ConnectionHelper.SendChatMessage(SenderSteamId, "The setting was already set to the specified value.");
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "The setting was already set to the specified value.");
         }
     }
 

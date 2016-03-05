@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using midspace.adminscripts.Messages.Communication;
 
 namespace midspace.adminscripts.Messages
 {
@@ -70,19 +71,19 @@ namespace midspace.adminscripts.Messages
             if (FieldsToUpdate.HasFlag(ChangedFields.Content))
             {
                 Content = ChatCommandLogic.Instance.ServerCfg.SetMessageOfTheDay(Content);
-                ConnectionHelper.SendChatMessage(SenderSteamId, "The message of the day was updated. Please note that you have to use '/cfg save' to save it permanently.");
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "The message of the day was updated. Please note that you have to use '/cfg save' to save it permanently.");
             }
 
             if (FieldsToUpdate.HasFlag(ChangedFields.HeadLine))
             {
                 CommandMessageOfTheDay.HeadLine = HeadLine;
-                ConnectionHelper.SendChatMessage(SenderSteamId, "The headline of the message of the day was updated. Please note that you have to use '/cfg save' to save it permanently.");
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "The headline of the message of the day was updated. Please note that you have to use '/cfg save' to save it permanently.");
             }
 
             if (FieldsToUpdate.HasFlag(ChangedFields.ShowInChat))
             {
                 CommandMessageOfTheDay.ShowInChat = ShowInChat;
-                ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("The setting motdShowInChat was set to {0}. Please note that you have to use '/cfg save' to save it permanently.", ShowInChat));
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("The setting motdShowInChat was set to {0}. Please note that you have to use '/cfg save' to save it permanently.", ShowInChat));
             }
 
             ConnectionHelper.SendMessageToAllPlayers(this);

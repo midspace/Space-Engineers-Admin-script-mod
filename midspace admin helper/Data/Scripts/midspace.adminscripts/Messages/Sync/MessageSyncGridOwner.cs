@@ -1,4 +1,6 @@
-﻿namespace midspace.adminscripts.Messages.Sync
+﻿using midspace.adminscripts.Messages.Communication;
+
+namespace midspace.adminscripts.Messages.Sync
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -49,7 +51,7 @@
                         var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
                         foreach (var grid in grids)
                             grid.ChangeGridOwnership(player.PlayerID, MyOwnershipShareModeEnum.All);
-                        ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Grid {0} Claimed by player {1}.", selectedShip.DisplayName, player.DisplayName));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("Grid {0} Claimed by player {1}.", selectedShip.DisplayName, player.DisplayName));
                     }
                     break;
 
@@ -58,7 +60,7 @@
                         var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
                         foreach (var grid in grids)
                             grid.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
-                        ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Grid {0} Revoked of all ownership.", selectedShip.DisplayName));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("Grid {0} Revoked of all ownership.", selectedShip.DisplayName));
                     }
                     break;
 
@@ -73,7 +75,7 @@
                             foreach (var block in blocks)
                                 block.FatBlock.ChangeOwner(block.FatBlock.OwnerId, MyOwnershipShareModeEnum.All);
                         }
-                        ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Grid {0} Shared.", selectedShip.DisplayName));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("Grid {0} Shared.", selectedShip.DisplayName));
                     }
                     break;
             }

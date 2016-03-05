@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using midspace.adminscripts.Messages.Communication;
 using midspace.adminscripts.Protection;
 using ProtoBuf;
 
@@ -25,7 +26,7 @@ namespace midspace.adminscripts.Messages.Protection
                 case ProtectionAreaMessageType.Add:
                     if (ProtectionHandler.AddArea(ProtectionArea))
                     {
-                        ConnectionHelper.SendChatMessage(SenderSteamId, "Successfully created area.");
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server",  "Successfully created area.");
                         ConnectionHelper.SendMessageToAllPlayers(new MessageSyncProtection()
                         {
                             Config = ProtectionHandler.Config
@@ -33,12 +34,12 @@ namespace midspace.adminscripts.Messages.Protection
                         ProtectionHandler.Save();
                     }
                     else
-                        ConnectionHelper.SendChatMessage(SenderSteamId, "An area with that name already exists.");
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "An area with that name already exists.");
                     break;
                 case ProtectionAreaMessageType.Remove:
                     if (ProtectionHandler.RemoveArea(ProtectionArea))
                     {
-                        ConnectionHelper.SendChatMessage(SenderSteamId, "Successfully removed area.");
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "Successfully removed area.");
                         ConnectionHelper.SendMessageToAllPlayers(new MessageSyncProtection()
                         {
                             Config = ProtectionHandler.Config
@@ -46,7 +47,7 @@ namespace midspace.adminscripts.Messages.Protection
                         ProtectionHandler.Save();
                     }
                     else
-                        ConnectionHelper.SendChatMessage(SenderSteamId, "An area with that name could not be found.");
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "An area with that name could not be found.");
                     break;
             }
         }

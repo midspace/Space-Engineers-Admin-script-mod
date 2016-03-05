@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using midspace.adminscripts.Messages.Communication;
 
 namespace midspace.adminscripts.Messages
 {
@@ -23,10 +24,10 @@ namespace midspace.adminscripts.Messages
             if (bannedPlayer.SteamId != 0)
             {
                 ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.Remove(bannedPlayer);
-                ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Pardoned player {0}", bannedPlayer.PlayerName));
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("Pardoned player {0}", bannedPlayer.PlayerName));
             }
             else
-                ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Can't find a banned player named {0}", PlayerName));
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("Can't find a banned player named {0}", PlayerName));
         }
     }
 }

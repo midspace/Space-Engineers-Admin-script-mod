@@ -1,10 +1,5 @@
 ﻿using ProtoBuf;
 using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
 
 namespace midspace.adminscripts.Messages
 {
@@ -19,13 +14,8 @@ namespace midspace.adminscripts.Messages
 
         public override void ProcessClient()
         {
-            var senderName = ChatMessage.Sender.PlayerName;
-            
-            // we do not want to set the server as whisper partner
-            if (ChatMessage.Sender.SteamId != 0)
-                CommandPrivateMessage.LastWhisperId = ChatMessage.Sender.SteamId;
-
-            MyAPIGateway.Utilities.ShowMessage(string.Format("{0}{1}", senderName, senderName.Equals("Server") ? "" : " whispers"), ChatMessage.Text);
+            CommandPrivateMessage.LastWhisperId = ChatMessage.Sender.SteamId;
+            MyAPIGateway.Utilities.ShowMessage(string.Format("{0} {1}", ChatMessage.Sender.PlayerName, "whispers"), ChatMessage.Text);
         }
 
         public override void ProcessServer()

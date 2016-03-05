@@ -1,4 +1,6 @@
-﻿namespace midspace.adminscripts
+﻿using midspace.adminscripts.Messages.Communication;
+
+namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
@@ -798,7 +800,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             if (string.IsNullOrEmpty(commandStruct.Name))
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Command {0} could not be found.", command.Name));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Command {0} could not be found.", command.Name));
                 return;
             }
 
@@ -831,9 +833,9 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
 
             if (commandStruct.NeededLevel == uint.MaxValue)
-                ConnectionHelper.SendChatMessage(sender, string.Format("The command '{0}' was disabled.", commandStruct.Name));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("The command '{0}' was disabled.", commandStruct.Name));
             else
-                ConnectionHelper.SendChatMessage(sender, string.Format("The level of command '{0}' was set to {1}.", commandStruct.Name, commandStruct.NeededLevel));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("The level of command '{0}' was set to {1}.", commandStruct.Name, commandStruct.NeededLevel));
 
             SavePermissionFile();
         }
@@ -848,7 +850,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (commands.Count == 0)
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("No command matching with {0} could be found.", param));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("No command matching with {0} could be found.", param));
                     return;
                 }
             }
@@ -888,11 +890,11 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} could not be found.", playerName));
                 return;
             }
 
-            ConnectionHelper.SendChatMessage(sender, string.Format("{0}'s level was set to {1}.", playerName, level));
+            MessageClientTextMessage.SendMessage(sender, "Server", string.Format("{0}'s level was set to {1}.", playerName, level));
 
             SavePermissionFile();
         }
@@ -912,7 +914,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Command {0} could not be found.", commandName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Command {0} could not be found.", commandName));
                     return;
                 }
 
@@ -921,7 +923,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (Permissions.Players[i].Extensions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} already has extended access to {1}.", playerName, commandName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} already has extended access to {1}.", playerName, commandName));
                     return;
                 }
 
@@ -930,7 +932,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     var command = Permissions.Players[i].Restrictions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
                     Permissions.Players[i].Restrictions.Remove(command);
                     SendPermissionChange(playerPermission.Player.SteamId, commandStruct);
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
                     return;
                 }
 
@@ -941,11 +943,11 @@ If you can't find the error, simply delete the file. The server will create a ne
                     Name = commandStruct.Name, 
                     NeededLevel = GetPlayerLevel(playerPermission.Player.SteamId) 
                 });
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has extended access to {1} from now.", playerName, commandName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has extended access to {1} from now.", playerName, commandName));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} could not be found.", playerName));
                 return;
             }
 
@@ -967,7 +969,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Command {0} could not be found.", commandName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Command {0} could not be found.", commandName));
                     return;
                 }
 
@@ -976,7 +978,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (Permissions.Players[i].Restrictions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} already has restricted access to {1}.", playerName, commandName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} already has restricted access to {1}.", playerName, commandName));
                     return;
                 }
 
@@ -985,7 +987,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     var command = Permissions.Players[i].Extensions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
                     Permissions.Players[i].Extensions.Remove(command);
                     SendPermissionChange(playerPermission.Player.SteamId, commandStruct);
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
                     return;
                 }
 
@@ -996,11 +998,11 @@ If you can't find the error, simply delete the file. The server will create a ne
                     Name = commandStruct.Name,
                     NeededLevel = GetPlayerLevel(playerPermission.Player.SteamId) + 1
                 });
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} has no access to {1} from now.", playerName, commandName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has no access to {1} from now.", playerName, commandName));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} could not be found.", playerName));
                 return;
             }
 
@@ -1020,11 +1022,11 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 SendPermissions(playerPermission.Player.SteamId);
 
-                ConnectionHelper.SendChatMessage(sender, string.Format("{0} uses the {1} level now. Current level: {2}", playerName, usePlayerLevel ? "player" : "group", GetPlayerLevel(playerPermission.Player.SteamId)));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("{0} uses the {1} level now. Current level: {2}", playerName, usePlayerLevel ? "player" : "group", GetPlayerLevel(playerPermission.Player.SteamId)));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} could not be found.", playerName));
                 return;
             }
 
@@ -1040,7 +1042,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             if (onlinePlayers.Count == 0 && Permissions.Players.Count == 0)
             {
-                ConnectionHelper.SendChatMessage(sender, "No players found.");
+                MessageClientTextMessage.SendMessage(sender, "Server", "No players found.");
                 return;
             }
 
@@ -1064,7 +1066,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (players.Count == 0)
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("No player matching with {0} could be found.", param));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("No player matching with {0} could be found.", param));
                     return;
                 }
             }
@@ -1089,7 +1091,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             if (Permissions.Groups.Any(g => g.GroupName.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("There is already a group named {0}.", name));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("There is already a group named {0}.", name));
                 return;
             }
 
@@ -1099,7 +1101,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 Members = new List<ulong>(),
             });
 
-            ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} with level {1} was created.", name, level));
+            MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} with level {1} was created.", name, level));
 
             SavePermissionFile();
         }
@@ -1120,11 +1122,11 @@ If you can't find the error, simply delete the file. The server will create a ne
                     SendPermissions(steamId);
                 }
 
-                ConnectionHelper.SendChatMessage(sender, string.Format("The level of group {0} was updated to {1}.", groupName, level));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("The level of group {0} was updated to {1}.", groupName, level));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} could not be found.", groupName));
                 return;
             }
 
@@ -1138,7 +1140,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             {
                 if (Permissions.Groups.Any(g => g.GroupName.Equals(newName, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("There is already a group named {0}.", newName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("There is already a group named {0}.", newName));
                     return;
                 }
 
@@ -1148,11 +1150,11 @@ If you can't find the error, simply delete the file. The server will create a ne
                 group.GroupName = newName;
                 Permissions.Groups[i] = group;
 
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} was renamed to {1}.", groupName, newName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} was renamed to {1}.", groupName, newName));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} could not be found.", groupName));
                 return;
             }
 
@@ -1172,7 +1174,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     playerName = playerPermission.Player.PlayerName;
                     if (group.Members.Contains(playerPermission.Player.SteamId))
                     {
-                        ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is already a member of group {1}.", playerName, groupName));
+                        MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} is already a member of group {1}.", playerName, groupName));
                         return;
                     }
 
@@ -1184,15 +1186,15 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
                 else
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} could not be found.", playerName));
                     return;
                 }
 
-                ConnectionHelper.SendChatMessage(sender, string.Format("Added player {0} to group {1}.", playerName, groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Added player {0} to group {1}.", playerName, groupName));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} could not be found.", groupName));
                 return;
             }
 
@@ -1212,7 +1214,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                     playerName = playerPermission.Player.PlayerName;
                     if (!group.Members.Contains(playerPermission.Player.SteamId))
                     {
-                        ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} is not a member of group {1}.", playerName, groupName));
+                        MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} is not a member of group {1}.", playerName, groupName));
                         return;
                     }
 
@@ -1224,15 +1226,15 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
                 else
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("Player {0} could not be found.", playerName));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} could not be found.", playerName));
                     return;
                 }
 
-                ConnectionHelper.SendChatMessage(sender, string.Format("Removed player {0} from group {1}.", playerName, groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Removed player {0} from group {1}.", playerName, groupName));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} could not be found.", groupName));
                 return;
             }
 
@@ -1252,11 +1254,11 @@ If you can't find the error, simply delete the file. The server will create a ne
                     SendPermissions(steamId);
                 }
 
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} has been deleted.", groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} has been deleted.", groupName));
             }
             else
             {
-                ConnectionHelper.SendChatMessage(sender, string.Format("Group {0} could not be found.", groupName));
+                MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} could not be found.", groupName));
                 return;
             }
 
@@ -1267,7 +1269,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             if (Permissions.Groups.Count == 0)
             {
-                ConnectionHelper.SendChatMessage(sender, "No groups found.");
+                MessageClientTextMessage.SendMessage(sender, "Server", "No groups found.");
                 return;
             }
 
@@ -1279,7 +1281,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 if (groups.Count == 0)
                 {
-                    ConnectionHelper.SendChatMessage(sender, string.Format("No group matching with {0} could be found.", param));
+                    MessageClientTextMessage.SendMessage(sender, "Server", string.Format("No group matching with {0} could be found.", param));
                     return;
                 }
             }

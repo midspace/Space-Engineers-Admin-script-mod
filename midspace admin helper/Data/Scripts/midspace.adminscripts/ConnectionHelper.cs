@@ -233,30 +233,5 @@ namespace midspace.adminscripts
                 }
             }
         }
-
-        public static void SendChatMessage(IMyPlayer receiver, string message)
-        {
-            SendChatMessage(receiver.SteamUserId, message);
-        }
-
-        public static void SendChatMessage(ulong steamId, string message)
-        {
-            if (steamId == 0)
-                return;
-
-            var chatMessage = new MessagePrivateMessage() {
-                ChatMessage = new ChatMessage()
-                {
-                    Sender = new Player()
-                    {
-                        PlayerName = "Server",
-                        SteamId = 0
-                    },
-                    Text = message,
-                }
-            };
-
-            SendMessageToPlayer(steamId, chatMessage);
-        }
     }
 }

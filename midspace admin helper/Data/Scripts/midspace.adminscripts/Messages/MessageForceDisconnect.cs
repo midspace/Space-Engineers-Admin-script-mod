@@ -3,7 +3,7 @@ using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using midspace.adminscripts.Messages.Communication;
 
 namespace midspace.adminscripts.Messages
 {
@@ -38,7 +38,7 @@ namespace midspace.adminscripts.Messages
             }
 
             ConnectionHelper.SendMessageToPlayer(SteamId, this);
-            ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("{0} player {1}.", Ban ? "Forcebanned" : "Forcekicked", player.DisplayName));
+            MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("{0} player {1}.", Ban ? "Forcebanned" : "Forcekicked", player.DisplayName));
         }
     }
 }

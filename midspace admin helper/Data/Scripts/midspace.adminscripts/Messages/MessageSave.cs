@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using midspace.adminscripts.Messages.Communication;
 
 namespace midspace.adminscripts.Messages
 {
@@ -22,7 +23,7 @@ namespace midspace.adminscripts.Messages
         {
             if (ServerConfig.ServerIsClient && SenderSteamId != MyAPIGateway.Session.Player.SteamUserId) //no one should be able to do that
             {
-                ConnectionHelper.SendChatMessage(SenderSteamId, "Saving the session on a locally hosted server is not allowed.");
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "Saving the session on a locally hosted server is not allowed.");
                 return;
             }
 
@@ -30,13 +31,13 @@ namespace midspace.adminscripts.Messages
             {
                 MyAPIGateway.Session.Save();
                 ChatCommandLogic.Instance.ServerCfg.SaveLogs();
-                ConnectionHelper.SendChatMessage(SenderSteamId, "Session saved.");
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", "Session saved.");
             }
             else
             {
                 MyAPIGateway.Session.Save(Name);
                 ChatCommandLogic.Instance.ServerCfg.Save(Name);
-                ConnectionHelper.SendChatMessage(SenderSteamId, string.Format("Session saved as {0}.", Name));
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("Session saved as {0}.", Name));
             }
         }
     }
