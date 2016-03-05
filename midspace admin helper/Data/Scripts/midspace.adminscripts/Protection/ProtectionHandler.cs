@@ -1,9 +1,12 @@
-﻿namespace midspace.adminscripts.Protection
+﻿using System.Timers;
+using midspace.adminscripts.Messages.Communication;
+using midspace.adminscripts.Utils.Timer;
+
+namespace midspace.adminscripts.Protection
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Ingame;
     using VRage.Game;
@@ -13,11 +16,14 @@
 
     public static class ProtectionHandler
     {
-
         public static ProtectionConfig Config;
 
         private static bool _isInitialized;
         private static HandtoolCache _handtoolCache;
+        private static Dictionary<IMyPlayer, DateTime> _sentFailedMessage;
+        private static ThreadsafeTimer _cleanupTimer;
+
+        private const int GrindFailedMessageInterval = 5000;
 
         public static void Init_Server()
         {
@@ -29,6 +35,11 @@
             Load();
 
             _handtoolCache = new HandtoolCache();
+            _sentFailedMessage = new Dictionary<IMyPlayer, DateTime>();
+            // every 30 seconds
+            _cleanupTimer = new ThreadsafeTimer(30000);
+            _cleanupTimer.Elapsed += CleanUp;
+            _cleanupTimer.Start();
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
         }
 
@@ -74,10 +85,20 @@
 
             if (block != null)
             {
-                if (CanDamageBlock(info.AttackerId, block, info.Type))
+                IMyPlayer player;
+                if (CanDamageBlock(info.AttackerId, block, info.Type, out player))
                     return;
 
                 info.Amount = 0;
+
+                // notify player
+                DateTime time;
+                if (player != null && (!_sentFailedMessage.TryGetValue(player, out time) || DateTime.Now - time >= TimeSpan.FromMilliseconds(GrindFailedMessageInterval)))
+                {
+                    MessageClientNotification.SendMessage(player.SteamUserId, "You are not allowed to damage this block.", GrindFailedMessageInterval, MyFontEnum.Red);
+                    _sentFailedMessage.Update(player, DateTime.Now);
+                }
+
                 return;
             }
 
@@ -104,8 +125,17 @@
             }
         }
 
-        private static bool CanDamageBlock(long attackerEntityId, IMySlimBlock block, MyStringHash type)
+        /// <summary>
+        /// Finds out if the entity with the given entityId can damage the given block regarding the given damage type. 
+        /// </summary>
+        /// <param name="attackerEntityId">The entityId of the entity that damages the given block.</param>
+        /// <param name="block">The block that is damaged.</param>
+        /// <param name="type">The damage type.</param>
+        /// <param name="player">If a player is causing the damage, we return it as well.</param>
+        /// <returns>True if the block can be damaged.</returns>
+        private static bool CanDamageBlock(long attackerEntityId, IMySlimBlock block, MyStringHash type, out IMyPlayer player)
         {
+            player = null;
             if (!IsProtected(block)) 
                 return true;
 
@@ -115,7 +145,6 @@
 
             if (type == MyDamageType.Grind)
             {
-                IMyPlayer player;
                 if (attackerEntity is IMyShipGrinder)
                 {
                     player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity.GetTopMostParent());
@@ -205,6 +234,24 @@
 
             Config.Areas.RemoveAll(a => a.Name.Equals(area.Name, StringComparison.InvariantCultureIgnoreCase));
             return true;
+        }
+
+        /// <summary>
+        /// Removes disconnected players from the sent messages dictionary.
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="messageEventArgs"></param>
+        private static void CleanUp(object o, ElapsedEventArgs messageEventArgs)
+        {
+            var players = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(players);
+
+            Dictionary<IMyPlayer, DateTime> validEntries = new Dictionary<IMyPlayer, DateTime>();
+            foreach (var pair in _sentFailedMessage)
+                if (players.Contains(pair.Key))
+                    validEntries.Add(pair.Key, pair.Value);
+
+            _sentFailedMessage = validEntries;
         }
     }
 }

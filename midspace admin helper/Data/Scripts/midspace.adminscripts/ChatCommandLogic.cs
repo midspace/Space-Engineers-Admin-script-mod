@@ -1,3 +1,5 @@
+using midspace.adminscripts.Utils.Timer;
+
 namespace midspace.adminscripts
 {
     using System;
@@ -39,16 +41,13 @@ namespace midspace.adminscripts
         public AdminNotification AdminNotification;
         public bool ShowDialogsOnReceive = false;
 
-        public Timer PermissionRequestTimer;
+        public ThreadsafeTimer PermissionRequestTimer;
         public bool BlockCommandExecution = false;
         public bool AllowBuilding = false;
 
-        private bool _permissionRequest;
         private bool _isInitialized;
         private bool _commandsRegistered;
-        private Timer _timer100;
-        private bool _100MsTimerElapsed;
-        private bool _1000MsTimerElapsed;
+        private ThreadsafeTimer _timer100;
         private int _timerCounter = 0;
         private static string[] _oreNames;
         private static List<string> _ingotNames;
@@ -87,26 +86,9 @@ namespace midspace.adminscripts
 
             base.UpdateBeforeSimulation();
 
-            if (_100MsTimerElapsed)
-            {
-                _100MsTimerElapsed = false;
-                ChatCommandService.UpdateBeforeSimulation100();
-            }
-
-            if (_1000MsTimerElapsed)
-            {
-                _1000MsTimerElapsed = false;
-                ChatCommandService.UpdateBeforeSimulation1000();
-            }
-
-            if (_permissionRequest)
-            {
-                _permissionRequest = false;
-                ConnectionHelper.SendMessageToServer(new MessagePermissionRequest());
-            }
-
             ChatCommandService.UpdateBeforeSimulation();
             ProtectionHandler.UpdateBeforeSimulation();
+            TimerRegistry.Update();
         }
 
         protected override void UnloadData()
@@ -135,7 +117,7 @@ namespace midspace.adminscripts
             Logger.Debug("Attach MessageEntered");
 
 
-            _timer100 = new Timer(100);
+            _timer100 = new ThreadsafeTimer(100);
             _timer100.Elapsed += TimerOnElapsed100;
             _timer100.Start();
             // Attach any other events here.
@@ -161,7 +143,7 @@ namespace midspace.adminscripts
                 }
                 ConnectionHelper.Client_MessageCache.Clear();
                 BlockCommandExecution = true;
-                PermissionRequestTimer = new Timer(10000);
+                PermissionRequestTimer = new ThreadsafeTimer(10000);
                 PermissionRequestTimer.Elapsed += PermissionRequestTimer_Elapsed;
                 PermissionRequestTimer.Start();
                 // tell the server that we need everything now, permissions, protection, etc.
@@ -324,11 +306,7 @@ namespace midspace.adminscripts
 
         private void DetachEvents()
         {
-            if (_timer100 != null)
-            {
-                _timer100.Stop();
-                _timer100.Elapsed -= TimerOnElapsed100;
-            }
+            TimerRegistry.Close();
 
             // servers: listen and dedicated, MP
             if (ServerCfg != null)
@@ -370,21 +348,18 @@ namespace midspace.adminscripts
         {
             _timerCounter++;
 
-            // Run timed events that do not affect Threading in game.
-            _100MsTimerElapsed = true;
-
             if (_timerCounter % 10 == 0)
-                _1000MsTimerElapsed = true;
-
-            // DO NOT SET ANY IN GAME API CALLS HERE. AT ALL!
+                ChatCommandService.UpdateBeforeSimulation1000();
 
             if (_timerCounter == 100)
                 _timerCounter = 0;
+
+            ChatCommandService.UpdateBeforeSimulation100();
         }
 
         void PermissionRequestTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _permissionRequest = true;
+            ConnectionHelper.SendMessageToServer(new MessagePermissionRequest());
         }
 
         #endregion

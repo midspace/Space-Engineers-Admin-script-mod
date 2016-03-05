@@ -74,6 +74,7 @@
     <Compile Include="InventoryManagement\CommandInventoryInsert.cs" />
     <Compile Include="Localize.cs" />
     <Compile Include="Messages\Communication\MessageClientDialogMessage.cs" />
+    <Compile Include="Messages\Communication\MessageClientNotification.cs" />
     <Compile Include="Messages\Communication\MessageClientTextMessage.cs" />
     <Compile Include="Messages\MessageAdminNotification.cs" />
     <Compile Include="Messages\MessageBase.cs" />
@@ -81,7 +82,7 @@
     <Compile Include="Messages\MessageConfig.cs" />
     <Compile Include="Messages\MessageConnectionRequest.cs" />
     <Compile Include="Messages\MessageContainer.cs" />
-	<Compile Include="Messages\MessageFactionMessage.cs" />
+    <Compile Include="Messages\MessageFactionMessage.cs" />
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
     <Compile Include="Messages\MessageChatCommand.cs" />
@@ -139,7 +140,7 @@
     <Compile Include="ShipManagement\CommandShipDestructible.cs" />
     <Compile Include="UserCommands\CommandChatHistory.cs" />
     <Compile Include="Misc\CommandSunTrack.cs" />
-	<Compile Include="UserCommands\CommandFactionChat.cs" />
+    <Compile Include="UserCommands\CommandFactionChat.cs" />
     <Compile Include="UserCommands\CommandLaserUpDown.cs" />
     <Compile Include="UserCommands\CommandLaserRangefinder.cs" />
     <Compile Include="UserCommands\CommandSettings.cs" />
@@ -228,6 +229,8 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ServerConfig.cs" />
+    <Compile Include="Utils\Timer\ThreadsafeTimer.cs" />
+    <Compile Include="Utils\Timer\TimerRegistry.cs" />
     <Compile Include="VoxelEditLogic.cs" />
     <Compile Include="ChatCommandLogic.cs" />
     <Compile Include="Support.cs" />
