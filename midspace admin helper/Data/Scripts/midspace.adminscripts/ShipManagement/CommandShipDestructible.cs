@@ -22,7 +22,7 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/((destructible)|(destruct))\s+(?<switch>(on)|(off)|1|2)(\s+|$)(?<Name>.*)|$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/((destructible)|(destruct))\s+(?<switch>(on)|(off)|1|0)(\s+|$)(?<name>.*)|$", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 bool switchOn = false;
