@@ -22,7 +22,8 @@
             Weapons = 0x20, // all types.
             SpotLights = 0x40,
             Sensors = 0x80,
-            Medical = 0x100
+            Medical = 0x100,
+            Mass = 0x200
         };
 
         public CommandShipSwitch()
@@ -65,6 +66,8 @@
                         control |= SwitchSystems.Weapons;
                     else if (controlStr.IndexOf("medi", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         control |= SwitchSystems.Medical;
+                    else if (controlStr.IndexOf("mass", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Mass;
                 }
 
                 if (control == SwitchSystems.None)
@@ -170,6 +173,12 @@
                     // I'm unsure if we should go with it like this, which is why it is as yet undocumented.
                     // The idea is, if you have turned the power off to all ships, you can turn the power back on only for grids with Medical and Cryo.
                     SwitchShipSystemsOnOff(cubeGrid, SwitchSystems.Power, mode);
+                    counter++;
+                }
+                if ((SwitchSystems.Mass & control) == SwitchSystems.Mass && block.FatBlock is IMyFunctionalBlock
+                    && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_VirtualMass)))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
                     counter++;
                 }
             }
