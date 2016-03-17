@@ -3,10 +3,10 @@
     using System;
     using System.Linq;
     using System.Text.RegularExpressions;
-
-    using Sandbox.ModAPI;
-    using VRageMath;
     using midspace.adminscripts.Messages.Sync;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+    using VRageMath;
 
     public class CommandStopAll : ChatCommand
     {
@@ -35,9 +35,9 @@
                 var entityList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
 
                 entityList = entityList.Where(e =>
-                    (e is Sandbox.ModAPI.IMyFloatingObject)
-                    || (e is Sandbox.ModAPI.IMyCharacter)
-                    || (e is Sandbox.ModAPI.IMyCubeGrid)).ToList();
+                    (e is IMyFloatingObject)
+                    || (e is IMyCharacter)
+                    || (e is IMyCubeGrid)).ToList();
 
                 int counter = 0;
                 foreach (var item in entityList)

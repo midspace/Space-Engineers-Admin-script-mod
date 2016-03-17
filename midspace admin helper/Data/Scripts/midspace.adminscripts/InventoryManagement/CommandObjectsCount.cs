@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     public class CommandObjectsCount : ChatCommand
@@ -35,7 +36,7 @@
         public static void CountObjects(ulong steamId)
         {
             var floatingList = new HashSet<IMyEntity>();
-            MyAPIGateway.Entities.GetEntities(floatingList, e => (e is Sandbox.ModAPI.IMyFloatingObject));
+            MyAPIGateway.Entities.GetEntities(floatingList, e => (e is IMyFloatingObject));
             var replicableList = new HashSet<IMyEntity>();
             MyAPIGateway.Entities.GetEntities(replicableList, e => (e is Sandbox.Game.Entities.MyInventoryBagEntity));
 

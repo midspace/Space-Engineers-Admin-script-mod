@@ -6,6 +6,7 @@
 
     using Messages;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
     public class CommandInvisible : ChatCommand

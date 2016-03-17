@@ -6,6 +6,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRageMath;
 

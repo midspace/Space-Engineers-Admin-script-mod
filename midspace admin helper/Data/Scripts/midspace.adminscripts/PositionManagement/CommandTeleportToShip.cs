@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
-
     using Sandbox.ModAPI;
-    using VRageMath;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
+    using VRageMath;
 
     public class CommandTeleportToShip : ChatCommand
     {

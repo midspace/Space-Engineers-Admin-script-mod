@@ -9,15 +9,17 @@ namespace midspace.adminscripts
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
+    using SpaceEngineers.Game.ModAPI;
     using VRage;
     using VRage.Game;
     using VRage.Game.Entity;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Utils;
     using VRageMath;
-    using IMyControllableEntity = Sandbox.ModAPI.Interfaces.IMyControllableEntity;
+    using IMyDestroyableObject = VRage.Game.ModAPI.Interfaces.IMyDestroyableObject;
+    using IMyShipConnector = Sandbox.ModAPI.Ingame.IMyShipConnector; // There isn't a non-Ingame interface for IMyShipConnector at this time.
 
     public static class Extensions
     {
@@ -120,8 +122,7 @@ namespace midspace.adminscripts
                 }
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipConnector) && type == AttachedGrids.All)
                 {
-                    // There isn't a non-Ingame interface for IMyShipConnector at this time.
-                    var connector = (Sandbox.ModAPI.Ingame.IMyShipConnector)block.FatBlock;
+                    var connector = (IMyShipConnector)block.FatBlock;
 
                     if (connector.IsConnected == false || connector.IsLocked == false || connector.OtherConnector == null)
                         continue;
@@ -193,11 +194,11 @@ namespace midspace.adminscripts
 
         public static IMyControllableEntity[] FindWorkingCockpits(this IMyEntity entity)
         {
-            var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
+            var cubeGrid = entity as IMyCubeGrid;
 
             if (cubeGrid != null)
             {
-                var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+                var blocks = new List<IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.IsWorking
                     && f.FatBlock is IMyControllableEntity
                     && f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit));
@@ -209,7 +210,7 @@ namespace midspace.adminscripts
 
         public static void EjectControllingPlayers(this IMyCubeGrid cubeGrid)
         {
-            var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+            var blocks = new List<IMySlimBlock>();
             cubeGrid.GetBlocks(blocks, f => f.FatBlock != null
                 && f.FatBlock is IMyControllableEntity
                 && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Cockpit)
@@ -298,7 +299,7 @@ namespace midspace.adminscripts
 
         #region block
 
-        public static bool IsShipControlEnabled(this Sandbox.ModAPI.Ingame.IMyCubeBlock cockpitBlock)
+        public static bool IsShipControlEnabled(this IMyCubeBlock cockpitBlock)
         {
             var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpitBlock.BlockDefinition);
             var cockpitDefinition = definition as MyCockpitDefinition;
@@ -326,6 +327,17 @@ namespace midspace.adminscripts
             // TODO: Unsure which of these are required. needs further investigation.
             block.ChangeOwner(playerId, shareMode);
             block.ChangeBlockOwnerRequest(playerId, shareMode);
+        }
+
+        // copy of Sandbox.ModAPI.Ingame.TerminalBlockExtentions, but without Ingame.
+        public static void ApplyAction(this IMyTerminalBlock block, string actionName)
+        {
+            block.GetActionWithName(actionName).Apply(block);
+        }
+
+        public static void ApplyAction(this Sandbox.ModAPI.Ingame.IMyTerminalBlock block, string actionName)
+        {
+            block.GetActionWithName(actionName).Apply(block);
         }
 
         #endregion
@@ -494,7 +506,7 @@ namespace midspace.adminscripts
             return MyAPIGateway.Multiplayer.IsServerPlayer(player.Client);
         }
 
-        public static Sandbox.ModAPI.IMyInventory GetPlayerInventory(this IMyPlayer player)
+        public static IMyInventory GetPlayerInventory(this IMyPlayer player)
         {
             var character = player.GetCharacter();
             if (character == null)
@@ -502,7 +514,7 @@ namespace midspace.adminscripts
             return character.GetPlayerInventory();
         }
 
-        public static Sandbox.ModAPI.IMyInventory GetPlayerInventory(this IMyCharacter character)
+        public static IMyInventory GetPlayerInventory(this IMyCharacter character)
         {
             if (character == null)
                 return null;

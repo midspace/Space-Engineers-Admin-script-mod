@@ -6,6 +6,7 @@
     using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     public class CommandShipDestructible : ChatCommand
@@ -64,7 +65,7 @@
 
                 // Find the selected ship.
                 var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (currentShipList.Count == 1)
                 {

@@ -6,10 +6,9 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages;
-    using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
 
     public class CommandFactionChat : ChatCommand
     {

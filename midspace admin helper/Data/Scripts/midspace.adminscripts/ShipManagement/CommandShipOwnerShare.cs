@@ -4,9 +4,9 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Messages.Sync;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     /// <summary>
@@ -31,7 +31,7 @@
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (entity != null)
                 {
-                    var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
                         if (!MyAPIGateway.Multiplayer.MultiplayerActive)

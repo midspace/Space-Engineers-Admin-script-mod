@@ -5,6 +5,7 @@
     using System.Linq;
 
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
 
     public class CommandListBots : ChatCommand
     {

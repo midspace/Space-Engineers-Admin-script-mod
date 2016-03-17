@@ -1,10 +1,10 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
     using ProtoBuf;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     [ProtoContract]

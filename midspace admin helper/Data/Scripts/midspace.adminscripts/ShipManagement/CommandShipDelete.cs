@@ -6,6 +6,7 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     public class CommandShipDelete : ChatCommand
@@ -28,7 +29,7 @@
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (entity != null)
                 {
-                    var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
                         DeleteShip(entity);
@@ -46,7 +47,7 @@
                 var shipName = match.Groups["Key"].Value;
 
                 var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (currentShipList.Count == 1)
                 {

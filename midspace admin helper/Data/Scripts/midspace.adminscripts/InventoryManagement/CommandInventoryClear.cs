@@ -8,6 +8,7 @@
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.Game.Entity;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     public class CommandInventoryClear : ChatCommand

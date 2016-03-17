@@ -12,11 +12,12 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using VRage;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Voxels;
     using VRageMath;
-    using IMyControllableEntity = Sandbox.ModAPI.Interfaces.IMyControllableEntity;
+    using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
 
     public static class Support
     {
@@ -75,7 +76,7 @@ namespace midspace.adminscripts
             {
                 if (findShips || findCubes)
                 {
-                    var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var cubeGrid = entity as IMyCubeGrid;
 
                     if (cubeGrid != null)
                     {
@@ -221,10 +222,10 @@ namespace midspace.adminscripts
                 else if (searchTransmittingBlockNames)
                 {
                     // look for a ship with an antenna or beacon with partially matching name.
-                    var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+                    var blocks = new List<IMySlimBlock>();
                     ((IMyCubeGrid)ship).GetBlocks(blocks, f => f.FatBlock != null && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RadioAntenna) || f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon)));
-                    if (blocks.Any(b => ((Sandbox.ModAPI.Ingame.IMyTerminalBlock)b.FatBlock).CustomName.Equals(findShipName, StringComparison.InvariantCultureIgnoreCase) ||
-                    (partNameMatch && ((Sandbox.ModAPI.Ingame.IMyTerminalBlock)b.FatBlock).CustomName.IndexOf(findShipName, StringComparison.InvariantCultureIgnoreCase) >= 0)))
+                    if (blocks.Any(b => ((IMyTerminalBlock)b.FatBlock).CustomName.Equals(findShipName, StringComparison.InvariantCultureIgnoreCase) ||
+                    (partNameMatch && ((IMyTerminalBlock)b.FatBlock).CustomName.IndexOf(findShipName, StringComparison.InvariantCultureIgnoreCase) >= 0)))
                     {
                         shipList.Add(ship);
                     }
@@ -969,7 +970,7 @@ namespace midspace.adminscripts
                     else
                     {
                         var cockpits = target.FindWorkingCockpits();
-                        var operationalCockpit = cockpits.FirstOrDefault(c => ((Sandbox.ModAPI.Ingame.IMyCockpit)c).IsShipControlEnabled());
+                        var operationalCockpit = cockpits.FirstOrDefault(c => ((IMyCubeBlock)c).IsShipControlEnabled());
 
                         if (operationalCockpit != null)
                             // find a cockpit which is not a passenger seat.
@@ -1342,7 +1343,7 @@ namespace midspace.adminscripts
             return itemAdded;
         }
 
-        public static bool InventoryAdd(Sandbox.ModAPI.IMyInventory inventory, MyFixedPoint amount, MyDefinitionId definitionId)
+        public static bool InventoryAdd(IMyInventory inventory, MyFixedPoint amount, MyDefinitionId definitionId)
         {
             var content = (MyObjectBuilder_PhysicalObject)MyObjectBuilderSerializer.CreateNewObject(definitionId);
 

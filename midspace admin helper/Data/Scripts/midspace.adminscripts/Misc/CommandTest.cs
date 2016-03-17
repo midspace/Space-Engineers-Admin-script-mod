@@ -5,15 +5,23 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Utils;
     using VRageMath;
+    using IMyBlockGroup = Sandbox.ModAPI.Ingame.IMyBlockGroup;
+    using IMyCameraController = VRage.Game.ModAPI.Interfaces.IMyCameraController;
+    using IMyCargoContainer = Sandbox.ModAPI.Ingame.IMyCargoContainer;
+    using IMyCockpit = Sandbox.ModAPI.Ingame.IMyCockpit;
+    using IMyRemoteControl = Sandbox.ModAPI.Ingame.IMyRemoteControl;
+    using IMyCameraBlock = Sandbox.ModAPI.Ingame.IMyCameraBlock;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 
@@ -184,13 +192,13 @@
                     MyAPIGateway.Utilities.ShowMessage("Player", "pos={0:N},{1:N},{2:N}", pos.X, pos.Y, pos.Z);
                 }
 
-                var cockpit = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyCockpit;
-                var remoteControl = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyRemoteControl;
-                var character = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.IMyCharacter;
+                var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
+                var remoteControl = MyAPIGateway.Session.ControlledObject as IMyRemoteControl;
+                var character = MyAPIGateway.Session.ControlledObject as IMyCharacter;
                 var character2 = MyAPIGateway.Session.ControlledObject as Sandbox.Game.Entities.Character.MyCharacter;
                 var camera = MyAPIGateway.Session.ControlledObject as IMyCamera;
-                var cameraBlock = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyCameraBlock;
-                var cameraController = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Interfaces.IMyCameraController;
+                var cameraBlock = MyAPIGateway.Session.ControlledObject as IMyCameraBlock;
+                var cameraController = MyAPIGateway.Session.ControlledObject as IMyCameraController;
                 var spectator = MyAPIGateway.Session.ControlledObject as VRage.MySpectator;
 
                 if (cockpit != null)
@@ -223,7 +231,7 @@
                     var pos = cameraController.GetViewMatrix().Translation;
                     MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 1. FPV={0} POS={1:N},{2:N},{3:N}", cameraController.IsInFirstPersonView, pos.X, pos.Y, pos.Z);
                 }
-                if (MyAPIGateway.Session.ControlledObject.Entity is Sandbox.ModAPI.Interfaces.IMyCameraController)
+                if (MyAPIGateway.Session.ControlledObject.Entity is IMyCameraController)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 2.");
                 }
@@ -314,7 +322,7 @@
 
                 foreach (var entity in entites)
                 {
-                    var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var cubeGrid = entity as IMyCubeGrid;
 
                     // check if the ray comes anywhere near the Grid before continuing.
                     var ray = new RayD(position, worldMatrix.Forward);
@@ -323,7 +331,7 @@
                         var hit = cubeGrid.RayCastBlocks(position, worldMatrix.Forward * 1000);
                         if (hit.HasValue)
                         {
-                            var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+                            var blocks = new List<IMySlimBlock>();
                             cubeGrid.GetBlocks(blocks, f => f.FatBlock != null);
                             MyAPIGateway.Utilities.ShowMessage("AABB", string.Format("{0}", entity.WorldAABB));
 
@@ -370,7 +378,7 @@
                 //    MyAPIGateway.Utilities.ShowMessage("IMyMultiplayer", "true");
 
 
-                if (entity is Sandbox.ModAPI.IMyCubeGrid) entity = entity.Parent;
+                if (entity is IMyCubeGrid) entity = entity.Parent;
 
                 if (entity.Physics != null)
                 {
@@ -466,7 +474,7 @@
 
             if (messageText.Equals("/test8B", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, false, false, true, false) as Sandbox.ModAPI.IMyCubeGrid;
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, true, false, false, true, false) as IMyCubeGrid;
 
                 if (entity == null)
                     return false;
@@ -500,7 +508,7 @@
 
 
                 MyAPIGateway.Entities.RemapObjectBuilder(gridBuilder);
-                var newEntity = (Sandbox.ModAPI.IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(gridBuilder);
+                var newEntity = (IMyCubeGrid)MyAPIGateway.Entities.CreateFromObjectBuilderAndAdd(gridBuilder);
                 MyAPIGateway.Multiplayer.SendEntitiesCreated(new List<MyObjectBuilder_EntityBase> { gridBuilder });
                 entity.MergeGrid_MergeBlock(newEntity, new Vector3I(0, 1, 0));
 
@@ -534,12 +542,12 @@
             // attached grid count test.
             if (messageText.Equals("/test10", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false) as Sandbox.ModAPI.IMyCubeGrid;
+                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false) as IMyCubeGrid;
 
                 if (entity == null)
                     return false;
 
-                var cubeGrid = (Sandbox.ModAPI.IMyCubeGrid)entity;
+                var cubeGrid = (IMyCubeGrid)entity;
                 var grids = cubeGrid.GetAttachedGrids();
 
                 MyAPIGateway.Utilities.ShowMessage("Attached Count", "{0}", grids.Count);
@@ -549,7 +557,7 @@
 
                 // Terminal Groups....
                 var gridTerminalSystem = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid);
-                var groups = new List<Sandbox.ModAPI.Ingame.IMyBlockGroup>();
+                var groups = new List<IMyBlockGroup>();
                 gridTerminalSystem.GetBlockGroups(groups); // may abide by the owner rules?
 
 
@@ -670,7 +678,7 @@
 
                 foreach (var entity in entites)
                 {
-                    var cubeGrid = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var cubeGrid = entity as IMyCubeGrid;
                     if (cubeGrid != null)
                     {
                         var terminalsys = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(cubeGrid);

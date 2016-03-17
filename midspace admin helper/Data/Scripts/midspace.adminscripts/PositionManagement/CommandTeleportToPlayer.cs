@@ -6,8 +6,8 @@
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRageMath;
-    using Sandbox.Definitions;
 
     public class CommandTeleportToPlayer : ChatCommand
     {

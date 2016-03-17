@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Sandbox.Game.Weapons;
-using Sandbox.ModAPI;
-using VRage.ModAPI;
-using VRageMath;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using Sandbox.Game.Weapons;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+    using VRage.ModAPI;
+    using VRageMath;
+
     public class HandtoolCache
     {
         private Dictionary<IMyPlayer, IMyEntity> _cache;

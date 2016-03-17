@@ -4,15 +4,16 @@
     using System.Collections.Generic;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Interfaces;
     using VRage;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRageMath;
+    using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
+    using IMyDestroyableObject = VRage.Game.ModAPI.Interfaces.IMyDestroyableObject;
 
     /// <summary>
     /// Ares ; God of war, bloodshed, and violence.

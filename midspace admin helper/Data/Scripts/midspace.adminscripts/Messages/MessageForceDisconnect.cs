@@ -1,12 +1,12 @@
-﻿using ProtoBuf;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using midspace.adminscripts.Messages.Communication;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using midspace.adminscripts.Messages.Communication;
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+
     [ProtoContract]
     public class MessageForceDisconnect : MessageBase
     {

@@ -1,13 +1,11 @@
-﻿using midspace.adminscripts.Messages;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
+    using midspace.adminscripts.Messages;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+
     /// <summary>
     /// Organizes the notifications for admins such as errors.
     /// </summary>

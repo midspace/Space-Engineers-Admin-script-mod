@@ -1,14 +1,12 @@
-﻿using Sandbox.Common.Components;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.ModAPI;
-using Sandbox.ModAPI.Ingame;
-using VRage.Game.Components;
-using VRage.ObjectBuilders;
-using IMyCubeGrid = Sandbox.ModAPI.IMyCubeGrid;
-using IMyLandingGear = Sandbox.ModAPI.IMyLandingGear;
-
-namespace midspace.adminscripts.Protection.GameLogicComponents
+﻿namespace midspace.adminscripts.Protection.GameLogicComponents
 {
+    using Sandbox.Common.ObjectBuilders;
+    using Sandbox.ModAPI;
+    using SpaceEngineers.Game.ModAPI;
+    using VRage.Game.Components;
+    using VRage.Game.ModAPI;
+    using VRage.ObjectBuilders;
+
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LandingGear))]
     public class ProtectedLandingGear : MyGameLogicComponent
     {

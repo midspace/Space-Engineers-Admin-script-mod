@@ -1,10 +1,9 @@
 ﻿namespace midspace.adminscripts.Protection.GameLogicComponents
 {
-    using Sandbox.Common;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.Components;
+    using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubePlacer))]

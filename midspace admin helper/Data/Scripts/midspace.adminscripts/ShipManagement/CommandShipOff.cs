@@ -7,6 +7,7 @@
     using Messages.Sync;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     public class CommandShipOff : ChatCommand
@@ -28,7 +29,7 @@
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (entity != null)
                 {
-                    var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
                         int reactors;
@@ -48,7 +49,7 @@
                 var shipName = match.Groups["Key"].Value;
 
                 var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (currentShipList.Count == 0)
                 {
@@ -91,7 +92,7 @@
 
             foreach (var cubeGrid in grids)
             {
-                var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+                var blocks = new List<IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks, f => f.FatBlock != null
                     && f.FatBlock is IMyFunctionalBlock
                     && (f.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor)

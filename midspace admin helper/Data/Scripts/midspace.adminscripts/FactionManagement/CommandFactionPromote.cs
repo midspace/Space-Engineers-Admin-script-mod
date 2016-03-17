@@ -6,6 +6,7 @@
     using System.Text.RegularExpressions;
     using Messages.Sync;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
 
     public class CommandFactionPromote : ChatCommand
     {

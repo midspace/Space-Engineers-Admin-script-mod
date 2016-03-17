@@ -5,6 +5,7 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
     /// <summary>

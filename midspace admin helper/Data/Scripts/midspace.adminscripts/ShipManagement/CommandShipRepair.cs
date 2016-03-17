@@ -4,22 +4,13 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    //using Sandbox.Game.Entities.Cube;
-    //using Sandbox.Game.Multiplayer;
-    using Sandbox.ModAPI.Interfaces;
-    using VRage.Utils;
-    using VRageMath;
 
     using Sandbox.ModAPI;
-    using VRage.ModAPI;
-    using Sandbox.Common.ObjectBuilders;
-    using VRage.ObjectBuilders;
-    using Sandbox.Common.ObjectBuilders.Definitions;
-    using Sandbox.Game.Entities;
-    using Sandbox.Game.Weapons;
-    using Sandbox.Game.Multiplayer;
-    using Sandbox.Definitions;
     using VRage.Game;
+    using VRage.Game.ModAPI;
+    using VRage.ModAPI;
+    using VRage.ObjectBuilders;
+    using IMyDestroyableObject = VRage.Game.ModAPI.Interfaces.IMyDestroyableObject;
 
     public class CommandShipRepair : ChatCommand
     {
@@ -40,7 +31,7 @@
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (entity != null)
                 {
-                    var shipEntity = entity as Sandbox.ModAPI.IMyCubeGrid;
+                    var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
                         RepairShip(entity);
@@ -58,7 +49,7 @@
                 var shipName = match.Groups["Key"].Value;
 
                 var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (currentShipList.Count == 1)
                 {

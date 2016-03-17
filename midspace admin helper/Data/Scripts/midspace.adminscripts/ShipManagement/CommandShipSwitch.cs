@@ -6,6 +6,7 @@
 
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
 
     public class CommandShipSwitch : ChatCommand

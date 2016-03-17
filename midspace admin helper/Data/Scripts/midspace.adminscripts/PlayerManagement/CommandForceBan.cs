@@ -1,11 +1,12 @@
 ﻿namespace midspace.adminscripts
 {
-    using midspace.adminscripts.Messages;
-    using Sandbox.ModAPI;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using midspace.adminscripts.Messages;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
 
     public class CommandForceBan : ChatCommand
     {

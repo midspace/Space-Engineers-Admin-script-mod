@@ -1,8 +1,8 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using System.ComponentModel;
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRageMath;
 
     /// <summary>

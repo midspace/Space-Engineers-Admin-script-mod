@@ -1,13 +1,14 @@
-﻿using midspace.adminscripts.Messages;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using midspace.adminscripts.Messages;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+
     public class CommandPrivateMessage : ChatCommand
     {
         public IMyPlayer WhisperPartner;

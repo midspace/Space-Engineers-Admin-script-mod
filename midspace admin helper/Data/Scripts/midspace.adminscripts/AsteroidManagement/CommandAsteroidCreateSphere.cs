@@ -6,10 +6,10 @@
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRageMath;
 
     public class CommandAsteroidCreateSphere : ChatCommand
@@ -167,9 +167,9 @@ Examples:
                     var boundingSphere = new BoundingSphereD(position, (maxDiameter + 2) / 2);
                     var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref boundingSphere);
                     floatingList = floatingList.Where(e =>
-                        (e is Sandbox.ModAPI.IMyCubeGrid && ((Sandbox.ModAPI.IMyCubeGrid)e).IsStatic == false)
-                        || (e is Sandbox.ModAPI.IMyCubeBlock && ((Sandbox.ModAPI.IMyCubeGrid)((Sandbox.ModAPI.IMyCubeBlock)e).Parent).IsStatic == false)
-                        || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
+                        (e is IMyCubeGrid && ((IMyCubeGrid)e).IsStatic == false)
+                        || (e is IMyCubeBlock && ((IMyCubeGrid)((IMyCubeBlock)e).Parent).IsStatic == false)
+                        || (e is IMyCharacter)).ToList();
 
                     if (floatingList.Count > 0)
                     {

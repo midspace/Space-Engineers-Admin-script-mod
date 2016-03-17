@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
-    using Sandbox.ModAPI;
-    using VRage.ModAPI;
     using midspace.adminscripts.Messages.Sync;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+    using VRage.ModAPI;
 
     public class CommandStop : ChatCommand
     {
@@ -52,7 +52,7 @@
                     var shipName = match.Groups["Key"].Value;
 
                     var currentShipList = new HashSet<IMyEntity>();
-                    MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+                    MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
 
                     if (currentShipList.Count == 0)
                     {

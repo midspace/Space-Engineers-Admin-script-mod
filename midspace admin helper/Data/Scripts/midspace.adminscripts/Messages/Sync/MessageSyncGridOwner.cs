@@ -1,13 +1,12 @@
-﻿using midspace.adminscripts.Messages.Communication;
-
-namespace midspace.adminscripts.Messages.Sync
+﻿namespace midspace.adminscripts.Messages.Sync
 {
     using System.Collections.Generic;
     using System.Linq;
+    using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
 
     [ProtoContract]
     public class MessageSyncGridOwner : MessageBase

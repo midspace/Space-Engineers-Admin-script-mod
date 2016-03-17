@@ -1,10 +1,10 @@
 ﻿namespace midspace.adminscripts
 {
-    using System;
     using System.Globalization;
     using System.Text.RegularExpressions;
 
     using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
     using VRageMath;
 
     public class CommandSetVector : ChatCommand

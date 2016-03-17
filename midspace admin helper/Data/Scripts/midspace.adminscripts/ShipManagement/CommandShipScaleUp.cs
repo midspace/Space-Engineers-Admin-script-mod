@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
 
@@ -46,7 +46,7 @@
                 var shipName = match.Groups["Key"].Value;
 
                 var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is Sandbox.ModAPI.IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
+                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (currentShipList.Count == 1)
                 {
@@ -121,7 +121,7 @@
             var gridIndex = 0;
             foreach (var cubeGrid in grids)
             {
-                var blocks = new List<Sandbox.ModAPI.IMySlimBlock>();
+                var blocks = new List<IMySlimBlock>();
                 cubeGrid.GetBlocks(blocks);
 
                 var gridObjectBuilder = cubeGrid.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;

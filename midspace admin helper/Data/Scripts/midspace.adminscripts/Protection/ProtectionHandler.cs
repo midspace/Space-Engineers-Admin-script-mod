@@ -1,18 +1,17 @@
-﻿using System.Timers;
-using midspace.adminscripts.Messages.Communication;
-using midspace.adminscripts.Utils.Timer;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Timers;
+    using midspace.adminscripts.Messages.Communication;
+    using midspace.adminscripts.Utils.Timer;
     using Sandbox.ModAPI;
-    using Sandbox.ModAPI.Ingame;
     using VRage.Game;
+    using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.Utils;
-    using IMySlimBlock = Sandbox.ModAPI.IMySlimBlock;
+    using IMyShipGrinder = Sandbox.ModAPI.Ingame.IMyShipGrinder;
 
     public static class ProtectionHandler
     {
@@ -136,7 +135,7 @@ namespace midspace.adminscripts.Protection
         private static bool CanDamageBlock(long attackerEntityId, IMySlimBlock block, MyStringHash type, out IMyPlayer player)
         {
             player = null;
-            if (!IsProtected(block)) 
+            if (!IsProtected(block))
                 return true;
 
             IMyEntity attackerEntity;
@@ -178,7 +177,7 @@ namespace midspace.adminscripts.Protection
         /// <param name="player"></param>
         /// <param name="cubeGrid"></param>
         /// <returns></returns>
-        public static bool CanModify(IMyPlayer player, Sandbox.ModAPI.IMyCubeGrid cubeGrid)
+        public static bool CanModify(IMyPlayer player, IMyCubeGrid cubeGrid)
         {
             var allSmallOwners = cubeGrid.GetAllSmallOwners();
             return allSmallOwners.Count == 0 || allSmallOwners.Contains(player.IdentityId);

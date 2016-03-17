@@ -3,10 +3,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using midspace.adminscripts.Messages.Sync;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.Components;
+    using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]

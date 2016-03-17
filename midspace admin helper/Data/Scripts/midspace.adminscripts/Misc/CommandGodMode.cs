@@ -1,12 +1,13 @@
-﻿using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using midspace.adminscripts.Messages.Sync;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using midspace.adminscripts.Messages.Sync;
+    using Sandbox.ModAPI;
+    using VRage.Game.ModAPI;
+
     public class CommandGodMode : ChatCommand
     {
         private static List<IMyPlayer> Players = new List<IMyPlayer>();

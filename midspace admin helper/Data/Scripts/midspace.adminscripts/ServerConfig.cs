@@ -1,6 +1,4 @@
-﻿using midspace.adminscripts.Messages.Communication;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
@@ -9,11 +7,12 @@ namespace midspace.adminscripts
     using System.Text;
     using System.Xml.Serialization;
     using midspace.adminscripts.Messages;
+    using midspace.adminscripts.Messages.Communication;
     using midspace.adminscripts.Messages.Permissions;
     using midspace.adminscripts.Protection;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
 
     /// <summary>
     /// Represents the server configuration of the mod.
@@ -99,7 +98,7 @@ namespace midspace.adminscripts
                 RegisteredIndestructibleDamageHandler = true;
                 Logger.Debug("Registered indestructible damage handler.");
             }
-            
+
             Logger.Debug("Config loaded.");
         }
 
@@ -359,7 +358,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             reader.Close();
             PrivateConversations = MyAPIGateway.Utilities.SerializeFromXML<List<PrivateConversation>>(text);
         }
-        
+
         public void LogPrivateMessage(ChatMessage chatMessage, ulong receiver)
         {
             if (!Config.LogPrivateMessages)
@@ -612,7 +611,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                     // remove all commands with the same name as we might have added it already asuming it is new
                     Permissions.Commands.RemoveAll(c => c.Name.Equals(command.Name));
-                    
+
                     Permissions.Commands.Add(new CommandStruct()
                     {
                         Name = command.Name,
@@ -674,7 +673,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             if (Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
             {
                 var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId));
-                
+
                 // create new entry if necessary or update the playername
                 IMyPlayer myPlayer;
                 if (MyAPIGateway.Players.TryGetPlayer(steamId, out myPlayer) && !playerPermission.Player.PlayerName.Equals(myPlayer.DisplayName))
@@ -758,7 +757,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             else if (Permissions.Groups.Any(g => g.Members.Any(l => l == steamId)))
             {
                 uint highestLevel = 0;
-                foreach (PermissionGroup group in Permissions.Groups.Where(g => g.Members.Any(l => l == steamId))) 
+                foreach (PermissionGroup group in Permissions.Groups.Where(g => g.Members.Any(l => l == steamId)))
                 {
                     if (group.Level > highestLevel)
                         playerLevel = group.Level;
@@ -938,10 +937,10 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 Permissions.Players[i].Extensions.Add(commandStruct.Name);
 
-                SendPermissionChange(playerPermission.Player.SteamId, new CommandStruct() 
-                { 
-                    Name = commandStruct.Name, 
-                    NeededLevel = GetPlayerLevel(playerPermission.Player.SteamId) 
+                SendPermissionChange(playerPermission.Player.SteamId, new CommandStruct()
+                {
+                    Name = commandStruct.Name,
+                    NeededLevel = GetPlayerLevel(playerPermission.Player.SteamId)
                 });
                 MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has extended access to {1} from now.", playerName, commandName));
             }
@@ -1095,7 +1094,8 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            Permissions.Groups.Add(new PermissionGroup() {
+            Permissions.Groups.Add(new PermissionGroup()
+            {
                 GroupName = name,
                 Level = level,
                 Members = new List<ulong>(),
@@ -1356,7 +1356,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
             else
                 playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
-            
+
             return true;
         }
 
@@ -1407,7 +1407,7 @@ If you can't find the error, simply delete the file. The server will create a ne
     /// Contains the settings from the file.
     /// </summary>
     //must be a class otherwise we can't define a ctor without parameters
-    public class ServerConfigurationStruct 
+    public class ServerConfigurationStruct
     {
         public string WorldLocation;
 
@@ -1429,7 +1429,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         {
             //init default values
             WorldLocation = MyAPIGateway.Session.CurrentPath;
-            MotdFileSuffix =  MyAPIGateway.Session.Name.ReplaceForbiddenChars();
+            MotdFileSuffix = MyAPIGateway.Session.Name.ReplaceForbiddenChars();
             MotdHeadLine = "";
             MotdShowInChat = false;
             LogPrivateMessages = true;

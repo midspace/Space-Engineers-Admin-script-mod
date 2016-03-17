@@ -4,6 +4,7 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
+    using IMyShipController = Sandbox.ModAPI.Ingame.IMyShipController;
 
     /// <summary>
     /// Saves the player's current cockpit toolbar back to the server.
@@ -23,7 +24,7 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var cockpit = MyAPIGateway.Session.ControlledObject as Sandbox.ModAPI.Ingame.IMyShipController;
+            var cockpit = MyAPIGateway.Session.ControlledObject as IMyShipController;
 
             if (cockpit == null)
             {
