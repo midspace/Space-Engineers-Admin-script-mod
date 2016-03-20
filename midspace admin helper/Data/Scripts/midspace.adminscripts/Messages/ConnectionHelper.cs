@@ -132,6 +132,7 @@
 
         #endregion
 
+        #region util
         /// <summary>
         /// Calculates how many bytes can be stored in the given message.
         /// </summary>
@@ -234,5 +235,7 @@
                 }
             }
         }
+
+        #endregion
     }
 }

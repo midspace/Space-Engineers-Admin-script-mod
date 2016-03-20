@@ -73,6 +73,12 @@
     <Compile Include="AsteroidManagement\CommandPlanetsList.cs" />
     <Compile Include="AsteroidManagement\CommandPlanetDelete.cs" />
     <Compile Include="ChatCommandService.cs" />
+    <Compile Include="Config\Files\FileBase.cs" />
+    <Compile Include="Config\Files\GlobalChatLogFile.cs" />
+    <Compile Include="Config\Files\MotdFile.cs" />
+    <Compile Include="Config\Files\PermissionsFile.cs" />
+    <Compile Include="Config\Files\PrivateMessageLogFile.cs" />
+    <Compile Include="Config\Files\ServerConfigFile.cs" />
     <Compile Include="FactionManagement\CommandFactionPeace.cs" />
     <Compile Include="InventoryManagement\CommandInventoryInsert.cs" />
     <Compile Include="Localize.cs" />
@@ -220,7 +226,7 @@
     <Compile Include="SessionManagement\CommandSessionCopyPaste.cs" />
     <Compile Include="SessionManagement\CommandSessionCargoShips.cs" />
     <Compile Include="InventoryManagement\CommandObjectsCollect.cs" />
-    <Compile Include="ConnectionHelper.cs" />
+    <Compile Include="Messages\ConnectionHelper.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidCreate.cs" />
     <Compile Include="Misc\CommandStopAll.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidCreateSphere.cs" />
@@ -231,7 +237,7 @@
     <Compile Include="ChatCommand.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="ServerConfig.cs" />
+    <Compile Include="Config\ServerConfig.cs" />
     <Compile Include="Utils\Timer\ThreadsafeTimer.cs" />
     <Compile Include="Utils\Timer\TimerRegistry.cs" />
     <Compile Include="VoxelEditLogic.cs" />

@@ -1,4 +1,6 @@
-﻿namespace midspace.adminscripts
+﻿using midspace.adminscripts.Config.Files;
+
+namespace midspace.adminscripts
 {
     using System;
     using System.Collections.Generic;
@@ -19,24 +21,13 @@
     /// </summary>
     public class ServerConfig
     {
-        /// <summary>
-        /// The format of the config file name.
-        /// </summary>
-        private const string ConfigFileNameFormat = "Config_{0}.cfg";
-        private const string MotdFileNameFormat = "Motd_{0}.txt";
-        private const string PmLogFileNameFormat = "PrivateMessageLog_{0}.xml";
-        private const string GcLogFileNameFormat = "GlobalChatLog_{0}.xml";
-        private const string PermissionFileNameFormat = "Permissions_{0}.xml";
 
-        private string ConfigFileName;
-        private string MotdFileName;
-        private string PmLogFileName;
-        private string GcLogFileName;
-        private string PermissionFileName;
+        private MotdFile motdFile;
+        private ServerConfigFile serverConfigFile;
+        private GlobalChatLogFile globalChatLogFile;
+        private PrivateMessageLogFile privateMessageLogFile;
+        private PermissionsFile permissionsFile;
 
-        private List<ChatCommand> ChatCommands;
-        private List<ChatMessage> ChatMessages = new List<ChatMessage>();
-        private List<PrivateConversation> PrivateConversations = new List<PrivateConversation>();
 
         //hotlists
         Dictionary<ulong, List<CommandStruct>> CommandCache = new Dictionary<ulong, List<CommandStruct>>();
@@ -46,8 +37,7 @@
         /// <summary>
         /// Used for saving and loading things.
         /// </summary>
-        private ServerConfigurationStruct m_Config;
-        private Permissions Permissions;
+        public ServerConfigurationStruct Config { get { return serverConfigFile.Config; } private set { serverConfigFile.Config = value; } }
 
         /// <summary>
         /// True for listen server.
@@ -58,16 +48,13 @@
 
         public ServerConfig(List<ChatCommand> commands)
         {
-            ChatCommands = commands;
+            string pathName = Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath);
 
             if (MyAPIGateway.Utilities.IsDedicated)
                 ServerIsClient = false;
 
-            Config = new ServerConfigurationStruct();
-
             //cfg
-            ConfigFileName = string.Format(ConfigFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
-            LoadOrCreateConfig();
+            serverConfigFile = new ServerConfigFile(pathName);
 
             if (Config.EnableLog)
             {
@@ -76,20 +63,19 @@
                 Logger.Debug("Log Enabled.");
             }
 
-            //motd
-            MotdFileName = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
-            LoadOrCreateMotdFile();
+            motdFile = new MotdFile(Config.MotdFileSuffix);
+            SendMotd();
+
             //chat log
-            GcLogFileName = string.Format(GcLogFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
-            LoadOrCreateChatLog();
+            globalChatLogFile = new GlobalChatLogFile(pathName);
+
             //permissions
-            PermissionFileName = string.Format(PermissionFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
-            LoadOrCreatePermissionFile();
+            permissionsFile = new PermissionsFile(pathName, commands);
+
             //pm log
             if (Config.LogPrivateMessages)
             {
-                PmLogFileName = string.Format(PmLogFileNameFormat, Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
-                LoadOrCreatePmLog();
+                privateMessageLogFile = new PrivateMessageLogFile(pathName);
             }
 
             if (Config.NoGrindIndestructible)
@@ -102,8 +88,6 @@
             Logger.Debug("Config loaded.");
         }
 
-        public ServerConfigurationStruct Config { get { return m_Config; } private set { m_Config = value; } }
-
         public void Save(string customSaveName = null)
         {
             //write values in cfg
@@ -113,14 +97,14 @@
             //cfg
             Config.WorldLocation = MyAPIGateway.Session.CurrentPath;
 
-            WriteConfig(customSaveName);
+            serverConfigFile.Save(customSaveName);
             //motd
-            SaveMotd();
+            motdFile.Save();
 
             SaveLogs(customSaveName);
 
             if (customSaveName != null)
-                SavePermissionFile(customSaveName);
+                permissionsFile.Save(customSaveName);
 
             ProtectionHandler.Save(customSaveName);
             Logger.Debug("Config saved.");
@@ -128,88 +112,21 @@
 
         public void ReloadConfig()
         {
-            LoadConfig();
-            LoadMotd();
+            serverConfigFile.Load();
+            motdFile.Load();
         }
 
         public void SaveLogs(string customSaveName = null)
         {
-            SaveGlobalChatLog(customSaveName);
+            globalChatLogFile.Save(customSaveName);
 
             if (Config.LogPrivateMessages)
-                SavePmLog(customSaveName);
+                privateMessageLogFile.Save(customSaveName);
+
             Logger.Debug("Logs saved.");
         }
 
         #region server config
-
-        private void LoadOrCreateConfig()
-        {
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(ConfigFileName, typeof(ServerConfig)))
-                WriteConfig();
-            else
-                LoadConfig();
-        }
-
-        private void LoadConfig()
-        {
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(ConfigFileName, typeof(ServerConfig));
-
-            var xmlText = reader.ReadToEnd();
-            reader.Close();
-
-            if (string.IsNullOrWhiteSpace(xmlText))
-                return;
-
-            try
-            {
-                Config = MyAPIGateway.Utilities.SerializeFromXML<ServerConfigurationStruct>(xmlText);
-            }
-            catch (Exception ex)
-            {
-                AdminNotification notification = new AdminNotification()
-                {
-                    Date = DateTime.Now,
-                    Content = string.Format(@"There is an error in the config file. It couldn't be read. The server was started with default settings.
-
-Message:
-{0}
-
-If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message)
-                };
-
-                AdminNotificator.StoreAndNotify(notification);
-            }
-
-            var sendLogPms = Config.LogPrivateMessages != CommandPrivateMessage.LogPrivateMessages;
-            CommandPrivateMessage.LogPrivateMessages = Config.LogPrivateMessages;
-            if (sendLogPms)
-                ConnectionHelper.SendMessageToAllPlayers(new MessageConfig()
-                {
-                    Config = new ServerConfigurationStruct()
-                    {
-                        LogPrivateMessages = CommandPrivateMessage.LogPrivateMessages
-                    },
-                    Action = ConfigAction.LogPrivateMessages
-                });
-
-            Config.MotdFileSuffix = Config.MotdFileSuffix.ReplaceForbiddenChars();
-        }
-
-        private void WriteConfig(string customSaveName = null)
-        {
-            string fileName;
-
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(ConfigFileNameFormat, customSaveName);
-            else
-                fileName = ConfigFileName;
-
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML(Config));
-            writer.Flush();
-            writer.Close();
-        }
 
         private void IndestructibleDamageHandler(object target, ref MyDamageInformation info)
         {
@@ -239,27 +156,14 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         #region message of the day
 
-        private void LoadOrCreateMotdFile()
+        private void SendMotd()
         {
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(MotdFileName, typeof(ChatCommandLogic)))
-                CreateMotdConfig();
-
-            LoadMotd();
-        }
-
-        private void LoadMotd()
-        {
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(MotdFileName, typeof(ChatCommandLogic));
-            var text = reader.ReadToEnd();
-            reader.Close();
-
-
             var message = new MessageOfTheDayMessage();
 
             var sendMotd = !Config.MotdHeadLine.Equals(CommandMessageOfTheDay.HeadLine);
             if (sendMotd)
             {
-                message.Content = SetMessageOfTheDay(text);
+                message.Content = SetMessageOfTheDay(motdFile.MessageOfTheDay);
                 message.FieldsToUpdate = message.FieldsToUpdate | MessageOfTheDayMessage.ChangedFields.Content;
             }
 
@@ -281,16 +185,6 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             if (sendMotdHl || sendMotdSic)
                 ConnectionHelper.SendMessageToAllPlayers(message);
-        }
-
-        /// <summary>
-        /// Create empty motd file.
-        /// </summary>
-        private void CreateMotdConfig()
-        {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(MotdFileName, typeof(ChatCommandLogic));
-            writer.Flush();
-            writer.Close();
         }
 
         private string ReplaceVariables(string text)
@@ -329,42 +223,16 @@ If you can't find the error, simply delete the file. The server will create a ne
             return motd;
         }
 
-        private void SaveMotd()
-        {
-            Config.MotdFileSuffix = Config.MotdFileSuffix.ReplaceForbiddenChars();
-            var file = string.Format(MotdFileNameFormat, Config.MotdFileSuffix);
-
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(file, typeof(ChatCommandLogic));
-            if (CommandMessageOfTheDay.Content != null)
-                writer.Write(CommandMessageOfTheDay.Content);
-            else
-                writer.Write("");
-
-            writer.Flush();
-            writer.Close();
-        }
-
         #endregion
 
         #region private messages
-
-        private void LoadOrCreatePmLog()
-        {
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(PmLogFileName, typeof(ServerConfig)))
-                return;
-
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(PmLogFileName, typeof(ServerConfig));
-            var text = reader.ReadToEnd();
-            reader.Close();
-            PrivateConversations = MyAPIGateway.Utilities.SerializeFromXML<List<PrivateConversation>>(text);
-        }
 
         public void LogPrivateMessage(ChatMessage chatMessage, ulong receiver)
         {
             if (!Config.LogPrivateMessages)
                 return;
 
-            List<PrivateConversation> senderConversations = PrivateConversations.FindAll(c => c.Participants.Exists(p => p.SteamId == chatMessage.Sender.SteamId));
+            List<PrivateConversation> senderConversations = privateMessageLogFile.PrivateConversations.FindAll(c => c.Participants.Exists(p => p.SteamId == chatMessage.Sender.SteamId));
 
             var pm = new PrivateMessage()
             {
@@ -386,7 +254,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 var senderPlayer = players.FirstOrDefault(p => p.SteamUserId == chatMessage.Sender.SteamId);
                 var receiverPlayer = players.FirstOrDefault(p => p.SteamUserId == receiver);
 
-                PrivateConversations.Add(new PrivateConversation()
+                privateMessageLogFile.PrivateConversations.Add(new PrivateConversation()
                 {
                     Participants = new List<Player>(new Player[] {
                             new Player() {
@@ -402,22 +270,6 @@ If you can't find the error, simply delete the file. The server will create a ne
             }
         }
 
-        private void SavePmLog(string customSaveName = null)
-        {
-            string fileName;
-
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(PmLogFileNameFormat, customSaveName);
-            else
-                fileName = PmLogFileName;
-
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML<List<PrivateConversation>>(PrivateConversations));
-            writer.Flush();
-            writer.Close();
-            Logger.Debug("Saved private message log.");
-        }
-
         #endregion
 
         #region global messages
@@ -425,48 +277,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         public void LogGlobalMessage(ChatMessage chatMessage)
         {
             chatMessage.Date = DateTime.Now;
-            ChatMessages.Add(chatMessage);
-        }
-
-        private void LoadOrCreateChatLog()
-        {
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(GcLogFileName, typeof(ServerConfig)))
-                return;
-
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(GcLogFileName, typeof(ServerConfig));
-            var text = reader.ReadToEnd();
-            reader.Close();
-
-            if (!string.IsNullOrEmpty(text))
-            {
-                try
-                {
-                    ChatMessages = MyAPIGateway.Utilities.SerializeFromXML<List<ChatMessage>>(text);
-                }
-                catch (Exception ex)
-                {
-                    var exception = new Exception(string.Format("An error occuring loading the file '{0}'. Begining with the text \"{1}\".", GcLogFileName, text.Substring(0, Math.Min(text.Length, 100))), ex);
-                    AdminNotificator.StoreExceptionAndNotify(exception);
-                }
-            }
-
-            if (ChatMessages == null)
-                ChatMessages = new List<ChatMessage>();
-        }
-
-        private void SaveGlobalChatLog(string customSaveName = null)
-        {
-            string fileName;
-
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(GcLogFileNameFormat, customSaveName);
-            else
-                fileName = GcLogFileName;
-
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML<List<ChatMessage>>(ChatMessages));
-            writer.Flush();
-            writer.Close();
+            globalChatLogFile.ChatMessages.Add(chatMessage);
         }
 
         /// <summary>
@@ -477,7 +288,7 @@ If you can't find the error, simply delete the file. The server will create a ne
         public void SendChatHistory(ulong receiver, uint entryCount)
         {
             // we just append new chat messages to the log. To get the most recent on top we have to sort it.
-            List<ChatMessage> cache = new List<ChatMessage>(ChatMessages.OrderByDescending(m => m.Date));
+            List<ChatMessage> cache = new List<ChatMessage>(globalChatLogFile.ChatMessages.OrderByDescending(m => m.Date));
 
             // we have to make sure that we don't throw an exception
             int range = (int)entryCount;
@@ -496,192 +307,26 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         #region permissions
 
-        private void LoadOrCreatePermissionFile()
-        {
-            if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(PermissionFileName, typeof(ServerConfig)))
-            {
-                Permissions = new Permissions
-                {
-                    Commands = new List<CommandStruct>(),
-                    Groups = new List<PermissionGroup>(),
-                    Players = new List<PlayerPermission>()
-                };
-
-                foreach (ChatCommand command in ChatCommands)
-                {
-                    Permissions.Commands.Add(new CommandStruct()
-                    {
-                        Name = command.Name,
-                        NeededLevel = command.Security
-                    });
-                }
-
-                SavePermissionFile();
-                Logger.Debug("Permission File created.");
-                return;
-            }
-
-            TextReader reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(PermissionFileName, typeof(ServerConfig));
-            var text = reader.ReadToEnd();
-            reader.Close();
-
-            Permissions = new Permissions
-            {
-                Commands = new List<CommandStruct>(),
-                Groups = new List<PermissionGroup>(),
-                Players = new List<PlayerPermission>()
-            };
-
-            if (!string.IsNullOrEmpty(text))
-            {
-                try
-                {
-                    Permissions = MyAPIGateway.Utilities.SerializeFromXML<Permissions>(text);
-                }
-                catch (Exception ex)
-                {
-                    AdminNotification notification = new AdminNotification()
-                    {
-                        Date = DateTime.Now,
-                        Content = string.Format(@"There is an error in the Permissions file. It couldn't be read. The server was started with default Permissions.
-
-Message:
-{0}
-
-If you can't find the error, simply delete the file. The server will create a new one with default settings on restart.", ex.Message)
-                    };
-
-                    AdminNotificator.StoreAndNotify(notification);
-                }
-            }
-
-            //create a copy of the commands in the file
-            var invalidCommands = new List<CommandStruct>(Permissions.Commands);
-
-            foreach (ChatCommand command in ChatCommands)
-            {
-                if (!Permissions.Commands.Any(c => c.Name.Equals(command.Name)))
-                {
-                    //add a command if it does not exist
-                    Permissions.Commands.Add(new CommandStruct()
-                    {
-                        Name = command.Name,
-                        NeededLevel = command.Security
-                    });
-                }
-                else
-                {
-                    //remove all commands from the list, that are valid
-                    invalidCommands.Remove(Permissions.Commands.First(c => c.Name.Equals(command.Name)));
-                }
-            }
-
-            foreach (CommandStruct cmdStruct in invalidCommands)
-            {
-                // remove all invalid commands
-                Permissions.Commands.Remove(cmdStruct);
-
-                // clean up the player permissions
-                var extentions = new List<PlayerPermission>(Permissions.Players.Where(p => p.Extensions.Any(c => c.Equals(cmdStruct.Name))));
-                var restrictions = new List<PlayerPermission>(Permissions.Players.Where(p => p.Restrictions.Any(c => c.Equals(cmdStruct.Name))));
-
-                foreach (PlayerPermission playerPermission in extentions)
-                {
-                    var i = Permissions.Players.IndexOf(playerPermission);
-                    var player = Permissions.Players[i];
-                    Permissions.Players.RemoveAt(i);
-                    player.Extensions.Remove(cmdStruct.Name);
-                    Permissions.Players.Insert(i, playerPermission);
-                }
-
-                foreach (PlayerPermission playerPermission in restrictions)
-                {
-                    var i = Permissions.Players.IndexOf(playerPermission);
-                    var player = Permissions.Players[i];
-                    Permissions.Players.RemoveAt(i);
-                    player.Restrictions.Remove(cmdStruct.Name);
-                    Permissions.Players.Insert(i, player);
-                }
-
-                // if the struct used an alias, we add it again properly while keeping the previous level
-                // this might be because we changed the name of an command and keep the old as an alias to not confuse the users
-                if (ChatCommands.Any(c => c.Commands.Any(s => s.Substring(1).Equals(cmdStruct.Name))))
-                {
-                    var command = ChatCommands.First(c => c.Commands.Any(s => s.Substring(1).Equals(cmdStruct.Name)));
-
-                    // remove all commands with the same name as we might have added it already asuming it is new
-                    Permissions.Commands.RemoveAll(c => c.Name.Equals(command.Name));
-
-                    Permissions.Commands.Add(new CommandStruct()
-                    {
-                        Name = command.Name,
-                        NeededLevel = cmdStruct.NeededLevel
-                    });
-
-
-                    foreach (PlayerPermission playerPermission in extentions)
-                    {
-                        var i = Permissions.Players.IndexOf(Permissions.Players.First(p => p.Player.SteamId == playerPermission.Player.SteamId));
-                        var player = Permissions.Players[i];
-                        Permissions.Players.RemoveAt(i);
-                        player.Extensions.Add(command.Name);
-                        Permissions.Players.Insert(i, player);
-                    }
-
-                    foreach (PlayerPermission playerPermission in restrictions)
-                    {
-                        var i = Permissions.Players.IndexOf(Permissions.Players.First(p => p.Player.SteamId == playerPermission.Player.SteamId));
-                        var player = Permissions.Players[i];
-                        Permissions.Players.RemoveAt(i);
-                        player.Restrictions.Add(command.Name);
-                        Permissions.Players.Insert(i, player);
-                    }
-                }
-            }
-
-            Logger.Debug("Permission File loaded {0} commands.", Permissions.Commands.Count);
-
-            // for better readability we sort it, first by level then by name
-            Permissions.Commands = new List<CommandStruct>(Permissions.Commands.OrderByDescending(c => c.NeededLevel).ThenBy(c => c.Name));
-
-            SavePermissionFile();
-        }
-
-        private void SavePermissionFile(string customSaveName = null)
-        {
-            string fileName;
-
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(PermissionFileNameFormat, customSaveName);
-            else
-                fileName = PermissionFileName;
-
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML<Permissions>(Permissions));
-            writer.Flush();
-            writer.Close();
-        }
-
         public void SendPermissions(ulong steamId)
         {
             uint playerLevel = 0;
 
             playerLevel = GetPlayerLevel(steamId);
 
-            var playerPermissions = new List<CommandStruct>(Permissions.Commands);
+            var playerPermissions = new List<CommandStruct>(permissionsFile.Permissions.Commands);
 
-            if (Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
+            if (permissionsFile.Permissions.Players.Any(p => p.Player.SteamId.Equals(steamId)))
             {
-                var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId));
+                var playerPermission = permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId.Equals(steamId));
 
                 // create new entry if necessary or update the playername
                 IMyPlayer myPlayer;
                 if (MyAPIGateway.Players.TryGetPlayer(steamId, out myPlayer) && !playerPermission.Player.PlayerName.Equals(myPlayer.DisplayName))
                 {
-                    playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == myPlayer.SteamUserId);
-                    var i = Permissions.Players.IndexOf(playerPermission);
+                    playerPermission = permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId == myPlayer.SteamUserId);
+                    var i = permissionsFile.Permissions.Players.IndexOf(playerPermission);
                     playerPermission.Player.PlayerName = myPlayer.DisplayName;
-                    Permissions.Players[i] = playerPermission;
+                    permissionsFile.Permissions.Players[i] = playerPermission;
                 }
 
                 var extendedPermissions = playerPermission.Extensions;
@@ -750,14 +395,14 @@ If you can't find the error, simply delete the file. The server will create a ne
             if (MyAPIGateway.Players.TryGetPlayer(steamId, out player) && player.IsAdmin())
                 playerLevel = Config.AdminLevel;
 
-            if (Permissions.Players.Any(p => p.Player.SteamId == steamId && p.UsePlayerLevel))
+            if (permissionsFile.Permissions.Players.Any(p => p.Player.SteamId == steamId && p.UsePlayerLevel))
             {
-                playerLevel = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Level;
+                playerLevel = permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Level;
             }
-            else if (Permissions.Groups.Any(g => g.Members.Any(l => l == steamId)))
+            else if (permissionsFile.Permissions.Groups.Any(g => g.Members.Any(l => l == steamId)))
             {
                 uint highestLevel = 0;
-                foreach (PermissionGroup group in Permissions.Groups.Where(g => g.Members.Any(l => l == steamId)))
+                foreach (PermissionGroup group in permissionsFile.Permissions.Groups.Where(g => g.Members.Any(l => l == steamId)))
                 {
                     if (group.Level > highestLevel)
                         playerLevel = group.Level;
@@ -780,7 +425,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 if (!player.IsAdmin())
                     continue;
 
-                if (!Permissions.Players.Any(p => p.Player.SteamId == player.SteamUserId) || (!Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamUserId).UsePlayerLevel && !Permissions.Groups.Any(g => g.Members.Contains(player.SteamUserId))))
+                if (!permissionsFile.Permissions.Players.Any(p => p.Player.SteamId == player.SteamUserId) || (!permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamUserId).UsePlayerLevel && !permissionsFile.Permissions.Groups.Any(g => g.Members.Contains(player.SteamUserId))))
                     SendPermissions(player.SteamUserId);
             }
         }
@@ -791,11 +436,11 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         public void UpdateCommandSecurity(CommandStruct command, ulong sender)
         {
-            var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(command.Name, StringComparison.InvariantCultureIgnoreCase));
+            var commandStruct = permissionsFile.Permissions.Commands.FirstOrDefault(c => c.Name.Equals(command.Name, StringComparison.InvariantCultureIgnoreCase));
 
             int index;
             if (CommandCache.ContainsKey(sender) && command.Name.Substring(0, 1) == "#" && Int32.TryParse(command.Name.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
-                commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
+                commandStruct = permissionsFile.Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
 
             if (string.IsNullOrEmpty(commandStruct.Name))
             {
@@ -806,16 +451,16 @@ If you can't find the error, simply delete the file. The server will create a ne
             command.Name = commandStruct.Name;
 
             //update security first
-            var i = Permissions.Commands.IndexOf(commandStruct);
+            var i = permissionsFile.Permissions.Commands.IndexOf(commandStruct);
             commandStruct.NeededLevel = command.NeededLevel;
-            Permissions.Commands[i] = commandStruct;
+            permissionsFile.Permissions.Commands[i] = commandStruct;
 
             //then send changes
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players, p => p != null);
             foreach (IMyPlayer player in players)
             {
-                var playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamUserId);
+                var playerPermission = permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId == player.SteamUserId);
 
                 if (playerPermission.Player.SteamId == 0)
                 {
@@ -836,16 +481,16 @@ If you can't find the error, simply delete the file. The server will create a ne
             else
                 MessageClientTextMessage.SendMessage(sender, "Server", string.Format("The level of command '{0}' was set to {1}.", commandStruct.Name, commandStruct.NeededLevel));
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void CreateCommandHotlist(ulong sender, string param = null)
         {
-            List<CommandStruct> commands = new List<CommandStruct>(Permissions.Commands);
+            List<CommandStruct> commands = new List<CommandStruct>(permissionsFile.Permissions.Commands);
 
             if (!string.IsNullOrEmpty(param))
             {
-                commands = new List<CommandStruct>(Permissions.Commands.Where(c => c.Name.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
+                commands = new List<CommandStruct>(permissionsFile.Permissions.Commands.Where(c => c.Name.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
                 if (commands.Count == 0)
                 {
@@ -880,9 +525,9 @@ If you can't find the error, simply delete the file. The server will create a ne
                 playerName = player.Player.PlayerName;
 
                 //change level
-                var i = Permissions.Players.IndexOf(player);
+                var i = permissionsFile.Permissions.Players.IndexOf(player);
                 player.Level = level;
-                Permissions.Players[i] = player;
+                permissionsFile.Permissions.Players[i] = player;
 
                 //send changes to player
                 SendPermissions(player.Player.SteamId);
@@ -895,7 +540,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             MessageClientTextMessage.SendMessage(sender, "Server", string.Format("{0}'s level was set to {1}.", playerName, level));
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void ExtendRights(string playerName, string commandName, ulong sender)
@@ -905,11 +550,11 @@ If you can't find the error, simply delete the file. The server will create a ne
             {
                 playerName = playerPermission.Player.PlayerName;
 
-                var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+                var commandStruct = permissionsFile.Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
 
                 int index;
                 if (CommandCache.ContainsKey(sender) && commandName.Substring(0, 1) == "#" && Int32.TryParse(commandName.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
-                    commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
+                    commandStruct = permissionsFile.Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
                 {
@@ -918,24 +563,24 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
 
                 commandName = commandStruct.Name;
-                var i = Permissions.Players.IndexOf(playerPermission);
+                var i = permissionsFile.Permissions.Players.IndexOf(playerPermission);
 
-                if (Permissions.Players[i].Extensions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
+                if (permissionsFile.Permissions.Players[i].Extensions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} already has extended access to {1}.", playerName, commandName));
                     return;
                 }
 
-                if (Permissions.Players[i].Restrictions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
+                if (permissionsFile.Permissions.Players[i].Restrictions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    var command = Permissions.Players[i].Restrictions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
-                    Permissions.Players[i].Restrictions.Remove(command);
+                    var command = permissionsFile.Permissions.Players[i].Restrictions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+                    permissionsFile.Permissions.Players[i].Restrictions.Remove(command);
                     SendPermissionChange(playerPermission.Player.SteamId, commandStruct);
                     MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
                     return;
                 }
 
-                Permissions.Players[i].Extensions.Add(commandStruct.Name);
+                permissionsFile.Permissions.Players[i].Extensions.Add(commandStruct.Name);
 
                 SendPermissionChange(playerPermission.Player.SteamId, new CommandStruct()
                 {
@@ -950,7 +595,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void RestrictRights(string playerName, string commandName, ulong sender)
@@ -960,11 +605,11 @@ If you can't find the error, simply delete the file. The server will create a ne
             {
                 playerName = playerPermission.Player.PlayerName;
 
-                var commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+                var commandStruct = permissionsFile.Permissions.Commands.FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
 
                 int index;
                 if (CommandCache.ContainsKey(sender) && commandName.Substring(0, 1) == "#" && Int32.TryParse(commandName.Substring(1), out index) && index > 0 && index <= CommandCache[sender].Count)
-                    commandStruct = Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
+                    commandStruct = permissionsFile.Permissions.Commands.FirstOrDefault(c => c.Name.Equals(CommandCache[sender][index - 1].Name, StringComparison.InvariantCultureIgnoreCase));
 
                 if (string.IsNullOrEmpty(commandStruct.Name))
                 {
@@ -973,24 +618,24 @@ If you can't find the error, simply delete the file. The server will create a ne
                 }
 
                 commandName = commandStruct.Name;
-                var i = Permissions.Players.IndexOf(playerPermission);
+                var i = permissionsFile.Permissions.Players.IndexOf(playerPermission);
 
-                if (Permissions.Players[i].Restrictions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
+                if (permissionsFile.Permissions.Players[i].Restrictions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} already has restricted access to {1}.", playerName, commandName));
                     return;
                 }
 
-                if (Permissions.Players[i].Extensions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
+                if (permissionsFile.Permissions.Players[i].Extensions.Any(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    var command = Permissions.Players[i].Extensions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
-                    Permissions.Players[i].Extensions.Remove(command);
+                    var command = permissionsFile.Permissions.Players[i].Extensions.FirstOrDefault(s => s.Equals(commandName, StringComparison.InvariantCultureIgnoreCase));
+                    permissionsFile.Permissions.Players[i].Extensions.Remove(command);
                     SendPermissionChange(playerPermission.Player.SteamId, commandStruct);
                     MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Player {0} has normal access to {1} from now.", playerName, commandName));
                     return;
                 }
 
-                Permissions.Players[i].Restrictions.Add(commandStruct.Name);
+                permissionsFile.Permissions.Players[i].Restrictions.Add(commandStruct.Name);
 
                 SendPermissionChange(playerPermission.Player.SteamId, new CommandStruct()
                 {
@@ -1005,7 +650,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void UsePlayerLevel(string playerName, bool usePlayerLevel, ulong sender)
@@ -1015,9 +660,9 @@ If you can't find the error, simply delete the file. The server will create a ne
             {
                 playerName = playerPermission.Player.PlayerName;
 
-                var i = Permissions.Players.IndexOf(playerPermission);
+                var i = permissionsFile.Permissions.Players.IndexOf(playerPermission);
                 playerPermission.UsePlayerLevel = usePlayerLevel;
-                Permissions.Players[i] = playerPermission;
+                permissionsFile.Permissions.Players[i] = playerPermission;
 
                 SendPermissions(playerPermission.Player.SteamId);
 
@@ -1029,17 +674,17 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void CreatePlayerHotlist(ulong sender, string param)
         {
-            List<PlayerPermission> players = new List<PlayerPermission>(Permissions.Players);
+            List<PlayerPermission> players = new List<PlayerPermission>(permissionsFile.Permissions.Players);
 
             var onlinePlayers = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(onlinePlayers, p => p != null);
 
-            if (onlinePlayers.Count == 0 && Permissions.Players.Count == 0)
+            if (onlinePlayers.Count == 0 && permissionsFile.Permissions.Players.Count == 0)
             {
                 MessageClientTextMessage.SendMessage(sender, "Server", "No players found.");
                 return;
@@ -1088,13 +733,13 @@ If you can't find the error, simply delete the file. The server will create a ne
 
         public void CreateGroup(string name, uint level, ulong sender)
         {
-            if (Permissions.Groups.Any(g => g.GroupName.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
+            if (permissionsFile.Permissions.Groups.Any(g => g.GroupName.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 MessageClientTextMessage.SendMessage(sender, "Server", string.Format("There is already a group named {0}.", name));
                 return;
             }
 
-            Permissions.Groups.Add(new PermissionGroup()
+            permissionsFile.Permissions.Groups.Add(new PermissionGroup()
             {
                 GroupName = name,
                 Level = level,
@@ -1103,7 +748,7 @@ If you can't find the error, simply delete the file. The server will create a ne
 
             MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} with level {1} was created.", name, level));
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void SetGroupLevel(string groupName, uint level, ulong sender)
@@ -1113,9 +758,9 @@ If you can't find the error, simply delete the file. The server will create a ne
             {
                 groupName = group.GroupName;
 
-                var i = Permissions.Groups.IndexOf(group);
+                var i = permissionsFile.Permissions.Groups.IndexOf(group);
                 group.Level = level;
-                Permissions.Groups[i] = group;
+                permissionsFile.Permissions.Groups[i] = group;
 
                 foreach (ulong steamId in group.Members)
                 {
@@ -1130,7 +775,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void SetGroupName(string groupName, string newName, ulong sender)
@@ -1138,7 +783,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             PermissionGroup group;
             if (TryGetGroup(groupName, out group, sender))
             {
-                if (Permissions.Groups.Any(g => g.GroupName.Equals(newName, StringComparison.InvariantCultureIgnoreCase)))
+                if (permissionsFile.Permissions.Groups.Any(g => g.GroupName.Equals(newName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     MessageClientTextMessage.SendMessage(sender, "Server", string.Format("There is already a group named {0}.", newName));
                     return;
@@ -1146,9 +791,9 @@ If you can't find the error, simply delete the file. The server will create a ne
 
                 groupName = group.GroupName;
 
-                var i = Permissions.Groups.IndexOf(group);
+                var i = permissionsFile.Permissions.Groups.IndexOf(group);
                 group.GroupName = newName;
-                Permissions.Groups[i] = group;
+                permissionsFile.Permissions.Groups[i] = group;
 
                 MessageClientTextMessage.SendMessage(sender, "Server", string.Format("Group {0} was renamed to {1}.", groupName, newName));
             }
@@ -1158,7 +803,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void AddPlayerToGroup(string groupName, string playerName, ulong sender)
@@ -1178,9 +823,9 @@ If you can't find the error, simply delete the file. The server will create a ne
                         return;
                     }
 
-                    var i = Permissions.Groups.IndexOf(group);
+                    var i = permissionsFile.Permissions.Groups.IndexOf(group);
                     group.Members.Add(playerPermission.Player.SteamId);
-                    Permissions.Groups[i] = group;
+                    permissionsFile.Permissions.Groups[i] = group;
 
                     SendPermissions(playerPermission.Player.SteamId);
                 }
@@ -1198,7 +843,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void RemovePlayerFromGroup(string groupName, string playerName, ulong sender)
@@ -1218,9 +863,9 @@ If you can't find the error, simply delete the file. The server will create a ne
                         return;
                     }
 
-                    var i = Permissions.Groups.IndexOf(group);
+                    var i = permissionsFile.Permissions.Groups.IndexOf(group);
                     group.Members.Remove(playerPermission.Player.SteamId);
-                    Permissions.Groups[i] = group;
+                    permissionsFile.Permissions.Groups[i] = group;
 
                     SendPermissions(playerPermission.Player.SteamId);
                 }
@@ -1238,7 +883,7 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void DeleteGroup(string groupName, ulong sender)
@@ -1247,7 +892,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             if (TryGetGroup(groupName, out group, sender))
             {
                 groupName = group.GroupName;
-                Permissions.Groups.Remove(group);
+                permissionsFile.Permissions.Groups.Remove(group);
 
                 foreach (ulong steamId in group.Members)
                 {
@@ -1262,22 +907,22 @@ If you can't find the error, simply delete the file. The server will create a ne
                 return;
             }
 
-            SavePermissionFile();
+            permissionsFile.Save();
         }
 
         public void CreateGroupHotlist(ulong sender, string param = null)
         {
-            if (Permissions.Groups.Count == 0)
+            if (permissionsFile.Permissions.Groups.Count == 0)
             {
                 MessageClientTextMessage.SendMessage(sender, "Server", "No groups found.");
                 return;
             }
 
-            List<PermissionGroup> groups = new List<PermissionGroup>(Permissions.Groups);
+            List<PermissionGroup> groups = new List<PermissionGroup>(permissionsFile.Permissions.Groups);
 
             if (!string.IsNullOrEmpty(param))
             {
-                groups = new List<PermissionGroup>(Permissions.Groups.Where(g => g.GroupName.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
+                groups = new List<PermissionGroup>(permissionsFile.Permissions.Groups.Where(g => g.GroupName.IndexOf(param, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
                 if (groups.Count == 0)
                 {
@@ -1299,7 +944,7 @@ If you can't find the error, simply delete the file. The server will create a ne
             {
                 List<string> names = new List<string>();
                 foreach (ulong steamId in group.Members)
-                    names.Add(Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Player.PlayerName);
+                    names.Add(permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId == steamId).Player.PlayerName);
 
                 memberNames.Add(string.Join(", ", names));
             }
@@ -1322,17 +967,17 @@ If you can't find the error, simply delete the file. The server will create a ne
             if (PlayerCache.ContainsKey(sender) && playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= PlayerCache[sender].Count)
                 playerName = PlayerCache[sender][index - 1].Player.PlayerName;
 
-            if (!Permissions.Players.Any(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)))
+            if (!permissionsFile.Permissions.Players.Any(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 IMyPlayer myPlayer;
                 if (MyAPIGateway.Players.TryGetPlayer(playerName, out myPlayer))
                 {
-                    if (Permissions.Players.Any(p => p.Player.SteamId == myPlayer.SteamUserId))
+                    if (permissionsFile.Permissions.Players.Any(p => p.Player.SteamId == myPlayer.SteamUserId))
                     {
-                        playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.SteamId == myPlayer.SteamUserId);
-                        var i = Permissions.Players.IndexOf(playerPermission);
+                        playerPermission = permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.SteamId == myPlayer.SteamUserId);
+                        var i = permissionsFile.Permissions.Players.IndexOf(playerPermission);
                         playerPermission.Player.PlayerName = myPlayer.DisplayName;
-                        Permissions.Players[i] = playerPermission;
+                        permissionsFile.Permissions.Players[i] = playerPermission;
                     }
                     else
                     {
@@ -1348,25 +993,25 @@ If you can't find the error, simply delete the file. The server will create a ne
                             Extensions = new List<string>(),
                             Restrictions = new List<string>()
                         };
-                        Permissions.Players.Add(playerPermission);
+                        permissionsFile.Permissions.Players.Add(playerPermission);
                     }
                 }
                 else
                     return false;
             }
             else
-                playerPermission = Permissions.Players.FirstOrDefault(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
+                playerPermission = permissionsFile.Permissions.Players.FirstOrDefault(p => p.Player.PlayerName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
 
             return true;
         }
 
         public bool TryGetGroup(string groupName, out PermissionGroup group, ulong sender)
         {
-            group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
+            group = permissionsFile.Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(groupName, StringComparison.InvariantCultureIgnoreCase));
 
             int index;
             if (GroupCache.ContainsKey(sender) && groupName.Substring(0, 1) == "#" && Int32.TryParse(groupName.Substring(1), out index) && index > 0 && index <= GroupCache[sender].Count)
-                group = Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(GroupCache[sender][index - 1].GroupName, StringComparison.InvariantCultureIgnoreCase));
+                group = permissionsFile.Permissions.Groups.FirstOrDefault(g => g.GroupName.Equals(GroupCache[sender][index - 1].GroupName, StringComparison.InvariantCultureIgnoreCase));
 
             if (string.IsNullOrEmpty(group.GroupName))
                 return false;
