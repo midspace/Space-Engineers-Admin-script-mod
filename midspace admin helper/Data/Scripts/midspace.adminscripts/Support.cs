@@ -23,16 +23,16 @@ namespace midspace.adminscripts
     {
         #region Find Assets
 
-        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable)
+        public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable, bool playerViewOnly = false)
         {
             IMyEntity entity;
             double distance;
             Vector3D hitPoint;
-            FindLookAtEntity(controlledEntity, true, false, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets, findReplicable);
+            FindLookAtEntity(controlledEntity, true, false, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets, findReplicable, playerViewOnly);
             return entity;
         }
 
-        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, bool ignoreProjection, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable)
+        public static void FindLookAtEntity(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, bool ignoreProjection, out IMyEntity lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable, bool playerViewOnly = false)
         {
             const float range = 5000000;
             Matrix worldMatrix;
@@ -40,7 +40,14 @@ namespace midspace.adminscripts
             Vector3D endPosition;
             IMyCubeGrid occupiedGrid = null;
 
-            if (controlledEntity.Entity.Parent == null)
+            if (!playerViewOnly && MyAPIGateway.Session.CameraController is MySpectator)
+            {
+                worldMatrix = MyAPIGateway.Session.Camera.WorldMatrix;
+                startPosition = worldMatrix.Translation;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * range;
+                ignoreOccupiedGrid = false;
+            }
+            else if (controlledEntity.Entity.Parent == null)
             {
                 worldMatrix = controlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs, or the direction the player is looking with ALT.
                 startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;

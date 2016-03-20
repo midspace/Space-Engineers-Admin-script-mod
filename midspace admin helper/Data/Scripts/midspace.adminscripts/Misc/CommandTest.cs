@@ -199,7 +199,8 @@
                 var camera = MyAPIGateway.Session.ControlledObject as IMyCamera;
                 var cameraBlock = MyAPIGateway.Session.ControlledObject as IMyCameraBlock;
                 var cameraController = MyAPIGateway.Session.ControlledObject as IMyCameraController;
-                var spectator = MyAPIGateway.Session.ControlledObject as VRage.MySpectator;
+                //var spectator = MyAPIGateway.Session.ControlledObject as VRage.MySpectator;
+                var spectator = MyAPIGateway.Session.Camera;
 
                 if (cockpit != null)
                 {
@@ -228,8 +229,8 @@
                 }
                 if (cameraController != null)
                 {
-                    var pos = cameraController.GetViewMatrix().Translation;
-                    MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 1. FPV={0} POS={1:N},{2:N},{3:N}", cameraController.IsInFirstPersonView, pos.X, pos.Y, pos.Z);
+                    //var pos = cameraController.GetViewMatrix().Translation;
+                    //MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 1. FPV={0} POS={1:N},{2:N},{3:N}", cameraController.IsInFirstPersonView, pos.X, pos.Y, pos.Z);
                 }
                 if (MyAPIGateway.Session.ControlledObject.Entity is IMyCameraController)
                 {
@@ -243,6 +244,7 @@
                 if (spectator != null)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Player", "Spectator1.");
+                    MyAPIGateway.Utilities.ShowMessage("Control", "camera controller 1. POS={0:N},{1:N},{2:N}", spectator.Position.X, spectator.Position.Y, spectator.Position.Z);
                 }
                 if (MyAPIGateway.Session.ControlledObject.Entity is MySpectator)
                 {

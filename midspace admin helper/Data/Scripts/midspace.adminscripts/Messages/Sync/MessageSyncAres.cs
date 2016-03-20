@@ -35,6 +35,9 @@
         [ProtoMember(3)]
         public string OreMaterial;
 
+        [ProtoMember(4)]
+        public MatrixD ViewMatrix;
+
         #endregion
 
         #region Process
@@ -54,14 +57,14 @@
             Process(new MessageSyncAres { SyncType = SyncAresType.Slap, SteamId = steamId });
         }
 
-        public static void ThrowBomb(ulong steamId)
+        public static void ThrowBomb(ulong steamId, MatrixD viewMatrix)
         {
-            Process(new MessageSyncAres { SyncType = SyncAresType.Bomb, SteamId = steamId });
+            Process(new MessageSyncAres { SyncType = SyncAresType.Bomb, SteamId = steamId, ViewMatrix = viewMatrix});
         }
 
-        public static void ThrowMeteor(ulong steamId, string oreMaterial)
+        public static void ThrowMeteor(ulong steamId, string oreMaterial, MatrixD viewMatrix)
         {
-            Process(new MessageSyncAres { SyncType = SyncAresType.Meteor, SteamId = steamId, OreMaterial = oreMaterial });
+            Process(new MessageSyncAres { SyncType = SyncAresType.Meteor, SteamId = steamId, OreMaterial = oreMaterial, ViewMatrix = viewMatrix });
         }
 
         public static void Eject(ulong steamId)
@@ -74,7 +77,7 @@
             if (MyAPIGateway.Multiplayer.MultiplayerActive)
                 ConnectionHelper.SendMessageToServer(syncEntity);
             else
-                syncEntity.CommonProcess(syncEntity.SyncType, syncEntity.SteamId, syncEntity.OreMaterial);
+                syncEntity.CommonProcess(syncEntity.SyncType, syncEntity.SteamId, syncEntity.OreMaterial, syncEntity.ViewMatrix);
         }
 
         #endregion
@@ -86,10 +89,10 @@
 
         public override void ProcessServer()
         {
-            CommonProcess(SyncType, SteamId, OreMaterial);
+            CommonProcess(SyncType, SteamId, OreMaterial, ViewMatrix);
         }
 
-        private void CommonProcess(SyncAresType syncType, ulong steamId, string oreMaterial)
+        private void CommonProcess(SyncAresType syncType, ulong steamId, string oreMaterial, MatrixD viewMatrix)
         {
             var player = MyAPIGateway.Players.FindPlayerBySteamId(steamId);
             if (player == null)
@@ -98,11 +101,11 @@
             switch (syncType)
             {
                 case SyncAresType.Bomb:
-                    ThrowBomb(player);
+                    ThrowBomb(player, viewMatrix);
                     break;
 
                 case SyncAresType.Meteor:
-                    ThrowMeteor(MyAPIGateway.Players.FindPlayerBySteamId(steamId), oreMaterial);
+                    ThrowMeteor(oreMaterial, viewMatrix);
                     break;
 
                 case SyncAresType.Slay:
@@ -183,27 +186,13 @@
             meteorBuilder.CreateAndSyncEntity();
         }
 
-        private void ThrowBomb(IMyPlayer player)
+        private void ThrowBomb(IMyPlayer player, MatrixD viewMatrix)
         {
             if (player == null)
                 return;
 
-            MatrixD worldMatrix;
-            Vector3D position;
-
-            if (player.Controller.ControlledEntity.Entity.Parent == null)
-            {
-                worldMatrix = player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
-                position = worldMatrix.Translation + worldMatrix.Forward * 2.5f; // Spawn item 1.5m in front of player for safety.
-            }
-            else
-            {
-                worldMatrix = player.Controller.ControlledEntity.Entity.WorldMatrix;
-                position = worldMatrix.Translation + worldMatrix.Forward * 2.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
-            }
-
             // TODO: multiply vector against current entity.LinearVelocity.
-            Vector3 vector = worldMatrix.Forward * 300;
+            Vector3 vector = viewMatrix.Forward * 300;
 
             var gridObjectBuilder = new MyObjectBuilder_CubeGrid()
             {
@@ -212,7 +201,7 @@
                 IsStatic = false,
                 LinearVelocity = vector,
                 AngularVelocity = new SerializableVector3(0, 0, 0),
-                PositionAndOrientation = new MyPositionAndOrientation(position, Vector3.Forward, Vector3.Up),
+                PositionAndOrientation = new MyPositionAndOrientation(viewMatrix.Translation, Vector3.Forward, Vector3.Up),
                 DisplayName = "Prepare to die."
             };
 
@@ -234,37 +223,23 @@
             tempList.CreateAndSyncEntities();
         }
 
-        private void ThrowMeteor(IMyPlayer player, string oreName)
+        private void ThrowMeteor(string oreName, MatrixD viewMatrix)
         {
-            MatrixD worldMatrix;
-            Vector3D position;
-
-            if (player.Controller.ControlledEntity.Entity.Parent == null)
+            var meteorBuilder = new MyObjectBuilder_Meteor
             {
-                worldMatrix = player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
-                position = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player for safety.
-            }
-            else
-            {
-                worldMatrix = player.Controller.ControlledEntity.Entity.WorldMatrix;
-                position = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
-            }
-
-            var meteorBuilder = new MyObjectBuilder_Meteor()
-            {
-                Item = new MyObjectBuilder_InventoryItem()
+                Item = new MyObjectBuilder_InventoryItem
                 {
                     Amount = 10000,
-                    Content = new MyObjectBuilder_Ore() { SubtypeName = oreName }
+                    Content = new MyObjectBuilder_Ore { SubtypeName = oreName }
                 },
                 PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
-                PositionAndOrientation = new MyPositionAndOrientation()
+                PositionAndOrientation = new MyPositionAndOrientation
                 {
-                    Position = position,
-                    Forward = (Vector3)worldMatrix.Forward,
-                    Up = (Vector3)worldMatrix.Up,
+                    Position = viewMatrix.Translation,
+                    Forward = (Vector3)viewMatrix.Forward,
+                    Up = (Vector3)viewMatrix.Up,
                 },
-                LinearVelocity = worldMatrix.Forward * 500,
+                LinearVelocity = viewMatrix.Forward * 500,
                 Integrity = 100,
             };
 
@@ -287,6 +262,7 @@
                         baseController.Use();
                 }
 
+                // This may cause issues with not properly seperating the player's resource sink from the controlled entity.
                 player.Controller.ControlledEntity.Use();
 
                 //// Enqueue the command a second time, to make sure the player is ejected from a remote controlled ship and a piloted ship.
