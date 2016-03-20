@@ -63,7 +63,7 @@
                         control |= SwitchSystems.SpotLights;
                     else if (controlStr.IndexOf("tim", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         control |= SwitchSystems.Timers;
-                    else if (controlStr.IndexOf("wep", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    else if (controlStr.IndexOf("wep", StringComparison.InvariantCultureIgnoreCase) >= 0 || controlStr.IndexOf("weap", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         control |= SwitchSystems.Weapons;
                     else if (controlStr.IndexOf("medi", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         control |= SwitchSystems.Medical;
