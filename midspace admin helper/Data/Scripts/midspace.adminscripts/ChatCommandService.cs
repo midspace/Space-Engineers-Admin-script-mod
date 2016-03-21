@@ -5,6 +5,7 @@
     using System.Linq;
     using midspace.adminscripts.Messages;
     using Sandbox.Common.ObjectBuilders;
+    using midspace.adminscripts.Config;
     using Sandbox.ModAPI;
     using VRage.Game;
 

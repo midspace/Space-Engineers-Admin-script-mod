@@ -1,4 +1,7 @@
-﻿namespace midspace.adminscripts.Protection
+﻿using System.Timers;
+using midspace.adminscripts.Utils.Timer;
+
+namespace midspace.adminscripts.Protection
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -10,14 +13,20 @@
 
     public class HandtoolCache
     {
-        private Dictionary<IMyPlayer, IMyEntity> _cache;
-        private List<IMyEntity> _uninitializedHandTools; 
+        private readonly Dictionary<IMyPlayer, IMyEntity> _cache;
+        private readonly List<IMyEntity> _uninitializedHandTools;
 
 
         public HandtoolCache()
         {
             _cache = new Dictionary<IMyPlayer, IMyEntity>();
             _uninitializedHandTools = new List<IMyEntity>();
+
+            // as the conditions of "FindPlayer(...)" aren't very safe (players could be very near),
+            // we'll check the cache from time to time in order to prevent it from ´containing wrong data
+            var safetyChecker = new ThreadsafeTimer(5000);
+            safetyChecker.Elapsed += Safety_Elapsed;
+            safetyChecker.Start();
 
             MyAPIGateway.Entities.OnEntityAdd += Entities_OnEntityAdd;
             MyAPIGateway.Entities.OnEntityRemove += Entities_OnEntityRemove;
@@ -64,15 +73,16 @@
             foreach (IMyPlayer player in players)
             {
                 var character = player.GetCharacter();
-                if (character != null)
-                {
-                    var distance = (((IMyEntity)character).GetPosition() - entity.GetPosition()).LengthSquared();
 
-                    if (distance < nearestDistance)
-                    {
-                        nearestDistance = distance;
-                        nearestPlayer = player;
-                    }
+                if (character == null) 
+                    continue;
+
+                var distance = (((IMyEntity)character).GetPosition() - entity.GetPosition()).LengthSquared();
+
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestPlayer = player;
                 }
             }
 
@@ -101,14 +111,32 @@
                 if (player == null)
                     return;
 
-                if (_cache.ContainsKey(player))
-                    _cache.Remove(player);
-
-                _cache.Add(player, handTool);
+                _cache.Update(player, handTool);
                 finished.Add(handTool);
             }
 
             _uninitializedHandTools.RemoveAll(e => finished.Contains(e));
+        }
+
+        private void Safety_Elapsed(object o, ElapsedEventArgs elapsedEventArgs)
+        {
+            HashSet<IMyPlayer> keySet = new HashSet<IMyPlayer>(_cache.Keys);
+            var correctedEntities = new Dictionary<IMyPlayer, IMyEntity>();
+
+            foreach (IMyPlayer player in keySet)
+            {
+                IMyEntity handTool = _cache[player];
+                IMyPlayer foundPlayer = FindPlayer(handTool);
+                if (player != foundPlayer)
+                {
+                    // we remove all wrong pairs
+                    _cache.Remove(player);
+                    correctedEntities.Add(foundPlayer, handTool);
+                }
+            }
+
+            foreach (KeyValuePair<IMyPlayer, IMyEntity> keyValuePair in correctedEntities)
+                _cache.Update(keyValuePair.Key, keyValuePair.Value);
         }
      }
 }
