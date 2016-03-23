@@ -6,6 +6,7 @@
     using System.Text.RegularExpressions;
     using Messages.Sync;
     using Sandbox.ModAPI;
+    using VRage;
     using VRage.Game;
     using VRage.Game.ModAPI;
     using VRageMath;
@@ -31,8 +32,17 @@
                 {
                     var range = double.Parse(match.Groups["R"].Value, CultureInfo.InvariantCulture);
                     var velocity = double.Parse(match.Groups["V"].Value, CultureInfo.InvariantCulture);
-                    var playerEntity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
-                    var destination = playerEntity.WorldAABB.Center;
+
+                    Vector3D destination;
+                    if (MyAPIGateway.Session.CameraController is MySpectator)
+                    {
+                        destination = MyAPIGateway.Session.Camera.WorldMatrix.Translation;
+                    }
+                    else
+                    {
+                        var playerEntity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
+                        destination = playerEntity.WorldAABB.Center;
+                    }
 
                     if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                         PullObjects(0, destination, range, velocity);

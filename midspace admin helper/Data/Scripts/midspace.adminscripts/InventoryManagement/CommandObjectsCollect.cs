@@ -8,6 +8,7 @@
     using System.Timers;
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
+    using VRage;
     using VRage.Game;
     using VRage.Game.ModAPI;
     using VRageMath;
@@ -53,7 +54,11 @@
 
                     Vector3D destination;
 
-                    if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
+                    if (MyAPIGateway.Session.CameraController is MySpectator)
+                    {
+                        destination = MyAPIGateway.Session.Camera.WorldMatrix.Translation;
+                    }
+                    else if (MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Parent == null)
                     {
                         var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false);
                         destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f; // Spawn item 1.5m in front of player for safety.

@@ -5,6 +5,7 @@
     using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
+    using VRage;
     using VRage.Game.ModAPI;
     using VRageMath;
 
@@ -29,8 +30,17 @@
                 double range = 100;
                 double.TryParse(strRange, out range);
                 range = Math.Abs(range);
-                var playerEntity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
-                var destination = playerEntity.WorldAABB.Center;
+
+                Vector3D destination;
+                if (MyAPIGateway.Session.CameraController is MySpectator)
+                {
+                    destination = MyAPIGateway.Session.Camera.WorldMatrix.Translation;
+                }
+                else
+                {
+                    var playerEntity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
+                    destination = playerEntity.WorldAABB.Center;
+                }
                 var sphere = new BoundingSphereD(destination, range);
                 var entityList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
 
