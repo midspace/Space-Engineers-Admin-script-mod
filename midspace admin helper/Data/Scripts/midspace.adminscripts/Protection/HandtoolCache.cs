@@ -38,7 +38,7 @@ namespace midspace.adminscripts.Protection
             MyAPIGateway.Entities.OnEntityRemove -= Entities_OnEntityRemove;
         }
 
-        void Entities_OnEntityAdd(IMyEntity entity)
+        private void Entities_OnEntityAdd(IMyEntity entity)
         {
             if (entity is MyEngineerToolBase)
                 // when the entity is created, it is not finished (pos is 0, boundingbox does not exist, etc.)
@@ -48,18 +48,15 @@ namespace midspace.adminscripts.Protection
         }
 
         // this method is called twice when switching weapon, idk why
-        void Entities_OnEntityRemove(IMyEntity entity)
+        private void Entities_OnEntityRemove(IMyEntity entity)
         {
-            if (entity is MyEngineerToolBase)
-            {
-                if (!_cache.ContainsValue(entity))
-                    return;
+            if (!(entity is MyEngineerToolBase) || !_cache.ContainsValue(entity))
+                return;
 
-                var player = _cache.First(p => p.Value.EntityId == entity.EntityId).Key;
+            var player = _cache.First(p => p.Value.EntityId == entity.EntityId).Key;
 
-                if (_cache.ContainsKey(player))
-                    _cache.Remove(player);
-            }
+            if (_cache.ContainsKey(player))
+                _cache.Remove(player);
         }
 
         private IMyPlayer FindPlayer(IMyEntity entity)
@@ -67,17 +64,18 @@ namespace midspace.adminscripts.Protection
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players);
 
-            double nearestDistance = 5; // usually the distance between player and handtool is about 2 to 3, 5 is plenty 
+            double nearestDistance = 5;
+                // usually the distance between player and handtool is about 2 to 3, 5 is plenty 
             IMyPlayer nearestPlayer = null;
 
             foreach (IMyPlayer player in players)
             {
                 var character = player.GetCharacter();
 
-                if (character == null) 
+                if (character == null)
                     continue;
 
-                var distance = (((IMyEntity)character).GetPosition() - entity.GetPosition()).LengthSquared();
+                var distance = (((IMyEntity) character).GetPosition() - entity.GetPosition()).LengthSquared();
 
                 if (distance < nearestDistance)
                 {
@@ -103,7 +101,8 @@ namespace midspace.adminscripts.Protection
             var finished = new List<IMyEntity>();
             foreach (IMyEntity handTool in _uninitializedHandTools)
             {
-                if (handTool.GetPosition() == Vector3.Zero) // prototype check for not inited yet, need a better check for that
+                if (handTool.GetPosition() == Vector3.Zero)
+                    // prototype check for not inited yet, need a better check for that
                     continue;
 
                 var player = FindPlayer(handTool);
@@ -127,16 +126,23 @@ namespace midspace.adminscripts.Protection
             {
                 IMyEntity handTool = _cache[player];
                 IMyPlayer foundPlayer = FindPlayer(handTool);
-                if (player != foundPlayer)
-                {
-                    // we remove all wrong pairs
-                    _cache.Remove(player);
-                    correctedEntities.Add(foundPlayer, handTool);
-                }
+
+                if (player == foundPlayer)
+                    continue;
+
+                // remove invalid entries
+                _cache.Remove(player);
+
+                // somehow it returns null when a player enters a cockpit or so but if the player enters the cockpit the handtool should be removed from the cache
+                // ... still, I can't figure out why it returns null O.o
+                if (foundPlayer == null)
+                    continue;
+
+                correctedEntities.Add(foundPlayer, handTool);
             }
 
             foreach (KeyValuePair<IMyPlayer, IMyEntity> keyValuePair in correctedEntities)
                 _cache.Update(keyValuePair.Key, keyValuePair.Value);
         }
-     }
+    }
 }
