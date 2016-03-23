@@ -4,6 +4,7 @@
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Library.Utils;
 
     [ProtoContract]
     public class MessageSession : MessageBase
