@@ -48,13 +48,17 @@ namespace midspace.adminscripts.Protection
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler_Server);
         }
 
-        public static void Init_Client(ProtectionConfig config)
+        public static void InitOrUpdateClient(ProtectionConfig config)
         {
+            // still allow update of cfg
             Config = config;
 
-            if (!ChatCommandLogic.Instance.AllowBuilding)
-                ChatCommandLogic.Instance.AllowBuilding = true;
+            if (_isInitialized)
+                return;
 
+            // but no init, as for servers we won't init it anyway
+            _isInitialized = true;
+            ChatCommandLogic.Instance.AllowBuilding = true;
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler_Client);
         }
 

@@ -10,7 +10,7 @@ namespace midspace.adminscripts.Messages.Protection
 
         public override void ProcessClient()
         {
-            ProtectionHandler.Init_Client(Config);
+            ProtectionHandler.InitOrUpdateClient(Config);
         }
 
         public override void ProcessServer()
