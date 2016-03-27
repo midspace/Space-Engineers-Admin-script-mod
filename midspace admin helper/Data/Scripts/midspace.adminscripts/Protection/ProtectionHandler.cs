@@ -46,6 +46,7 @@ namespace midspace.adminscripts.Protection
             _cleanupTimer.Elapsed += CleanUp;
             _cleanupTimer.Start();
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler_Server);
+            ChatCommandLogic.Instance.AllowBuilding = true;
         }
 
         public static void InitOrUpdateClient(ProtectionConfig config)
@@ -284,7 +285,7 @@ namespace midspace.adminscripts.Protection
 
         public static void UpdateBeforeSimulation()
         {
-            if (!_isInitialized)
+            if (!_isInitialized || !_isServer)
                 return;
 
             _handtoolCache.UpdateBeforeSimulation();
