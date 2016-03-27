@@ -78,6 +78,7 @@
     <Compile Include="Config\Files\MotdFile.cs" />
     <Compile Include="Config\Files\PermissionsFile.cs" />
     <Compile Include="Config\Files\PrivateMessageLogFile.cs" />
+    <Compile Include="Config\Files\ProtectionConfigFile.cs" />
     <Compile Include="Config\Files\ServerConfigFile.cs" />
     <Compile Include="Config\Permissions.cs" />
     <Compile Include="FactionManagement\CommandFactionPeace.cs" />

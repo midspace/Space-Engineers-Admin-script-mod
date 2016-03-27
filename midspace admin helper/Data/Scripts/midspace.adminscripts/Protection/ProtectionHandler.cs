@@ -1,4 +1,6 @@
-﻿namespace midspace.adminscripts.Protection
+﻿using System.IO;
+
+namespace midspace.adminscripts.Protection
 {
     using System;
     using System.Collections.Generic;
@@ -6,6 +8,7 @@
     using System.Timers;
     using midspace.adminscripts.Messages.Communication;
     using midspace.adminscripts.Utils.Timer;
+    using midspace.adminscripts.Config.Files;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.ModAPI;
@@ -15,12 +18,14 @@
 
     public static class ProtectionHandler
     {
-        public static ProtectionConfig Config;
+        public static ProtectionConfig Config { get; private set; }
 
         private static bool _isInitialized;
         private static HandtoolCache _handtoolCache;
         private static Dictionary<IMyPlayer, DateTime> _sentFailedMessage;
         private static ThreadsafeTimer _cleanupTimer;
+        private static bool _isServer;
+        private static ProtectionConfigFile _configFile;
 
         private const int GrindFailedMessageInterval = 5000;
 
@@ -30,6 +35,7 @@
                 return;
 
             _isInitialized = true;
+            _isServer = true;
             Config = new ProtectionConfig();
             Load();
 
@@ -39,7 +45,7 @@
             _cleanupTimer = new ThreadsafeTimer(30000);
             _cleanupTimer.Elapsed += CleanUp;
             _cleanupTimer.Start();
-            MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
+            MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler_Server);
         }
 
         public static void Init_Client(ProtectionConfig config)
@@ -48,6 +54,8 @@
 
             if (!ChatCommandLogic.Instance.AllowBuilding)
                 ChatCommandLogic.Instance.AllowBuilding = true;
+
+            MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler_Client);
         }
 
         public static void Close()
@@ -56,26 +64,86 @@
                 return;
 
             _isInitialized = false;
-            _handtoolCache.Close();
+
+            if (_isServer)
+                _handtoolCache.Close();
+            else
+                ChatCommandLogic.Instance.AllowBuilding = false;
         }
 
         public static void Save(string customSaveName = null)
         {
-            if (!_isInitialized)
+            if (!_isInitialized || !_isServer)
                 return;
 
-            Config.Save(customSaveName);
+            _configFile.Config = Config;
+            _configFile.Save(customSaveName);
         }
 
         private static void Load()
         {
-            if (!_isInitialized)
+            if (!_isInitialized || !_isServer)
                 return;
 
-            Config.Load();
+            _configFile = new ProtectionConfigFile(Path.GetFileNameWithoutExtension(MyAPIGateway.Session.CurrentPath));
+            Config = _configFile.Config;
         }
 
-        private static void DamageHandler(object target, ref MyDamageInformation info)
+        /// <summary>
+        /// Handles the damage in ProtectionAreas if Protection is enabled. This method is designed for client side use.
+        /// Usually this should not be needed as all damage should be processed on the server side but due to a bug in the
+        /// damage system, clients receive the data so that server and client will be out of sync. That's why this is needed.
+        /// It does the same calculations as the server but won't notify players.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="info"></param>
+        private static void DamageHandler_Client(object target, ref MyDamageInformation info)
+        {
+            if (!Config.ProtectionEnabled)
+                return;
+
+            IMySlimBlock block = target as IMySlimBlock;
+
+            if (block != null)
+            {
+                IMyPlayer player;
+                if (CanDamageBlock(info.AttackerId, block, info.Type, out player))
+                    return;
+
+                info.Amount = 0;
+                return;
+            }
+
+            // disable pvp in PAs
+            IMyCharacter character = target as IMyCharacter;
+            if (character != null)
+            {
+                var players = new List<IMyPlayer>();
+                MyAPIGateway.Players.GetPlayers(players, p => p != null && p.Controller.ControlledEntity != null && p.Controller.ControlledEntity.Entity != null);
+
+                var player = players.FirstOrDefault(p => p.GetCharacter() == character);
+                if (player == null)
+                    return;
+
+                if (!IsProtected(player.Controller.ControlledEntity.Entity))
+                    return;
+
+                if (info.Type == MyDamageType.LowPressure || info.Type == MyDamageType.Asphyxia ||
+                    info.Type == MyDamageType.Environment || info.Type == MyDamageType.Fall ||
+                    info.Type == MyDamageType.Fire || info.Type == MyDamageType.Radioactivity ||
+                    info.Type == MyDamageType.Suicide || info.Type == MyDamageType.Unknown)
+                    return;
+
+                info.Amount = 0;
+            }
+        }
+
+        /// <summary>
+        /// Handles the damage in ProtectionAreas if Protection is enabled. This method is desinged for server side use and will notify the players if they tried to damage the wrong block.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="info"></param>
+        private static void DamageHandler_Server(object target, ref MyDamageInformation info)
         {
             if (!Config.ProtectionEnabled)
                 return;
@@ -101,6 +169,7 @@
                 return;
             }
 
+            // disable pvp in PAs
             IMyCharacter character = target as IMyCharacter;
             if (character != null)
             {
