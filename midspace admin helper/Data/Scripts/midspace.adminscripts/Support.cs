@@ -1358,11 +1358,11 @@ namespace midspace.adminscripts
             if (gasContainer != null)
                 gasContainer.GasLevel = 1f;
 
-            MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem { Amount = amount, Content = content };
+            MyObjectBuilder_InventoryItem inventoryItem = new MyObjectBuilder_InventoryItem { Amount = amount, PhysicalContent = content };
 
             if (inventory.CanItemsBeAdded(inventoryItem.Amount, definitionId))
             {
-                inventory.AddItems(inventoryItem.Amount, (MyObjectBuilder_PhysicalObject)inventoryItem.Content, -1);
+                inventory.AddItems(inventoryItem.Amount, inventoryItem.PhysicalContent, -1);
                 return true;
             }
 
@@ -1386,7 +1386,7 @@ namespace midspace.adminscripts
             if (gasContainer != null)
                 gasContainer.GasLevel = 1f;
 
-            floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = amount, Content = content };
+            floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = amount, PhysicalContent = content };
             floatingBuilder.PersistentFlags = MyPersistentEntityFlags2.InScene; // Very important
 
             floatingBuilder.PositionAndOrientation = new MyPositionAndOrientation()
@@ -1408,7 +1408,7 @@ namespace midspace.adminscripts
             if (gasContainer != null)
                 gasContainer.GasLevel = 1f;
 
-            floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = amount, Content = content };
+            floatingBuilder.Item = new MyObjectBuilder_InventoryItem() { Amount = amount, PhysicalContent = content };
             floatingBuilder.PersistentFlags = MyPersistentEntityFlags2.InScene; // Very important
 
             floatingBuilder.PositionAndOrientation = new MyPositionAndOrientation()

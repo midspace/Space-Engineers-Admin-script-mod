@@ -170,7 +170,7 @@
 
             var meteorBuilder = new MyObjectBuilder_Meteor
             {
-                Item = new MyObjectBuilder_InventoryItem { Amount = 1, Content = new MyObjectBuilder_Ore { SubtypeName = oreName } },
+                Item = new MyObjectBuilder_InventoryItem { Amount = 1, PhysicalContent = new MyObjectBuilder_Ore { SubtypeName = oreName } },
                 PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
                 PositionAndOrientation = new MyPositionAndOrientation
                 {
@@ -230,7 +230,7 @@
                 Item = new MyObjectBuilder_InventoryItem
                 {
                     Amount = 10000,
-                    Content = new MyObjectBuilder_Ore { SubtypeName = oreName }
+                    PhysicalContent = new MyObjectBuilder_Ore { SubtypeName = oreName }
                 },
                 PersistentFlags = MyPersistentEntityFlags2.InScene, // Very important
                 PositionAndOrientation = new MyPositionAndOrientation
