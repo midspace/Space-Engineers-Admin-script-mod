@@ -287,9 +287,9 @@
 
                 // The CameraController.GetViewMatrix appears warped at the moment.
                 //var position = ((IMyEntity)MyAPIGateway.Session.CameraController).GetPosition();
-                var camMatrix = MyAPIGateway.Session.CameraController.GetViewMatrix();
-                var camPosition = camMatrix.Translation;
-                MyAPIGateway.Utilities.ShowMessage("Cam", string.Format("x={0:N},y={1:N},z={2:N}  x={3:N},y={4:N},z={5:N}", camPosition.X, camPosition.Y, camPosition.Z, camMatrix.Forward.X, camMatrix.Forward.Y, camMatrix.Forward.Z));
+                //var camMatrix = MyAPIGateway.Session.CameraController.GetViewMatrix();
+                //var camPosition = camMatrix.Translation;
+                //MyAPIGateway.Utilities.ShowMessage("Cam", string.Format("x={0:N},y={1:N},z={2:N}  x={3:N},y={4:N},z={5:N}", camPosition.X, camPosition.Y, camPosition.Z, camMatrix.Forward.X, camMatrix.Forward.Y, camMatrix.Forward.Z));
 
                 //var worldMatrix = MyAPIGateway.Session.ControlledObject.Entity.WorldMatrix;
                 var worldMatrix = MyAPIGateway.Session.ControlledObject.GetHeadMatrix(true, true, true);
