@@ -287,12 +287,8 @@ namespace midspace.adminscripts
             commands.Add(new CommandStopAll());
             commands.Add(new CommandTeleport());
             commands.Add(new CommandTeleportBack());
-            commands.Add(new CommandTeleportDelete());
-            commands.Add(new CommandTeleportFavorite());
             commands.Add(new CommandTeleportJump());
-            commands.Add(new CommandTeleportList());
             commands.Add(new CommandTeleportOffset());
-            commands.Add(new CommandTeleportSave());
             commands.Add(new CommandTeleportToPlayer());
             commands.Add(new CommandTeleportToShip());
             commands.Add(new CommandTest());

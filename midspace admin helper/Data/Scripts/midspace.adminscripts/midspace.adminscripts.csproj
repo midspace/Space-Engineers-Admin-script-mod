@@ -233,10 +233,6 @@
     <Compile Include="AsteroidManagement\CommandAsteroidSpread.cs" />
     <Compile Include="ShipManagement\CommandExtendedListShips.cs" />
     <Compile Include="Misc\CommandGameName.cs" />
-    <Compile Include="PositionManagement\CommandTeleportSave.cs" />
-    <Compile Include="PositionManagement\CommandTeleportList.cs" />
-    <Compile Include="PositionManagement\CommandTeleportFavorite.cs" />
-    <Compile Include="PositionManagement\CommandTeleportDelete.cs" />
     <Compile Include="ShipManagement\CommandShipOff.cs" />
     <Compile Include="ShipManagement\CommandShipOn.cs" />
     <Compile Include="InventoryManagement\CommandInventoryClear.cs" />
