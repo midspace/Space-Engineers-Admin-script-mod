@@ -426,9 +426,6 @@ namespace midspace.adminscripts
 
         public static bool TryGetPlayer(this IMyPlayerCollection collection, ulong steamId, out IMyPlayer player)
         {
-            player = null;
-            if (steamId == null)
-                return false;
             var players = new List<IMyPlayer>();
             collection.GetPlayers(players, p => p != null);
 
@@ -438,6 +435,15 @@ namespace midspace.adminscripts
 
             return true;
         }
+
+        public static IMyPlayer GetPlayer(this IMyPlayerCollection collection, ulong steamId)
+        {
+            var players = new List<IMyPlayer>();
+            collection.GetPlayers(players, p => p != null);
+
+            return players.FirstOrDefault(p => p.SteamUserId == steamId);
+        }
+
 
         public static IMyPlayer Player(this IMyIdentity identity)
         {

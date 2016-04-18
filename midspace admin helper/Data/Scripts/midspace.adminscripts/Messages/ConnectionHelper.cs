@@ -48,7 +48,8 @@
         /// <summary>
         /// Creates and sends an entity with the given information for the server and all players.
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
+        /// <param name="syncAll"></param>
         public static void SendMessageToAll(MessageBase message, bool syncAll = true)
         {
             if (MyAPIGateway.Session.Player != null)
@@ -180,7 +181,7 @@
                 var messagePart = new MessageIncomingMessageParts()
                 {
                     Side = side,
-                    SenderSteamId = side == MessageSide.ServerSide ? MyAPIGateway.Session.Player.SteamUserId : 0,
+                    SenderSteamId = side == MessageSide.ServerSide && MyAPIGateway.Session.Player != null ? MyAPIGateway.Session.Player.SteamUserId : 0,
                     LastPart = false,
                 };
 
