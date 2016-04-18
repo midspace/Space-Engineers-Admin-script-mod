@@ -10,7 +10,7 @@
     public class CommandSpeed : ChatCommand
     {
         public CommandSpeed()
-            : base(ChatCommandSecurity.Admin, "speed", new[] { "/speed" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "speed", new[] { "/speed" })
         {
         }
 
@@ -26,7 +26,9 @@
             if (match.Success)
             {
                 var vector = double.Parse(match.Groups["V"].Value, CultureInfo.InvariantCulture);
-                var entity = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity;
+
+                IMyPlayer player = MyAPIGateway.Players.GetPlayer(steamId);
+                var entity = player.Controller.ControlledEntity.Entity;
 
                 if (entity is IMyCubeBlock)
                 {
@@ -45,7 +47,7 @@
                 }
                 else
                 {
-                    var worldMatrix = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
+                    var worldMatrix = player.Controller.ControlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs.
                     var targetVector = worldMatrix.Forward;
                     targetVector = Vector3D.Normalize(targetVector) * vector;
                     entity.Physics.LinearVelocity = targetVector;

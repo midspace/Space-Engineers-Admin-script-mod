@@ -14,7 +14,7 @@
     public class CommandInventoryClear : ChatCommand
     {
         public CommandInventoryClear()
-            : base(ChatCommandSecurity.Admin, "invclear", new[] { "/invclear" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "invclear", new[] { "/invclear" })
         {
         }
 
@@ -39,9 +39,10 @@
                 selectedPlayer = identities.FirstOrDefault();
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
-                    selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
+                    selectedPlayer = cacheList[index - 1];
                 }
 
                 if (selectedPlayer == null)

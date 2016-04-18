@@ -11,7 +11,7 @@
     public class CommandFactionPromote : ChatCommand
     {
         public CommandFactionPromote()
-            : base(ChatCommandSecurity.Admin, "fp", new[] { "/fp" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "fp", new[] { "/fp" })
         {
         }
 
@@ -37,10 +37,11 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
@@ -52,7 +53,7 @@
 
                 if (factionBuilder == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("promote", "{0} is not in faction.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "promote", "{0} is not in faction.", selectedPlayer.DisplayName);
                     return true;
                 }
 
@@ -60,18 +61,18 @@
 
                 if (fm.IsFounder)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("promote", "{0} is Founder and cannot be promoted.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "promote", "{0} is Founder and cannot be promoted.", selectedPlayer.DisplayName);
                     return true;
                 }
 
                 if (fm.IsLeader)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("promote", "{0} is Leader and cannot be promoted.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "promote", "{0} is Leader and cannot be promoted.", selectedPlayer.DisplayName);
                     return true;
                 }
 
                 MessageSyncFaction.PromotePlayer(factionBuilder.FactionId, selectedPlayer.PlayerID);
-                MyAPIGateway.Utilities.ShowMessage("promote", "{0} from Member to Leader.", selectedPlayer.DisplayName);
+                MyAPIGateway.Utilities.SendMessage(steamId, "promote", "{0} from Member to Leader.", selectedPlayer.DisplayName);
                 return true;
             }
 

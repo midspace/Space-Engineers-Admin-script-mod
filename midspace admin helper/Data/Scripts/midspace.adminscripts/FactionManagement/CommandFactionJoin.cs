@@ -13,7 +13,7 @@
         private Queue<Action> _workQueue = new Queue<Action>();
 
         public CommandFactionJoin()
-            : base(ChatCommandSecurity.Admin, "fj", new[] { "/fj" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "fj", new[] { "/fj" })
         {
         }
 
@@ -24,7 +24,7 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/fj\s{1,}(?<Faction>.+)\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/fj\s+(?<Faction>.+)\s+(?<Key>.+)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -38,9 +38,10 @@
                 IMyIdentity selectedPlayer = identities.FirstOrDefault();
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
-                    selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
+                    selectedPlayer = cacheList[index - 1];
                 }
 
                 if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
@@ -54,7 +55,7 @@
                 if (!MyAPIGateway.Session.Factions.FactionTagExists(factionName) &&
                     !MyAPIGateway.Session.Factions.FactionNameExists(factionName))
                 {
-                    MyAPIGateway.Utilities.ShowMessage("faction", "{0} does not exist.", factionName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "faction", "{0} does not exist.", factionName);
                     return true;
                 }
 
@@ -63,7 +64,7 @@
                 var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.PlayerId));
                 if (factionBuilder != null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("player", "{0} is already in faction {1}.{2}", selectedPlayer.DisplayName, factionBuilder.Tag, factionBuilder.Name);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "player", "{0} is already in faction {1}.{2}", selectedPlayer.DisplayName, factionBuilder.Tag, factionBuilder.Name);
                     return true;
                 }
 
@@ -73,7 +74,7 @@
                 if (factionCollectionBuilder != null)
                 {
                     MessageSyncFaction.JoinFaction(factionCollectionBuilder.FactionId, selectedPlayer.PlayerId);
-                    MyAPIGateway.Utilities.ShowMessage("join", "{0} has been addded to faction.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "join", "{0} has been addded to faction.", selectedPlayer.DisplayName);
                 }
 
                 return true;

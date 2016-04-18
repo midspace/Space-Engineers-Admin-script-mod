@@ -1,13 +1,10 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages.Sync;
     using Sandbox.ModAPI;
     using VRage.Game.ModAPI;
-    using VRage.ModAPI;
 
     public class CommandShipDestructible : ChatCommand
     {
@@ -39,7 +36,6 @@
                 if (switchString.Equals("off", StringComparison.InvariantCultureIgnoreCase) || switchString.Equals("0", StringComparison.InvariantCultureIgnoreCase))
                     switchOn = false;
 
-
                 // set destructible on the ship in the crosshairs.
                 if (string.IsNullOrEmpty(shipName))
                 {
@@ -47,15 +43,7 @@
                     var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                            MessageSyncSetDestructable.SetDestructible(shipEntity, switchOn);
-                        else
-                            ConnectionHelper.SendMessageToServer(new MessageSyncSetDestructable()
-                            {
-                                EntityId = shipEntity.EntityId,
-                                Destructable = switchOn
-                            });
-                        
+                        MessageSyncGridChange.SendMessage(SyncGridChangeType.Destructible, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID, switchOn);
                         return true;
                     }
 
@@ -63,49 +51,7 @@
                     return true;
                 }
 
-                // Find the selected ship.
-                var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
-
-                if (currentShipList.Count == 1)
-                {
-                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                        MessageSyncSetDestructable.SetDestructible(currentShipList.First(), switchOn);
-                    else
-                        ConnectionHelper.SendMessageToServer(new MessageSyncSetDestructable()
-                        {
-                            EntityId = currentShipList.First().EntityId,
-                            Destructable = switchOn
-                        });
-
-                    return true;
-                }
-                else if (currentShipList.Count == 0)
-                {
-                    int index;
-                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count && CommandListShips.ShipCache[index - 1] != null)
-                    {
-                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                            MessageSyncSetDestructable.SetDestructible(CommandListShips.ShipCache[index - 1], switchOn);
-                        else
-                            ConnectionHelper.SendMessageToServer(new MessageSyncSetDestructable()
-                            {
-                                EntityId = CommandListShips.ShipCache[index - 1].EntityId,
-                                Destructable = switchOn
-                            });
-
-
-                        CommandListShips.ShipCache[index - 1] = null;
-                        return true;
-                    }
-                }
-                else if (currentShipList.Count > 1)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("destructible", "{0} Ships match that name.", currentShipList.Count);
-                    return true;
-                }
-
-                MyAPIGateway.Utilities.ShowMessage("destructible", "Ship name not found.");
+                MessageSyncGridChange.SendMessage(SyncGridChangeType.Destructible, 0, shipName, MyAPIGateway.Session.Player.PlayerID, switchOn);
                 return true;
             }
 

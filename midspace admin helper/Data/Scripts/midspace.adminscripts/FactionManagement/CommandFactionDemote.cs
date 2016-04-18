@@ -10,7 +10,7 @@
     public class CommandFactionDemote : ChatCommand
     {
         public CommandFactionDemote()
-            : base(ChatCommandSecurity.Admin, "fd", new[] { "/fd" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "fd", new[] { "/fd" })
         {
         }
 
@@ -21,7 +21,7 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/fd\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/fd\s+(?<Key>.+)", RegexOptions.IgnoreCase);
 
             if (match.Success)
             {
@@ -37,10 +37,11 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
@@ -52,7 +53,7 @@
 
                 if (factionBuilder == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("demote", "{0} not in faction.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "demote", "{0} not in faction.", selectedPlayer.DisplayName);
                     return true;
                 }
 
@@ -60,18 +61,18 @@
 
                 if (fm.IsFounder)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("demote", "{0} is Founder and cannot be demoted.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "demote", "{0} is Founder and cannot be demoted.", selectedPlayer.DisplayName);
                     return true;
                 }
 
                 if (fm.IsLeader)
                 {
                     MessageSyncFaction.DemotePlayer(factionBuilder.FactionId, selectedPlayer.PlayerID);
-                    MyAPIGateway.Utilities.ShowMessage("demote", "{0} from Leader to Member.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "demote", "{0} from Leader to Member.", selectedPlayer.DisplayName);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("demote", "{0} cannot be demoted further.", selectedPlayer.DisplayName);
+                MyAPIGateway.Utilities.SendMessage(steamId, "demote", "{0} cannot be demoted further.", selectedPlayer.DisplayName);
                 return true;
             }
 

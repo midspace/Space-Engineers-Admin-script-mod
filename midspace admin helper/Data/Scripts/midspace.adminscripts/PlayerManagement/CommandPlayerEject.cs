@@ -10,10 +10,8 @@
 
     public class CommandPlayerEject : ChatCommand
     {
-        private Queue<Action> _workQueue = new Queue<Action>();
-
         public CommandPlayerEject()
-            : base(ChatCommandSecurity.Admin, "eject", new[] { "/eject" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "eject", new[] { "/eject" })
         {
         }
 
@@ -39,42 +37,21 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Eject", "No player named '{0}' found.", playerName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Eject", "No player named '{0}' found.", playerName);
                     return true;
                 }
 
                 MessageSyncAres.Eject(selectedPlayer.SteamUserId);
-
-                //if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
-                //{
-                //    MyAPIGateway.Utilities.ShowMessage("ejecting", selectedPlayer.DisplayName);
-                //    selectedPlayer.Controller.ControlledEntity.Use();
-
-                //    // Enqueue the command a second time, to make sure the player is ejected from a remote controlled ship and a piloted ship.
-                //    _workQueue.Enqueue(delegate() {
-                //        if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
-                //        {
-                //            selectedPlayer.Controller.ControlledEntity.Use();
-                //        }
-                //    });
-
-                //    // Neither of these do what I expect them to. In fact, I'm not sure what they do.
-                //    //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity);
-                //    //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity.Parent);
-                //}
-                //else
-                //{
-                //    MyAPIGateway.Utilities.ShowMessage("player", string.Format("{0} is not a pilot", selectedPlayer.DisplayName));
-                //}
                 return true;
 
                 // NPC's do not appears as Players, but Identities.
@@ -98,7 +75,7 @@
                 //        var block = (IMyCubeBlock)cockpit;
                 //        if (block.OwnerId == selectedPlayer.PlayerId)
                 //        {
-                //            MyAPIGateway.Utilities.ShowMessage("ejecting", selectedPlayer.DisplayName);
+                //            MyAPIGateway.Utilities.SendMessage(steamId, "ejecting", selectedPlayer.DisplayName);
                 //            // Does not appear to eject Autopilot.
                 //            cockpit.Use();
                 //        }
@@ -107,16 +84,6 @@
             }
 
             return false;
-        }
-
-
-        public override void UpdateBeforeSimulation100()
-        {
-            if (_workQueue.Count > 0)
-            {
-                var action = _workQueue.Dequeue();
-                action.Invoke();
-            }
         }
     }
 }

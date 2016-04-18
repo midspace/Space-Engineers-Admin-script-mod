@@ -14,11 +14,12 @@
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of in game ships, populated only by search results.
         /// </summary>
-        public readonly static List<IMyEntity> ShipCache = new List<IMyEntity>();
+        private readonly static Dictionary<ulong, List<IMyEntity>> ServerShipCache = new Dictionary<ulong, List<IMyEntity>>();
 
         public CommandListShips()
-            : base(ChatCommandSecurity.Admin, "listships", new[] { "/listships" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "listships", new[] { "/listships" })
         {
+            ServerShipCache.Clear();
         }
 
         public override void Help(ulong steamId, bool brief)
@@ -39,17 +40,17 @@
 
                 var currentShipList = Support.FindShipsByName(shipName);
 
-                ShipCache.Clear();
+                ServerShipCache[steamId] = new List<IMyEntity>();
 
                 //only display the list in chat if the chat allows to fully show it, else display it in a mission screen.
                 if (currentShipList.Count <= 9)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Count", currentShipList.Count.ToString());
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Count", currentShipList.Count.ToString());
                     var index = 1;
                     foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
                     {
-                        ShipCache.Add(ship);
-                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), ship.DisplayName);
+                        ServerShipCache[steamId].Add(ship);
+                        MyAPIGateway.Utilities.SendMessage(steamId, string.Format("#{0}", index++), ship.DisplayName);
                     }
                 }
                 else
@@ -59,17 +60,28 @@
                     var index = 1;
                     foreach (var ship in currentShipList.OrderBy(s => s.DisplayName))
                     {
-                        CommandListShips.ShipCache.Add(ship);
+                        ServerShipCache[steamId].Add(ship);
                         description.AppendFormat("#{0}: {1}\r\n", index++, ship.DisplayName);
                     }
 
-                    MyAPIGateway.Utilities.ShowMissionScreen("List Ships", prefix, " ", description.ToString());
+                    MyAPIGateway.Utilities.SendMissionScreen(steamId, "List Ships", prefix, " ", description.ToString());
                 }
 
                 return true;
             }
 
             return false;
+        }
+
+        public static List<IMyEntity> GetShipCache(ulong steamId)
+        {
+            List<IMyEntity> cacheList;
+            if (!ServerShipCache.TryGetValue(steamId, out cacheList))
+            {
+                ServerShipCache[steamId] = new List<IMyEntity>();
+                cacheList = ServerShipCache[steamId];
+            }
+            return cacheList;
         }
     }
 }

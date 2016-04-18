@@ -74,7 +74,7 @@
 
         private static void Process(MessageSyncAres syncEntity)
         {
-            if (MyAPIGateway.Multiplayer.MultiplayerActive)
+            if (MyAPIGateway.Multiplayer.MultiplayerActive && !MyAPIGateway.Multiplayer.IsServer)
                 ConnectionHelper.SendMessageToServer(syncEntity);
             else
                 syncEntity.CommonProcess(syncEntity.SyncType, syncEntity.SteamId, syncEntity.OreMaterial, syncEntity.ViewMatrix);
@@ -215,6 +215,9 @@
                 BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Forward, Base6Directions.Direction.Up),
                 ShareMode = MyOwnershipShareModeEnum.All,
                 CustomName = "Hello. My name is Inigo Montoya. You killed my father. Prepare to die.",
+                IsArmed = true,
+                IsCountingDown = true,
+                CountdownMs = 30000, // 300 m/s for 30 seconds. 9Km range, if ship max speed allows 300 m/s.
             };
 
             gridObjectBuilder.CubeBlocks.Add(cube);

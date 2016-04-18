@@ -11,7 +11,7 @@
     public class CommandForceBan : ChatCommand
     {
         public CommandForceBan()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "forceban", new string[] { "/forceban" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server | ChatCommandFlag.MultiplayerOnly, "forceban", new string[] { "/forceban" })
         {
         }
 
@@ -37,20 +37,21 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("ForceBan", "No player named {0} found.", playerName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "ForceBan", "No player named {0} found.", playerName);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("ForceBan", selectedPlayer.DisplayName);
+                MyAPIGateway.Utilities.SendMessage(steamId, "ForceBan", selectedPlayer.DisplayName);
                 ConnectionHelper.SendMessageToServer(new MessageForceDisconnect() { SteamId = selectedPlayer.SteamUserId, Ban = true });
                 return true;
             }

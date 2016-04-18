@@ -24,17 +24,19 @@
             SpotLights = 0x40,
             Sensors = 0x80,
             Medical = 0x100,
-            Mass = 0x200
+            Mass = 0x200,
+            Welder = 0x400,
+            Grinder = 0x800
         };
 
         public CommandShipSwitch()
-            : base(ChatCommandSecurity.Admin, "switch", new[] { "/switch" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "switch", new[] { "/switch" })
         {
         }
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/switch [power] [production] [program] [projection] [sensor] [spot] [timer] [weapon] on/off", "Turns globally on/off the selected systems.");
+            MyAPIGateway.Utilities.ShowMessage("/switch [grinder] [power] [production] [program] [projection] [sensor] [spot] [timer] [weapon] [welder] on/off", "Turns globally on/off the selected systems.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
@@ -69,17 +71,21 @@
                         control |= SwitchSystems.Medical;
                     else if (controlStr.IndexOf("mass", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         control |= SwitchSystems.Mass;
+                    else if (controlStr.IndexOf("grin", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Grinder;
+                    else if (controlStr.IndexOf("weld", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Welder;
                 }
 
                 if (control == SwitchSystems.None)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Switched ", "No systems specified.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Switched", "No systems specified.");
                     return true;
                 }
 
                 var counter = SwitchSystemsOnOff(control, mode);
 
-                MyAPIGateway.Utilities.ShowMessage("Switched ", "{0} systems turned {1}.", counter, (mode ? "On" : "Off"));
+                MyAPIGateway.Utilities.SendMessage(steamId, "Switched", "{0} systems turned {1}.", counter, (mode ? "On" : "Off"));
                 return true;
             }
 
@@ -182,10 +188,21 @@
                     ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
                     counter++;
                 }
+                if ((SwitchSystems.Grinder & control) == SwitchSystems.Grinder && block.FatBlock is IMyFunctionalBlock
+                    && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipGrinder)))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    counter++;
+                }
+                if ((SwitchSystems.Welder & control) == SwitchSystems.Welder && block.FatBlock is IMyFunctionalBlock
+                    && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipWelder)))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    counter++;
+                }
             }
 
             return counter;
         }
-
     }
 }

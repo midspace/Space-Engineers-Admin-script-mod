@@ -24,6 +24,8 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessagePrivateMessage))]
     [XmlInclude(typeof(MessageSave))]
     [XmlInclude(typeof(MessageSession))]
+    [XmlInclude(typeof(MessageTaggedEntityStore))]
+    [XmlInclude(typeof(MessageSaveTeleportHistory))]
     //permissions
     [XmlInclude(typeof(MessageCommandPermission))]
     [XmlInclude(typeof(MessageGroupPermission))]
@@ -35,7 +37,7 @@ namespace midspace.adminscripts.Messages
     //sync
     [XmlInclude(typeof(MessageSyncAres))]
     [XmlInclude(typeof(MessageSyncBlockOwner))]
-    [XmlInclude(typeof(MessageSyncGridOwner))]
+    [XmlInclude(typeof(MessageSyncGridChange))]
     [XmlInclude(typeof(MessageSyncEntity))]
     [XmlInclude(typeof(MessageSyncFaction))]
     [XmlInclude(typeof(MessageSyncBlock))]
@@ -43,7 +45,6 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageSyncInvisible))]
     [XmlInclude(typeof(MessageSyncCreateObject))]
     [XmlInclude(typeof(MessageSyncCreatePrefab))]
-    [XmlInclude(typeof(MessageSyncSetDestructable))]
     [XmlInclude(typeof(MessageSyncFloatingObjects))]
     [XmlInclude(typeof(MessageSyncSaveToolbar))]
     //communication

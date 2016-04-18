@@ -242,7 +242,7 @@ namespace midspace.adminscripts
             return shipList;
         }
 
-        public static bool FindEntitiesNamed(string entityName, bool findPlayers, bool findShips, bool findAsteroids, bool findPlanets, bool findGps,
+        public static bool FindEntitiesNamed(ulong steamId, long playerId, string entityName, bool findPlayers, bool findShips, bool findAsteroids, bool findPlanets, bool findGps,
             out IMyPlayer player, out IMyEntity entity, out IMyGps gps)
         {
             #region Find Exact name match first.
@@ -266,7 +266,7 @@ namespace midspace.adminscripts
                 MyAPIGateway.Session.VoxelMaps.GetInstances(planetList, v => v is Sandbox.Game.Entities.MyPlanet && (entityName == null || v.StorageName.Equals(entityName, StringComparison.InvariantCultureIgnoreCase)));
 
             if (findGps)
-                gpsList = MyAPIGateway.Session.GPS.GetGpsList(MyAPIGateway.Session.Player.IdentityId).Where(g => entityName == null || g.Name.Equals(entityName, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                gpsList = MyAPIGateway.Session.GPS.GetGpsList(playerId).Where(g => entityName == null || g.Name.Equals(entityName, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
             // identify a unique ship or player by the name.
             if (playerList.Count > 1 || shipList.Count > 1 || asteroidList.Count > 1 || planetList.Count > 1 || gpsList.Count > 1)
@@ -285,7 +285,7 @@ namespace midspace.adminscripts
                 if (findGps)
                     msg += string.Format("  Gps: {0}", gpsList.Count);
 
-                MyAPIGateway.Utilities.ShowMessage("Cannot match", msg);
+                MyAPIGateway.Utilities.SendMessage(steamId, "Cannot match", msg);
 
                 player = null;
                 entity = null;
@@ -356,7 +356,7 @@ namespace midspace.adminscripts
                 MyAPIGateway.Session.VoxelMaps.GetInstances(planetList, v => v is Sandbox.Game.Entities.MyPlanet && (entityName == null || v.StorageName.IndexOf(entityName, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
             if (findGps)
-                gpsList = MyAPIGateway.Session.GPS.GetGpsList(MyAPIGateway.Session.Player.IdentityId).Where(g => entityName == null || g.Name.IndexOf(entityName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToList();
+                gpsList = MyAPIGateway.Session.GPS.GetGpsList(playerId).Where(g => entityName == null || g.Name.IndexOf(entityName, StringComparison.InvariantCultureIgnoreCase) >= 0).ToList();
 
             // identify a unique ship or player by the name.
             if (playerList.Count > 1 || shipList.Count > 1 || asteroidList.Count > 1 || planetList.Count > 1 || gpsList.Count > 1)
@@ -375,7 +375,7 @@ namespace midspace.adminscripts
                 if (findGps)
                     msg += string.Format("  Gps: {0}", gpsList.Count);
 
-                MyAPIGateway.Utilities.ShowMessage("Cannot match", msg);
+                MyAPIGateway.Utilities.SendMessage(steamId, "Cannot match", msg);
 
                 player = null;
                 entity = null;
@@ -428,7 +428,7 @@ namespace midspace.adminscripts
             // In reality, this is equivilant to:
             // if (playerList.Count == 0 && shipList.Count == 0 && asteroidList.Count == 0 && planetList.Count == 0 && gpsList.Count == 0)
 
-            MyAPIGateway.Utilities.ShowMessage("Error", "Could not find specified object");
+            MyAPIGateway.Utilities.SendMessage(steamId, "Error", "Could not find specified object");
 
             player = null;
             entity = null;
@@ -1014,8 +1014,8 @@ namespace midspace.adminscripts
         /// <param name="emptyTargetMessage"></param>
         /// <param name="noSafeLocationMessage"></param>
         /// <returns></returns>
-        public static bool MoveTo(ulong steamId, IMyPlayer sourcePlayer, IMyPlayer targetPlayer, bool safely, bool agressivePosition,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
+        public static bool MoveTo(IMyPlayer sourcePlayer, IMyPlayer targetPlayer, bool safely, bool agressivePosition,
+            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage, ulong steamId)
         {
             if (sourcePlayer == null)
             {

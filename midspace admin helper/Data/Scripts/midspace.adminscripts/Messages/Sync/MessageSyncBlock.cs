@@ -1,9 +1,9 @@
-﻿using ProtoBuf;
-using Sandbox.ModAPI;
-using VRage.ModAPI;
-
-namespace midspace.adminscripts.Messages.Sync
+﻿namespace midspace.adminscripts.Messages.Sync
 {
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using VRage.ModAPI;
+
     [ProtoContract]
     public class MessageSyncBlock : MessageBase
     {

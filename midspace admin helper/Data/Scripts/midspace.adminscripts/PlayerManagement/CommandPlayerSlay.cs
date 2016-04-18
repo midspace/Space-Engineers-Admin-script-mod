@@ -11,7 +11,7 @@
     public class CommandPlayerSlay : ChatCommand
     {
         public CommandPlayerSlay()
-            : base(ChatCommandSecurity.Admin, "slay", new[] { "/slay" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "slay", new[] { "/slay" })
         {
         }
 
@@ -37,16 +37,17 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Slay", "No player named '{0}' found.", playerName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Slay", "No player named '{0}' found.", playerName);
                     return true;
                 }
 

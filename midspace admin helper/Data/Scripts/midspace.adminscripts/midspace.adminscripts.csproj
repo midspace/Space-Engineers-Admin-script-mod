@@ -109,6 +109,7 @@
     <Compile Include="Messages\Communication\MessageClientTextMessage.cs" />
     <Compile Include="Messages\MessageAdminNotification.cs" />
     <Compile Include="Messages\MessageBase.cs" />
+    <Compile Include="Messages\MessageSaveTeleportHistory.cs" />
     <Compile Include="Messages\MessageChatHistory.cs" />
     <Compile Include="Messages\MessageConfig.cs" />
     <Compile Include="Messages\MessageConnectionRequest.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Messages\MessageForceDisconnect.cs" />
     <Compile Include="Messages\MessageGlobalMessage.cs" />
     <Compile Include="Messages\MessageChatCommand.cs" />
+    <Compile Include="Messages\MessageTaggedEntityStore.cs" />
     <Compile Include="Messages\Protection\MessageProtectionArea.cs" />
     <Compile Include="Messages\Protection\MessageProtectionConfig.cs" />
     <Compile Include="Messages\Protection\MessageSyncProtection.cs" />
@@ -124,7 +126,6 @@
     <Compile Include="Messages\Sync\MessageSyncBlock.cs" />
     <Compile Include="Messages\Sync\MessageSyncAres.cs" />
     <Compile Include="Messages\Sync\MessageSyncFaction.cs" />
-    <Compile Include="Messages\Sync\MessageSyncSetDestructable.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
@@ -140,7 +141,7 @@
     <Compile Include="Messages\MessagePrivateMessage.cs" />
     <Compile Include="Messages\MessageSession.cs" />
     <Compile Include="Messages\MessageSide.cs" />
-    <Compile Include="Messages\Sync\MessageSyncGridOwner.cs" />
+    <Compile Include="Messages\Sync\MessageSyncGridChange.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
     <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
     <Compile Include="Messages\Sync\MessageSyncSaveToolbar.cs" />

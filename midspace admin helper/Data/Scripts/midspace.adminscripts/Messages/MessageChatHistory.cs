@@ -1,12 +1,8 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using System.Collections.Generic;
+    using ProtoBuf;
+
     [ProtoContract]
     public class MessageChatHistory : MessageBase
     {

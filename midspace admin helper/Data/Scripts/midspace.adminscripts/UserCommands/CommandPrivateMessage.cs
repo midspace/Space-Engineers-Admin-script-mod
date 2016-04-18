@@ -16,7 +16,7 @@
         public static bool LogPrivateMessages = false;
 
         public CommandPrivateMessage()
-            : base(ChatCommandSecurity.User, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
+            : base(ChatCommandSecurity.User, ChatCommandFlag.Server | ChatCommandFlag.MultiplayerOnly, "msg", new[] { "/msg", "@", "/tell", "@@", "@@@", "@@@@", "@@@@@", "@?" })
         {
         }
 
@@ -61,6 +61,8 @@ The logging of private messages is {1}.
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
+            List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+
             //TODO: matching playernames
             var match = Regex.Match(messageText, @"@@@@@\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
@@ -69,10 +71,10 @@ The logging of private messages is {1}.
                 IMyPlayer lastWhisper = null;
                 if (MyAPIGateway.Players.TryGetPlayer(LastWhisperId, out lastWhisper))
                 {
-                    SendPrivateMessage(lastWhisper, message);
+                    SendPrivateMessage(steamId, lastWhisper, message);
                     return true;
                 }
-                MyAPIGateway.Utilities.ShowMessage("PM System", "Could not find player. Either no one whispered to you or he is offline now.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "PM System", "Could not find player. Either no one whispered to you or he is offline now.");
                 return true;
             }
 
@@ -84,13 +86,13 @@ The logging of private messages is {1}.
                 if (MyAPIGateway.Players.TryGetPlayer(LastWhisperId, out lastWhisper))
                 {
                     if (!string.IsNullOrEmpty(message))
-                        SendPrivateMessage(lastWhisper, message);
+                        SendPrivateMessage(steamId, lastWhisper, message);
 
                     WhisperPartner = lastWhisper;
-                    MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Set whisperpartner to {0}", WhisperPartner.DisplayName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Set whisperpartner to {0}", WhisperPartner.DisplayName));
                     return true;
                 }
-                MyAPIGateway.Utilities.ShowMessage("PM System", "Could not find player. Either no one whispered to you or he is offline now.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "PM System", "Could not find player. Either no one whispered to you or he is offline now.");
                 return true;
             }
 
@@ -104,24 +106,24 @@ The logging of private messages is {1}.
                 if (MyAPIGateway.Players.TryGetPlayer(playerName, out receiver))
                 {
                     if (!string.IsNullOrEmpty(message))
-                        SendPrivateMessage(receiver, message);
+                        SendPrivateMessage(steamId, receiver, message);
 
                     WhisperPartner = receiver;
-                    MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Set whisperpartner to {0}", WhisperPartner.DisplayName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Set whisperpartner to {0}", WhisperPartner.DisplayName));
                 }
-                else if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                else if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     receiver = listplayers.FirstOrDefault();
                     if (!string.IsNullOrEmpty(message))
-                        SendPrivateMessage(receiver, message);
+                        SendPrivateMessage(steamId, receiver, message);
 
                     WhisperPartner = receiver;
-                    MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Set whisperpartner to {0}", WhisperPartner.DisplayName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Set whisperpartner to {0}", WhisperPartner.DisplayName));
                 }
                 else
-                    MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Player {0} does not exist.", match2.Groups["KeyPlayer"].Value));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Player {0} does not exist.", match2.Groups["KeyPlayer"].Value));
 
                 return true;
             }
@@ -131,17 +133,17 @@ The logging of private messages is {1}.
             {
                 if (WhisperPartner == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("PM System", "No whisperpartner set");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", "No whisperpartner set");
                     return true;
                 }
                 //make sure player is online
                 if (MyAPIGateway.Players.TryGetPlayer(WhisperPartner.SteamUserId, out WhisperPartner))
                 {
-                    SendPrivateMessage(WhisperPartner, match3.Groups["Key"].Value);
+                    SendPrivateMessage(steamId, WhisperPartner, match3.Groups["Key"].Value);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Player {0} is offline.", WhisperPartner.DisplayName));
+                MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Player {0} is offline.", WhisperPartner.DisplayName));
                 return true;
             }
 
@@ -151,17 +153,18 @@ The logging of private messages is {1}.
                 var playerName = match4.Groups["Player"].Value;
                 IMyPlayer receiver;
                 int index;
+             
                 if (MyAPIGateway.Players.TryGetPlayer(playerName, out receiver)) 
-                    SendPrivateMessage(receiver, match4.Groups["Message"].Value);
-                else if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                    SendPrivateMessage(steamId, receiver, match4.Groups["Message"].Value);
+                else if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     receiver = listplayers.FirstOrDefault();
-                    SendPrivateMessage(receiver, match4.Groups["Message"].Value);
+                    SendPrivateMessage(steamId, receiver, match4.Groups["Message"].Value);
                 }
                 else
-                    MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Player {0} does not exist.", match4.Groups["KeyPlayer"].Value));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Player {0} does not exist.", match4.Groups["KeyPlayer"].Value));
                 return true;
             }
 
@@ -169,9 +172,9 @@ The logging of private messages is {1}.
             if (match5.Success)
             {
                 if (WhisperPartner != null)
-                    MyAPIGateway.Utilities.ShowMessage("PM System", string.Format("Your current whisperpartner is {0}.", WhisperPartner.DisplayName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", string.Format("Your current whisperpartner is {0}.", WhisperPartner.DisplayName));
                 else
-                    MyAPIGateway.Utilities.ShowMessage("PM System", "No whisperpartner set.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "PM System", "No whisperpartner set.");
                 return true;
             }
             
@@ -179,10 +182,10 @@ The logging of private messages is {1}.
             return false;
         }
 
-        private void SendPrivateMessage(IMyPlayer receiver, string message)
+        private void SendPrivateMessage(ulong steamId, IMyPlayer receiver, string message)
         {
             if (string.IsNullOrEmpty(message))
-                MyAPIGateway.Utilities.ShowMessage("PM System", "Message too short.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "PM System", "Message too short.");
 
             var privateMessage = new MessagePrivateMessage();
             privateMessage.ChatMessage = new ChatMessage()
@@ -199,7 +202,7 @@ The logging of private messages is {1}.
             privateMessage.Receiver = receiver.SteamUserId;
             ConnectionHelper.SendMessageToServer(privateMessage);
 
-            MyAPIGateway.Utilities.ShowMessage(string.Format("Whispered {0}", receiver.DisplayName), message);
+            MyAPIGateway.Utilities.SendMessage(steamId, string.Format("Whispered {0}", receiver.DisplayName), message);
         }
     }
 }

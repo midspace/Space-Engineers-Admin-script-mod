@@ -13,7 +13,7 @@
         public static bool DropPlayer;
 
         public CommandForceKick()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "forcekick", new string[] { "/forcekick" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server | ChatCommandFlag.MultiplayerOnly, "forcekick", new string[] { "/forcekick" })
         {
         }
 
@@ -24,7 +24,7 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/forcekick\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/forcekick\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 var playerName = match.Groups["Key"].Value;
@@ -39,20 +39,21 @@
                 }
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == CommandPlayerStatus.IdentityCache[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("ForceKick", "No player named {0} found.", playerName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "ForceKick", "No player named {0} found.", playerName);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("ForceKick", selectedPlayer.DisplayName);
+                MyAPIGateway.Utilities.SendMessage(steamId, "ForceKick", selectedPlayer.DisplayName);
                 ConnectionHelper.SendMessageToServer(new MessageForceDisconnect() { SteamId = selectedPlayer.SteamUserId });
                 return true;
             }
@@ -62,13 +63,13 @@
     }
 }
 
-namespace A8DB07281BA741DFB48BE151DDBFE24F
+namespace Sandbox.Game.World
 {
     using System;
     using VRage.Game.Components;
 
     [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
-    public class D384FFC3B4164AB29EE47720094B109E : MySessionComponentBase
+    public class MySession : MySessionComponentBase
     {
         public override void UpdateBeforeSimulation()
         {

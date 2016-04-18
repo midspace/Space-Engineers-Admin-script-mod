@@ -32,11 +32,11 @@
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (entity != null)
                 {
-                    if (CommandShipScaleUp.ScaleShip(entity as IMyCubeGrid, scale))
+                    if (CommandShipScaleUp.ScaleShip(steamId, entity as IMyCubeGrid, scale))
                         return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("scaleup", "No ship targeted.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "scaleup", "No ship targeted.");
                 return true;
             }
 
@@ -50,28 +50,29 @@
 
                 if (currentShipList.Count == 1)
                 {
-                    if (CommandShipScaleUp.ScaleShip(currentShipList.First() as IMyCubeGrid, scale))
+                    if (CommandShipScaleUp.ScaleShip(steamId, currentShipList.First() as IMyCubeGrid, scale))
                         return true;
                 }
                 else if (currentShipList.Count == 0)
                 {
                     int index;
-                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count && CommandListShips.ShipCache[index - 1] != null)
+                    List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
+                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= shipCache.Count && shipCache[index - 1] != null)
                     {
-                        if (CommandShipScaleUp.ScaleShip(CommandListShips.ShipCache[index - 1] as IMyCubeGrid, scale))
+                        if (CommandShipScaleUp.ScaleShip(steamId, shipCache[index - 1] as IMyCubeGrid, scale))
                         {
-                            CommandListShips.ShipCache[index - 1] = null;
+                            shipCache[index - 1] = null;
                             return true;
                         }
                     }
                 }
                 else if (currentShipList.Count > 1)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("scaleup", "{0} Ships match that name.", currentShipList.Count);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "scaleup", "{0} Ships match that name.", currentShipList.Count);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("scaleup", "Ship name not found.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "scaleup", "Ship name not found.");
                 return true;
             }
 
@@ -95,14 +96,14 @@
         // TODO: deal with cubes that need to be rotated.
         // LargeBlockBeacon, SmallBlockBeacon, ConveyorTube, ConveyorTubeSmall
     
-        public static bool ScaleShip(IMyCubeGrid shipEntity, MyCubeSize newScale)
+        public static bool ScaleShip(ulong steamId, IMyCubeGrid shipEntity, MyCubeSize newScale)
         {
             if (shipEntity == null)
                 return false;
 
             if (shipEntity.GridSizeEnum == newScale)
             {
-                MyAPIGateway.Utilities.ShowMessage("scaledown", "Ship is already the right scale.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "scaledown", "Ship is already the right scale.");
                 return true;
             }
 
@@ -173,7 +174,7 @@
                 cubeGrid.SyncObject.SendCloseRequest(); 
 
                 var name = cubeGrid.DisplayName;
-                MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' resized.", name);
+                MyAPIGateway.Utilities.SendMessage(steamId, "ship", "'{0}' resized.", name);
 
                 tempList.Add(gridObjectBuilder);
 

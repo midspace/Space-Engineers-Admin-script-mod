@@ -16,7 +16,7 @@
         /// Need to make it safer to teleport when either player is a pilot.
         /// </summary>
         public CommandTeleportToPlayer()
-            : base(ChatCommandSecurity.Admin, "tpp", new[] { "/tpp" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "tpp", new[] { "/tpp" })
         {
         }
 
@@ -41,14 +41,15 @@
                 selectedPlayer = identities.FirstOrDefault();
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
-                    selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
+                    selectedPlayer = cacheList[index - 1];
                 }
 
                 if (selectedPlayer == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Player name", string.Format("'{0}' not found", playerName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Player name", string.Format("'{0}' not found", playerName));
                     return true;
                 }
 
@@ -58,32 +59,39 @@
 
                 if (player == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Player", "no longer exists");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Player", "no longer exists");
                     return true;
                 }
 
                 Action<Vector3D> saveTeleportBack = delegate (Vector3D position)
                 {
                     // save teleport in history
-                    CommandTeleportBack.SaveTeleportInHistory(position);
+                    CommandTeleportBack.SaveTeleportInHistory(playerId, position);
                 };
 
-                Action emptySourceMsg = delegate ()
+                Action emptySourceMsg = delegate
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Source entity no longer exists.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Source entity no longer exists.");
                 };
 
-                Action emptyTargetMsg = delegate ()
+                Action emptyTargetMsg = delegate
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Target entity no longer exists.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Target entity no longer exists.");
                 };
 
-                Action noSafeLocationMsg = delegate ()
+                Action noSafeLocationMsg = delegate
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Could not find safe location to transport to.");
                 };
 
-                Support.MoveTo(0, MyAPIGateway.Session.Player, player, true, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
+                IMyPlayer thisPlayer;
+                if (!MyAPIGateway.Players.TryGetPlayer(steamId, out thisPlayer))
+                {
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Source entity no longer exists.");
+                    return true;
+                }
+
+                var ret = Support.MoveTo(thisPlayer, player, true, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg, steamId);
                 return true;
             }
 

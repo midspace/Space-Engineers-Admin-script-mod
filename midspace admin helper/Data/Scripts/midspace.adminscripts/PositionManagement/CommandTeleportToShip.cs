@@ -11,7 +11,7 @@
     public class CommandTeleportToShip : ChatCommand
     {
         public CommandTeleportToShip()
-            : base(ChatCommandSecurity.Admin, "tps", new[] { "/tps" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "tps", new[] { "/tps" })
         {
         }
 
@@ -34,9 +34,10 @@
                 if (currentShipList.Count == 0)
                 {
                     int index;
-                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count)
+                    List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
+                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= shipCache.Count)
                     {
-                        currentShipList = new HashSet<IMyEntity> { CommandListShips.ShipCache[index - 1] };
+                        currentShipList = new HashSet<IMyEntity> { shipCache[index - 1] };
                     }
                 }
 
@@ -44,38 +45,39 @@
 
                 if (ship == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Ship name", "'{0}' not found", shipName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Ship name", "'{0}' not found", shipName);
                     return true;
                 }
 
                 if (ship.Closed)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Ship", "no longer exists");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Ship", "no longer exists");
                     return true;
                 }
 
                 Action<Vector3D> saveTeleportBack = delegate (Vector3D position)
                 {
                     // save teleport in history
-                    CommandTeleportBack.SaveTeleportInHistory(position);
+                    CommandTeleportBack.SaveTeleportInHistory(playerId, position);
                 };
 
                 Action emptySourceMsg = delegate ()
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Source player no longer exists.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Source player no longer exists.");
                 };
 
                 Action emptyTargetMsg = delegate ()
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Teleport failed", "Target ship no longer exists.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Target ship no longer exists.");
                 };
 
                 Action noSafeLocationMsg = delegate ()
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Failed", "Could not find safe location to transport to.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Could not find safe location to transport to.");
                 };
 
-                return Support.MoveTo(MyAPIGateway.Session.Player, ship, true,
+                IMyPlayer player = MyAPIGateway.Players.GetPlayer(steamId);
+                return Support.MoveTo(player, ship, true,
                            saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg);
             }
 

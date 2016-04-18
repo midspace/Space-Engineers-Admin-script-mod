@@ -11,7 +11,7 @@
     public class CommandFactionKick : ChatCommand
     {
         public CommandFactionKick()
-            : base(ChatCommandSecurity.Admin, "fk", new[] { "/fk" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "fk", new[] { "/fk" })
         {
         }
 
@@ -36,9 +36,10 @@
                 selectedPlayer = identities.FirstOrDefault();
 
                 int index;
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandPlayerStatus.IdentityCache.Count)
+                List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
-                    selectedPlayer = CommandPlayerStatus.IdentityCache[index - 1];
+                    selectedPlayer = cacheList[index - 1];
                 }
 
                 if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
@@ -56,7 +57,7 @@
                 {
                     MessageSyncFaction.CancelJoinFaction(request.FactionId, selectedPlayer.PlayerId);
                     //MyAPIGateway.Session.Factions.CancelJoinRequest(request.FactionId, selectedPlayer.PlayerId);
-                    MyAPIGateway.Utilities.ShowMessage("kick", "{0} has had join request cancelled.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "kick", "{0} has had join request cancelled.", selectedPlayer.DisplayName);
                     return true;
                 }
 
@@ -64,12 +65,12 @@
 
                 if (factionBuilder == null)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("kick", "{0} is not in faction.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "kick", "{0} is not in faction.", selectedPlayer.DisplayName);
                     return true;
                 }
 
                 MessageSyncFaction.KickFaction(factionBuilder.FactionId, selectedPlayer.PlayerId);
-                MyAPIGateway.Utilities.ShowMessage("kick", "{0} has been removed from faction.", selectedPlayer.DisplayName);
+                MyAPIGateway.Utilities.SendMessage(steamId, "kick", "{0} has been removed from faction.", selectedPlayer.DisplayName);
                 return true;
             }
 

@@ -1,11 +1,11 @@
-﻿using System;
-using ProtoBuf;
-using Sandbox.ModAPI;
-using VRage.ModAPI;
-using VRageMath;
-
-namespace midspace.adminscripts.Messages.Sync
+﻿namespace midspace.adminscripts.Messages.Sync
 {
+    using System;
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using VRage.ModAPI;
+    using VRageMath;
+
     [ProtoContract]
     public class MessageSyncEntity : MessageBase
     {
@@ -55,7 +55,7 @@ namespace midspace.adminscripts.Messages.Sync
             if (MyAPIGateway.Multiplayer.MultiplayerActive)
                 ConnectionHelper.SendMessageToAll(syncEntity);
             else
-                syncEntity.CommonProcess(entity);
+                CommonProcess(entity, syncEntity.SyncType, syncEntity.Velocity, syncEntity.Position, syncEntity.Matrix);
         }
 
         #endregion
@@ -67,7 +67,7 @@ namespace midspace.adminscripts.Messages.Sync
             if (!MyAPIGateway.Entities.EntityExists(EntityId))
                 return;
 
-            CommonProcess(MyAPIGateway.Entities.GetEntityById(EntityId));
+            CommonProcess(MyAPIGateway.Entities.GetEntityById(EntityId), SyncType, Velocity, Position, Matrix);
         }
 
         public override void ProcessServer()
@@ -77,29 +77,29 @@ namespace midspace.adminscripts.Messages.Sync
             if (!MyAPIGateway.Entities.EntityExists(EntityId))
                 return;
 
-            CommonProcess(MyAPIGateway.Entities.GetEntityById(EntityId));
+            CommonProcess(MyAPIGateway.Entities.GetEntityById(EntityId), SyncType, Velocity, Position, Matrix);
         }
 
-        private void CommonProcess(IMyEntity entity)
+        private static void CommonProcess(IMyEntity entity, SyncEntityType syncType, Vector3 velocity, Vector3D position, MatrixD matrix)
         {
             if (entity == null)
                 return;
 
-            if (SyncType.HasFlag(SyncEntityType.Stop))
+            if (syncType.HasFlag(SyncEntityType.Stop))
                 entity.Stop();
 
             // The Physics.LinearVelocity doesn't change the player speed quickly enough before SetPosition is called, as
             // the player will smack into the other obejct before it's correct velocity is actually registered.
-            if (SyncType.HasFlag(SyncEntityType.Velocity) && entity.Physics != null)
-                entity.Physics.LinearVelocity = Velocity;
+            if (syncType.HasFlag(SyncEntityType.Velocity) && entity.Physics != null)
+                entity.Physics.LinearVelocity = velocity;
 
             // The SetWorldMatrix doesn't rotate the player quickly enough before SetPosition is called, as 
             // the player will bounce off objects before it's correct orentation is actually registered.
-            if (SyncType.HasFlag(SyncEntityType.Matrix))
-                entity.SetWorldMatrix(Matrix);
+            if (syncType.HasFlag(SyncEntityType.Matrix))
+                entity.SetWorldMatrix(matrix);
 
-            if (SyncType.HasFlag(SyncEntityType.Position))
-                entity.SetPosition(Position);
+            if (syncType.HasFlag(SyncEntityType.Position))
+                entity.SetPosition(position);
         }
     }
 

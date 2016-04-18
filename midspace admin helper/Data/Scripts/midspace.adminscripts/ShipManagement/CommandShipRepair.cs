@@ -34,12 +34,12 @@
                     var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        RepairShip(entity);
+                        RepairShip(steamId, entity);
                         return true;
                     }
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("repair", "No ship targeted.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "repair", "No ship targeted.");
                 return true;
             }
 
@@ -53,33 +53,85 @@
 
                 if (currentShipList.Count == 1)
                 {
-                    RepairShip(currentShipList.First());
+                    RepairShip(steamId, currentShipList.First());
                     return true;
                 }
                 else if (currentShipList.Count == 0)
                 {
                     int index;
-                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count && CommandListShips.ShipCache[index - 1] != null)
+                    List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
+                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= shipCache.Count && shipCache[index - 1] != null)
                     {
-                        RepairShip(CommandListShips.ShipCache[index - 1]);
-                        CommandListShips.ShipCache[index - 1] = null;
+                        RepairShip(steamId, shipCache[index - 1]);
+                        shipCache[index - 1] = null;
                         return true;
                     }
                 }
                 else if (currentShipList.Count > 1)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("repair", "{0} Ships match that name.", currentShipList.Count);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "repair", "{0} Ships match that name.", currentShipList.Count);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("repair", "Ship name not found.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "repair", "Ship name not found.");
                 return true;
             }
 
             return false;
         }
 
-        private void RepairShip(IMyEntity shipEntity)
+        private void RepairShip(ulong steamId, IMyEntity shipEntity)
+        {
+            var blocks = new List<IMySlimBlock>();
+            var ship = (IMyCubeGrid)shipEntity;
+            ship.GetBlocks(blocks, f => f != null);
+
+
+            var grid = (Sandbox.Game.Entities.MyCubeGrid)shipEntity;
+            //MyGridPhysics physics = grid.Physics; // MyGridPhysics not allowed.
+            //physics.RecreateWeldedShape();  // MyPhysicsBody not allowed.
+
+
+            //var physics = new MyGridPhysics(grid, null);
+
+            //grid.ApplyDestructionDeformation();
+            //physics.ApplyDeformation(0, 0, 0, Vector3.Zero, Vector3.Zero, MyDamageType.Weld, 0, 0, 0);
+
+            //Sandbox.Game.Multiplayer.MySyncGrid g = grid.SyncObject;  // is marked Internal.
+
+            foreach (IMySlimBlock block in blocks)
+            {
+                //block.CurrentDamage
+                //block.AccumulatedDamage
+                //block.DamageRatio
+                //block.HasDeformation
+                //block.MaxDeformation
+
+                //((IMyDestroyableObject)block).DoDamage(-1000, MyDamageType.Weld, true);
+                //block.ApplyAccumulatedDamage();
+                //ship.ApplyDestructionDeformation(block);
+                //grid.ApplyDestructionDeformation((Sandbox.Game.Entities.Cube.MySlimBlock)block, -1f);
+
+                if ((block.HasDeformation || block.MaxDeformation > 0.0f) || !block.IsFullIntegrity)
+                {
+                    //float maxAllowedBoneMovement = WELDER_MAX_REPAIR_BONE_MOVEMENT_SPEED * ToolCooldownMs * 0.001f;
+
+                    //var b = block as MySlimBlock; // MySlimBlock is not allowed.
+                    //block.IncreaseMountLevel(WeldAmount, Owner.ControllerInfo.ControllingIdentityId, CharacterInventory, maxAllowedBoneMovement);
+                    //b.IncreaseMountLevel(1000, 0, null, 0);
+                }
+
+                var targetDestroyable = block as IMyDestroyableObject;
+                if (targetDestroyable != null)
+                {
+
+                }
+            }
+
+            MyAPIGateway.Utilities.SendMessage(steamId, "repair", "Ship '{0}' has been repairded.", shipEntity.DisplayName);
+        }
+
+        private void RepairShip2(ulong steamId, IMyEntity shipEntity)
         {
             // We SHOULD NOT make any changes directly to the prefab, we need to make a Value copy using Clone(), and modify that instead.
             var gridObjectBuilder = shipEntity.GetObjectBuilder().Clone() as MyObjectBuilder_CubeGrid;
@@ -108,7 +160,7 @@
             tempList.Add(gridObjectBuilder);
             tempList.CreateAndSyncEntities();
 
-            MyAPIGateway.Utilities.ShowMessage("repair", "Ship '{0}' has been repairded.", shipEntity.DisplayName);
+            MyAPIGateway.Utilities.SendMessage(steamId, "repair", "Ship '{0}' has been repairded.", shipEntity.DisplayName);
         }
     }
 }

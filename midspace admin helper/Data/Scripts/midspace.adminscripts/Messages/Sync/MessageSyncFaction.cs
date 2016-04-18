@@ -59,7 +59,7 @@ namespace midspace.adminscripts.Messages.Sync
 
         private static void Process(MessageSyncFaction syncEntity)
         {
-            if (MyAPIGateway.Multiplayer.MultiplayerActive)
+            if (MyAPIGateway.Multiplayer.MultiplayerActive && !MyAPIGateway.Multiplayer.IsServer)
                 ConnectionHelper.SendMessageToServer(syncEntity);
             else
                 syncEntity.CommonProcess(syncEntity.SyncType, syncEntity.FactionId, syncEntity.PlayerId);

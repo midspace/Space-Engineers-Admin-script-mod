@@ -2,6 +2,7 @@
 {
     using System.Globalization;
     using System.Text.RegularExpressions;
+    using Messages;
     using Messages.Sync;
     using Sandbox.ModAPI;
     using VRageMath;
@@ -53,7 +54,7 @@
                 }
 
                 // save teleport in history
-                CommandTeleportBack.SaveTeleportInHistory(currentPosition);
+                MessageSaveTeleportHistory.SaveToHistory(playerId, currentPosition);
                 return true;
             }
 

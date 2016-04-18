@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Messages;
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
@@ -13,11 +14,6 @@
 
     public class CommandIdentify : ChatCommand
     {
-        /// <summary>
-        /// Temporary cache created when player id's an item in game.
-        /// </summary>
-        public static IMyEntity IdentifyCache = null;
-
         public CommandIdentify()
             : base(ChatCommandSecurity.Admin, "id", new[] { "/id" })
         {
@@ -38,7 +34,7 @@
                 Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, out entity, out distance, out hitPoint, true, true, true, true, true, true);
                 if (entity != null)
                 {
-                    IdentifyCache = entity;
+                    MessageTaggedEntityStore.RegisterIdentity(playerId, entity.EntityId);
                     string displayType;
                     string displayName;
                     string description;

@@ -57,7 +57,7 @@
                 }
 
                 if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                    ConnectionHelper.SendMessageToServer(new MessageSyncGod() {Enable = GodModeEnabled});
+                    ConnectionHelper.SendMessageToServer(new MessageSyncGod() { Enable = GodModeEnabled });
 
                 MyAPIGateway.Utilities.ShowMessage("GodMode", GodModeEnabled ? "On" : "Off");
 

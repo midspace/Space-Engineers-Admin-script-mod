@@ -1,13 +1,10 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
-
+    using Messages.Sync;
     using Sandbox.ModAPI;
     using VRage.Game.ModAPI;
-    using VRage.ModAPI;
 
     public class CommandShipDelete : ChatCommand
     {
@@ -23,18 +20,15 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            if (messageText.Equals("/deleteship", StringComparison.InvariantCultureIgnoreCase)||
+            if (messageText.Equals("/deleteship", StringComparison.InvariantCultureIgnoreCase) ||
                 messageText.Equals("/delship", StringComparison.InvariantCultureIgnoreCase))
-                {
+            {
                 var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
-                if (entity != null)
+                var shipEntity = entity as IMyCubeGrid;
+                if (shipEntity != null)
                 {
-                    var shipEntity = entity as IMyCubeGrid;
-                    if (shipEntity != null)
-                    {
-                        DeleteShip(entity);
-                        return true;
-                    }
+                    MessageSyncGridChange.SendMessage(SyncGridChangeType.DeleteShip, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID);
+                    return true;
                 }
 
                 MyAPIGateway.Utilities.ShowMessage("deleteship", "No ship targeted.");
@@ -45,56 +39,11 @@
             if (match.Success)
             {
                 var shipName = match.Groups["Key"].Value;
-
-                var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
-
-                if (currentShipList.Count == 1)
-                {
-                    DeleteShip(currentShipList.First());
-                    return true;
-                }
-                else if (currentShipList.Count == 0)
-                {
-                    int index;
-                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= CommandListShips.ShipCache.Count && CommandListShips.ShipCache[index - 1] != null)
-                    {
-                        DeleteShip(CommandListShips.ShipCache[index - 1]);
-                        CommandListShips.ShipCache[index - 1] = null;
-                        return true;
-                    }
-                }
-                else if (currentShipList.Count > 1)
-                {
-                    MyAPIGateway.Utilities.ShowMessage("deleteship", "{0} Ships match that name.", currentShipList.Count);
-                    return true;
-                }
-
-                MyAPIGateway.Utilities.ShowMessage("deleteship", "Ship name not found.");
+                MessageSyncGridChange.SendMessage(SyncGridChangeType.DeleteShip, 0, shipName, MyAPIGateway.Session.Player.PlayerID);
                 return true;
             }
 
             return false;
-        }
-
-        private void DeleteShip(IMyEntity shipEntity)
-        {
-            var grids = shipEntity.GetAttachedGrids(AttachedGrids.Static);
-
-            foreach (var cubeGrid in grids)
-            {
-                // ejects any player prior to deleting the grid.
-                cubeGrid.EjectControllingPlayers();
-
-                var name = cubeGrid.DisplayName;
-
-                // This will Delete the entity and sync to all.
-                // Using this, also works with player ejection in the same Tick.
-           
-                cubeGrid.SyncObject.SendCloseRequest();
-
-                MyAPIGateway.Utilities.ShowMessage("ship", "'{0}' deleted.", name);
-            }
         }
     }
 }
