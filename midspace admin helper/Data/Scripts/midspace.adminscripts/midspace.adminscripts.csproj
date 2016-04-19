@@ -135,7 +135,6 @@
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />
-    <Compile Include="Messages\MessagePardon.cs" />
     <Compile Include="Messages\MessageSave.cs" />
     <Compile Include="Messages\Permissions\MessageGroupPermission.cs" />
     <Compile Include="Messages\MessageIncomingMessageParts.cs" />

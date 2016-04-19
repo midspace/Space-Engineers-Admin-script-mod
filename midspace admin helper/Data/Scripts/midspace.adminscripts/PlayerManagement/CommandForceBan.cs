@@ -22,7 +22,7 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"/forceban\s{1,}(?<Key>.+)", RegexOptions.IgnoreCase);
+            var match = Regex.Match(messageText, @"/forceban\s+(?<Key>.+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 var playerName = match.Groups["Key"].Value;
@@ -51,8 +51,15 @@
                     return true;
                 }
 
-                MyAPIGateway.Utilities.SendMessage(steamId, "ForceBan", selectedPlayer.DisplayName);
-                ConnectionHelper.SendMessageToServer(new MessageForceDisconnect() { SteamId = selectedPlayer.SteamUserId, Ban = true });
+                ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.Add(new Player()
+                {
+                    SteamId = selectedPlayer.SteamUserId,
+                    PlayerName = selectedPlayer.DisplayName
+                });
+
+                ConnectionHelper.SendMessageToPlayer(selectedPlayer.SteamUserId, new MessageForceDisconnect { SteamId = selectedPlayer.SteamUserId, Ban = true });
+                MyAPIGateway.Utilities.SendMessage(steamId, "Server", "{0} player Forcebanned", selectedPlayer.DisplayName);
+
                 return true;
             }
 

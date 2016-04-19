@@ -53,8 +53,8 @@
                     return true;
                 }
 
-                MyAPIGateway.Utilities.SendMessage(steamId, "ForceKick", selectedPlayer.DisplayName);
-                ConnectionHelper.SendMessageToServer(new MessageForceDisconnect() { SteamId = selectedPlayer.SteamUserId });
+                ConnectionHelper.SendMessageToPlayer(selectedPlayer.SteamUserId, new MessageForceDisconnect { SteamId = selectedPlayer.SteamUserId, Ban = false });
+                MyAPIGateway.Utilities.SendMessage(steamId, "Server", "{0} player Forcekicked", selectedPlayer.DisplayName);
                 return true;
             }
 
@@ -74,7 +74,10 @@ namespace Sandbox.Game.World
         public override void UpdateBeforeSimulation()
         {
             if (midspace.adminscripts.CommandForceKick.DropPlayer)
+            {
+                VRage.Utils.MyLog.Default.WriteLine("Player kicked from Server");
                 throw new Exception();
+            }
         }
     }
 }
