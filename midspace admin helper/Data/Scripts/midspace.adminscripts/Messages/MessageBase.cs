@@ -5,6 +5,7 @@ using midspace.adminscripts.Messages.Permissions;
 using midspace.adminscripts.Messages.Protection;
 using midspace.adminscripts.Messages.Sync;
 using ProtoBuf;
+using Sandbox.ModAPI;
 
 namespace midspace.adminscripts.Messages
 {
@@ -65,6 +66,12 @@ namespace midspace.adminscripts.Messages
         /// </summary>
         [ProtoMember(2)]
         public MessageSide Side;
+
+        public MessageBase()
+        {
+            if (MyAPIGateway.Session.Player != null)
+                SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
+        }
 
         /*
         [ProtoAfterDeserialization]

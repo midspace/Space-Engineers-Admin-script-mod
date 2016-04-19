@@ -22,7 +22,12 @@
 
         public static void RegisterIdentity(long playerId, long entityId)
         {
-            ConnectionHelper.SendMessageToServer(new MessageTaggedEntityStore { PlayerId = playerId, EntityId = entityId });
+            var msg = new MessageTaggedEntityStore { PlayerId = playerId, EntityId = entityId };
+
+            if (MyAPIGateway.Multiplayer.MultiplayerActive)
+                ConnectionHelper.SendMessageToServer(msg);
+            else
+                msg.ProcessServer();
         }
 
         public static IMyEntity GetEntity(long playerId)
