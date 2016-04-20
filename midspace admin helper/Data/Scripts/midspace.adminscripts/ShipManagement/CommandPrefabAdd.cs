@@ -39,8 +39,8 @@
                 {
                     if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                     {
-                        if (!MessageSyncCreatePrefab.AddPrefab(prefab.Id.SubtypeName, MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId, SyncCreatePrefabType.Stock))
-                            MyAPIGateway.Utilities.ShowMessage("Failed", "Could not create the specified prefab.");
+                        if (MessageSyncCreatePrefab.AddPrefab(prefab.Id.SubtypeName, MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.EntityId, SyncCreatePrefabType.Stock))
+                            return true;
                     }
                     else
                         ConnectionHelper.SendMessageToServer(new MessageSyncCreatePrefab()
@@ -51,6 +51,9 @@
                         });
                     return true;
                 }
+
+                MyAPIGateway.Utilities.ShowMessage("Failed", "Could not create the specified prefab.");
+                return true;
             }
 
             return false;
