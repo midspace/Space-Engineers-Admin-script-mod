@@ -108,6 +108,7 @@
     <Compile Include="Config\Permissions.cs" />
     <Compile Include="FactionManagement\CommandFactionPeace.cs" />
     <Compile Include="InventoryManagement\CommandInventoryInsert.cs" />
+    <Compile Include="InventoryManagement\CommandObjectsDelete.cs" />
     <Compile Include="Localize.cs" />
     <Compile Include="Messages\Communication\MessageClientDialogMessage.cs" />
     <Compile Include="Messages\Communication\MessageClientNotification.cs" />

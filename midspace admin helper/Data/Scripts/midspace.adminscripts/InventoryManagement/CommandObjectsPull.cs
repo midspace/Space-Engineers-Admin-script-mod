@@ -27,7 +27,7 @@
         {
             if (messageText.StartsWith("/pullobjects ", StringComparison.InvariantCultureIgnoreCase))
             {
-                var match = Regex.Match(messageText, @"/pullobjects\s{1,}(?<R>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s{1,}(?<V>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
+                var match = Regex.Match(messageText, @"/pullobjects\s+(?<R>[+-]?((\d+(\.\d*)?)|(\.\d+)))\s+(?<V>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
                     var range = double.Parse(match.Groups["R"].Value, CultureInfo.InvariantCulture);

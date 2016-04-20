@@ -47,7 +47,7 @@
         {
             if (messageText.StartsWith("/collectobjects ", StringComparison.InvariantCultureIgnoreCase))
             {
-                var match = Regex.Match(messageText, @"/collectobjects\s{1,}(?<R>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
+                var match = Regex.Match(messageText, @"/collectobjects\s+(?<R>[+-]?((\d+(\.\d*)?)|(\.\d+)))", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
                     var range = double.Parse(match.Groups["R"].Value, CultureInfo.InvariantCulture);
