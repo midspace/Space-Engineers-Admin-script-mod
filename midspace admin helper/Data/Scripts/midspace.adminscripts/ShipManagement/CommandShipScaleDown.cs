@@ -1,18 +1,12 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
+    using Messages.Sync;
     using Sandbox.ModAPI;
-    using VRage.Game;
-    using VRage.Game.ModAPI;
-    using VRage.ModAPI;
 
     public class CommandShipScaleDown : ChatCommand
     {
-        private const MyCubeSize scale = MyCubeSize.Small;
-
         public CommandShipScaleDown()
             : base(ChatCommandSecurity.Admin, "scaledown", new[] { "/scaledown" })
         {
@@ -27,14 +21,14 @@
         {
             if (messageText.Equals("/scaledown", StringComparison.InvariantCultureIgnoreCase))
             {
-                var entity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
-                if (entity != null)
+                var shipEntity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
+                if (shipEntity != null)
                 {
-                    if (CommandShipScaleUp.ScaleShip(steamId, entity as IMyCubeGrid, scale))
-                        return true;
+                    MessageSyncGridChange.SendMessage(SyncGridChangeType.ScaleDown, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID);
+                    return true;
                 }
 
-                MyAPIGateway.Utilities.SendMessage(steamId, "scaledown", "No ship targeted.");
+                MyAPIGateway.Utilities.ShowMessage("scaledown", "No ship targeted.");
                 return true;
             }
 
@@ -42,35 +36,7 @@
             if (match.Success)
             {
                 var shipName = match.Groups["Key"].Value;
-
-                var currentShipList = new HashSet<IMyEntity>();
-                MyAPIGateway.Entities.GetEntities(currentShipList, e => e is IMyCubeGrid && e.DisplayName.Equals(shipName, StringComparison.InvariantCultureIgnoreCase));
-
-                if (currentShipList.Count == 1)
-                {
-                    if (CommandShipScaleUp.ScaleShip(steamId, currentShipList.First() as IMyCubeGrid, scale))
-                        return true;
-                }
-                else if (currentShipList.Count == 0)
-                {
-                    int index;
-                    List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
-                    if (shipName.Substring(0, 1) == "#" && Int32.TryParse(shipName.Substring(1), out index) && index > 0 && index <= shipCache.Count && shipCache[index - 1] != null)
-                    {
-                        if (CommandShipScaleUp.ScaleShip(steamId, shipCache[index - 1] as IMyCubeGrid, scale))
-                        {
-                            shipCache[index - 1] = null;
-                            return true;
-                        }
-                    }
-                }
-                else if (currentShipList.Count > 1)
-                {
-                    MyAPIGateway.Utilities.SendMessage(steamId, "scaledown", "{0} Ships match that name.", currentShipList.Count);
-                    return true;
-                }
-
-                MyAPIGateway.Utilities.SendMessage(steamId, "scaledown", "Ship name not found.");
+                MessageSyncGridChange.SendMessage(SyncGridChangeType.ScaleDown, 0, shipName, MyAPIGateway.Session.Player.PlayerID);
                 return true;
             }
 

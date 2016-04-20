@@ -3,9 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
+    using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.ModAPI;
@@ -75,7 +77,7 @@
                     // hotlist search.
                     int index;
                     List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
-                    if (searchEntity.Substring(0, 1) == "#" && Int32.TryParse(searchEntity.Substring(1), out index) && index > 0 && index <= shipCache.Count)
+                    if (searchEntity.Substring(0, 1) == "#" && int.TryParse(searchEntity.Substring(1), out index) && index > 0 && index <= shipCache.Count)
                     {
                         selectedShips.Add((IMyCubeGrid)shipCache[index - 1]);
                     }
@@ -180,6 +182,16 @@
                             MessageSyncEntity.Process(selectedShip, SyncEntityType.Stop);
                             MyAPIGateway.Utilities.SendMessage(steamId, selectedShip.DisplayName, "Is stopping.");
                         }
+                    }
+                    break;
+                case SyncGridChangeType.ScaleDown:
+                    {
+                        ScaleShip(steamId, selectedShips.First(), MyCubeSize.Small);
+                    }
+                    break;
+                case SyncGridChangeType.ScaleUp:
+                    {
+                        ScaleShip(steamId, selectedShips.First(), MyCubeSize.Large);
                     }
                     break;
             }
@@ -289,7 +301,7 @@
             }
         }
 
-        public static void SetDestructible(IMyEntity shipEntity, bool destructible, ulong steamId)
+        private void SetDestructible(IMyEntity shipEntity, bool destructible, ulong steamId)
         {
             var gridObjectBuilder = shipEntity.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
             if (gridObjectBuilder.DestructibleBlocks == destructible)
@@ -311,6 +323,114 @@
 
             MyAPIGateway.Utilities.SendMessage(steamId, "destructible", "Ship '{0}' destructible has been set to {1}.", shipEntity.DisplayName, destructible ? "On" : "Off");
         }
+
+        static readonly Dictionary<string, string> LargeToSmall = new Dictionary<string, string> {
+            { "LargeBlockConveyor", "SmallBlockConveyor" },
+            { "ConveyorTube", "ConveyorTubeSmall" },
+            { "ConveyorTubeCurved", "ConveyorTubeSmallCurved" },
+            { "LargeBlockLargeContainer", "SmallBlockMediumContainer" }
+        };
+
+        static readonly Dictionary<string, string> SmallToLarge = new Dictionary<string, string> {
+            { "SmallBlockConveyor", "LargeBlockConveyor" },
+            { "ConveyorTubeSmall", "ConveyorTube" } ,
+            { "ConveyorTubeSmallCurved", "ConveyorTubeCurved" },
+            { "SmallBlockMediumContainer", "LargeBlockLargeContainer" },
+        };
+
+        // TODO: deal with cubes that need to be rotated.
+        // LargeBlockBeacon, SmallBlockBeacon, ConveyorTube, ConveyorTubeSmall
+
+        private bool ScaleShip(ulong steamId, IMyCubeGrid shipEntity, MyCubeSize newScale)
+        {
+            if (shipEntity == null)
+                return false;
+
+            if (shipEntity.GridSizeEnum == newScale)
+            {
+                MyAPIGateway.Utilities.SendMessage(steamId, "scaledown", "Ship is already the right scale.");
+                return true;
+            }
+
+            var grids = shipEntity.GetAttachedGrids();
+
+            var newGrids = new MyObjectBuilder_CubeGrid[grids.Count];
+
+            foreach (var cubeGrid in grids)
+            {
+                // ejects any player prior to deleting the grid.
+                cubeGrid.EjectControllingPlayers();
+                cubeGrid.Physics.Enabled = false;
+            }
+
+            var tempList = new List<MyObjectBuilder_EntityBase>();
+            var gridIndex = 0;
+            foreach (var cubeGrid in grids)
+            {
+                var blocks = new List<IMySlimBlock>();
+                cubeGrid.GetBlocks(blocks);
+
+                var gridObjectBuilder = cubeGrid.GetObjectBuilder(true) as MyObjectBuilder_CubeGrid;
+
+                gridObjectBuilder.EntityId = 0;
+                Regex rgx = new Regex(Regex.Escape(gridObjectBuilder.GridSizeEnum.ToString()));
+                var rgxScale = Regex.Escape(newScale.ToString());
+                gridObjectBuilder.GridSizeEnum = newScale;
+                var removeList = new List<MyObjectBuilder_CubeBlock>();
+
+                foreach (var block in gridObjectBuilder.CubeBlocks)
+                {
+                    MyCubeBlockDefinition definition;
+                    string newSubType = null;
+                    if (newScale == MyCubeSize.Small && LargeToSmall.ContainsKey(block.SubtypeName))
+                        newSubType = LargeToSmall[block.SubtypeName];
+                    else if (newScale == MyCubeSize.Large && SmallToLarge.ContainsKey(block.SubtypeName))
+                        newSubType = SmallToLarge[block.SubtypeName];
+                    else
+                    {
+                        newSubType = rgx.Replace(block.SubtypeName, rgxScale, 1);
+
+                        // Match using the BlockPairName if there is a matching cube.
+                        if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), block.SubtypeName), out definition))
+                        {
+                            var newDef = MyDefinitionManager.Static.GetAllDefinitions().Where(d => d is MyCubeBlockDefinition && ((MyCubeBlockDefinition)d).BlockPairName == definition.BlockPairName && ((MyCubeBlockDefinition)d).CubeSize == newScale).FirstOrDefault();
+                            if (newDef != null)
+                                newSubType = newDef.Id.SubtypeName;
+                        }
+                    }
+                    if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), newSubType), out definition) && definition.CubeSize == newScale)
+                    {
+                        block.SubtypeName = newSubType;
+                        //block.EntityId = 0;
+                    }
+                    else
+                    {
+                        removeList.Add(block);
+                    }
+                }
+
+                foreach (var block in removeList)
+                {
+                    gridObjectBuilder.CubeBlocks.Remove(block);
+                }
+
+                // This will Delete the entity and sync to all.
+                // Using this, also works with player ejection in the same Tick.
+                cubeGrid.SyncObject.SendCloseRequest();
+
+                var name = cubeGrid.DisplayName;
+                MyAPIGateway.Utilities.SendMessage(steamId, "ship", "'{0}' resized.", name);
+
+                tempList.Add(gridObjectBuilder);
+
+                gridIndex++;
+            }
+
+            // TODO: reposition multiple grids so rotors and pistons re-attach.
+
+            tempList.CreateAndSyncEntities();
+            return true;
+        }
     }
 
     public enum SyncGridChangeType
@@ -322,6 +442,8 @@
         SwitchOffPower,
         DeleteShip,
         Destructible,
-        Stop
+        Stop,
+        ScaleUp,
+        ScaleDown
     }
 }
