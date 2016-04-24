@@ -573,7 +573,7 @@ namespace midspace.adminscripts
         /// <param name="searchAsteroidName"></param>
         /// <param name="originalAsteroid"></param>
         /// <returns></returns>
-        public static bool FindAsteroid(string searchAsteroidName, out IMyVoxelBase originalAsteroid)
+        public static bool FindAsteroid(ulong steamId, string searchAsteroidName, out IMyVoxelBase originalAsteroid)
         {
             var currentAsteroidList = new List<IMyVoxelBase>();
             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(searchAsteroidName, StringComparison.InvariantCultureIgnoreCase));
@@ -593,10 +593,11 @@ namespace midspace.adminscripts
                 }
             }
 
+            List<IMyVoxelBase> asteroidCache = CommandAsteroidsList.GetAsteroidCache(steamId);
             int index;
-            if (searchAsteroidName.Substring(0, 1) == "#" && Int32.TryParse(searchAsteroidName.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
+            if (searchAsteroidName.Substring(0, 1) == "#" && Int32.TryParse(searchAsteroidName.Substring(1), out index) && index > 0 && index <= asteroidCache.Count)
             {
-                originalAsteroid = CommandAsteroidsList.AsteroidCache[index - 1];
+                originalAsteroid = asteroidCache[index - 1];
                 return true;
             }
 

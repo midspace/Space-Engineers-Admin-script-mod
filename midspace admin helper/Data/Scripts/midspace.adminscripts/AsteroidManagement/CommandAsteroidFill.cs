@@ -13,7 +13,7 @@
     public class CommandAsteroidFill : ChatCommand
     {
         public CommandAsteroidFill()
-            : base(ChatCommandSecurity.Admin, "roidfill", new[] { "/roidfill" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "roidfill", new[] { "/roidfill" })
         {
         }
 
@@ -29,9 +29,9 @@
             {
                 var searchAsteroidName = match.Groups["Asteroid"].Value;
                 IMyVoxelBase originalAsteroid = null;
-                if (!Support.FindAsteroid(searchAsteroidName, out originalAsteroid))
+                if (!Support.FindAsteroid(steamId, searchAsteroidName, out originalAsteroid))
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Cannot find asteroid", string.Format("'{0}'", searchAsteroidName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Cannot find asteroid", string.Format("'{0}'", searchAsteroidName));
                     return true;
                 }
 
@@ -40,7 +40,7 @@
                 string suggestedMaterials = "";
                 if (!Support.FindMaterial(searchMaterialName, out material, ref suggestedMaterials))
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Invalid Material specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", searchMaterialName, suggestedMaterials);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Invalid Material specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", searchMaterialName, suggestedMaterials);
                     return true;
                 }
 
@@ -52,7 +52,7 @@
 
                 MyAPIGateway.Session.VoxelMaps.PaintInShape(originalAsteroid, boxShape, material.Index);
 
-                MyAPIGateway.Utilities.ShowMessage("Asteroid", "'{0}' filled with material '{1}'.", originalAsteroid.StorageName, material.Id.SubtypeName);
+                MyAPIGateway.Utilities.SendMessage(steamId, "Asteroid", "'{0}' filled with material '{1}'.", originalAsteroid.StorageName, material.Id.SubtypeName);
                 return true;
             }
 

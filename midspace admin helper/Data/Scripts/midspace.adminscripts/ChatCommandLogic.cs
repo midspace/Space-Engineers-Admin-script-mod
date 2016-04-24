@@ -115,6 +115,7 @@ namespace midspace.adminscripts
             Logger.Init();
             MyAPIGateway.Utilities.MessageEntered += Utilities_MessageEntered;
             Logger.Debug("Attach MessageEntered");
+            VRage.Utils.MyLog.Default.WriteLine("##Mod## Admin Helper Client Initialisation");
 
 
             _timer100 = new ThreadsafeTimer(100);
@@ -160,6 +161,7 @@ namespace midspace.adminscripts
             _isInitialized = true; // Set this first to block any other calls from UpdateBeforeSimulation().
             Logger.Init();
             Logger.Debug("Server Logger started");
+            VRage.Utils.MyLog.Default.WriteLine("##Mod## Admin Helper Server Initialisation");
 
             // TODO: restructure the ChatCommandLogic to encapsulate ChatCommandService on the server side.
             // Required to check security for user calls on the Server side, and call the UpdateBeforeSimulation...() methods for each command.
@@ -242,6 +244,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandInvisible());
             commands.Add(new CommandMeteor(_oreNames[0]));
             commands.Add(new CommandObjectsCollect());
+            commands.Add(new CommandObjectsDelete());
             commands.Add(new CommandObjectsCount());
             commands.Add(new CommandObjectsPull());
             commands.Add(new CommandPardon());

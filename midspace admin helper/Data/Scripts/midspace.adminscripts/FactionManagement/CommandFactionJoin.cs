@@ -44,13 +44,17 @@
                     selectedPlayer = cacheList[index - 1];
                 }
 
-                if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= CommandListBots.BotCache.Count)
+                List<IMyIdentity> botCacheList = CommandListBots.GetIdentityCache(steamId);
+                if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= botCacheList.Count)
                 {
-                    selectedPlayer = CommandListBots.BotCache[index - 1];
+                    selectedPlayer = botCacheList[index - 1];
                 }
 
                 if (selectedPlayer == null)
-                    return false;
+                {
+                    MyAPIGateway.Utilities.SendMessage(steamId, "fj", "specified player could not be found.");
+                    return true;
+                }
 
                 if (!MyAPIGateway.Session.Factions.FactionTagExists(factionName) &&
                     !MyAPIGateway.Session.Factions.FactionNameExists(factionName))

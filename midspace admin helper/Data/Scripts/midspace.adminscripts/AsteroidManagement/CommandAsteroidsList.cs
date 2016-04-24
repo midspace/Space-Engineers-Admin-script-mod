@@ -15,12 +15,12 @@
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of in game asteroids, populated only by search results.
         /// </summary>
-        public readonly static List<IMyVoxelBase> AsteroidCache = new List<IMyVoxelBase>();
+        private readonly static Dictionary<ulong, List<IMyVoxelBase>> ServerAsteroidCache = new Dictionary<ulong, List<IMyVoxelBase>>();
 
         public CommandAsteroidsList()
-            : base(ChatCommandSecurity.Admin, "listasteroids", new[] { "/listasteroids" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "listasteroids", new[] { "/listasteroids" })
         {
-            AsteroidCache.Clear();
+            ServerAsteroidCache.Clear();
         }
 
         public override void Help(ulong steamId, bool brief)
@@ -42,17 +42,17 @@
                 var currentAsteroidList = new List<IMyVoxelBase>();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v is IMyVoxelMap && (asteroidName == null || v.StorageName.IndexOf(asteroidName, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
-                AsteroidCache.Clear();
+                ServerAsteroidCache[steamId] = new List<IMyVoxelBase>();
 
                 // Only display the list in chat if the chat allows to fully show it, else display it in a mission screen.
                 if (currentAsteroidList.Count <= 9)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Count", currentAsteroidList.Count.ToString());
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Count", currentAsteroidList.Count.ToString());
                     var index = 1;
                     foreach (var voxelMap in currentAsteroidList)
                     {
-                        AsteroidCache.Add(voxelMap);
-                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), voxelMap.StorageName);
+                        ServerAsteroidCache[steamId].Add(voxelMap);
+                        MyAPIGateway.Utilities.SendMessage(steamId, string.Format("#{0}", index++), voxelMap.StorageName);
                     }
                 }
                 else
@@ -62,17 +62,28 @@
                     var index = 1;
                     foreach (var voxelMap in currentAsteroidList.OrderBy(s => s.StorageName))
                     {
-                        AsteroidCache.Add(voxelMap);
+                        ServerAsteroidCache[steamId].Add(voxelMap);
                         description.AppendFormat("#{0}: {1}\r\n", index++, voxelMap.StorageName);
                     }
 
-                    MyAPIGateway.Utilities.ShowMissionScreen("List Asteroids", prefix, " ", description.ToString());
+                    MyAPIGateway.Utilities.SendMissionScreen(steamId, "List Asteroids", prefix, " ", description.ToString());
                 }
 
                 return true;
             }
 
             return false;
+        }
+
+        public static List<IMyVoxelBase> GetAsteroidCache(ulong steamId)
+        {
+            List<IMyVoxelBase> cacheList;
+            if (!ServerAsteroidCache.TryGetValue(steamId, out cacheList))
+            {
+                ServerAsteroidCache.Add(steamId, new List<IMyVoxelBase>());
+                cacheList = ServerAsteroidCache[steamId];
+            }
+            return cacheList;
         }
     }
 }

@@ -10,7 +10,7 @@
     public class CommandPlanetDelete : ChatCommand
     {
         public CommandPlanetDelete()
-            : base(ChatCommandSecurity.Admin, "deleteplanet", new[] { "/deleteplanet", "/delplanet" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "deleteplanet", new[] { "/deleteplanet", "/delplanet" })
         {
         }
 
@@ -28,10 +28,10 @@
                 if (entity != null)
                 {
                     var planetEntity = entity as Sandbox.Game.Entities.MyPlanet;
-                    return DeletePlanet(planetEntity);
+                    return DeletePlanet(steamId, planetEntity);
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("deleteplanet", "No planet targeted.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "deleteplanet", "No planet targeted.");
                 return true;
             }
 
@@ -45,39 +45,40 @@
 
                 if (currentPlanetList.Count == 1)
                 {
-                    DeletePlanet(currentPlanetList.First());
+                    DeletePlanet(steamId, currentPlanetList.First());
                     return true;
                 }
                 else if (currentPlanetList.Count == 0)
                 {
+                    List<IMyVoxelBase> planetCache = CommandPlanetsList.GetPlanetCache(steamId);
                     int index;
-                    if (planetName.Substring(0, 1) == "#" && int.TryParse(planetName.Substring(1), out index) && index > 0 && index <= CommandPlanetsList.PlanetCache.Count && CommandPlanetsList.PlanetCache[index - 1] != null)
+                    if (planetName.Substring(0, 1) == "#" && int.TryParse(planetName.Substring(1), out index) && index > 0 && index <= planetCache.Count && planetCache[index - 1] != null)
                     {
-                        DeletePlanet(CommandPlanetsList.PlanetCache[index - 1]);
-                        CommandPlanetsList.PlanetCache[index - 1] = null;
+                        DeletePlanet(steamId, planetCache[index - 1]);
+                        planetCache[index - 1] = null;
                         return true;
                     }
                 }
                 else if (currentPlanetList.Count > 1)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("deleteplanet", "{0} Planets match that name.", currentPlanetList.Count);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "deleteplanet", "{0} Planets match that name.", currentPlanetList.Count);
                     return true;
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("deleteplanet", "Planet name not found.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "deleteplanet", "Planet name not found.");
                 return true;
             }
 
             return false;
         }
 
-        private bool DeletePlanet(IMyVoxelBase planetEntity)
+        private bool DeletePlanet(ulong steamId, IMyVoxelBase planetEntity)
         {
             if (planetEntity == null)
                 return false;
             var name = planetEntity.StorageName;
             planetEntity.SyncObject.SendCloseRequest();
-            MyAPIGateway.Utilities.ShowMessage("planet", "'{0}' deleted.", name);
+            MyAPIGateway.Utilities.SendMessage(steamId, "planet", "'{0}' deleted.", name);
             return true;
         }
     }

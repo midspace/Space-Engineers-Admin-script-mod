@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using System.Text;
     using Sandbox.ModAPI;
     using VRage.Game.ModAPI;
 
@@ -12,11 +12,12 @@
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of npcs, populated only by search results.
         /// </summary>
-        public readonly static List<IMyIdentity> BotCache = new List<IMyIdentity>();
+        private readonly static Dictionary<ulong, List<IMyIdentity>> ServerIdentityCache = new Dictionary<ulong, List<IMyIdentity>>();
 
         public CommandListBots()
-            : base(ChatCommandSecurity.Admin, "listbots", new[] { "/listbots" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "listbots", new[] { "/listbots" })
         {
+            ServerIdentityCache.Clear();
         }
 
         public override void Help(ulong steamId, bool brief)
@@ -26,28 +27,41 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            if (messageText.Equals("/listbots", StringComparison.InvariantCultureIgnoreCase))
+            var players = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(players, p => p != null);
+            ServerIdentityCache[steamId] = new List<IMyIdentity>();
+            var index = 1;
+            var identities = new List<IMyIdentity>();
+            MyAPIGateway.Players.GetAllIdentites(identities);
+
+            var description = new StringBuilder();
+            var count = 0;
+
+            foreach (var identity in identities.OrderBy(i => i.DisplayName))
             {
-                var players = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(players, p => p != null);
-                BotCache.Clear();
-                var index = 1;
-                var identities = new List<IMyIdentity>();
-                MyAPIGateway.Players.GetAllIdentites(identities);
-
-                foreach (var identity in identities)
+                var steamPlayer = players.FirstOrDefault(p => p.PlayerID == identity.PlayerId);
+                if (steamPlayer == null)
                 {
-                    var steamPlayer = players.FirstOrDefault(p => p.PlayerID == identity.PlayerId);
-                    if (steamPlayer == null)
-                    {
-                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), "Bot '{0}'", identity.DisplayName);
-                        BotCache.Add(identity);
-                    }
-
+                    description.AppendFormat("#{0} '{1}'\r\n", index++, identity.DisplayName);
+                    ServerIdentityCache[steamId].Add(identity);
+                    count++;
                 }
-                return true;
             }
-            return false;
+
+            var prefix = string.Format("Count: {0}", count);
+            MyAPIGateway.Utilities.SendMissionScreen(steamId, "List Identities (Dead and Bot)", prefix, " ", description.ToString(), null, "OK");
+            return true;
+        }
+
+        public static List<IMyIdentity> GetIdentityCache(ulong steamId)
+        {
+            List<IMyIdentity> cacheList;
+            if (!ServerIdentityCache.TryGetValue(steamId, out cacheList))
+            {
+                ServerIdentityCache.Add(steamId, new List<IMyIdentity>());
+                cacheList = ServerIdentityCache[steamId];
+            }
+            return cacheList;
         }
     }
 }

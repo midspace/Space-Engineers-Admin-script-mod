@@ -18,7 +18,7 @@
     public class CommandAsteroidReplace : ChatCommand
     {
         public CommandAsteroidReplace()
-            : base(ChatCommandSecurity.Admin, "roidreplace", new[] { "/roidreplace" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "roidreplace", new[] { "/roidreplace" })
         {
         }
 
@@ -55,7 +55,7 @@ The following materials are available:
 {0}
 
 ", materialNames);
-                MyAPIGateway.Utilities.ShowMissionScreen("Create Asteroid Sphere:", null, " ", description.ToString(), null, "OK");
+                MyAPIGateway.Utilities.SendMissionScreen(steamId, "Create Asteroid Sphere:", null, " ", description.ToString(), null, "OK");
             }
         }
 
@@ -66,15 +66,15 @@ The following materials are available:
             {
                 var searchAsteroidName = match.Groups["Asteroid"].Value;
                 IMyVoxelBase originalAsteroid = null;
-                if (!Support.FindAsteroid(searchAsteroidName, out originalAsteroid))
+                if (!Support.FindAsteroid(steamId, searchAsteroidName, out originalAsteroid))
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Cannot find asteroid", string.Format("'{0}'", searchAsteroidName));
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Cannot find asteroid", string.Format("'{0}'", searchAsteroidName));
                     return true;
                 }
 
                 var searchMaterialName1 = match.Groups["Material1"].Value;
                 var searchMaterialName2 = match.Groups["Material2"].Value;
-                return ReplaceAsteroidMaterial(originalAsteroid, searchMaterialName1, searchMaterialName2);
+                return ReplaceAsteroidMaterial(steamId, originalAsteroid, searchMaterialName1, searchMaterialName2);
             }
 
             match = Regex.Match(messageText, @"/roidreplace\s+(?<Material1>[^\s]+)\s+(?<Material2>[^\s]+)", RegexOptions.IgnoreCase);
@@ -87,31 +87,31 @@ The following materials are available:
                     var voxelMap = (IMyVoxelMap)entity;
                     var searchMaterialName1 = match.Groups["Material1"].Value;
                     var searchMaterialName2 = match.Groups["Material2"].Value;
-                    return ReplaceAsteroidMaterial(voxelMap, searchMaterialName1, searchMaterialName2);
+                    return ReplaceAsteroidMaterial(steamId, voxelMap, searchMaterialName1, searchMaterialName2);
                 }
                 else
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Asteroid", "Was not targeted.");
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Asteroid", "Was not targeted.");
                 }
             }
 
             return false;
         }
 
-        private bool ReplaceAsteroidMaterial(IMyVoxelBase originalAsteroid, string searchMaterialName1, string searchMaterialName2)
+        private bool ReplaceAsteroidMaterial(ulong steamId, IMyVoxelBase originalAsteroid, string searchMaterialName1, string searchMaterialName2)
         {
             MyVoxelMaterialDefinition material1;
             string suggestedMaterials = "";
             if (!Support.FindMaterial(searchMaterialName1, out material1, ref suggestedMaterials))
             {
-                MyAPIGateway.Utilities.ShowMessage("Invalid Material1 specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", searchMaterialName1, suggestedMaterials);
+                MyAPIGateway.Utilities.SendMessage(steamId, "Invalid Material1 specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", searchMaterialName1, suggestedMaterials);
                 return true;
             }
 
             MyVoxelMaterialDefinition material2;
             if (!Support.FindMaterial(searchMaterialName2, out material2, ref suggestedMaterials))
             {
-                MyAPIGateway.Utilities.ShowMessage("Invalid Material2 specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", searchMaterialName2, suggestedMaterials);
+                MyAPIGateway.Utilities.SendMessage(steamId, "Invalid Material2 specified.", "Cannot find the material '{0}'.\r\nTry the following: {1}", searchMaterialName2, suggestedMaterials);
                 return true;
             }
 
@@ -132,7 +132,7 @@ The following materials are available:
 
             oldStorage.WriteRange(oldCache, MyStorageDataTypeFlags.ContentAndMaterial, Vector3I.Zero, oldStorage.Size - 1);
 
-            MyAPIGateway.Utilities.ShowMessage("Asteroid", "'{0}' material '{1}' replaced with '{2}'.", originalAsteroid.StorageName, material1.Id.SubtypeName, material2.Id.SubtypeName);
+            MyAPIGateway.Utilities.SendMessage(steamId, "Asteroid", "'{0}' material '{1}' replaced with '{2}'.", originalAsteroid.StorageName, material1.Id.SubtypeName, material2.Id.SubtypeName);
             return true;
         }
     }

@@ -14,12 +14,12 @@
         /// <summary>
         /// Temporary hotlist cache created when player requests a list of in game planets, populated only by search results.
         /// </summary>
-        public readonly static List<IMyVoxelBase> PlanetCache = new List<IMyVoxelBase>();
+        private readonly static Dictionary<ulong, List<IMyVoxelBase>> ServerPlanetCache = new Dictionary<ulong, List<IMyVoxelBase>>();
 
         public CommandPlanetsList()
-            : base(ChatCommandSecurity.Admin, "listplanets", new[] { "/listplanets" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "listplanets", new[] { "/listplanets" })
         {
-            PlanetCache.Clear();
+            ServerPlanetCache.Clear();
         }
 
         public override void Help(ulong steamId, bool brief)
@@ -41,17 +41,17 @@
                 var currentPlanetList = new List<IMyVoxelBase>();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentPlanetList, v => v is Sandbox.Game.Entities.MyPlanet && (planetName == null || v.StorageName.IndexOf(planetName, StringComparison.InvariantCultureIgnoreCase) >= 0));
 
-                PlanetCache.Clear();
+                ServerPlanetCache[steamId] = new List<IMyVoxelBase>();
 
                 // Only display the list in chat if the chat allows to fully show it, else display it in a mission screen.
                 if (currentPlanetList.Count <= 9)
                 {
-                    MyAPIGateway.Utilities.ShowMessage("Count", currentPlanetList.Count.ToString());
+                    MyAPIGateway.Utilities.SendMessage(steamId, "Count", currentPlanetList.Count.ToString());
                     var index = 1;
                     foreach (var voxelMap in currentPlanetList)
                     {
-                        PlanetCache.Add(voxelMap);
-                        MyAPIGateway.Utilities.ShowMessage(string.Format("#{0}", index++), voxelMap.StorageName);
+                        ServerPlanetCache[steamId].Add(voxelMap);
+                        MyAPIGateway.Utilities.SendMessage(steamId, string.Format("#{0}", index++), voxelMap.StorageName);
                     }
                 }
                 else
@@ -61,17 +61,28 @@
                     var index = 1;
                     foreach (var voxelMap in currentPlanetList.OrderBy(s => s.StorageName))
                     {
-                        PlanetCache.Add(voxelMap);
+                        ServerPlanetCache[steamId].Add(voxelMap);
                         description.AppendFormat("#{0}: {1}\r\n", index++, voxelMap.StorageName);
                     }
 
-                    MyAPIGateway.Utilities.ShowMissionScreen("List Planets", prefix, " ", description.ToString());
+                    MyAPIGateway.Utilities.SendMissionScreen(steamId, "List Planets", prefix, " ", description.ToString());
                 }
 
                 return true;
             }
 
             return false;
+        }
+
+        public static List<IMyVoxelBase> GetPlanetCache(ulong steamId)
+        {
+            List<IMyVoxelBase> cacheList;
+            if (!ServerPlanetCache.TryGetValue(steamId, out cacheList))
+            {
+                ServerPlanetCache.Add(steamId, new List<IMyVoxelBase>());
+                cacheList = ServerPlanetCache[steamId];
+            }
+            return cacheList;
         }
     }
 }

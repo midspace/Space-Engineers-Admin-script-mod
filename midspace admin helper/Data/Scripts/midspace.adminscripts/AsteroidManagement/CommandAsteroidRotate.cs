@@ -16,7 +16,7 @@
     public class CommandAsteroidRotate : ChatCommand
     {
         public CommandAsteroidRotate()
-            : base(ChatCommandSecurity.Admin, "rotateroid", new[] { "/rotateroid" })
+            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "rotateroid", new[] { "/rotateroid" })
         {
         }
 
@@ -55,15 +55,16 @@
                         }
                     }
 
+                    List<IMyVoxelBase> asteroidCache = CommandAsteroidsList.GetAsteroidCache(steamId);
                     int index;
-                    if (searchName.Substring(0, 1) == "#" && Int32.TryParse(searchName.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
+                    if (searchName.Substring(0, 1) == "#" && Int32.TryParse(searchName.Substring(1), out index) && index > 0 && index <= asteroidCache.Count)
                     {
-                        originalAsteroid = CommandAsteroidsList.AsteroidCache[index - 1];
+                        originalAsteroid = asteroidCache[index - 1];
                     }
 
                     if (originalAsteroid == null)
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Cannot find asteroid", string.Format("'{0}'", searchName));
+                        MyAPIGateway.Utilities.SendMessage(steamId, "Cannot find asteroid", string.Format("'{0}'", searchName));
                         return true;
                     }
 
@@ -106,7 +107,7 @@
                     MyAPIGateway.Entities.RemoveEntity((IMyEntity)originalAsteroid);
 
                     // Invalidate the cache, to force user to select again to prevent possible corruption by using an old cache.
-                    CommandAsteroidsList.AsteroidCache.Clear();
+                    asteroidCache.Clear();
                     return true;
                 }
             }

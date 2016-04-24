@@ -160,6 +160,10 @@ asteroidname - complete asteroid name without spaces.
                 int index;
                 List<IMyIdentity> identityCache = CommandPlayerStatus.GetIdentityCache(steamId);
                 List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
+
+                List<IMyVoxelBase> planetCache = CommandPlanetsList.GetPlanetCache(steamId);
+                List<IMyVoxelBase> asteroidCache = CommandAsteroidsList.GetAsteroidCache(steamId);
+
                 IMyEntity taggedEntity = MessageTaggedEntityStore.GetEntity(playerId);
 
                 #region Teleport You to target.
@@ -245,9 +249,9 @@ asteroidname - complete asteroid name without spaces.
                     }
                     if (asteroid1)
                     {
-                        if (Int32.TryParse(match.Groups["Asteroid1"].Value.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
+                        if (Int32.TryParse(match.Groups["Asteroid1"].Value.Substring(1), out index) && index > 0 && index <= asteroidCache.Count)
                         {
-                            var currentAsteroidList = new HashSet<IMyEntity> { CommandAsteroidsList.AsteroidCache[index - 1] };
+                            var currentAsteroidList = new HashSet<IMyEntity> { asteroidCache[index - 1] };
                             var asteroid = (IMyVoxelBase)currentAsteroidList.FirstElement();
                             Support.MoveTo(player, asteroid, safely, saveTeleportBack, noSafeLocationMsg, emptyTargetMsg, noSafeLocationMsg);
                             return true;
@@ -255,9 +259,9 @@ asteroidname - complete asteroid name without spaces.
                     }
                     if (planet1)
                     {
-                        if (Int32.TryParse(match.Groups["Planet1"].Value.Substring(1), out index) && index > 0 && index <= CommandPlanetsList.PlanetCache.Count)
+                        if (Int32.TryParse(match.Groups["Planet1"].Value.Substring(1), out index) && index > 0 && index <= planetCache.Count)
                         {
-                            var currentPlanetList = new HashSet<IMyEntity> { CommandPlanetsList.PlanetCache[index - 1] };
+                            var currentPlanetList = new HashSet<IMyEntity> { planetCache[index - 1] };
                             var planet = (IMyVoxelBase)currentPlanetList.FirstElement();
                             Support.MoveTo(player, planet, safely, saveTeleportBack, noSafeLocationMsg, emptyTargetMsg, noSafeLocationMsg);
                             return true;
@@ -667,9 +671,9 @@ asteroidname - complete asteroid name without spaces.
                 if (asteroid2)
                 {
                     IMyEntity targetAsteroid = null;
-                    if (Int32.TryParse(match.Groups["Asteroid2"].Value.Substring(1), out index) && index > 0 && index <= CommandAsteroidsList.AsteroidCache.Count)
+                    if (Int32.TryParse(match.Groups["Asteroid2"].Value.Substring(1), out index) && index > 0 && index <= asteroidCache.Count)
                     {
-                        var currentAsteroidList = new HashSet<IMyEntity> { CommandAsteroidsList.AsteroidCache[index - 1] };
+                        var currentAsteroidList = new HashSet<IMyEntity> { asteroidCache[index - 1] };
                         targetAsteroid = currentAsteroidList.FirstElement();
                     }
                     if (targetAsteroid == null)
@@ -722,9 +726,9 @@ asteroidname - complete asteroid name without spaces.
                 if (planet2)
                 {
                     IMyEntity targetPlanet = null;
-                    if (Int32.TryParse(match.Groups["Planet2"].Value.Substring(1), out index) && index > 0 && index <= CommandPlanetsList.PlanetCache.Count)
+                    if (Int32.TryParse(match.Groups["Planet2"].Value.Substring(1), out index) && index > 0 && index <= planetCache.Count)
                     {
-                        var currentPlanetList = new HashSet<IMyEntity> { CommandPlanetsList.PlanetCache[index - 1] };
+                        var currentPlanetList = new HashSet<IMyEntity> { planetCache[index - 1] };
                         targetPlanet = currentPlanetList.FirstElement();
                     }
                     if (targetPlanet == null)

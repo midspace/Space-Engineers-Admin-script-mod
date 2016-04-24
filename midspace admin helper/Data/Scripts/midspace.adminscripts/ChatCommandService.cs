@@ -178,7 +178,7 @@
                         if (MyAPIGateway.Session.Player.IsExperimentalCreator())
                         {
                             MyAPIGateway.Utilities.ShowMissionScreen(string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
-                            VRage.Utils.MyLog.Default.WriteLine(String.Format("## Admin Helper mod Exception caught. Message: {0}", ex));
+                            VRage.Utils.MyLog.Default.WriteLine(String.Format("##Mod## Admin Helper mod Exception caught. Message: {0}", ex));
                             continue;
                         }
 
@@ -275,7 +275,7 @@
                         if (Extensions.ExperimentalCreatorList.Contains(steamId))
                         {
                             MyAPIGateway.Utilities.SendMissionScreen(steamId, string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
-                            VRage.Utils.MyLog.Default.WriteLine(String.Format("## Admin Helper mod Exception caught. Message: {0}", ex));
+                            VRage.Utils.MyLog.Default.WriteLine(String.Format("##Mod## Admin Helper mod Exception caught. Message: {0}", ex));
                             continue;
                         }
 
