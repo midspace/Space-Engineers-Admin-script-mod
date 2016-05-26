@@ -46,7 +46,6 @@ namespace midspace.adminscripts.Messages
     [XmlInclude(typeof(MessageSyncCreateObject))]
     [XmlInclude(typeof(MessageSyncCreatePrefab))]
     [XmlInclude(typeof(MessageSyncFloatingObjects))]
-    [XmlInclude(typeof(MessageSyncSaveToolbar))]
     //communication
     [XmlInclude(typeof(MessageClientDialogMessage))]
     [XmlInclude(typeof(MessageClientNotification))]

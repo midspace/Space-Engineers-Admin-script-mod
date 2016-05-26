@@ -296,7 +296,6 @@ namespace midspace.adminscripts
             commands.Add(new CommandTeleportToShip());
             commands.Add(new CommandTest());
             commands.Add(new CommandTime());
-            commands.Add(new CommandSaveToolbar());
 
             return commands;
         }

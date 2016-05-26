@@ -149,7 +149,6 @@
     <Compile Include="Messages\Sync\MessageSyncGridChange.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
     <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
-    <Compile Include="Messages\Sync\MessageSyncSaveToolbar.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />
     <Compile Include="Misc\CommandBomb.cs" />
@@ -216,7 +215,6 @@
     <Compile Include="PositionManagement\CommandTeleportJump.cs" />
     <Compile Include="PositionManagement\CommandTeleportOffset.cs" />
     <Compile Include="PositionManagement\CommandTeleportToPlayer.cs" />
-    <Compile Include="UserCommands\CommandSaveToolbar.cs" />
     <Compile Include="UserCommands\CommandTime.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidEditClear.cs" />
     <Compile Include="AsteroidManagement\CommandAsteroidEditSet.cs" />
