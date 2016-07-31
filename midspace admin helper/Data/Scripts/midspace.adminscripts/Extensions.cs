@@ -363,19 +363,25 @@ namespace midspace.adminscripts
                 return true;
             }
 
+            return player.IsAdmin;
+
+            // Player Promoted status can change during game play.
+            // May have to advise the player to disconnect or reconnect.
+            // player.IsPromoted;
+
             // determine if client is admin of Dedicated server.
-            var clients = MyAPIGateway.Session.GetCheckpoint("null").Clients;
-            if (clients != null)
-            {
-                var client = clients.FirstOrDefault(c => c.SteamId == player.SteamUserId && c.IsAdmin);
-                return client != null;
-                // If user is not in the list, automatically assume they are not an Admin.
-            }
+            //var clients = MyAPIGateway.Session.GetCheckpoint("null").Clients;
+            //if (clients != null)
+            //{
+            //    var client = clients.FirstOrDefault(c => c.SteamId == player.SteamUserId && c.IsAdmin);
+            //    return client != null;
+            //    // If user is not in the list, automatically assume they are not an Admin.
+            //}
 
             // clients is null when it's not a dedicated server.
             // Otherwise Treat everyone as Normal Player.
 
-            return false;
+            //return false;
         }
 
         // TODO: don't like this here. It should be a set of constants somewhere else.

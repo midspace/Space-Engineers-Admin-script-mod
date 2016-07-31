@@ -196,7 +196,7 @@
                 var cockpit = MyAPIGateway.Session.ControlledObject as IMyCockpit;
                 var remoteControl = MyAPIGateway.Session.ControlledObject as IMyRemoteControl;
                 var character = MyAPIGateway.Session.ControlledObject as IMyCharacter;
-                var character2 = MyAPIGateway.Session.ControlledObject as Sandbox.Game.Entities.Character.MyCharacter;
+                //var character2 = MyAPIGateway.Session.ControlledObject as Sandbox.Game.Entities.Character.MyCharacter;
                 var camera = MyAPIGateway.Session.ControlledObject as IMyCamera;
                 var cameraBlock = MyAPIGateway.Session.ControlledObject as IMyCameraBlock;
                 var cameraController = MyAPIGateway.Session.ControlledObject as IMyCameraController;
@@ -215,11 +215,11 @@
                 {
                     MyAPIGateway.Utilities.ShowMessage("Control", "character.");
                 }
-                if (character2 != null)
-                {
-                    //var pos = character2.PositionComp.GetPosition(); // Uses MyEntity which is not whitelisted.
-                    MyAPIGateway.Utilities.ShowMessage("Control", "character2.");
-                }
+                //if (character2 != null)
+                //{
+                //    //var pos = character2.PositionComp.GetPosition(); // Uses MyEntity which is not whitelisted.
+                //    MyAPIGateway.Utilities.ShowMessage("Control", "character2.");
+                //}
                 if (camera != null)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Control", "camera.");
@@ -564,9 +564,9 @@
                 gridTerminalSystem.GetBlockGroups(groups); // may abide by the owner rules?
 
 
-                MyAPIGateway.Utilities.ShowMessage("BlockGroup Count", "{0}", groups.Count);
-                foreach (var group in groups)
-                    MyAPIGateway.Utilities.ShowMessage("BlockGroup", "name:{0} blocks:{1} Id:{2}", group.Name, group.Blocks.Count, group.Blocks.Count > 0 ? group.Blocks[0].CubeGrid.EntityId : 0);
+                //MyAPIGateway.Utilities.ShowMessage("BlockGroup Count", "{0}", groups.Count);
+                //foreach (var group in groups)
+                //    MyAPIGateway.Utilities.ShowMessage("BlockGroup", "name:{0} blocks:{1} Id:{2}", group.Name, group.Blocks.Count, group.Blocks.Count > 0 ? group.Blocks[0].CubeGrid.EntityId : 0);
 
                 //MyAPIGateway.Utilities.ShowMessage("Grid count", string.Format("{0} {1} {2}", cubeGrid.DisplayName, terminalsys.Blocks.Count, terminalsys.BlockGroups.Count));
 

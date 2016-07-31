@@ -109,7 +109,13 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_DestructibleBlocks"), MyAPIGateway.Session.SessionSettings.DestructibleBlocks ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableToolShake"), MyAPIGateway.Session.SessionSettings.EnableToolShake ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_Encounters"), MyAPIGateway.Session.SessionSettings.EnableEncounters ? yes : no));
+#if BRANCH_DEV
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableConvertToStation"), MyAPIGateway.Session.SessionSettings.EnableConvertToStation ? yes : no));
+#elif BRANCH_DEVELOPMENT
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableConvertToStation"), MyAPIGateway.Session.SessionSettings.EnableConvertToStation ? yes : no));
+#else
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableStationVoxel"), MyAPIGateway.Session.SessionSettings.EnableStationVoxelSupport ? yes : no));
+#endif
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableCyberhounds"), MyAPIGateway.Session.SessionSettings.EnableCyberhounds.HasValue? (MyAPIGateway.Session.SessionSettings.EnableCyberhounds.Value ? yes : no) : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableSpiders"), MyAPIGateway.Session.SessionSettings.EnableSpiders.HasValue ? (MyAPIGateway.Session.SessionSettings.EnableSpiders.Value ? yes : no) : no));
             list.Add(string.Format("{0}: {1}", "Maximum Drones", MyAPIGateway.Session.SessionSettings.MaxDrones));
