@@ -3,6 +3,7 @@
     using System;
     using Sandbox.ModAPI;
     using VRage.Game.ModAPI;
+    using VRage.Game.ObjectBuilders;
     using VRageMath;
 
     /// <summary>
@@ -71,13 +72,11 @@
             else if (counters > 24)
                 counters = 24;
 
+            Vector3 baseSunDirection;
+            Vector3 sunRotationAxis;
+            float sunSpeed;
+            GetBaseSunDirection(out baseSunDirection, out sunRotationAxis, out sunSpeed);
 
-            var environment = MyAPIGateway.Session.GetSector().Environment;
-            
-
-            Vector3D baseSunDirection;
-            Vector3D.CreateFromAzimuthAndElevation(environment.SunAzimuth, environment.SunElevation, out baseSunDirection);
-            baseSunDirection = -baseSunDirection;
 
             var origin = MyAPIGateway.Session.Player.Controller.ControlledEntity.GetHeadMatrix(true, true, false).Translation;
             // TODO: figure out why the RPM doesn't match.
@@ -90,34 +89,53 @@
             for (long rotation = 0; rotation < sunRotationInterval; rotation += stage)
             {
                 var stageTime = new TimeSpan(rotation);
-                var finalSunDirection = GetSunDirection(baseSunDirection, stageTime.TotalMinutes);
+                float angle = MathHelper.TwoPi * rotation / sunRotationInterval;
+                Vector3 finalSunDirection = Vector3.Transform(baseSunDirection, Matrix.CreateFromAxisAngle(sunRotationAxis, angle));
+                finalSunDirection.Normalize();
 
-                gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), description, origin + (finalSunDirection * 10000), true, false);
+                gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), description, origin + (-finalSunDirection * 10000), true, false);
                 MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
             }
 
-            var vector1 = GetSunDirection(baseSunDirection, 0);
-            var vector2 = GetSunDirection(baseSunDirection, new TimeSpan(sunRotationInterval / 4).TotalMinutes);
-
-            var zenith = Vector3D.Normalize(Vector3D.Cross(vector1, vector2));
-            gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", description, origin + (zenith * 10000), true, false);
+            gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", description, origin + (sunRotationAxis * 10000), true, false);
             MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
-            gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", description, origin + (-zenith * 10000), true, false);
+            gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", description, origin + (-sunRotationAxis * 10000), true, false);
             MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
+
+            // Current sun position.
+            //float a = MathHelper.TwoPi * (float)(MyAPIGateway.Session.ElapsedGameTime().TotalMinutes / sunSpeed);
+            //Vector3 fsd = Vector3.Transform(baseSunDirection, Matrix.CreateFromAxisAngle(sunRotationAxis, a));
+            //fsd.Normalize();
+
+            //gps = MyAPIGateway.Session.GPS.Create("SUN", description, origin + (-fsd * 10000), true, false);
+            //MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
             return true;
         }
 
-        private Vector3D GetSunDirection(Vector3D baseSunDirection, double elapsedMinutes)
+        private void GetBaseSunDirection(out Vector3 baseSunDirection, out Vector3 sunRotationAxis, out float sunSpeed)
         {
-            // copied from Sandbox.Game.Gui.MyGuiScreenGamePlay.Draw()
-            double angle = MathHelper.TwoPi * (elapsedMinutes / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes);
-            var sunDirection = baseSunDirection;
-            double originalSunCosAngle = Math.Abs(Vector3D.Dot(sunDirection, Vector3D.Up));
-            Vector3D sunRotationAxis = Vector3D.Cross(Vector3D.Cross(sunDirection, originalSunCosAngle > 0.95f ? Vector3D.Left : Vector3D.Up), sunDirection);
-            sunDirection = Vector3D.Normalize(Vector3D.Transform(sunDirection, MatrixD.CreateFromAxisAngle(sunRotationAxis, angle)));
-            return -sunDirection;
+            baseSunDirection = Vector3.Zero;
+            sunSpeed = 0;
+
+            var cpnt = MyAPIGateway.Session.GetCheckpoint("null");
+            foreach (var comp in cpnt.SessionComponents)
+            {
+                var weatherComp = comp as MyObjectBuilder_SectorWeatherComponent;
+                if (weatherComp != null)
+                {
+                    baseSunDirection = weatherComp.BaseSunDirection;
+                    sunSpeed = weatherComp.SunSpeed;
+                }
+            }
+
+            float num = Math.Abs(Vector3.Dot(baseSunDirection, Vector3.Up));
+            if (num > 0.95f)
+                sunRotationAxis = Vector3.Cross(Vector3.Cross(baseSunDirection, Vector3.Left), baseSunDirection);
+            else
+                sunRotationAxis = Vector3.Cross(Vector3.Cross(baseSunDirection, Vector3.Up), baseSunDirection);
+            sunRotationAxis.Normalize();
         }
     }
 }

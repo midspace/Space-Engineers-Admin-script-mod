@@ -64,10 +64,11 @@ namespace midspace.adminscripts
                     block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase))
                 {
                     // The MotorStator which inherits from MotorBase.
-                    var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MotorBase;
-                    if (motorBase == null || !motorBase.RotorEntityId.HasValue || motorBase.RotorEntityId.Value == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.RotorEntityId.Value))
+                    IMyMotorBase motorBase = block.FatBlock as IMyMotorBase;
+                    if (motorBase == null || motorBase.Rotor == null)
                         continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(motorBase.RotorEntityId.Value).Parent as IMyCubeGrid;
+
+                    IMyCubeGrid entityParent = motorBase.RotorGrid;
                     if (entityParent == null)
                         continue;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
@@ -82,10 +83,11 @@ namespace midspace.adminscripts
                     block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Wheel))
                 {
                     // The Rotor Part.
-                    var motorCube = Support.FindRotorBase(block.FatBlock.EntityId);
-                    if (motorCube == null)
+                    IMyMotorRotor motorRotor = block.FatBlock as IMyMotorRotor;
+                    if (motorRotor == null || motorRotor.Stator == null)
                         continue;
-                    var entityParent = (IMyCubeGrid)motorCube.Parent;
+
+                    IMyCubeGrid entityParent = motorRotor.Stator.CubeGrid;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
@@ -95,10 +97,11 @@ namespace midspace.adminscripts
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
                 {
                     // The Piston Top.
-                    var pistonCube = Support.FindPistonBase(block.FatBlock.EntityId);
-                    if (pistonCube == null)
+                    IMyPistonTop pistonTop = block.FatBlock as IMyPistonTop;
+                    if (pistonTop == null || pistonTop.Piston == null)
                         continue;
-                    var entityParent = (IMyCubeGrid)pistonCube.Parent;
+
+                    IMyCubeGrid entityParent = pistonTop.Piston.CubeGrid;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
@@ -108,10 +111,11 @@ namespace midspace.adminscripts
                 else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase) ||
                     block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase))
                 {
-                    var pistonBase = block.GetObjectBuilder() as MyObjectBuilder_PistonBase;
-                    if (pistonBase == null || pistonBase.TopBlockId == 0 || !MyAPIGateway.Entities.EntityExists(pistonBase.TopBlockId))
+                    IMyPistonBase pistonBase = block.FatBlock as IMyPistonBase;
+                    if (pistonBase == null || pistonBase.Top == null)
                         continue;
-                    var entityParent = MyAPIGateway.Entities.GetEntityById(pistonBase.TopBlockId).Parent as IMyCubeGrid;
+
+                    IMyCubeGrid entityParent = pistonBase.TopGrid;
                     if (entityParent == null)
                         continue;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))

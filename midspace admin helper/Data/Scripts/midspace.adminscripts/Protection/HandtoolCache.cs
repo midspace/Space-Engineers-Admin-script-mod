@@ -40,13 +40,7 @@ namespace midspace.adminscripts.Protection
 
         private void Entities_OnEntityAdd(IMyEntity entity)
         {
-#if BRANCH_DEV
             if (entity is Sandbox.ModAPI.Weapons.IMyEngineerToolBase)
-#elif BRANCH_DEVELOPMENT
-            if (entity is Sandbox.ModAPI.Weapons.IMyEngineerToolBase)
-#else
-            if (entity is MyEngineerToolBase)
-#endif
                 // when the entity is created, it is not finished (pos is 0, boundingbox does not exist, etc.)
                 // therefore we need to wait a moment or two until we can build up the cache
                 // but don't worry we won't allow it to damage sth. in that time (if it is even possible)
@@ -56,13 +50,7 @@ namespace midspace.adminscripts.Protection
         // this method is called twice when switching weapon, idk why
         private void Entities_OnEntityRemove(IMyEntity entity)
         {
-#if BRANCH_DEV
             if (!(entity is Sandbox.ModAPI.Weapons.IMyEngineerToolBase) || !_cache.ContainsValue(entity))
-#elif BRANCH_DEVELOPMENT
-            if (!(entity is Sandbox.ModAPI.Weapons.IMyEngineerToolBase) || !_cache.ContainsValue(entity))
-#else
-            if (!(entity is MyEngineerToolBase) || !_cache.ContainsValue(entity))
-#endif
                 return;
 
             var player = _cache.First(p => p.Value.EntityId == entity.EntityId).Key;
