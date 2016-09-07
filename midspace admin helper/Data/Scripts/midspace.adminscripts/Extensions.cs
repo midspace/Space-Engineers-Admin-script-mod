@@ -630,6 +630,15 @@ namespace midspace.adminscripts
             return Math.Ceiling(value / scale) * scale;
         }
 
+        public static double RoundUpToCube(this double value)
+        {
+            int baseVal = 1;
+            while (baseVal < value)
+                baseVal = baseVal * 2;
+            return baseVal;
+        }
+
+
         /// <summary>
         /// Replaces the chars from the given string that are not allowed for filenames with a whitespace.
         /// </summary>

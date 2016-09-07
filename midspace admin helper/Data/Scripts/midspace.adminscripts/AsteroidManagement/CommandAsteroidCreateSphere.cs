@@ -158,7 +158,7 @@ Examples:
                     layers.Add(new AsteroidSphereLayer() { Diameter = diameter, Material = material, MaterialName = materialName });
                 }
 
-                var length = (int)(maxDiameter + 4).RoundUpToNearest(64);
+                var length = (int)(maxDiameter + 4).RoundUpToCube();
                 var size = new Vector3I(length, length, length);
                 var name = match.Groups["Name"].Value;
 
@@ -202,7 +202,7 @@ The asteroid cannot be generated until this area is cleared of ships and players
                             break;
                         case 8:
                             // downsize the Asteroid store.
-                            length = (int)((maxDiameter / 2) + 4).RoundUpToNearest(64);
+                            length = (int)((maxDiameter / 2) + 4).RoundUpToCube();
                             size = new Vector3I(length, length, length);
                             origin = new Vector3I(size.X / 2, size.Y / 2, size.Z / 2);
                             ProcessAsteroid(name, size, position, new Vector3D(origin.X - 2, origin.Y - 2, origin.Z - 2), origin, layers);
