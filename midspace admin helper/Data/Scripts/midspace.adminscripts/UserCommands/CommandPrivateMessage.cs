@@ -188,12 +188,17 @@ The logging of private messages is {1}.
                 MyAPIGateway.Utilities.SendMessage(steamId, "PM System", "Message too short.");
 
             var privateMessage = new MessagePrivateMessage();
+
+            IMyPlayer player = MyAPIGateway.Multiplayer.Players.GetPlayer(steamId);
+            string name = player == null ? string.Empty : player.DisplayName;
+
             privateMessage.ChatMessage = new ChatMessage()
             {
                 Sender = new Player()
                 {
-                    SteamId = MyAPIGateway.Session.Player.SteamUserId,
-                    PlayerName = MyAPIGateway.Session.Player.DisplayName
+
+                    SteamId = steamId,
+                    PlayerName = name
                 },
                 Text = message,
                 Date = DateTime.Now
