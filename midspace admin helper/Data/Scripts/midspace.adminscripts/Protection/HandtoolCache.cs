@@ -1,26 +1,25 @@
-﻿using System.Timers;
-using midspace.adminscripts.Utils.Timer;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Sandbox.Game.Weapons;
+    using System.Timers;
+    using midspace.adminscripts.Utils.Timer;
     using Sandbox.ModAPI;
+    using Sandbox.ModAPI.Weapons;
+    using VRage.Game;
     using VRage.Game.ModAPI;
     using VRage.ModAPI;
-    using VRageMath;
 
     public class HandtoolCache
     {
-        private readonly Dictionary<IMyPlayer, IMyEntity> _cache;
-        private readonly List<IMyEntity> _uninitializedHandTools;
+        private readonly Dictionary<IMyPlayer, IMyEngineerToolBase> _cache;
+        private readonly List<IMyEngineerToolBase> _uninitializedHandTools;
 
 
         public HandtoolCache()
         {
-            _cache = new Dictionary<IMyPlayer, IMyEntity>();
-            _uninitializedHandTools = new List<IMyEntity>();
+            _cache = new Dictionary<IMyPlayer, IMyEngineerToolBase>();
+            _uninitializedHandTools = new List<IMyEngineerToolBase>();
 
             // as the conditions of "FindPlayer(...)" aren't very safe (players could be very near),
             // we'll check the cache from time to time in order to prevent it from ´containing wrong data
@@ -40,17 +39,22 @@ namespace midspace.adminscripts.Protection
 
         private void Entities_OnEntityAdd(IMyEntity entity)
         {
-            if (entity is Sandbox.ModAPI.Weapons.IMyEngineerToolBase)
+            IMyEngineerToolBase handTool = entity as IMyEngineerToolBase;
+            if (handTool != null)
+            {
                 // when the entity is created, it is not finished (pos is 0, boundingbox does not exist, etc.)
                 // therefore we need to wait a moment or two until we can build up the cache
                 // but don't worry we won't allow it to damage sth. in that time (if it is even possible)
-                _uninitializedHandTools.Add(entity);
+                _uninitializedHandTools.Add(handTool);
+            }   
         }
 
         // this method is called twice when switching weapon, idk why
         private void Entities_OnEntityRemove(IMyEntity entity)
         {
-            if (!(entity is Sandbox.ModAPI.Weapons.IMyEngineerToolBase) || !_cache.ContainsValue(entity))
+            IMyEngineerToolBase tool = entity as IMyEngineerToolBase;
+
+            if (tool == null || !_cache.ContainsValue(tool))
                 return;
 
             var player = _cache.First(p => p.Value.EntityId == entity.EntityId).Key;
@@ -59,32 +63,26 @@ namespace midspace.adminscripts.Protection
                 _cache.Remove(player);
         }
 
-        private IMyPlayer FindPlayer(IMyEntity entity)
+        private IMyPlayer FindPlayer(IMyEngineerToolBase handTool)
         {
             List<IMyPlayer> players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players);
 
-            double nearestDistance = 5;
-                // usually the distance between player and handtool is about 2 to 3, 5 is plenty 
-            IMyPlayer nearestPlayer = null;
-
             foreach (IMyPlayer player in players)
             {
-                var character = player.GetCharacter();
+                IMyCharacter character = player.Controller.ControlledEntity as IMyCharacter;
 
                 if (character == null)
                     continue;
 
-                var distance = (((IMyEntity) character).GetPosition() - entity.GetPosition()).LengthSquared();
-
-                if (distance < nearestDistance)
-                {
-                    nearestDistance = distance;
-                    nearestPlayer = player;
-                }
+                // The most inefficient way of finding which player is equiped with what tool.
+                // What is needed is either MyCharacter.CurrentWeapon, or MyEngineerToolBase.Owner exposed through the appropriate interface.
+                MyObjectBuilder_Character c = character.GetObjectBuilder(true) as MyObjectBuilder_Character;
+                if (c != null && c.HandWeapon != null && c.HandWeapon.EntityId == handTool.EntityId)
+                    return player;
             }
 
-            return nearestPlayer;
+            return null;
         }
 
         public bool TryGetPlayer(long handToolEntityId, out IMyPlayer player)
@@ -98,12 +96,14 @@ namespace midspace.adminscripts.Protection
             if (_uninitializedHandTools.Count == 0)
                 return;
 
-            var finished = new List<IMyEntity>();
-            foreach (IMyEntity handTool in _uninitializedHandTools)
+            var finished = new List<IMyEngineerToolBase>();
+            foreach (IMyEngineerToolBase handTool in _uninitializedHandTools)
             {
-                if (handTool.GetPosition() == Vector3.Zero)
-                    // prototype check for not inited yet, need a better check for that
+                if (handTool.Closed)
+                {
+                    finished.Add(handTool);
                     continue;
+                }
 
                 var player = FindPlayer(handTool);
 
@@ -120,11 +120,11 @@ namespace midspace.adminscripts.Protection
         private void Safety_Elapsed(object o, ElapsedEventArgs elapsedEventArgs)
         {
             HashSet<IMyPlayer> keySet = new HashSet<IMyPlayer>(_cache.Keys);
-            var correctedEntities = new Dictionary<IMyPlayer, IMyEntity>();
+            var correctedEntities = new Dictionary<IMyPlayer, IMyEngineerToolBase>();
 
             foreach (IMyPlayer player in keySet)
             {
-                IMyEntity handTool = _cache[player];
+                IMyEngineerToolBase handTool = _cache[player];
                 IMyPlayer foundPlayer = FindPlayer(handTool);
 
                 if (player == foundPlayer)
@@ -141,7 +141,7 @@ namespace midspace.adminscripts.Protection
                 correctedEntities.Add(foundPlayer, handTool);
             }
 
-            foreach (KeyValuePair<IMyPlayer, IMyEntity> keyValuePair in correctedEntities)
+            foreach (KeyValuePair<IMyPlayer, IMyEngineerToolBase> keyValuePair in correctedEntities)
                 _cache.Update(keyValuePair.Key, keyValuePair.Value);
         }
     }

@@ -1,20 +1,18 @@
-﻿using System.IO;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Timers;
+    using midspace.adminscripts.Config.Files;
     using midspace.adminscripts.Messages.Communication;
     using midspace.adminscripts.Utils.Timer;
-    using midspace.adminscripts.Config.Files;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.Utils;
-    using IMyShipGrinder = Sandbox.ModAPI.Ingame.IMyShipGrinder;
 
     public static class ProtectionHandler
     {
