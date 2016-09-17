@@ -7,22 +7,21 @@
     using System.Linq;
     using System.Text;
     using Sandbox.Definitions;
+    using Sandbox.Engine.Utils;
+    using Sandbox.Game.Entities;
+    using Sandbox.Game.Entities.Cube;
     using Sandbox.ModAPI;
     using Sandbox.ModAPI.Interfaces;
     using VRage;
     using VRage.Game;
     using VRage.Game.ModAPI;
+    using VRage.Game.ObjectBuilders;
     using VRage.Library.Utils;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
     using VRage.Utils;
     using VRageMath;
-    using IMyBlockGroup = Sandbox.ModAPI.Ingame.IMyBlockGroup;
     using IMyCameraController = VRage.Game.ModAPI.Interfaces.IMyCameraController;
-    using IMyCargoContainer = Sandbox.ModAPI.Ingame.IMyCargoContainer;
-    using IMyCockpit = Sandbox.ModAPI.Ingame.IMyCockpit;
-    using IMyRemoteControl = Sandbox.ModAPI.Ingame.IMyRemoteControl;
-    using IMyCameraBlock = Sandbox.ModAPI.Ingame.IMyCameraBlock;
 
     /// <summary>
     /// These command test various different things. It's not commented, because I just create them on the spur of the moment. 

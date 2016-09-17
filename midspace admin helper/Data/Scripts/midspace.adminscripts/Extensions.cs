@@ -19,7 +19,6 @@ namespace midspace.adminscripts
     using VRage.Utils;
     using VRageMath;
     using IMyDestroyableObject = VRage.Game.ModAPI.Interfaces.IMyDestroyableObject;
-    using IMyShipConnector = Sandbox.ModAPI.Ingame.IMyShipConnector; // There isn't a non-Ingame interface for IMyShipConnector at this time.
 
     public static class Extensions
     {
@@ -131,7 +130,7 @@ namespace midspace.adminscripts
                     if (connector.IsConnected == false || connector.IsLocked == false || connector.OtherConnector == null)
                         continue;
 
-                    var otherGrid = (IMyCubeGrid)connector.OtherConnector.CubeGrid;
+                    var otherGrid = connector.OtherConnector.CubeGrid;
 
                     if (!results.Any(e => e.EntityId == otherGrid.EntityId))
                     {
@@ -335,11 +334,6 @@ namespace midspace.adminscripts
 
         // copy of Sandbox.ModAPI.Ingame.TerminalBlockExtentions, but without Ingame.
         public static void ApplyAction(this IMyTerminalBlock block, string actionName)
-        {
-            block.GetActionWithName(actionName).Apply(block);
-        }
-
-        public static void ApplyAction(this Sandbox.ModAPI.Ingame.IMyTerminalBlock block, string actionName)
         {
             block.GetActionWithName(actionName).Apply(block);
         }
