@@ -5,6 +5,7 @@
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage;
     using VRage.Game;

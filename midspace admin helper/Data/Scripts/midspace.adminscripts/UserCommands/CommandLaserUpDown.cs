@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using VRage.Voxels;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using System;
+    using System.Collections.Generic;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
+    using VRage.Voxels;
     using VRageMath;
 
     public class CommandLaserUpDown : ChatCommand

@@ -270,7 +270,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandSessionSpectator());
             commands.Add(new CommandSessionWeapons());
             commands.Add(new CommandSessionSpiders());
-            commands.Add(new CommandSessionCyberHounds());
+            commands.Add(new CommandSessionWolves());
             commands.Add(new CommandSetVector());
             commands.Add(new CommandSpeed());
             commands.Add(new CommandShipOff());
@@ -370,10 +370,10 @@ namespace midspace.adminscripts
                 sendToOthers = false;
             else
             {
-                var globalMessage = new MessageGlobalMessage() { 
-                    ChatMessage = new ChatMessage() { 
+                var globalMessage = new MessageGlobalMessage { 
+                    ChatMessage = new ChatMessage { 
                         Text = messageText,
-                        Sender = new Player() {
+                        Sender = new Player {
                             SteamId = MyAPIGateway.Session.Player.SteamUserId,
                             PlayerName = MyAPIGateway.Session.Player.DisplayName
                         },

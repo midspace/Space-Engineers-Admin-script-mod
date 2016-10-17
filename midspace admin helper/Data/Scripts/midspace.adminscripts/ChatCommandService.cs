@@ -6,8 +6,10 @@
     using midspace.adminscripts.Messages;
     using Sandbox.Common.ObjectBuilders;
     using midspace.adminscripts.Config;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.Game;
+    using VRage.Game.ModAPI;
 
     /// <summary>
     /// The Chat command service does most of the heavy work in organising and processing the ChatCommands.

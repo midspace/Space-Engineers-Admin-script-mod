@@ -6,18 +6,18 @@
     using Sandbox.ModAPI;
     using midspace.adminscripts.Messages;
 
-    public class CommandSessionCyberHounds : ChatCommand
+    public class CommandSessionWolves : ChatCommand
     {
-        public CommandSessionCyberHounds()
-            : base(ChatCommandSecurity.Admin, "cyberhounds", new[] { "/cyberhounds", "/cyberhound", "/hounds", "/hound" })
+        public CommandSessionWolves()
+            : base(ChatCommandSecurity.Admin, "wolves", new[] { "/wolves", "/wolf", "/wolfs" })
         {
         }
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/cyberhounds <on|off>", "Turns cyberhounds on or off for all players.");
+            MyAPIGateway.Utilities.ShowMessage("/wolves <on|off>", "Turns wolves on or off for all players.");
 
-            // Allows you to turn cyberhounds on or off.
+            // Allows you to turn wolves on or off.
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
@@ -37,15 +37,16 @@
             {
                 if (MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ConnectionHelper.SendMessageToServer(new MessageSession { State = state.Value, Setting = SessionSetting.Cyberhounds });
+                    ConnectionHelper.SendMessageToServer(new MessageSession { State = state.Value, Setting = SessionSetting.Wolves });
                     return true;
                 }
-                MyAPIGateway.Session.SessionSettings.EnableCyberhounds = state.Value;
+                MyAPIGateway.Session.SessionSettings.EnableWolfs = state.Value;
             }
 
             // Display the current state.
 
-            var currentState = MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableCyberhounds.HasValue ? MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableCyberhounds.Value : false;
+            var checkpoint = MyAPIGateway.Session.GetCheckpoint("null");
+            var currentState = checkpoint.Settings.EnableWolfs.HasValue ? checkpoint.Settings.EnableWolfs.Value : false;
 
             MyAPIGateway.Utilities.ShowMessage("Cyber Hounds", currentState ? "On" : "Off");
             return true;

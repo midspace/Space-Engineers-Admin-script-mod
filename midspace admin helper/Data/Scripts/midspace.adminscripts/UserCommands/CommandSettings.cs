@@ -76,6 +76,8 @@
             info.AppendFormat("{0}: x {1}\r\n", Localize.GetResource("WorldSettings_WelderSpeed"), MyAPIGateway.Session.WelderSpeedMultiplier);
             info.AppendFormat("{0}: x {1}\r\n", Localize.GetResource("WorldSettings_GrinderSpeed"), MyAPIGateway.Session.GrinderSpeedMultiplier);
             info.AppendFormat("{0}: {1:##,##0}\r\n", Localize.GetResource("MaxFloatingObjects"), MyAPIGateway.Session.MaxFloatingObjects);
+            info.AppendFormat("{0}: {1:##,##0}\r\n", Localize.GetResource("MaxBackupSaves"), MyAPIGateway.Session.MaxBackupSaves);
+            
             if (MyAPIGateway.Session.SessionSettings.WorldSizeKm == 0)
                 info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_LimitWorldSize"), Localize.GetResource("WorldSettings_WorldSizeUnlimited"));
             else
@@ -93,6 +95,7 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWeapons"), MyAPIGateway.Session.WeaponsEnabled ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_RemoveTrash"), MyAPIGateway.Session.SessionSettings.RemoveTrash ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygen"), MyAPIGateway.Session.SessionSettings.EnableOxygen ? yes : no));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygenPressurization"), MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_DisableRespawnShips"), MyAPIGateway.Session.SessionSettings.DisableRespawnShips ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableJetpack"), MyAPIGateway.Session.SessionSettings.EnableJetpack ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableVoxelDestruction"), MyAPIGateway.Session.SessionSettings.EnableVoxelDestruction ? yes : no));
@@ -109,14 +112,15 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_DestructibleBlocks"), MyAPIGateway.Session.SessionSettings.DestructibleBlocks ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableToolShake"), MyAPIGateway.Session.SessionSettings.EnableToolShake ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_Encounters"), MyAPIGateway.Session.SessionSettings.EnableEncounters ? yes : no));
-//#if BRANCH_DEV || BRANCH_DEVELOPMENT
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableConvertToStation"), MyAPIGateway.Session.SessionSettings.EnableConvertToStation ? yes : no));
-//#else
-//            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableStationVoxel"), MyAPIGateway.Session.SessionSettings.EnableStationVoxelSupport ? yes : no));
-//#endif
-            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableCyberhounds"), MyAPIGateway.Session.SessionSettings.EnableCyberhounds.HasValue? (MyAPIGateway.Session.SessionSettings.EnableCyberhounds.Value ? yes : no) : no));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWolfs"), MyAPIGateway.Session.SessionSettings.EnableWolfs.HasValue? (MyAPIGateway.Session.SessionSettings.EnableWolfs.Value ? yes : no) : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableSpiders"), MyAPIGateway.Session.SessionSettings.EnableSpiders.HasValue ? (MyAPIGateway.Session.SessionSettings.EnableSpiders.Value ? yes : no) : no));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StartInRespawnScreen"), MyAPIGateway.Session.SessionSettings.StartInRespawnScreen ? yes : no));
             list.Add(string.Format("{0}: {1}", "Maximum Drones", MyAPIGateway.Session.SessionSettings.MaxDrones));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_SoundMode") + " " + Localize.GetResource("WorldSettings_RealisticSound"), MyAPIGateway.Session.SessionSettings.RealisticSound ? yes : no));
+//#if !STABLE
+//            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StationVoxelSupport"), MyAPIGateway.Session.SessionSettings.StationVoxelSupport ? yes : no));
+//#endif
 
             // add the remaining settings as a sorted list (according to the localizaed labels).
             foreach (var str in list.OrderBy(e => e))
@@ -144,6 +148,10 @@
             // WorldSettings_Physics
             // WorldSettings_SoundInSpace
             // WorldSettings_SoundMode      MyAPIGateway.Session.SessionSettings.RealisticSound
+            //                              MyAPIGateway.Session.SessionSettings.EnableStructuralSimulation
+            //                              MaxActiveFracturePieces
+            //                              PhysicsIterations
+            //                              RealisticSound
 
             return true;
         }

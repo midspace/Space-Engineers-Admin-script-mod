@@ -51,8 +51,8 @@
                 case SessionSetting.Weapons:
                     MyAPIGateway.Session.SessionSettings.WeaponsEnabled = State;
                     break;
-                case SessionSetting.Cyberhounds:
-                    MyAPIGateway.Session.SessionSettings.EnableCyberhounds = State;
+                case SessionSetting.Wolves:
+                    MyAPIGateway.Session.SessionSettings.EnableWolfs = State;
                     break;
                 case SessionSetting.Spiders:
                     MyAPIGateway.Session.SessionSettings.EnableSpiders = State;
@@ -68,7 +68,7 @@
         Creative,
         Spectator,
         Weapons,
-        Cyberhounds,
+        Wolves,
         Spiders
     }
 }

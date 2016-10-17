@@ -124,58 +124,52 @@
             if (messageText.Equals("/test3", StringComparison.InvariantCultureIgnoreCase))
             {
                 // for testing things.
-                MyAPIGateway.Utilities.ShowMessage("MyId", "{0}", MyAPIGateway.Multiplayer.MyId);
-                MyAPIGateway.Utilities.ShowMessage("SteamId", "{0}", MyAPIGateway.Session.Player.SteamUserId);
-                MyAPIGateway.Utilities.ShowMessage("MyName", "{0}", MyAPIGateway.Multiplayer.MyName);
-                MyAPIGateway.Utilities.ShowMessage("IsServer", "{0}", MyAPIGateway.Multiplayer.IsServer);
-                MyAPIGateway.Utilities.ShowMessage("IsServerPlayer", "{0}", MyAPIGateway.Multiplayer.IsServerPlayer(MyAPIGateway.Session.Player.Client));
-                MyAPIGateway.Utilities.ShowMessage("MultiplayerActive", "{0}", MyAPIGateway.Multiplayer.MultiplayerActive);
-                MyAPIGateway.Utilities.ShowMessage("OnlineMode", "{0}", MyAPIGateway.Session.OnlineMode);
-                MyAPIGateway.Utilities.ShowMessage("IsDedicated", "{0}", MyAPIGateway.Utilities.IsDedicated);
-                //MyAPIGateway.Utilities.ShowMessage("Culture", "{0}", MyTexts.Culture.IetfLanguageTag);
-                MyAPIGateway.Utilities.ShowMessage("Culture", "{0}", MyAPIGateway.Session.Config.Language);
-                MyAPIGateway.Utilities.ShowMessage("Culture", "{0}-{1}", MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].CultureName, MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].SubcultureName);
+
+                StringBuilder msg = new StringBuilder();
+                msg.AppendFormat("MyId {0}\r\n", MyAPIGateway.Multiplayer.MyId);
+                msg.AppendFormat("SteamId {0}\r\n", MyAPIGateway.Session.Player.SteamUserId);
+                msg.AppendFormat("PlayerID {0}\r\n", MyAPIGateway.Session.Player.PlayerID);
+                msg.AppendFormat("IdentityId {0}\r\n", MyAPIGateway.Session.Player.IdentityId);
+                msg.AppendFormat("MyName {0}\r\n", MyAPIGateway.Multiplayer.MyName);
+                msg.AppendFormat("IsServer {0}\r\n", MyAPIGateway.Multiplayer.IsServer);
+                msg.AppendFormat("ServerId {0}\r\n", MyAPIGateway.Multiplayer.ServerId);
+                msg.AppendFormat("IsServerPlayer {0}\r\n", MyAPIGateway.Multiplayer.IsServerPlayer(MyAPIGateway.Session.Player.Client));
+                msg.AppendFormat("MultiplayerActive {0}\r\n", MyAPIGateway.Multiplayer.MultiplayerActive);
+                msg.AppendFormat("OnlineMode {0}\r\n", MyAPIGateway.Session.OnlineMode);
+                msg.AppendFormat("IsDedicated {0}\r\n", MyAPIGateway.Utilities.IsDedicated);
+                //msg.AppendFormat("Culture {0}\r\n", MyTexts.Culture.IetfLanguageTag);
+                msg.AppendFormat("Culture {0}\r\n", MyAPIGateway.Session.Config.Language);
+                msg.AppendFormat("Culture {0}-{1}\r\n", MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].CultureName, MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].SubcultureName);
 
                 var languageRu = MyTexts.Languages[(int)MyLanguagesEnum.Russian];
 
                 MyTexts.Clear();
                 MyTexts.LoadTexts(Path.Combine(MyAPIGateway.Utilities.GamePaths.ContentPath, "Data", "Localization"), languageRu.CultureName, languageRu.SubcultureName);
                 var yesRu = MyStringId.Get("DisplayName_Item_GoldIngot").GetString();
+                var russianGold = MyTexts.GetString(MyStringId.Get("DisplayName_Item_GoldIngot"));
 
                 var languageEn = MyTexts.Languages[(int)MyLanguagesEnum.English];
                 MyTexts.Clear();
                 MyTexts.LoadTexts(Path.Combine(MyAPIGateway.Utilities.GamePaths.ContentPath, "Data", "Localization"), languageEn.CultureName, languageRu.SubcultureName);
                 var yesEn = MyStringId.Get("DisplayName_Item_GoldIngot").GetString();
 
-                MyAPIGateway.Utilities.ShowMessage("Language Test", "Ru={0} En={1}", yesRu, yesEn);
 
-                //MyAPIGateway.Utilities.ShowMessage("Culture", "'{0}' '{1}'", CultureInfo.CurrentUICulture, CultureInfo.CurrentUICulture.IetfLanguageTag); // is blank under 01.100.xxx
-                //MyAPIGateway.Utilities.ShowMessage("Culture", "'{0}'", System.Threading.Thread.CurrentThread.CurrentUICulture.IetfLanguageTag); // unaccessible
+                msg.AppendFormat("Language Test Ru={0} En={1}\r\n", yesRu, yesEn);
+
+                // CultureInfo has been set to InvariantCulture since 01.100.xxx
+                // CurrentThread is overwritten in MyInitializer to assist in reading Exceptions (which is stupid as stack traces are all in code). So don't bother.
+                //msg.AppendFormat("Culture '{0}' '{1}' '{2}'\r\n", CultureInfo.CurrentUICulture, CultureInfo.CurrentUICulture.IetfLanguageTag, CultureInfo.CurrentUICulture.Name);
+                //msg.AppendFormat("Culture '{0}'\r\n", System.Threading.Thread.CurrentThread.CurrentUICulture.IetfLanguageTag); // not whitelisted anyhow.
 
                 var ed = ((MyObjectBuilder_EnvironmentDefinition)MyDefinitionManager.Static.EnvironmentDefinition.GetObjectBuilder());
-                MyAPIGateway.Utilities.ShowMessage("LargeShipMaxSpeed", "{0}", ed.LargeShipMaxSpeed);
-                MyAPIGateway.Utilities.ShowMessage("SunDirection", "{0} {1} {2}", ed.SunDirection.X, ed.SunDirection.Y, ed.SunDirection.Z);
-                //MyAPIGateway.Utilities.ShowMessage("SunDirection2", "{0} {1} {2}", MySector.SunProperties.SunDirectionNormalized);  // MySector is not allowed.
-                MyAPIGateway.Utilities.ShowMessage("ViewDistance", "{0:N}m", MyAPIGateway.Session.SessionSettings.ViewDistance);
-                
+                msg.AppendFormat("LargeShipMaxSpeed {0}\r\n", ed.LargeShipMaxSpeed);
+                msg.AppendFormat("LargeShipMaxSpeed {0}\r\n", MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed);
+                msg.AppendFormat("SmallShipMaxSpeed {0}\r\n", MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed);
 
-                // Environment is null for some reason. But not any more!!!!
-                var environment = MyAPIGateway.Session.GetSector().Environment;
-                //MyAPIGateway.Utilities.ShowMessage("SunDirection", "is null {0}", environment == null);
+                msg.AppendFormat("ViewDistance {0:N}m\r\n", MyAPIGateway.Session.SessionSettings.ViewDistance);
+                msg.AppendFormat("LastSaveTime {0:o}\r\n", MyAPIGateway.Session.GetWorld().Checkpoint.LastSaveTime);
 
-                Vector3 sunDirection;
-                Vector3.CreateFromAzimuthAndElevation(environment.SunAzimuth, environment.SunElevation, out sunDirection);
-                //MyAPIGateway.Utilities.ShowMessage("SunDirection3", "{0} {1}", environment.SunAzimuth, environment.SunElevation);
-                MyAPIGateway.Utilities.ShowMessage("SunDirection4", "{0} {1} {2}", sunDirection.X, sunDirection.Y, sunDirection.Z);
-
-                // MySector is not whitelisted.
-                //var env = MySector.GetEnvironmentSettings();
-
-                MyAPIGateway.Utilities.ShowMessage("LastSaveTime", "{0:o}", MyAPIGateway.Session.GetWorld().Checkpoint.LastSaveTime);
-
-
-                
-
+                MyAPIGateway.Utilities.ShowMissionScreen("test3", null, null, msg.ToString());
                 return true;
             }
 
