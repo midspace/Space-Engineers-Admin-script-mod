@@ -7,15 +7,24 @@ namespace midspace.adminscripts.Messages.Communication
     [ProtoContract]
     public class MessageClientNotification : MessageBase
     {
-        [ProtoMember(1)] 
+        [ProtoMember(1)]
         public string Message;
-        
-        [ProtoMember(2)] 
+
+        [ProtoMember(2)]
         public int DisappearTimeMs;
-        
-        [ProtoMember(3)] 
+
+#if STABLE
+        [ProtoMember(3)]
         public MyFontEnum Font;
-        
+#endif
+
+#if !STABLE
+
+        [ProtoMember(3)]
+        public string Font;
+#endif
+
+
         public override void ProcessClient()
         {
             MyAPIGateway.Utilities.ShowNotification(Message, DisappearTimeMs, Font);
@@ -26,6 +35,7 @@ namespace midspace.adminscripts.Messages.Communication
             // never processed on server
         }
 
+#if STABLE
         public static void SendMessage(ulong steamId, string message, int disappearTimeMs = 2000, MyFontEnum font = MyFontEnum.White, params object[] args)
         {
             if (args != null && args.Length != 0)
@@ -38,5 +48,26 @@ namespace midspace.adminscripts.Messages.Communication
                 Font = font
             });
         }
+#endif
+
+#if !STABLE
+        public static void SendMessage(ulong steamId, string message, int disappearTimeMs = 2000, params object[] args)
+        {
+            SendMessage(steamId, message, disappearTimeMs, MyFontEnum.White, args);
+        }
+
+        public static void SendMessage(ulong steamId, string message, string font, int disappearTimeMs = 2000, params object[] args)
+        {
+            if (args != null && args.Length != 0)
+                message = string.Format(message, args);
+
+            ConnectionHelper.SendMessageToPlayer(steamId, new MessageClientNotification
+            {
+                Message = message,
+                DisappearTimeMs = disappearTimeMs,
+                Font = font
+            });
+        }
+#endif
     }
 }

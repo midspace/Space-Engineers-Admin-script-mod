@@ -1,9 +1,7 @@
 ﻿namespace midspace.adminscripts
 {
     using System;
-    using Sandbox.Definitions;
     using Sandbox.ModAPI;
-    using VRage.Game;
     using VRage.Game.ModAPI;
     using VRage.Game.ObjectBuilders;
     using VRageMath;
@@ -30,12 +28,6 @@
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            //if (!MyAPIGateway.Session.SessionSettings.EnableSunRotation)
-            //{
-            //    MyAPIGateway.Utilities.ShowMessage("Suntrack", "The sun is not configured to orbit.");
-            //    return true;
-            //}
-
             const string description = "/suntrack clear";
             bool clear = false;
             int counters = 0;
@@ -83,27 +75,27 @@
             if (MyAPIGateway.Session.SessionSettings.EnableSunRotation)
             {
                 // TODO: figure out why the RPM doesn't match.
-                gps = MyAPIGateway.Session.GPS.Create("Sun observation " + (1.0d/MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes).ToString("0.000000") + " RPM", description, origin, true, false);
+                gps = MyAPIGateway.Session.GPS.Create("Sun observation " + (1.0d / MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes).ToString("0.000000") + " RPM", description, origin, true, false);
                 MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
-                long sunRotationInterval = (long) (TimeSpan.TicksPerMinute*(decimal) MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes);
-                long stage = sunRotationInterval/counters;
+                long sunRotationInterval = (long)(TimeSpan.TicksPerMinute * (decimal)MyAPIGateway.Session.SessionSettings.SunRotationIntervalMinutes);
+                long stage = sunRotationInterval / counters;
                 // Sun interval for 360 degrees.
                 for (long rotation = 0; rotation < sunRotationInterval; rotation += stage)
                 {
                     var stageTime = new TimeSpan(rotation);
-                    float angle = MathHelper.TwoPi*rotation/sunRotationInterval;
+                    float angle = MathHelper.TwoPi * rotation / sunRotationInterval;
                     Vector3 finalSunDirection = Vector3.Transform(baseSunDirection, Matrix.CreateFromAxisAngle(sunRotationAxis, angle));
                     finalSunDirection.Normalize();
 
-                    gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), description, origin + (finalSunDirection*10000), true, false);
+                    gps = MyAPIGateway.Session.GPS.Create("Sun " + stageTime.ToString("hh\\:mm\\:ss"), description, origin + (finalSunDirection * 10000), true, false);
                     MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
                 }
 
-                gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", description, origin + (sunRotationAxis*10000), true, false);
+                gps = MyAPIGateway.Session.GPS.Create("Sun Axis+", description, origin + (sunRotationAxis * 10000), true, false);
                 MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
 
-                gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", description, origin + (-sunRotationAxis*10000), true, false);
+                gps = MyAPIGateway.Session.GPS.Create("Sun Axis-", description, origin + (-sunRotationAxis * 10000), true, false);
                 MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
             }
             else
@@ -118,7 +110,7 @@
                 //}
                 //else
                 fsd = baseSunDirection;
-                gps = MyAPIGateway.Session.GPS.Create("Sun **", description, origin + (fsd*10000), true, false);
+                gps = MyAPIGateway.Session.GPS.Create("Sun **", description, origin + (fsd * 10000), true, false);
                 MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
             }
 
@@ -129,35 +121,37 @@
         {
             baseSunDirection = Vector3.Zero;
 
-            var ed = ((MyObjectBuilder_EnvironmentDefinition)MyDefinitionManager.Static.EnvironmentDefinition.GetObjectBuilder());
+            // -- MySector.InitEnvironmentSettings --
+            var environment = MyAPIGateway.Session.GetSector().Environment;
+            Vector3 baseSunDirectionNormalized;
+            Vector3.CreateFromAzimuthAndElevation(environment.SunAzimuth, environment.SunElevation, out baseSunDirectionNormalized);
+
             if (!MyAPIGateway.Session.SessionSettings.EnableSunRotation)
             {
-                baseSunDirection = ed.SunProperties.SunDirectionNormalized;
+                baseSunDirection = baseSunDirectionNormalized;
                 sunRotationAxis = Vector3.Zero;
                 return;
             }
 
-            // -- Sandbox.Game.SessionComponents.MySectorWeatherComponent.Init() -- 
+            // -- Sandbox.Game.SessionComponents.MySectorWeatherComponent.Init() --
             var cpnt = MyAPIGateway.Session.GetCheckpoint("null");
+            MyObjectBuilder_SectorWeatherComponent weatherComp = null;
             foreach (var comp in cpnt.SessionComponents)
             {
-                var weatherComp = comp as MyObjectBuilder_SectorWeatherComponent;
-                if (weatherComp != null)
-                {
-                    baseSunDirection = weatherComp.BaseSunDirection;
-                }
+                MyObjectBuilder_SectorWeatherComponent component = comp as MyObjectBuilder_SectorWeatherComponent;
+                if (component != null)
+                    weatherComp = component;
             }
 
-            if (Vector3.IsZero(baseSunDirection))
-                baseSunDirection = ed.SunProperties.BaseSunDirectionNormalized;
+            if (weatherComp != null && !weatherComp.BaseSunDirection.IsZero)
+                baseSunDirection = weatherComp.BaseSunDirection;
 
             // -- Sandbox.Game.SessionComponents.MySectorWeatherComponent.BeforeStart() -- 
             float num = Math.Abs(baseSunDirection.X) + Math.Abs(baseSunDirection.Y) + Math.Abs(baseSunDirection.Z);
-            if ((double)num < 0.001)
-                baseSunDirection = ed.SunProperties.BaseSunDirectionNormalized;
+            if (num < 0.001D)
+                baseSunDirection = baseSunDirectionNormalized;
 
             // -- VRage.Game.MySunProperties.SunRotationAxis --
-            Vector3 baseSunDirectionNormalized = ed.SunProperties.BaseSunDirectionNormalized;
             float num2 = Math.Abs(Vector3.Dot(baseSunDirectionNormalized, Vector3.Up));
             Vector3 result;
             if (num2 > 0.95f)

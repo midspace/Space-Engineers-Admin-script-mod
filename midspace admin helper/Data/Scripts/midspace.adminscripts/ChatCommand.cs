@@ -71,6 +71,13 @@
         public abstract bool Invoke(ulong steamId, long playerId, string messageText);
 
         /// <summary>
+        /// Replacement for the Finalizer the Keen killed off.
+        /// </summary>
+        public virtual void Dispose()
+        {
+        }
+
+        /// <summary>
         /// Optional method that is called on every frame Before Simulation.
         /// </summary>
         public virtual void UpdateBeforeSimulation()

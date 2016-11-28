@@ -1353,5 +1353,40 @@ namespace midspace.adminscripts
         }
 
         #endregion
+
+        #region Find Cube in Grid
+
+        public static IMyCubeBlock FindRotorBase(long entityId, IMyCubeGrid parent = null)
+        {
+            var entities = new HashSet<IMyEntity>();
+            MyAPIGateway.Entities.GetEntities(entities, e => e is IMyCubeGrid);
+
+            foreach (var entity in entities)
+            {
+                var cubeGrid = (IMyCubeGrid)entity;
+
+                var blocks = new List<IMySlimBlock>();
+                cubeGrid.GetBlocks(blocks, block => block != null && block.FatBlock != null &&
+                    (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
+                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase)));
+
+                foreach (var block in blocks)
+                {
+                    var motorBase = block.GetObjectBuilder() as MyObjectBuilder_MechanicalConnectionBlock;
+
+                    if (motorBase == null || !motorBase.TopBlockId.HasValue || motorBase.TopBlockId.Value == 0 || !MyAPIGateway.Entities.EntityExists(motorBase.TopBlockId.Value))
+                        continue;
+
+                    if (motorBase.TopBlockId == entityId)
+                        return block.FatBlock;
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
     }
 }

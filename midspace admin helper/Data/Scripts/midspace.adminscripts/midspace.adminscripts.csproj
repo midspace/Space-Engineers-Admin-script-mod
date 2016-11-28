@@ -138,6 +138,7 @@
     <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
     <Compile Include="Messages\Sync\MessageSyncGod.cs" />
+    <Compile Include="Messages\Sync\MessageSyncVoxelChange.cs" />
     <Compile Include="Messages\Sync\MessageSyncInvisible.cs" />
     <Compile Include="Messages\MessageSave.cs" />
     <Compile Include="Messages\Permissions\MessageGroupPermission.cs" />

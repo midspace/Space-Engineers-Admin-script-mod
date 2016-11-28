@@ -93,7 +93,9 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableCopyPaste"), MyAPIGateway.Session.EnableCopyPaste ? yes : no));
             //list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_ClientCanSave"), MyAPIGateway.Session.ClientCanSave ? yes : no)); // Obsolete.
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWeapons"), MyAPIGateway.Session.WeaponsEnabled ? yes : no));
+#if STABLE
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_RemoveTrash"), MyAPIGateway.Session.SessionSettings.RemoveTrash ? yes : no));
+#endif
             list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygen"), MyAPIGateway.Session.SessionSettings.EnableOxygen ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygenPressurization"), MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_DisableRespawnShips"), MyAPIGateway.Session.SessionSettings.DisableRespawnShips ? yes : no));
@@ -118,9 +120,9 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StartInRespawnScreen"), MyAPIGateway.Session.SessionSettings.StartInRespawnScreen ? yes : no));
             list.Add(string.Format("{0}: {1}", "Maximum Drones", MyAPIGateway.Session.SessionSettings.MaxDrones));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_SoundMode") + " " + Localize.GetResource("WorldSettings_RealisticSound"), MyAPIGateway.Session.SessionSettings.RealisticSound ? yes : no));
-//#if !STABLE
-//            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StationVoxelSupport"), MyAPIGateway.Session.SessionSettings.StationVoxelSupport ? yes : no));
-//#endif
+#if !STABLE
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StationVoxelSupport"), MyAPIGateway.Session.SessionSettings.StationVoxelSupport ? yes : no));
+#endif
 
             // add the remaining settings as a sorted list (according to the localizaed labels).
             foreach (var str in list.OrderBy(e => e))

@@ -69,7 +69,7 @@ namespace Sandbox.Game.World
     using VRage.Game.Components;
 
     [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
-    public class MySession : MySessionComponentBase
+    public class MySessions : MySessionComponentBase
     {
         public override void UpdateBeforeSimulation()
         {

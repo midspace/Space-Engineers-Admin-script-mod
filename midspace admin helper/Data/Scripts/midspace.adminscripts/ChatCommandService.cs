@@ -75,7 +75,12 @@
                     throw new Exception(string.Format("ChatCommand '{0}' already registered", command));
 
             Commands.Add(chatCommand.Name, chatCommand);
+        }
 
+        public static void DisposeCommands()
+        {
+            foreach (ChatCommand command in Commands.Values)
+                command.Dispose();
         }
 
         /// <summary>

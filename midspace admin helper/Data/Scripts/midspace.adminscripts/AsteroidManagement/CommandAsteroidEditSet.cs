@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using Sandbox.Common;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.ModAPI;

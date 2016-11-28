@@ -93,8 +93,12 @@ namespace midspace.adminscripts
 
         protected override void UnloadData()
         {
-            DetachEvents();
             Logger.Debug("Closing...");
+            DetachEvents();
+
+            if (_commandsRegistered)
+                ChatCommandService.DisposeCommands();
+
             Logger.Terminate();
             base.UnloadData();
         }
