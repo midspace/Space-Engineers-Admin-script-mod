@@ -63,7 +63,7 @@ Examples:
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
         {
-            var match = Regex.Match(messageText, @"(/config|/cfg)\s+(?<Key>[^\s]+)((\s+(?<Value>.+))|)", RegexOptions.IgnoreCase); 
+            var match = Regex.Match(messageText, @"(/config|/cfg)\s+(?<Key>[^\s]+)((\s+(?<Value>.+))|)", RegexOptions.IgnoreCase | RegexOptions.Singleline); 
             if (match.Success)
             {
                 var key = match.Groups["Key"].Value;
