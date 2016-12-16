@@ -29,7 +29,17 @@
             _timer100.Elapsed += TimerOnElapsed100;
         }
 
-        ~CommandObjectsCollect()
+        // Keen hates Finializers.
+        //~CommandObjectsCollect()
+        //{
+        //    if (_timer100 != null)
+        //    {
+        //        _timer100.Stop();
+        //        _timer100 = null;
+        //    }
+        //}
+
+        public override void Dispose()
         {
             if (_timer100 != null)
             {
