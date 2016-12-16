@@ -93,17 +93,10 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableCopyPaste"), MyAPIGateway.Session.EnableCopyPaste ? yes : no));
             //list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_ClientCanSave"), MyAPIGateway.Session.ClientCanSave ? yes : no)); // Obsolete.
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWeapons"), MyAPIGateway.Session.WeaponsEnabled ? yes : no));
-#if STABLE
-            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_RemoveTrash"), MyAPIGateway.Session.SessionSettings.RemoveTrash ? yes : no));
-#endif
+            //list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_RemoveTrash"), MyAPIGateway.Session.SessionSettings.RemoveTrash ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygen"), MyAPIGateway.Session.SessionSettings.EnableOxygen ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("World_Settings_EnableOxygenPressurization"), MyAPIGateway.Session.SessionSettings.EnableOxygenPressurization ? yes : no));
-#if STABLE
-            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_DisableRespawnShips"), MyAPIGateway.Session.SessionSettings.DisableRespawnShips ? yes : no));
-#endif
-#if !STABLE
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableRespawnShips"), MyAPIGateway.Session.SessionSettings.EnableRespawnShips ? yes : no));
-#endif
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableJetpack"), MyAPIGateway.Session.SessionSettings.EnableJetpack ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableVoxelDestruction"), MyAPIGateway.Session.SessionSettings.EnableVoxelDestruction ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_RespawnShipDelete"), MyAPIGateway.Session.SessionSettings.RespawnShipDelete ? yes : no));

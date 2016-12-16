@@ -13,17 +13,8 @@ namespace midspace.adminscripts.Messages.Communication
         [ProtoMember(2)]
         public int DisappearTimeMs;
 
-#if STABLE
-        [ProtoMember(3)]
-        public MyFontEnum Font;
-#endif
-
-#if !STABLE
-
         [ProtoMember(3)]
         public string Font;
-#endif
-
 
         public override void ProcessClient()
         {
@@ -35,22 +26,6 @@ namespace midspace.adminscripts.Messages.Communication
             // never processed on server
         }
 
-#if STABLE
-        public static void SendMessage(ulong steamId, string message, int disappearTimeMs = 2000, MyFontEnum font = MyFontEnum.White, params object[] args)
-        {
-            if (args != null && args.Length != 0)
-                message = string.Format(message, args);
-
-            ConnectionHelper.SendMessageToPlayer(steamId, new MessageClientNotification
-            {
-                Message = message,
-                DisappearTimeMs = disappearTimeMs,
-                Font = font
-            });
-        }
-#endif
-
-#if !STABLE
         public static void SendMessage(ulong steamId, string message, int disappearTimeMs = 2000, params object[] args)
         {
             SendMessage(steamId, message, disappearTimeMs, MyFontEnum.White, args);
@@ -68,6 +43,5 @@ namespace midspace.adminscripts.Messages.Communication
                 Font = font
             });
         }
-#endif
     }
 }
