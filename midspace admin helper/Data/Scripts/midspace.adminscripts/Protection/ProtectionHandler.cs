@@ -165,7 +165,7 @@
                 DateTime time;
                 if (player != null && (!_sentFailedMessage.TryGetValue(player, out time) || DateTime.Now - time >= TimeSpan.FromMilliseconds(GrindFailedMessageInterval)))
                 {
-                    MessageClientNotification.SendMessage(player.SteamUserId, "You are not allowed to damage this block.", GrindFailedMessageInterval, MyFontEnum.Red);
+                    MessageClientNotification.SendMessage(player.SteamUserId, "You are not allowed to damage this block.", MyFontEnum.Red, GrindFailedMessageInterval);
                     _sentFailedMessage.Update(player, DateTime.Now);
                 }
 
