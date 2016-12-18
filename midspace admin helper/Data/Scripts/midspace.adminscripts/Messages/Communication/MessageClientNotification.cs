@@ -28,7 +28,7 @@ namespace midspace.adminscripts.Messages.Communication
 
         public static void SendMessage(ulong steamId, string message, int disappearTimeMs = 2000, params object[] args)
         {
-            SendMessage(steamId, message, disappearTimeMs, MyFontEnum.White, args);
+            SendMessage(steamId, message, MyFontEnum.White, disappearTimeMs, args);
         }
 
         public static void SendMessage(ulong steamId, string message, string font, int disappearTimeMs = 2000, params object[] args)
