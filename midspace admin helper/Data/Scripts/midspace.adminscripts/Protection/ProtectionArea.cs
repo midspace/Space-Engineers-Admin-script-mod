@@ -38,17 +38,7 @@
 
         public bool Contains(IMyEntity entity)
         {
-            switch (Shape)
-            {
-                case ProtectionAreaShape.Cube:
-                    var boundingBox = new BoundingBoxD(new Vector3D(Center.X - Size, Center.Y - Size, Center.Z - Size), new Vector3D(Center.X + Size, Center.Y + Size, Center.Z + Size));
-                    return boundingBox.Intersects(entity.WorldAABB);
-                case ProtectionAreaShape.Sphere:
-                    var boundingSphere = new BoundingSphereD(Center, Size);
-                    return boundingSphere.Intersects(entity.WorldAABB);
-            }
-
-            return false;
+            return Contains(entity.WorldAABB);
         }
 
         public bool Contains(IMySlimBlock block)
@@ -62,15 +52,19 @@
 
             BoundingBoxD box;
             block.GetWorldBoundingBox(out box);
+            return Contains(box);
+        }
 
+        public bool Contains(BoundingBoxD boundingbox)
+        {
             switch (Shape)
             {
                 case ProtectionAreaShape.Cube:
-                    var boundingBox = new BoundingBoxD(new Vector3D(Center.X - Size, Center.Y - Size, Center.Z - Size), new Vector3D(Center.X + Size, Center.Y + Size, Center.Z + Size));
-                    return boundingBox.Intersects(box);
+                    var boundingBox = new BoundingBoxD(Center - Size, Center + Size);
+                    return boundingBox.Intersects(boundingbox);
                 case ProtectionAreaShape.Sphere:
                     var boundingSphere = new BoundingSphereD(Center, Size);
-                    return boundingSphere.Intersects(box);
+                    return boundingSphere.Intersects(boundingbox);
             }
 
             return false;
