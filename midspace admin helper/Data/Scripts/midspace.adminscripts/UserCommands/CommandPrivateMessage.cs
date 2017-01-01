@@ -189,7 +189,7 @@ The logging of private messages is {1}.
 
             var privateMessage = new MessagePrivateMessage();
 
-            IMyPlayer player = MyAPIGateway.Multiplayer.Players.GetPlayer(steamId);
+            IMyPlayer player = MyAPIGateway.Players.GetPlayer(steamId);
             string name = player == null ? string.Empty : player.DisplayName;
 
             privateMessage.ChatMessage = new ChatMessage

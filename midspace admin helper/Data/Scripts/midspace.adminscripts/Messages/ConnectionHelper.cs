@@ -31,9 +31,11 @@
         public static void SendMessageToServer(MessageBase message)
         {
             message.Side = MessageSide.ServerSide;
+            if (MyAPIGateway.Multiplayer.IsServer)
+                message.SenderSteamId = MyAPIGateway.Multiplayer.ServerId;
             if (MyAPIGateway.Session.Player != null)
                 message.SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
-            var xml = MyAPIGateway.Utilities.SerializeToXML<MessageContainer>(new MessageContainer() { Content = message });
+            var xml = MyAPIGateway.Utilities.SerializeToXML<MessageContainer>(new MessageContainer { Content = message });
             byte[] byteData = System.Text.Encoding.Unicode.GetBytes(xml);
             if (byteData.Length <= MAX_MESSAGE_SIZE)
                 MyAPIGateway.Multiplayer.SendMessageToServer(ConnectionId, byteData);
@@ -52,6 +54,8 @@
         /// <param name="syncAll"></param>
         public static void SendMessageToAll(MessageBase message, bool syncAll = true)
         {
+            if (MyAPIGateway.Multiplayer.IsServer)
+                message.SenderSteamId = MyAPIGateway.Multiplayer.ServerId;
             if (MyAPIGateway.Session.Player != null)
                 message.SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
 

@@ -978,9 +978,9 @@ namespace midspace.adminscripts
             {
                 var cockpit = (IMyCubeBlock)targetPlayer.Controller.ControlledEntity;
 
-                var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpit.BlockDefinition);
-                var cockpitDefinition = definition as MyCockpitDefinition;
-                var remoteDefinition = definition as MyRemoteControlDefinition;
+                //var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpit.BlockDefinition);
+                //var cockpitDefinition = definition as MyCockpitDefinition;
+                //var remoteDefinition = definition as MyRemoteControlDefinition;
 
                 if (cockpit.CubeGrid.GridSizeEnum != MyCubeSize.Small)
                     // station and large ship grids.

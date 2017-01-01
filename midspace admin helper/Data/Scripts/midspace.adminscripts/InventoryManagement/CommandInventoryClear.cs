@@ -50,7 +50,7 @@
 
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ClearInventory(0, selectedPlayer.PlayerId);
+                    ClearInventory(MyAPIGateway.Multiplayer.ServerId, selectedPlayer.PlayerId);
                 }
                 else
                 {

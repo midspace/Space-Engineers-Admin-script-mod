@@ -47,7 +47,7 @@
                         destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
                     }
 
-                    DeleteObjects(0, destination, range);
+                    DeleteObjects(MyAPIGateway.Multiplayer.ServerId, destination, range);
                     return true;
                 }
             }

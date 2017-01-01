@@ -68,6 +68,8 @@ namespace midspace.adminscripts.Messages
 
         public MessageBase()
         {
+            if (MyAPIGateway.Multiplayer.IsServer)
+                SenderSteamId = MyAPIGateway.Multiplayer.ServerId;
             if (MyAPIGateway.Session.Player != null)
                 SenderSteamId = MyAPIGateway.Session.Player.SteamUserId;
         }

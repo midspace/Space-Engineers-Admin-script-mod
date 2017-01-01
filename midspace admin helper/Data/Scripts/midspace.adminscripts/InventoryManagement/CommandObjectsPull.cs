@@ -45,7 +45,7 @@
                     }
 
                     if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                        PullObjects(0, destination, range, velocity);
+                        PullObjects(MyAPIGateway.Multiplayer.ServerId, destination, range, velocity);
                     else
                         ConnectionHelper.SendMessageToServer(new MessageSyncFloatingObjects { Type = SyncFloatingObject.Pull, Position = destination, Range = range, Velocity = velocity });
                     return true;
