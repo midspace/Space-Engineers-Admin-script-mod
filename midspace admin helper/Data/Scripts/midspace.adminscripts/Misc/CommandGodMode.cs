@@ -76,7 +76,7 @@
         /// <summary>
         /// Used to sync god mode with server.
         /// </summary>
-        /// <param name="player"></param>
+        /// <param name="steamId"></param>
         /// <param name="enable"></param>
         public static void ChangeGodMode(ulong steamId, bool enable)
         {

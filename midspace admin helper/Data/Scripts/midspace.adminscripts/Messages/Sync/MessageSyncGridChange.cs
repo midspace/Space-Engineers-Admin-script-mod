@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.ModAPI;
@@ -86,7 +86,7 @@
 
             if (selectedShips.Count == 0)
             {
-                MessageClientTextMessage.SendMessage(steamId, "Server", "No ships selected or found.");
+                MyAPIGateway.Utilities.SendMessage(steamId, "Server", "No ships selected or found.");
                 return;
             }
 
@@ -107,7 +107,7 @@
                             foreach (var grid in grids)
                                 grid.ChangeGridOwnership(player.PlayerID, MyOwnershipShareModeEnum.All);
 
-                            MessageClientTextMessage.SendMessage(steamId, "Server", string.Format("Grid {0} Claimed by player {1}.", selectedShip.DisplayName, player.DisplayName));
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Claimed by player {1}.", selectedShip.DisplayName, player.DisplayName));
                         }
                     }
                     break;
@@ -119,7 +119,7 @@
                             var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
                             foreach (var grid in grids)
                                 grid.ChangeGridOwnership(0, MyOwnershipShareModeEnum.All);
-                            MessageClientTextMessage.SendMessage(steamId, "Server", string.Format("Grid {0} Revoked of all ownership.", selectedShip.DisplayName));
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Revoked of all ownership.", selectedShip.DisplayName));
                         }
                     }
                     break;
@@ -137,7 +137,7 @@
                                 foreach (var block in blocks)
                                     block.FatBlock.ChangeOwner(block.FatBlock.OwnerId, MyOwnershipShareModeEnum.All);
                             }
-                            MessageClientTextMessage.SendMessage(steamId, "Server", string.Format("Grid {0} Shared.", selectedShip.DisplayName));
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Shared.", selectedShip.DisplayName));
                         }
                     }
                     break;
@@ -192,6 +192,59 @@
                 case SyncGridChangeType.ScaleUp:
                     {
                         ScaleShip(steamId, selectedShips.First(), MyCubeSize.Large);
+                    }
+                    break;
+
+                case SyncGridChangeType.BuiltBy:
+                    {
+                        string playerName = SearchEntity;
+
+                        var players = new List<IMyPlayer>();
+                        MyAPIGateway.Players.GetPlayers(players, p => p != null);
+                        IMyIdentity selectedPlayer = null;
+
+                        var identities = new List<IMyIdentity>();
+                        MyAPIGateway.Players.GetAllIdentites(identities, i => i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
+                        selectedPlayer = identities.FirstOrDefault();
+
+                        int index;
+                        List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
+                        if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
+                        {
+                            selectedPlayer = cacheList[index - 1];
+                        }
+
+                        List<IMyIdentity> botCacheList = CommandListBots.GetIdentityCache(steamId);
+                        if (playerName.Substring(0, 1).Equals("B", StringComparison.InvariantCultureIgnoreCase) && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= botCacheList.Count)
+                        {
+                            selectedPlayer = botCacheList[index - 1];
+                        }
+
+                        if (selectedPlayer == null)
+                        {
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Player or Bot '{0}' could not be found.", playerName));
+                            return;
+                        }
+
+                        // Using the identity list is a crap way, but since we don't have access to BuiltBy for non-functional blocks, this has to do.
+                        var listIdentites = new List<IMyIdentity>();
+                        MyAPIGateway.Players.GetAllIdentites(listIdentites);
+                        foreach (var selectedShip in selectedShips)
+                        {
+                            var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
+                            foreach (var grid in grids)
+                            {
+                                foreach (IMyIdentity identity in listIdentites)
+                                {
+                                    if (identity.IdentityId != selectedPlayer.IdentityId)
+                                    {
+                                        // The current API doesn't allow the setting of the BuiltBy to anything but an existing Identity (player or NPC).
+                                        ((MyCubeGrid)grid).TransferBlocksBuiltByID(identity.IdentityId, selectedPlayer.IdentityId);
+                                    }
+                                }
+                            }
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid '{0}' Changed of all built to '{1}'.", selectedShip.DisplayName, selectedPlayer.DisplayName));
+                        }
                     }
                     break;
             }
@@ -444,6 +497,7 @@
         Destructible,
         Stop,
         ScaleUp,
-        ScaleDown
+        ScaleDown,
+        BuiltBy
     }
 }

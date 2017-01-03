@@ -128,6 +128,14 @@
 
             info.AppendFormat("\r\n");
 
+            info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_BlockLimits"), MyAPIGateway.Session.SessionSettings.EnableBlockLimits ? yes : no);
+            foreach (var kvp in MyAPIGateway.Session.SessionSettings.BlockTypeLimits.Dictionary)
+            {
+                info.AppendFormat("  {0}: {1}\r\n", kvp.Key, kvp.Value);
+            }
+
+            info.AppendFormat("\r\n");
+
             var mods = MyAPIGateway.Session.GetCheckpoint("null").Mods;
             info.AppendFormat("{0}: {1:#,###0}\r\n", Localize.GetResource("WorldSettings_Mods"), mods.Count);
             foreach (var mod in mods.OrderBy(e => e.FriendlyName))

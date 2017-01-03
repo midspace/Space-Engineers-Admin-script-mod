@@ -282,6 +282,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandShipSwitch());
             commands.Add(new CommandShipOwnerClaim());
             commands.Add(new CommandShipOwnerRevoke());
+            commands.Add(new CommandShipBuiltBy());
             commands.Add(new CommandShipDelete());
             commands.Add(new CommandShipRepair());
             commands.Add(new CommandShipDestructible());

@@ -6,6 +6,7 @@
     using Messages;
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
+    using Sandbox.Game.Entities.Cube;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.ModAPI;
@@ -104,6 +105,17 @@
                             ownerList.Add(string.Format("{0} [{1}]", owner.DisplayName, ownerKvp.Value));
                         }
 
+                        // TODO: BuiltBy needs to be made available in IMySlimBlock.
+                        //var builtByCounts = new Dictionary<long, long>();
+                        //foreach (var block in blocks.Where(f => f.FatBlock != null && ((MyCubeBlock)f).BuiltBy != 0))
+                        //{
+                        //    if (ownerCounts.ContainsKey(block.FatBlock.OwnerId))
+                        //        ownerCounts[block.FatBlock.OwnerId]++;
+                        //    else
+                        //        ownerCounts.Add(block.FatBlock.OwnerId, 1);
+                        //}
+
+
                         //var damage = new StringBuilder();
                         //var buildComplete = new StringBuilder();
                         var incompleteBlocks = 0;
@@ -146,7 +158,7 @@
                             gridCube.LocalAABB.Size,
                             blocks.Count,
                             attachedGrids.Count,
-                            String.Join(", ", ownerList),
+                            string.Join(", ", ownerList),
                             incompleteBlocks);
 
                         if (cubeBlock != null)
@@ -155,7 +167,12 @@
                             var owner = identities.FirstOrDefault(p => p.PlayerId == cubeBlock.OwnerId);
                             if (owner != null)
                                 ownerName = owner.DisplayName;
-                            description += string.Format("\r\n\r\nCube;\r\n  Type : {1}\r\n  SubType : {0}\r\n  Name : {2}\r\n  Owner : {3}", cubeBlock.BlockDefinition.SubtypeName, cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName);
+
+                            string builtByName = "";
+                            var builtBy = identities.FirstOrDefault(p => p.PlayerId == ((MyCubeBlock)cubeBlock).BuiltBy);
+                            if (builtBy != null)
+                                builtByName = builtBy.DisplayName;
+                            description += string.Format("\r\n\r\nCube;\r\n  Type : {1}\r\n  SubType : {0}\r\n  Name : {2}\r\n  Owner : {3}\r\n  BuiltBy : {4}", cubeBlock.BlockDefinition.SubtypeName, cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName, builtByName);
                         }
 
                         MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
