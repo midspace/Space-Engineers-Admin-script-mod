@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Sandbox.ModAPI;
 
@@ -29,7 +30,16 @@ namespace midspace.adminscripts.Config.Files
             var text = reader.ReadToEnd();
             reader.Close();
 
-            PrivateConversations = MyAPIGateway.Utilities.SerializeFromXML<List<PrivateConversation>>(text);
+            try
+            {
+                PrivateConversations = MyAPIGateway.Utilities.SerializeFromXML<List<PrivateConversation>>(text);
+            }
+            catch (Exception ex)
+            {
+                var exception = new Exception(string.Format("An error occuring loading the file '{0}'. Begining with the text \"{1}\".", Name, text.Substring(0, Math.Min(text.Length, 100))), ex);
+                AdminNotificator.StoreExceptionAndNotify(exception);
+                throw exception;
+            }
         }
 
         public override void Create()
