@@ -247,6 +247,8 @@ namespace midspace.adminscripts
             commands.Add(new CommandBomb());
             commands.Add(new CommandInvisible());
             commands.Add(new CommandMeteor(_oreNames[0]));
+            commands.Add(new CommandAddSpider());
+            commands.Add(new CommandAddWolf());
             commands.Add(new CommandObjectsCollect());
             commands.Add(new CommandObjectsDelete());
             commands.Add(new CommandObjectsCount());

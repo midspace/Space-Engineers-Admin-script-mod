@@ -153,10 +153,12 @@
     <Compile Include="Messages\Sync\MessageSyncGridChange.cs" />
     <Compile Include="Messages\Sync\MessageSyncEntity.cs" />
     <Compile Include="Messages\Sync\MessageSyncFloatingObjects.cs" />
+    <Compile Include="Misc\CommandAddWolf.cs" />
     <Compile Include="Misc\CommandConfig.cs" />
     <Compile Include="Misc\CommandDetail.cs" />
     <Compile Include="Misc\CommandBomb.cs" />
     <Compile Include="Misc\CommandGodMode.cs" />
+    <Compile Include="Misc\CommandAddSpider.cs" />
     <Compile Include="PlayerManagement\CommandForceBan.cs" />
     <Compile Include="PlayerManagement\CommandForceKick.cs" />
     <Compile Include="Misc\CommandPermission.cs" />

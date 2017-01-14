@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
@@ -23,7 +24,7 @@
     [ProtoContract]
     public class MessageSyncAres : MessageBase
     {
-        static readonly Random _random = new Random();
+        //static readonly Random _random = new Random();
 
         #region fields
 
@@ -38,6 +39,9 @@
 
         [ProtoMember(4)]
         public MatrixD ViewMatrix;
+
+        [ProtoMember(5)]
+        public string SubtypeName;
 
         #endregion
 
@@ -60,7 +64,7 @@
 
         public static void ThrowBomb(ulong steamId, MatrixD viewMatrix)
         {
-            Process(new MessageSyncAres { SyncType = SyncAresType.Bomb, SteamId = steamId, ViewMatrix = viewMatrix});
+            Process(new MessageSyncAres { SyncType = SyncAresType.Bomb, SteamId = steamId, ViewMatrix = viewMatrix });
         }
 
         public static void ThrowMeteor(ulong steamId, string oreMaterial, MatrixD viewMatrix)
@@ -71,6 +75,11 @@
         public static void Eject(ulong steamId)
         {
             Process(new MessageSyncAres { SyncType = SyncAresType.Eject, SteamId = steamId });
+        }
+
+        public static void SpawnBot(ulong steamId, string subtypeName, MatrixD viewMatrix)
+        {
+            Process(new MessageSyncAres { SyncType = SyncAresType.SpawnBot, SteamId = steamId, SubtypeName = subtypeName, ViewMatrix = viewMatrix });
         }
 
         private static void Process(MessageSyncAres syncEntity)
@@ -123,6 +132,10 @@
 
                 case SyncAresType.Eject:
                     Eject(player);
+                    break;
+
+                case SyncAresType.SpawnBot:
+                    SpawnBotType(SubtypeName, viewMatrix);
                     break;
             }
         }
@@ -288,6 +301,34 @@
             }
         }
 
+        private void SpawnBotType(string subTypeName, MatrixD viewMatrix)
+        {
+
+            if (MyDefinitionManager.Static.GetBotDefinitions().Any(e => e.Id.SubtypeName.Equals(subTypeName, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                var currentPlanetList = new List<IMyVoxelBase>();
+                MyAPIGateway.Session.VoxelMaps.GetInstances(currentPlanetList, v => v is MyPlanet);
+
+                bool canSpawn = false;
+
+                foreach (IMyVoxelBase planet in currentPlanetList)
+                {
+                    MyGravityProviderComponent gravityProvider = planet.Components.Get<MyGravityProviderComponent>();
+                    canSpawn |= gravityProvider.IsPositionInRange(viewMatrix.Translation);
+                }
+
+                if (canSpawn)
+                {
+                    Sandbox.Game.MyVisualScriptLogicProvider.SpawnBot(subTypeName, viewMatrix.Translation);
+                    MyAPIGateway.Utilities.SendMessage(SenderSteamId, "server", "Spawned {0}", subTypeName);
+                }
+                else
+                {
+                    MyAPIGateway.Utilities.SendMessage(SenderSteamId, "server", "Cannot spawn here. Requires natural gravity.");
+                }
+            }
+        }
+
         public enum SyncAresType
         {
             Smite,
@@ -295,7 +336,8 @@
             Slap,
             Bomb,
             Meteor,
-            Eject
+            Eject,
+            SpawnBot
         }
     }
 }

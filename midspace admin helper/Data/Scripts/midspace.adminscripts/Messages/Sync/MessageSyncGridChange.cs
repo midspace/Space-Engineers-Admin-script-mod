@@ -247,6 +247,28 @@
                         }
                     }
                     break;
+
+                case SyncGridChangeType.Repair:
+                    {
+                        var players = new List<IMyPlayer>();
+                        MyAPIGateway.Players.GetPlayers(players, p => p != null && p.PlayerID == playerId);
+                        IMyPlayer player = players.FirstOrDefault();
+
+                        if (player == null)
+                            return;
+
+                        foreach (var selectedShip in selectedShips)
+                        {
+                            var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
+                            foreach (var grid in grids)
+                            {
+                                RepairShip(steamId, grid);
+                            }
+
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Repaired.", selectedShip.DisplayName));
+                        }
+                    }
+                    break;
             }
         }
 
@@ -484,6 +506,32 @@
             tempList.CreateAndSyncEntities();
             return true;
         }
+
+        private void RepairShip(ulong steamId, IMyEntity shipEntity)
+        {
+            var blocks = new List<IMySlimBlock>();
+            var ship = (IMyCubeGrid)shipEntity;
+            ship.GetBlocks(blocks, f => f != null);
+
+            foreach (IMySlimBlock block in blocks)
+            {
+                //block.CurrentDamage
+                //block.AccumulatedDamage
+                //block.DamageRatio
+                //block.HasDeformation
+                //block.MaxDeformation
+
+                //MyAPIGateway.Utilities.SendMessage(steamId, "state", "{0}: HasdD:{1} MaxD:{2} Int:{3} BuildInt:{4} MaxInt:{5}", i, block.HasDeformation, block.MaxDeformation, block.Integrity, block.BuildIntegrity, block.MaxIntegrity);
+                int j = 0;
+                while (block.HasDeformation && j < 20 || j == 0)
+                {
+                    block.IncreaseMountLevel(1000F, 0, null, 1000F, true);
+                    j++;
+                }
+            }
+
+            //MyAPIGateway.Utilities.SendMessage(steamId, "repair", "Ship '{0}' has been repairded.", shipEntity.DisplayName);
+        }
     }
 
     public enum SyncGridChangeType
@@ -498,6 +546,7 @@
         Stop,
         ScaleUp,
         ScaleDown,
-        BuiltBy
+        BuiltBy,
+        Repair
     }
 }
