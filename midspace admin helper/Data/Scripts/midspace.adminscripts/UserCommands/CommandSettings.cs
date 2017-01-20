@@ -113,14 +113,17 @@
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableToolShake"), MyAPIGateway.Session.SessionSettings.EnableToolShake ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_Encounters"), MyAPIGateway.Session.SessionSettings.EnableEncounters ? yes : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableConvertToStation"), MyAPIGateway.Session.SessionSettings.EnableConvertToStation ? yes : no));
+#if STABLE
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWolfs"), MyAPIGateway.Session.SessionSettings.EnableWolfs.HasValue? (MyAPIGateway.Session.SessionSettings.EnableWolfs.Value ? yes : no) : no));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableSpiders"), MyAPIGateway.Session.SessionSettings.EnableSpiders.HasValue ? (MyAPIGateway.Session.SessionSettings.EnableSpiders.Value ? yes : no) : no));
+#else
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableWolfs"), MyAPIGateway.Session.SessionSettings.EnableWolfs ? yes : no));
+            list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_EnableSpiders"), MyAPIGateway.Session.SessionSettings.EnableSpiders ? yes : no));
+#endif
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StartInRespawnScreen"), MyAPIGateway.Session.SessionSettings.StartInRespawnScreen ? yes : no));
             list.Add(string.Format("{0}: {1}", "Maximum Drones", MyAPIGateway.Session.SessionSettings.MaxDrones));
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_SoundMode") + " " + Localize.GetResource("WorldSettings_RealisticSound"), MyAPIGateway.Session.SessionSettings.RealisticSound ? yes : no));
-#if !STABLE
             list.Add(string.Format("{0}: {1}", Localize.GetResource("WorldSettings_StationVoxelSupport"), MyAPIGateway.Session.SessionSettings.StationVoxelSupport ? yes : no));
-#endif
 
             // add the remaining settings as a sorted list (according to the localizaed labels).
             foreach (var str in list.OrderBy(e => e))
