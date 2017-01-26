@@ -24,7 +24,7 @@
             if (messageText.Equals("/countobjects", StringComparison.InvariantCultureIgnoreCase))
             {
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                    CountObjects(0);
+                    CountObjects(MyAPIGateway.Session.Player.SteamUserId);
                 else
                     ConnectionHelper.SendMessageToServer(new MessageSyncFloatingObjects { Type = SyncFloatingObject.Count });
                 return true;
