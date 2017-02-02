@@ -44,11 +44,7 @@
             }
 
             // Display the current state.
-#if STABLE
-            var currentState = MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpiders.HasValue ? MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpiders.Value : false;
-#else
             var currentState = MyAPIGateway.Session.GetCheckpoint("null").Settings.EnableSpiders;
-#endif
             MyAPIGateway.Utilities.ShowMessage("Spiders", currentState ? "On" : "Off");
             return true;
         }

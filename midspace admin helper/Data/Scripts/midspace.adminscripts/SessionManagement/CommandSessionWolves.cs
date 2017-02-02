@@ -46,11 +46,7 @@
             // Display the current state.
 
             var checkpoint = MyAPIGateway.Session.GetCheckpoint("null");
-#if STABLE
-            var currentState = checkpoint.Settings.EnableWolfs.HasValue ? checkpoint.Settings.EnableWolfs.Value : false;
-#else
             var currentState = checkpoint.Settings.EnableWolfs;
-#endif
 
             MyAPIGateway.Utilities.ShowMessage("Cyber Hounds", currentState ? "On" : "Off");
             return true;
