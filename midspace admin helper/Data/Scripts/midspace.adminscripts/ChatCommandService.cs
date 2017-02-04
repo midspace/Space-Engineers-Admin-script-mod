@@ -171,7 +171,7 @@
                     //MyAPIGateway.Utilities.ShowMessage("CHECK", "Command Client: {0}", command.Value.Flag);
                     try
                     {
-                        if (command.Value.Invoke(MyAPIGateway.Session.Player.SteamUserId, MyAPIGateway.Session.Player.PlayerID, messageText))
+                        if (command.Value.Invoke(MyAPIGateway.Session.Player.SteamUserId, MyAPIGateway.Session.Player.IdentityId, messageText))
                             return true;
 
                         MyAPIGateway.Utilities.ShowMessage("Command failed", string.Format("Execution of command {0} failed. Use '/help {0}' for receiving a detailed instruction.", command.Value.Name));
@@ -201,7 +201,7 @@
                     // Send message to server to process.
                     ConnectionHelper.SendMessageToServer(new MessageChatCommand()
                     {
-                        PlayerId = MyAPIGateway.Session.Player.PlayerID,
+                        PlayerId = MyAPIGateway.Session.Player.IdentityId,
                         TextCommand = messageText
                     });
                     return true;

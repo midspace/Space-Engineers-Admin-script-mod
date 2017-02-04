@@ -39,7 +39,7 @@
 
             foreach (var identity in identities.OrderBy(i => i.DisplayName))
             {
-                var steamPlayer = players.FirstOrDefault(p => p.PlayerID == identity.PlayerId);
+                var steamPlayer = players.FirstOrDefault(p => p.IdentityId == identity.IdentityId);
                 if (steamPlayer == null)
                 {
                     description.AppendFormat("#{0} '{1}'\r\n", index++, identity.DisplayName);

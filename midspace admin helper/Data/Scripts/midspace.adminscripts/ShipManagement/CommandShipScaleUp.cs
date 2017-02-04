@@ -24,7 +24,7 @@
                 var shipEntity = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, true, false, false, false, false, false);
                 if (shipEntity != null)
                 {
-                    MessageSyncGridChange.SendMessage(SyncGridChangeType.ScaleUp, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID);
+                    MessageSyncGridChange.SendMessage(SyncGridChangeType.ScaleUp, shipEntity.EntityId, null, MyAPIGateway.Session.Player.IdentityId);
                     return true;
                 }
 
@@ -36,7 +36,7 @@
             if (match.Success)
             {
                 var shipName = match.Groups["Key"].Value;
-                MessageSyncGridChange.SendMessage(SyncGridChangeType.ScaleUp, 0, shipName, MyAPIGateway.Session.Player.PlayerID);
+                MessageSyncGridChange.SendMessage(SyncGridChangeType.ScaleUp, 0, shipName, MyAPIGateway.Session.Player.IdentityId);
                 return true;
             }
 

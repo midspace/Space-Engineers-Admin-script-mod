@@ -41,7 +41,7 @@
                 if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.IdentityId == cacheList[index - 1].IdentityId);
                     selectedPlayer = listplayers.FirstOrDefault();
                 }
 
@@ -49,7 +49,7 @@
                     return false;
 
                 var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
-                var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.PlayerID));
+                var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.IdentityId));
 
                 if (factionBuilder == null)
                 {
@@ -57,7 +57,7 @@
                     return true;
                 }
 
-                var fm = factionBuilder.Members.FirstOrDefault(m => m.PlayerId == selectedPlayer.PlayerID);
+                var fm = factionBuilder.Members.FirstOrDefault(m => m.PlayerId == selectedPlayer.IdentityId);
 
                 if (fm.IsFounder)
                 {
@@ -67,7 +67,7 @@
 
                 if (fm.IsLeader)
                 {
-                    MessageSyncFaction.DemotePlayer(factionBuilder.FactionId, selectedPlayer.PlayerID);
+                    MessageSyncFaction.DemotePlayer(factionBuilder.FactionId, selectedPlayer.IdentityId);
                     MyAPIGateway.Utilities.SendMessage(steamId, "demote", "{0} from Leader to Member.", selectedPlayer.DisplayName);
                     return true;
                 }

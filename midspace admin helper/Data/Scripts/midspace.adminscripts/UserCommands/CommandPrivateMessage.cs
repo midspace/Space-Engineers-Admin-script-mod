@@ -114,7 +114,7 @@ The logging of private messages is {1}.
                 else if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.IdentityId == cacheList[index - 1].IdentityId);
                     receiver = listplayers.FirstOrDefault();
                     if (!string.IsNullOrEmpty(message))
                         SendPrivateMessage(steamId, receiver, message);
@@ -159,7 +159,7 @@ The logging of private messages is {1}.
                 else if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     var listplayers = new List<IMyPlayer>();
-                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == cacheList[index - 1].PlayerId);
+                    MyAPIGateway.Players.GetPlayers(listplayers, p => p.IdentityId == cacheList[index - 1].IdentityId);
                     receiver = listplayers.FirstOrDefault();
                     SendPrivateMessage(steamId, receiver, match4.Groups["Message"].Value);
                 }

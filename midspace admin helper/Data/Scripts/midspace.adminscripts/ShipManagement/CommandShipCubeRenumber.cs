@@ -74,7 +74,7 @@
                             // newName is from existing name.
                             var newName = match.Groups["name"].Value.Trim() + " " + blockCounter;
                             description.AppendFormat("Changed '{0}' => '{1}'\r\n", terminal.CustomName, newName);
-                            terminal.SetCustomName(newName);
+                            terminal.CustomName = newName;
                             counter++;
                             counters[block.FatBlock.BlockDefinition] = blockCounter + 1;
                         }

@@ -13,7 +13,7 @@ namespace midspace.adminscripts
     /// <summary>
     /// For editing Voxels.
     /// </summary>
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_HandDrill))]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_HandDrill), true)]
     public class VoxelEditLogic : MyGameLogicComponent
     {
         private bool _isInRange;

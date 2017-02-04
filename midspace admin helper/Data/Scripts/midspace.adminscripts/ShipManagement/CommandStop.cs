@@ -26,7 +26,7 @@
                 var shipEntity = entity as IMyCubeGrid;
                 if (shipEntity != null)
                 {
-                    MessageSyncGridChange.SendMessage(SyncGridChangeType.Stop, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID);
+                    MessageSyncGridChange.SendMessage(SyncGridChangeType.Stop, shipEntity.EntityId, null, MyAPIGateway.Session.Player.IdentityId);
                     return true;
                 }
                 MyAPIGateway.Utilities.ShowMessage("Stop", "No ship targeted.");
@@ -39,7 +39,7 @@
                 if (match.Success)
                 {
                     var shipName = match.Groups["Key"].Value;
-                    MessageSyncGridChange.SendMessage(SyncGridChangeType.Stop, 0, shipName, MyAPIGateway.Session.Player.PlayerID);
+                    MessageSyncGridChange.SendMessage(SyncGridChangeType.Stop, 0, shipName, MyAPIGateway.Session.Player.IdentityId);
                     return true;
 
                 }

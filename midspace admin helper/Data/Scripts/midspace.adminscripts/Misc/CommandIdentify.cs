@@ -99,7 +99,7 @@
                         var ownerList = new List<string>();
                         foreach (var ownerKvp in ownerCounts)
                         {
-                            var owner = identities.FirstOrDefault(p => p.PlayerId == ownerKvp.Key);
+                            var owner = identities.FirstOrDefault(p => p.IdentityId == ownerKvp.Key);
                             if (owner == null)
                                 continue;
                             ownerList.Add(string.Format("{0} [{1}]", owner.DisplayName, ownerKvp.Value));
@@ -164,12 +164,12 @@
                         if (cubeBlock != null)
                         {
                             string ownerName = "";
-                            var owner = identities.FirstOrDefault(p => p.PlayerId == cubeBlock.OwnerId);
+                            var owner = identities.FirstOrDefault(p => p.IdentityId == cubeBlock.OwnerId);
                             if (owner != null)
                                 ownerName = owner.DisplayName;
 
                             string builtByName = "";
-                            var builtBy = identities.FirstOrDefault(p => p.PlayerId == ((MyCubeBlock)cubeBlock).BuiltBy);
+                            var builtBy = identities.FirstOrDefault(p => p.IdentityId == ((MyCubeBlock)cubeBlock).BuiltBy);
                             if (builtBy != null)
                                 builtByName = builtBy.DisplayName;
                             description += string.Format("\r\n\r\nCube;\r\n  Type : {1}\r\n  SubType : {0}\r\n  Name : {2}\r\n  Owner : {3}\r\n  BuiltBy : {4}", cubeBlock.BlockDefinition.SubtypeName, cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName, builtByName);

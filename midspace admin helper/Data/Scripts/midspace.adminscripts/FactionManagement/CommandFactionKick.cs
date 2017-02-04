@@ -53,16 +53,16 @@
 
                 var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
 
-                var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == selectedPlayer.PlayerId));
+                var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == selectedPlayer.IdentityId));
                 if (request != null)
                 {
-                    MessageSyncFaction.CancelJoinFaction(request.FactionId, selectedPlayer.PlayerId);
-                    //MyAPIGateway.Session.Factions.CancelJoinRequest(request.FactionId, selectedPlayer.PlayerId);
+                    MessageSyncFaction.CancelJoinFaction(request.FactionId, selectedPlayer.IdentityId);
+                    //MyAPIGateway.Session.Factions.CancelJoinRequest(request.FactionId, selectedPlayer.IdentityId);
                     MyAPIGateway.Utilities.SendMessage(steamId, "kick", "{0} has had join request cancelled.", selectedPlayer.DisplayName);
                     return true;
                 }
 
-                var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.PlayerId));
+                var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.IdentityId));
 
                 if (factionBuilder == null)
                 {
@@ -70,7 +70,7 @@
                     return true;
                 }
 
-                MessageSyncFaction.KickFaction(factionBuilder.FactionId, selectedPlayer.PlayerId);
+                MessageSyncFaction.KickFaction(factionBuilder.FactionId, selectedPlayer.IdentityId);
                 MyAPIGateway.Utilities.SendMessage(steamId, "kick", "{0} has been removed from faction.", selectedPlayer.DisplayName);
                 return true;
             }

@@ -240,9 +240,10 @@ The asteroid cannot be generated until this area is cleared of ships and players
             var storeName = Support.CreateUniqueStorageName(asteroidName);
             var storage = MyAPIGateway.Session.VoxelMaps.CreateStorage(size);
             var voxelMap = MyAPIGateway.Session.VoxelMaps.CreateVoxelMap(storeName, storage, position - (Vector3D)origin - offset, 0);
-            
-            if (layers.Count > 0)
-                voxelMap.Storage.OverwriteAllMaterials(layers[0].Material);
+
+            // OverwriteAllMaterials is Obsolete and doesn't appear to do anything any more.
+            //if (layers.Count > 0)
+            //    voxelMap.Storage.OverwriteAllMaterials(layers[0].Material);
 
             bool isEmpty = true;
 

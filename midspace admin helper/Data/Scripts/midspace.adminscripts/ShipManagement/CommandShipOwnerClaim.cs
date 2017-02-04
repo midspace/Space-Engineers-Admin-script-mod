@@ -29,7 +29,7 @@
                 var shipEntity = entity as IMyCubeGrid;
                 if (shipEntity != null)
                 {
-                    MessageSyncGridChange.SendMessage(SyncGridChangeType.OwnerClaim, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID);
+                    MessageSyncGridChange.SendMessage(SyncGridChangeType.OwnerClaim, shipEntity.EntityId, null, MyAPIGateway.Session.Player.IdentityId);
                     return true;
                 }
                 MyAPIGateway.Utilities.ShowMessage("Claim", "No ship targeted.");
@@ -41,7 +41,7 @@
             if (match.Success)
             {
                 var shipName = match.Groups["Key"].Value;
-                MessageSyncGridChange.SendMessage(SyncGridChangeType.OwnerClaim, 0, shipName, MyAPIGateway.Session.Player.PlayerID);
+                MessageSyncGridChange.SendMessage(SyncGridChangeType.OwnerClaim, 0, shipName, MyAPIGateway.Session.Player.IdentityId);
                 return true;
             }
 

@@ -62,10 +62,10 @@
                 return;
 
             if (SyncType == SyncBlockType.PowerOn)
-                block.RequestEnable(true);
+                block.Enabled = true;
 
             if (SyncType == SyncBlockType.PowerOff)
-                block.RequestEnable(false);
+                block.Enabled = false;
         }
     }
 

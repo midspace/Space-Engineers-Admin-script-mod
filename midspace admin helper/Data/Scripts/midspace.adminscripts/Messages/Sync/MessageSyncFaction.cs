@@ -87,7 +87,7 @@ namespace midspace.adminscripts.Messages.Sync
                         //var faction = MyAPIGateway.Session.Factions.TryGetFactionById(factionId);
 
                         // AddPlayerToFaction() Doesn't work right on dedicated servers. To be removed by Keen in future. Is Depriated.
-                        //MyAPIGateway.Session.Factions.AddPlayerToFaction(selectedPlayer.PlayerId, factionCollectionBuilder.FactionId);
+                        //MyAPIGateway.Session.Factions.AddPlayerToFaction(selectedPlayer.IdentityId, factionCollectionBuilder.FactionId);
                         //MyAPIGateway.Session.Factions.AddPlayerToFaction(PlayerId, FactionId);
 
                         var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == playerId));

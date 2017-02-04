@@ -128,7 +128,7 @@
                 StringBuilder msg = new StringBuilder();
                 msg.AppendFormat("MyId {0}\r\n", MyAPIGateway.Multiplayer.MyId);
                 msg.AppendFormat("SteamId {0}\r\n", MyAPIGateway.Session.Player.SteamUserId);
-                msg.AppendFormat("PlayerID {0}\r\n", MyAPIGateway.Session.Player.PlayerID);
+                msg.AppendFormat("PlayerID {0}\r\n", MyAPIGateway.Session.Player.IdentityId);
                 msg.AppendFormat("IdentityId {0}\r\n", MyAPIGateway.Session.Player.IdentityId);
                 msg.AppendFormat("MyName {0}\r\n", MyAPIGateway.Multiplayer.MyName);
                 msg.AppendFormat("IsServer {0}\r\n", MyAPIGateway.Multiplayer.IsServer);

@@ -61,7 +61,7 @@
                 }
                 else
                 {
-                    ConnectionHelper.SendMessageToAll(new MessageSyncInvisible() { PlayerId = MyAPIGateway.Session.Player.PlayerID, VisibleState = !state.Value });
+                    ConnectionHelper.SendMessageToAll(new MessageSyncInvisible() { PlayerId = MyAPIGateway.Session.Player.IdentityId, VisibleState = !state.Value });
                     return true;
                 }
             }
@@ -76,7 +76,7 @@
             Logger.Debug("Player Visible Change {0}", message.PlayerId, message.VisibleState);
 
             var players = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(players, p => p != null && p.PlayerID == message.PlayerId);
+            MyAPIGateway.Players.GetPlayers(players, p => p != null && p.IdentityId == message.PlayerId);
             IMyPlayer player = players.FirstOrDefault();
 
             if (player != null && player.Controller.ControlledEntity != null)
@@ -84,7 +84,7 @@
                 player.Controller.ControlledEntity.Entity.Visible = message.VisibleState;
 
                 // display the state back to the original caller.
-                if (!MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Session.Player != null && MyAPIGateway.Session.Player.PlayerID == message.PlayerId)
+                if (!MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Session.Player != null && MyAPIGateway.Session.Player.IdentityId == message.PlayerId)
                     MyAPIGateway.Utilities.ShowMessage("Invisible", !MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.Visible ? "On" : "Off");
             }
         }

@@ -120,7 +120,7 @@
                     && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Reactor)
                         || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_BatteryBlock)))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 // refineries, arc furnaces, assemblers
@@ -128,25 +128,25 @@
                     && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Refinery)
                         || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Assembler)))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Programmable & control) == SwitchSystems.Programmable && block.FatBlock is IMyFunctionalBlock
                     && block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MyProgrammableBlock))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Projectors & control) == SwitchSystems.Projectors && block.FatBlock is IMyFunctionalBlock
                     && block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Projector))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Timers & control) == SwitchSystems.Timers && block.FatBlock is IMyFunctionalBlock
                     && block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_TimerBlock))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Weapons & control) == SwitchSystems.Weapons && block.FatBlock is IMyFunctionalBlock
@@ -157,19 +157,19 @@
                         || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_SmallMissileLauncher)
                         || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_SmallMissileLauncherReload)))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.SpotLights & control) == SwitchSystems.SpotLights && block.FatBlock is IMyFunctionalBlock
                     && block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ReflectorLight))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Sensors & control) == SwitchSystems.Sensors && block.FatBlock is IMyFunctionalBlock
                     && block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_SensorBlock))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Medical & control) == SwitchSystems.Medical && block.FatBlock is IMyFunctionalBlock
@@ -185,19 +185,19 @@
                 if ((SwitchSystems.Mass & control) == SwitchSystems.Mass && block.FatBlock is IMyFunctionalBlock
                     && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_VirtualMass)))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Grinder & control) == SwitchSystems.Grinder && block.FatBlock is IMyFunctionalBlock
                     && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipGrinder)))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
                 if ((SwitchSystems.Welder & control) == SwitchSystems.Welder && block.FatBlock is IMyFunctionalBlock
                     && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipWelder)))
                 {
-                    ((IMyFunctionalBlock)block.FatBlock).RequestEnable(mode); // turn power on/off.
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
                 }
             }

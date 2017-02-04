@@ -962,7 +962,7 @@ namespace midspace.adminscripts
                 return false;
             }
 
-            if (sourcePlayer.PlayerID == targetPlayer.PlayerID)
+            if (sourcePlayer.IdentityId == targetPlayer.IdentityId)
             {
                 MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Cannot teleport player to themself.");
                 return false;

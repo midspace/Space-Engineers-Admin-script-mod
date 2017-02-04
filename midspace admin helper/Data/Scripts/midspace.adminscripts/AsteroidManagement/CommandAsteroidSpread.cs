@@ -40,7 +40,7 @@
 
                 
                 MyAPIGateway.Utilities.ShowMessage("Count", currentAsteroidList.Count.ToString());
-                var index = 1;
+                //var index = 1;
                 foreach (var voxelMap in currentAsteroidList)
                 {
 

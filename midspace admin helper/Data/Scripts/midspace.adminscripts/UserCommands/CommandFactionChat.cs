@@ -59,7 +59,7 @@ The logging of private messages is {0}.
             if (matchFactionChat.Success)
             {
                 IMyPlayer player = MyAPIGateway.Session.Player;
-                var plFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+                var plFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.IdentityId);
                 if (plFaction != null)
                 {
                     SendToFaction(matchFactionChat.Groups["Message"].Value, plFaction, FactionMessageType.OwnFaction);
@@ -74,7 +74,7 @@ The logging of private messages is {0}.
             if (matchAlliedFactionChat.Success)
             {
                 IMyPlayer player = MyAPIGateway.Session.Player;
-                var plFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+                var plFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.IdentityId);
                 if (plFaction != null)
                 {
                     MyObjectBuilder_FactionCollection factionCollection = MyAPIGateway.Session.Factions.GetObjectBuilder();
@@ -98,7 +98,7 @@ The logging of private messages is {0}.
             if (matchHubChat.Success)
             {
                 IMyPlayer player = MyAPIGateway.Session.Player;
-                var plFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+                var plFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.IdentityId);
                 if (plFaction != null)
                 {
                     MyObjectBuilder_FactionCollection factionCollection = MyAPIGateway.Session.Factions.GetObjectBuilder();
@@ -159,7 +159,7 @@ The logging of private messages is {0}.
         {
             var listplayers = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(listplayers);
-            foreach (IMyPlayer receiver in listplayers.Where(p => faction.IsMember(p.PlayerID) && p != MyAPIGateway.Session.Player))
+            foreach (IMyPlayer receiver in listplayers.Where(p => faction.IsMember(p.IdentityId) && p != MyAPIGateway.Session.Player))
             {
                 SendFactionMessage(receiver, message, type);
             }

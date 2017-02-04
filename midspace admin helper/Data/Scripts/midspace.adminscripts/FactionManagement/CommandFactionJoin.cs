@@ -65,7 +65,7 @@
 
                 var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
 
-                var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.PlayerId));
+                var factionBuilder = fc.Factions.FirstOrDefault(f => f.Members.Any(m => m.PlayerId == selectedPlayer.IdentityId));
                 if (factionBuilder != null)
                 {
                     MyAPIGateway.Utilities.SendMessage(steamId, "player", "{0} is already in faction {1}.{2}", selectedPlayer.DisplayName, factionBuilder.Tag, factionBuilder.Name);
@@ -77,7 +77,7 @@
 
                 if (factionCollectionBuilder != null)
                 {
-                    MessageSyncFaction.JoinFaction(factionCollectionBuilder.FactionId, selectedPlayer.PlayerId);
+                    MessageSyncFaction.JoinFaction(factionCollectionBuilder.FactionId, selectedPlayer.IdentityId);
                     MyAPIGateway.Utilities.SendMessage(steamId, "join", "{0} has been addded to faction.", selectedPlayer.DisplayName);
                 }
 

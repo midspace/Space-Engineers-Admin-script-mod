@@ -95,7 +95,7 @@
                 case SyncGridChangeType.OwnerClaim:
                     {
                         var players = new List<IMyPlayer>();
-                        MyAPIGateway.Players.GetPlayers(players, p => p != null && p.PlayerID == playerId);
+                        MyAPIGateway.Players.GetPlayers(players, p => p != null && p.IdentityId == playerId);
                         IMyPlayer player = players.FirstOrDefault();
 
                         if (player == null)
@@ -105,7 +105,7 @@
                         {
                             var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
                             foreach (var grid in grids)
-                                grid.ChangeGridOwnership(player.PlayerID, MyOwnershipShareModeEnum.All);
+                                grid.ChangeGridOwnership(player.IdentityId, MyOwnershipShareModeEnum.All);
 
                             MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Claimed by player {1}.", selectedShip.DisplayName, player.DisplayName));
                         }
@@ -251,7 +251,7 @@
                 case SyncGridChangeType.Repair:
                     {
                         var players = new List<IMyPlayer>();
-                        MyAPIGateway.Players.GetPlayers(players, p => p != null && p.PlayerID == playerId);
+                        MyAPIGateway.Players.GetPlayers(players, p => p != null && p.IdentityId == playerId);
                         IMyPlayer player = players.FirstOrDefault();
 
                         if (player == null)

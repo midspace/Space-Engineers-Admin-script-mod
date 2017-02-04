@@ -74,7 +74,7 @@
                             // newName is from definition.
                             var newName = block.FatBlock.BlockDefinition.GetDisplayName() + " " + blockCounter;
                             description.AppendFormat("Changed '{0}' => '{1}'\r\n", terminal.CustomName, newName);
-                            terminal.SetCustomName(newName);
+                            terminal.CustomName = newName;
                             counter++;
                             counters[block.FatBlock.BlockDefinition] = blockCounter + 1;
                         }

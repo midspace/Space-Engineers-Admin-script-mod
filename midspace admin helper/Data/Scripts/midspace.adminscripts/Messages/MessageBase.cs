@@ -112,7 +112,7 @@ namespace midspace.adminscripts.Messages
             {
                 ProcessClient();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TODO send error to server and notify admins
             }

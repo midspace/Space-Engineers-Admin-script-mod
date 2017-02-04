@@ -7,7 +7,7 @@
     using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LandingGear))]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LandingGear), true)]
     public class ProtectedLandingGear : MyGameLogicComponent
     {
         private MyObjectBuilder_EntityBase _objectBuilder;
@@ -40,7 +40,7 @@
             if (_landingGear == null)
                 return;
 
-            _landingGear.StateChanged += LandingGearOnStateChanged;
+            _landingGear.LockModeChanged += LandingGearOnLockModeChanged;
         }
 
         public override void UpdateBeforeSimulation()
@@ -51,17 +51,17 @@
             base.UpdateBeforeSimulation();
         }
 
-        private void LandingGearOnStateChanged(bool state)
+        private void LandingGearOnLockModeChanged(IMyLandingGear myLandingGear, SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode landingGearMode)
         {
-            if (!state)
+            if (landingGearMode != SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode.Locked)
                 return;
 
-            var ship = _landingGear.GetTopMostParent(typeof(IMyCubeGrid));
+            var ship = myLandingGear.GetTopMostParent(typeof(IMyCubeGrid));
             if (ship == null)
                 return;
 
             IMyPlayer player = null;
-            foreach (var workingCockpit in _landingGear.CubeGrid.FindWorkingCockpits())
+            foreach (var workingCockpit in myLandingGear.CubeGrid.FindWorkingCockpits())
             {
                 player = MyAPIGateway.Players.GetPlayerControllingEntity(workingCockpit.Entity);
 
@@ -69,28 +69,28 @@
                     break;
             }
 
-            var attachedEntity = _landingGear.GetAttachedEntity() as IMyCubeGrid;
+            var attachedEntity = myLandingGear.GetAttachedEntity() as IMyCubeGrid;
 
             if (attachedEntity == null)
                 return;
 
             if (!ProtectionHandler.IsProtected(attachedEntity))
                 return;
-            
+
             if (player == null)
             {
-                _landingGear.ApplyAction("Unlock");
+                myLandingGear.ApplyAction("Unlock");
                 // we turn it off to prevent 'spamming'
-                _landingGear.RequestEnable(false);
+                myLandingGear.Enabled = false;
                 return;
             }
 
             if (ProtectionHandler.CanModify(player, attachedEntity))
                 return;
 
-            _landingGear.ApplyAction("Unlock");
+            myLandingGear.ApplyAction("Unlock");
             // we turn it off to prevent 'spamming'
-            _landingGear.RequestEnable(false);
+            myLandingGear.Enabled = false;
         }
 
         public override void Close()
@@ -98,8 +98,8 @@
             if (!_isInitialized || _landingGear == null)
                 return;
 
-            _landingGear.StateChanged -= LandingGearOnStateChanged;
-            
+            _landingGear.LockModeChanged -= LandingGearOnLockModeChanged;
+
             base.Close();
         }
     }

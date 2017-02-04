@@ -6,7 +6,7 @@
     using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubePlacer))]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubePlacer), true)]
     public class ProtectedCubePlacer : MyGameLogicComponent
     {
         private MyObjectBuilder_EntityBase _objectBuilder;

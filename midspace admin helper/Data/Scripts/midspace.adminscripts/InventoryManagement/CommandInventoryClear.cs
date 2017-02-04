@@ -50,13 +50,13 @@
 
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
-                    ClearInventory(MyAPIGateway.Multiplayer.ServerId, selectedPlayer.PlayerId);
+                    ClearInventory(MyAPIGateway.Multiplayer.ServerId, selectedPlayer.IdentityId);
                 }
                 else
                 {
                     ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
                     {
-                        EntityId = selectedPlayer.PlayerId,
+                        EntityId = selectedPlayer.IdentityId,
                         Type = SyncCreateObjectType.Clear,
                     });
                 }
@@ -77,7 +77,7 @@
             else
             {
                 var listplayers = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == entityId);
+                MyAPIGateway.Players.GetPlayers(listplayers, p => p.IdentityId == entityId);
                 
                 var player = listplayers.FirstOrDefault();
                 if (player != null)

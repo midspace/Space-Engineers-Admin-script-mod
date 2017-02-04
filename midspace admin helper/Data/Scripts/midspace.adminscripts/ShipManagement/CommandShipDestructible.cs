@@ -43,7 +43,7 @@
                     var shipEntity = entity as IMyCubeGrid;
                     if (shipEntity != null)
                     {
-                        MessageSyncGridChange.SendMessage(SyncGridChangeType.Destructible, shipEntity.EntityId, null, MyAPIGateway.Session.Player.PlayerID, switchOn);
+                        MessageSyncGridChange.SendMessage(SyncGridChangeType.Destructible, shipEntity.EntityId, null, MyAPIGateway.Session.Player.IdentityId, switchOn);
                         return true;
                     }
 
@@ -51,7 +51,7 @@
                     return true;
                 }
 
-                MessageSyncGridChange.SendMessage(SyncGridChangeType.Destructible, 0, shipName, MyAPIGateway.Session.Player.PlayerID, switchOn);
+                MessageSyncGridChange.SendMessage(SyncGridChangeType.Destructible, 0, shipName, MyAPIGateway.Session.Player.IdentityId, switchOn);
                 return true;
             }
 

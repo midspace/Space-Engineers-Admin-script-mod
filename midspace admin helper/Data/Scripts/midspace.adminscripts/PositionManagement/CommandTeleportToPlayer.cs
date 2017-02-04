@@ -54,7 +54,7 @@
                 }
 
                 var listplayers = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(listplayers, p => p.PlayerID == selectedPlayer.PlayerId);
+                MyAPIGateway.Players.GetPlayers(listplayers, p => p.IdentityId == selectedPlayer.IdentityId);
                 var player = listplayers.FirstOrDefault();
 
                 if (player == null)

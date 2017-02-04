@@ -9,7 +9,7 @@
     using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid), true)]
     public class ProtectedCubeGrid : MyGameLogicComponent
     {
         private IMyCubeGrid _cubeGrid;
@@ -18,7 +18,7 @@
 
         private List<long> _cachedOwners;
         private bool _firstOwnershipChange = true;
-        private List<long> _allowedChanges; 
+        //private List<long> _allowedChanges; 
 
         public override MyObjectBuilder_EntityBase GetObjectBuilder(bool copy = false)
         {

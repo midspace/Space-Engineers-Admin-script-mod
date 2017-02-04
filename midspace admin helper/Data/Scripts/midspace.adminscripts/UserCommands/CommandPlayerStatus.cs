@@ -43,7 +43,7 @@
                 // is player Admin, or Host?
                 // The Dedicated Config with admins and more is now to be found in Utilities 
 
-                var steamPlayer = players.FirstOrDefault(p => p.PlayerID == identity.PlayerId);
+                var steamPlayer = players.FirstOrDefault(p => p.IdentityId == identity.IdentityId);
 
                 if (steamPlayer != null)
                 {

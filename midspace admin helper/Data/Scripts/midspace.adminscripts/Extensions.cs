@@ -64,10 +64,10 @@ namespace midspace.adminscripts
                 {
                     // The MotorStator which inherits from MotorBase.
                     IMyMotorBase motorBase = block.FatBlock as IMyMotorBase;
-                    if (motorBase == null || motorBase.Rotor == null)
+                    if (motorBase == null || motorBase.Top == null)
                         continue;
 
-                    IMyCubeGrid entityParent = motorBase.RotorGrid;
+                    IMyCubeGrid entityParent = motorBase.TopGrid;
                     if (entityParent == null)
                         continue;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
@@ -84,7 +84,7 @@ namespace midspace.adminscripts
                     // The Rotor Part.
                     IMyMotorRotor motorRotor = block.FatBlock as IMyMotorRotor;
                     IMyCubeGrid entityParent = null;
-                    if (motorRotor == null || motorRotor.Stator == null)
+                    if (motorRotor == null || motorRotor.Base == null)
                     {
                         // Wheels appear to not properly populate the Stator property.
                         IMyCubeBlock altBlock = Support.FindRotorBase(motorRotor.EntityId);
@@ -94,7 +94,7 @@ namespace midspace.adminscripts
                         entityParent = altBlock.CubeGrid;
                     }
                     else
-                        entityParent = motorRotor.Stator.CubeGrid;
+                        entityParent = motorRotor.Base.CubeGrid;
                     if (!results.Any(e => e.EntityId == entityParent.EntityId))
                     {
                         results.Add(entityParent);
@@ -135,7 +135,7 @@ namespace midspace.adminscripts
                 {
                     var connector = (IMyShipConnector)block.FatBlock;
 
-                    if (connector.IsConnected == false || connector.IsLocked == false || connector.OtherConnector == null)
+                    if (connector.Status != Sandbox.ModAPI.Ingame.MyShipConnectorStatus.Connected || connector.OtherConnector == null)
                         continue;
 
                     var otherGrid = connector.OtherConnector.CubeGrid;
@@ -369,7 +369,11 @@ namespace midspace.adminscripts
                 return true;
             }
 
-            return player.IsAdmin;
+            return player.PromoteLevel == MyPromoteLevel.Admin ||
+               player.PromoteLevel == MyPromoteLevel.Owner ||
+               player.PromoteLevel == MyPromoteLevel.SpaceMaster;
+
+            //return player.IsAdmin;
 
             // Player Promoted status can change during game play.
             // May have to advise the player to disconnect or reconnect.
@@ -460,7 +464,7 @@ namespace midspace.adminscripts
         public static IMyPlayer Player(this IMyIdentity identity)
         {
             var listPlayers = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(listPlayers, p => p.PlayerID == identity.PlayerId);
+            MyAPIGateway.Players.GetPlayers(listPlayers, p => p.IdentityId == identity.IdentityId);
             return listPlayers.FirstOrDefault();
         }
 
