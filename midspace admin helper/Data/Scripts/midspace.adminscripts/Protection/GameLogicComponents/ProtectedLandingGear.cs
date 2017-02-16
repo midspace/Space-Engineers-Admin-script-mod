@@ -40,7 +40,9 @@
             if (_landingGear == null)
                 return;
 
-            _landingGear.LockModeChanged += LandingGearOnLockModeChanged;
+            // StateChanged is Obsolete, but the replacement is blocked from use in ModAPI.
+            _landingGear.StateChanged += LandingGearOnStateChanged;
+            //_landingGear.LockModeChanged += LandingGearOnLockModeChanged;
         }
 
         public override void UpdateBeforeSimulation()
@@ -51,17 +53,21 @@
             base.UpdateBeforeSimulation();
         }
 
-        private void LandingGearOnLockModeChanged(IMyLandingGear myLandingGear, SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode landingGearMode)
+        private void LandingGearOnStateChanged(bool state)    
         {
-            if (landingGearMode != SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode.Locked)
+                if (!state)
                 return;
+        //private void LandingGearOnLockModeChanged(IMyLandingGear myLandingGear, SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode landingGearMode)
+        //{
+        //    if (landingGearMode != SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode.Locked)
+        //        return;
 
-            var ship = myLandingGear.GetTopMostParent(typeof(IMyCubeGrid));
+            var ship = _landingGear.GetTopMostParent(typeof(IMyCubeGrid));
             if (ship == null)
                 return;
 
             IMyPlayer player = null;
-            foreach (var workingCockpit in myLandingGear.CubeGrid.FindWorkingCockpits())
+            foreach (var workingCockpit in _landingGear.CubeGrid.FindWorkingCockpits())
             {
                 player = MyAPIGateway.Players.GetPlayerControllingEntity(workingCockpit.Entity);
 
@@ -69,7 +75,7 @@
                     break;
             }
 
-            var attachedEntity = myLandingGear.GetAttachedEntity() as IMyCubeGrid;
+            var attachedEntity = _landingGear.GetAttachedEntity() as IMyCubeGrid;
 
             if (attachedEntity == null)
                 return;
@@ -79,18 +85,18 @@
 
             if (player == null)
             {
-                myLandingGear.ApplyAction("Unlock");
+                _landingGear.ApplyAction("Unlock");
                 // we turn it off to prevent 'spamming'
-                myLandingGear.Enabled = false;
+                _landingGear.Enabled = false;
                 return;
             }
 
             if (ProtectionHandler.CanModify(player, attachedEntity))
                 return;
 
-            myLandingGear.ApplyAction("Unlock");
+            _landingGear.ApplyAction("Unlock");
             // we turn it off to prevent 'spamming'
-            myLandingGear.Enabled = false;
+            _landingGear.Enabled = false;
         }
 
         public override void Close()
@@ -98,7 +104,8 @@
             if (!_isInitialized || _landingGear == null)
                 return;
 
-            _landingGear.LockModeChanged -= LandingGearOnLockModeChanged;
+            _landingGear.StateChanged -= LandingGearOnStateChanged;
+            //_landingGear.LockModeChanged -= LandingGearOnLockModeChanged;
 
             base.Close();
         }
