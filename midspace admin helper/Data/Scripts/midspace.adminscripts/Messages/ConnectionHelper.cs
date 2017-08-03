@@ -101,7 +101,7 @@
         public static void ProcessData(string dataString)
         {
             Logger.Debug("START - Message Serialization");
-            MessageContainer message = null;
+            MessageContainer message;
 
             try
             {
@@ -125,7 +125,6 @@
                 {
                     Logger.Debug("Processing message exception. Side: {0}, Exception: {1}", message.Content.Side, e.ToString());
                 }
-                return;
             }
         }
 

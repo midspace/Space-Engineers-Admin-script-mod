@@ -1,7 +1,6 @@
 ﻿namespace midspace.adminscripts.Messages
 {
     using ProtoBuf;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Library.Utils;
