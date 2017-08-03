@@ -1,6 +1,6 @@
 ﻿using System.IO;
-using midspace.adminscripts.Messages;
 using Sandbox.ModAPI;
+using VRage;
 
 namespace midspace.adminscripts.Config.Files
 {
@@ -15,10 +15,13 @@ namespace midspace.adminscripts.Config.Files
 
         public override void Save(string customSaveName = null)
         {
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(Name, typeof(ChatCommandLogic));
-            writer.Write(CommandMessageOfTheDay.Content ?? "");
-            writer.Flush();
-            writer.Close();
+            using (ExecutionLock.AcquireExclusiveUsing())
+            {
+                TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(Name, typeof(ChatCommandLogic));
+                writer.Write(CommandMessageOfTheDay.Content ?? "");
+                writer.Flush();
+                writer.Close();
+            }
         }
 
         public override void Load()

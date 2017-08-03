@@ -1,9 +1,11 @@
-﻿using Sandbox.ModAPI;
-
-namespace midspace.adminscripts.Config.Files
+﻿namespace midspace.adminscripts.Config.Files
 {
+    using Sandbox.ModAPI;
+    using VRage;
+
     public abstract class FileBase
     {
+        public readonly FastResourceLock ExecutionLock = new FastResourceLock();
         public string Name { get; protected set; }
 
         protected FileBase(string fileName, string format)
@@ -20,7 +22,7 @@ namespace midspace.adminscripts.Config.Files
 
         protected void Init()
         {
-            if (MyAPIGateway.Utilities.FileExistsInLocalStorage(Name, typeof (FileBase)))
+            if (MyAPIGateway.Utilities.FileExistsInLocalStorage(Name, typeof(FileBase)))
                 Load();
             else
                 Create();

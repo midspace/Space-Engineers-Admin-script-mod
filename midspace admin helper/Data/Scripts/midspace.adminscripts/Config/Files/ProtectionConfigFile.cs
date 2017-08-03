@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Security.Policy;
 using midspace.adminscripts.Protection;
 using Sandbox.ModAPI;
+using VRage;
 
 namespace midspace.adminscripts.Config.Files
 {
@@ -12,23 +12,26 @@ namespace midspace.adminscripts.Config.Files
 
         private const string Format = "Areas_{0}.xml";
 
-        public ProtectionConfigFile(string fileName) 
+        public ProtectionConfigFile(string fileName)
           : base(fileName, Format) { }
 
         public override void Save(string customSaveName = null)
         {
-            string fileName;
+            using (ExecutionLock.AcquireExclusiveUsing())
+            {
+                string fileName;
 
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(Format, customSaveName);
-            else
-                fileName = Name;
+                if (!string.IsNullOrEmpty(customSaveName))
+                    fileName = String.Format(Format, customSaveName);
+                else
+                    fileName = Name;
 
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML(Config));
-            writer.Flush();
-            writer.Close();
-            Logger.Debug("Saved protection.");
+                TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
+                writer.Write(MyAPIGateway.Utilities.SerializeToXML(Config));
+                writer.Flush();
+                writer.Close();
+                Logger.Debug("Saved protection.");
+            }
         }
 
         public override void Load()
@@ -38,7 +41,7 @@ namespace midspace.adminscripts.Config.Files
             reader.Close();
 
             Config = new ProtectionConfig();
-            
+
             try
             {
                 Config = MyAPIGateway.Utilities.SerializeFromXML<ProtectionConfig>(text);

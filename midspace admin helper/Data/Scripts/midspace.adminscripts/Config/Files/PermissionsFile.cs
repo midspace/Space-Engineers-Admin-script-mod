@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Sandbox.ModAPI;
+using VRage;
 
 namespace midspace.adminscripts.Config.Files
 {
     public class PermissionsFile : FileBase
     {
         private const string Format = "Permissions_{0}.xml";
-        private readonly List<ChatCommand> _chatCommands; 
+        private readonly List<ChatCommand> _chatCommands;
 
         public Permissions Permissions { get; set; }
 
         public PermissionsFile(string fileName, List<ChatCommand> commands)
-        { 
+        {
             Name = string.Format(Format, fileName);
             _chatCommands = commands;
             Init();
@@ -22,17 +23,20 @@ namespace midspace.adminscripts.Config.Files
 
         public override void Save(string customSaveName = null)
         {
-            string fileName;
+            using (ExecutionLock.AcquireExclusiveUsing())
+            {
+                string fileName;
 
-            if (!string.IsNullOrEmpty(customSaveName))
-                fileName = String.Format(Format, customSaveName);
-            else
-                fileName = Name;
+                if (!string.IsNullOrEmpty(customSaveName))
+                    fileName = String.Format(Format, customSaveName);
+                else
+                    fileName = Name;
 
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML(Permissions));
-            writer.Flush();
-            writer.Close();
+                TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof (ServerConfig));
+                writer.Write(MyAPIGateway.Utilities.SerializeToXML(Permissions));
+                writer.Flush();
+                writer.Close();
+            }
         }
 
         public override void Load()

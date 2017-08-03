@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Sandbox.ModAPI;
+using VRage;
 
 namespace midspace.adminscripts.Config.Files
 {
@@ -16,12 +17,15 @@ namespace midspace.adminscripts.Config.Files
 
         public override void Save(string customSaveName = null)
         {
-            var fileName = !string.IsNullOrEmpty(customSaveName) ? string.Format(Format, customSaveName) : Name;
+            using (ExecutionLock.AcquireExclusiveUsing())
+            {
+                var fileName = !string.IsNullOrEmpty(customSaveName) ? string.Format(Format, customSaveName) : Name;
 
-            TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof(ServerConfig));
-            writer.Write(MyAPIGateway.Utilities.SerializeToXML(PrivateConversations));
-            writer.Flush();
-            writer.Close();
+                TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(fileName, typeof (ServerConfig));
+                writer.Write(MyAPIGateway.Utilities.SerializeToXML(PrivateConversations));
+                writer.Flush();
+                writer.Close();
+            }
         }
 
         public override void Load()
