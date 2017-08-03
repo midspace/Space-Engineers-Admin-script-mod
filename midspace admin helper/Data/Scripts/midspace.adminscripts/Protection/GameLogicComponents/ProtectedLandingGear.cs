@@ -7,7 +7,7 @@
     using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LandingGear), true)]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LandingGear), true)] // leave useEntityUpdate=true, otherwise the protection won't work.
     public class ProtectedLandingGear : MyGameLogicComponent
     {
         private MyObjectBuilder_EntityBase _objectBuilder;

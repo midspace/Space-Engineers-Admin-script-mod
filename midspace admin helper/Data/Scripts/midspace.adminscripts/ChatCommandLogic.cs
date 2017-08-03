@@ -87,7 +87,6 @@ namespace midspace.adminscripts
             base.UpdateBeforeSimulation();
 
             ChatCommandService.UpdateBeforeSimulation();
-            ProtectionHandler.UpdateBeforeSimulation();
             TimerRegistry.Update();
         }
 

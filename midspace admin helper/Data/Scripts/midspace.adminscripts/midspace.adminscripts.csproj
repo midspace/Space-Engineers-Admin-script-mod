@@ -166,7 +166,6 @@
     <Compile Include="PositionManagement\CommandSpeed.cs" />
     <Compile Include="Protection\Commands\CommandProtectionArea.cs" />
     <Compile Include="Protection\GameLogicComponents\ProtectedLandingGear.cs" />
-    <Compile Include="Protection\HandtoolCache.cs" />
     <Compile Include="Protection\GameLogicComponents\ProtectedCubeGrid.cs" />
     <Compile Include="Protection\GameLogicComponents\ProtectedCubePlacer.cs" />
     <Compile Include="Protection\ProtectionArea.cs" />

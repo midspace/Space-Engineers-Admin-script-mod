@@ -9,6 +9,7 @@
     using midspace.adminscripts.Messages.Communication;
     using midspace.adminscripts.Utils.Timer;
     using Sandbox.ModAPI;
+    using Sandbox.ModAPI.Weapons;
     using VRage.Game;
     using VRage.Game.ModAPI;
     using VRage.ModAPI;
@@ -19,7 +20,6 @@
         public static ProtectionConfig Config { get; private set; }
 
         private static bool _isInitialized;
-        private static HandtoolCache _handtoolCache;
         private static Dictionary<IMyPlayer, DateTime> _sentFailedMessage;
         private static ThreadsafeTimer _cleanupTimer;
         private static bool _isServer;
@@ -37,7 +37,6 @@
             Config = new ProtectionConfig();
             Load();
 
-            _handtoolCache = new HandtoolCache();
             _sentFailedMessage = new Dictionary<IMyPlayer, DateTime>();
             // every 30 seconds
             _cleanupTimer = new ThreadsafeTimer(30000);
@@ -68,9 +67,7 @@
 
             _isInitialized = false;
 
-            if (_isServer)
-                _handtoolCache.Close();
-            else
+            if (!_isServer)
                 ChatCommandLogic.Instance.AllowBuilding = false;
         }
 
@@ -226,7 +223,26 @@
                     return CanModify(player, block);
                 }
 
-                return _handtoolCache.TryGetPlayer(attackerEntity.EntityId, out player) && CanModify(player, block);
+                // handTool.OwnerId is the identityId of the character.
+                IMyEngineerToolBase handTool = attackerEntity as IMyEngineerToolBase;
+                if (handTool != null)
+                {
+                    if (MyAPIGateway.Entities.TryGetEntityById(handTool.OwnerId, out attackerEntity))
+                    {
+                        player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity);
+                        if (player != null)
+                        {
+                            return CanModify(player, block);
+                        }
+                    }
+
+                    // debatable if this code is any faster or more efficient.
+                    //var players = new List<IMyPlayer>();
+                    //MyAPIGateway.Players.GetPlayers(players, p => p != null);
+                    //player = players.FirstOrDefault(p => p.Character != null && p.Character.EntityId == handTool.OwnerId);
+                    //if (player != null)
+                    //    return CanModify(player, block);
+                }
             }
             // we don't want players to destroy things in protection areas...
             return false;
@@ -237,7 +253,6 @@
         /// </summary>
         /// <param name="player"></param>
         /// <param name="block"></param>
-        /// <returns></returns>
         public static bool CanModify(IMyPlayer player, IMySlimBlock block)
         {
             return CanModify(player, block.CubeGrid);
@@ -279,14 +294,6 @@
                 return false;
 
             return Config.Areas.Any(area => area.Contains(block)) ^ Config.ProtectionInverted;
-        }
-
-        public static void UpdateBeforeSimulation()
-        {
-            if (!_isInitialized || !_isServer)
-                return;
-
-            _handtoolCache.UpdateBeforeSimulation();
         }
 
         public static bool AddArea(ProtectionArea area)

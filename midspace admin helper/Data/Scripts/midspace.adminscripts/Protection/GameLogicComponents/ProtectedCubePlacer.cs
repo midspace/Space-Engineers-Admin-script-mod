@@ -6,7 +6,7 @@
     using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
 
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubePlacer), true)]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubePlacer), true)]  // leave useEntityUpdate=true, otherwise the protection won't work.
     public class ProtectedCubePlacer : MyGameLogicComponent
     {
         private MyObjectBuilder_EntityBase _objectBuilder;
@@ -51,8 +51,7 @@
                 }
                 else if (ProtectionHandler.Config.ProtectionEnabled)
                 {
-                    var cubeGrid = Support.FindLookAtEntity(MyAPIGateway.Session.Player.Controller.ControlledEntity, true, false, false, false, false, false) as IMyCubeGrid;
-
+                    IMyCubeGrid cubeGrid = MyAPIGateway.CubeBuilder.FindClosestGrid();
                     if (_cachedGrid == null || (_cachedGrid != null && cubeGrid != _cachedGrid))
                     {
                         if (cubeGrid != null && MyAPIGateway.Session.Player != null)
