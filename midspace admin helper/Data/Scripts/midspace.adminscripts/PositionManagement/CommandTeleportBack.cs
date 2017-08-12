@@ -41,13 +41,27 @@
 
                 IMyPlayer player = MyAPIGateway.Players.GetPlayer(steamId);
 
-                Action noSafeLocationMsg = delegate
+                Action<Support.MoveResponseMessage> responseMsg = delegate (Support.MoveResponseMessage message)
                 {
-                    MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Could not find safe location to transport to.");
+                    switch (message)
+                    {
+                        case Support.MoveResponseMessage.SourceEntityNotFound:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Source entity no longer exists.");
+                            break;
+                        case Support.MoveResponseMessage.TargetEntityNotFound:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Target entity no longer exists.");
+                            break;
+                        case Support.MoveResponseMessage.NoSafeLocation:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Could not find safe location to transport to.");
+                            break;
+                        case Support.MoveResponseMessage.CannotTeleportStatic:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Cannot teleport station.");
+                            break;
+                    }
                 };
 
                 //basically we perform a normal teleport without adding it to the history
-                Support.MoveTo(player, position, true, null, noSafeLocationMsg);
+                Support.MoveTo(player, position, true, null, responseMsg);
                 return true;
             }
             return false;

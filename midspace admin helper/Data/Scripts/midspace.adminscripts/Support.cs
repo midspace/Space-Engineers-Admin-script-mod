@@ -21,6 +21,14 @@ namespace midspace.adminscripts
 
     public static class Support
     {
+        public enum MoveResponseMessage : byte
+        {
+            SourceEntityNotFound = 0,
+            TargetEntityNotFound = 1,
+            NoSafeLocation = 2,
+            CannotTeleportStatic = 3
+        }
+
         #region Find Assets
 
         public static IMyEntity FindLookAtEntity(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable, bool playerViewOnly = false)
@@ -708,16 +716,15 @@ namespace midspace.adminscripts
         /// <param name="targetLocation"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="emptySourceMessage"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns>Will return false if the move operation could not be carried out.</returns>
         public static bool MoveTo(IMyEntity source, Vector3D targetLocation, bool safely,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (source == null || source.Closed)
             {
-                if (emptySourceMessage != null)
-                    emptySourceMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.SourceEntityNotFound);
                 return false;
             }
 
@@ -726,7 +733,7 @@ namespace midspace.adminscripts
             if (cubeGrid != null)
             {
                 var worldOffset = targetLocation - cubeGrid.GetPosition();
-                return MoveShipByOffset(cubeGrid, worldOffset, safely, updatedPosition, noSafeLocationMessage);
+                return MoveShipByOffset(cubeGrid, worldOffset, safely, updatedPosition, responseMessage);
             }
 
             return false;
@@ -739,10 +746,10 @@ namespace midspace.adminscripts
         /// <param name="targetLocation"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns>Will return false if the move operation could not be carried out.</returns>
         public static bool MoveTo(IMyPlayer sourcePlayer, Vector3D targetLocation, bool safely,
-            Action<Vector3D> updatedPosition, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (sourcePlayer == null)
                 return false;
@@ -752,14 +759,14 @@ namespace midspace.adminscripts
                 // Move the ship the player is piloting.
                 var cubeGrid = (IMyCubeGrid)sourcePlayer.Controller.ControlledEntity.Entity.GetTopMostParent();
                 var worldOffset = targetLocation - sourcePlayer.Controller.ControlledEntity.Entity.GetPosition();
-                return MoveShipByOffset(cubeGrid, worldOffset, safely, updatedPosition, noSafeLocationMessage);
+                return MoveShipByOffset(cubeGrid, worldOffset, safely, updatedPosition, responseMessage);
             }
 
             // Move the player only.
             if (safely && !FindPlayerFreePosition(ref targetLocation, sourcePlayer))
             {
-                if (noSafeLocationMessage != null)
-                    noSafeLocationMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.NoSafeLocation);
                 return false;
             }
 
@@ -780,24 +787,22 @@ namespace midspace.adminscripts
         /// <param name="target"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="emptySourceMessage"></param>
-        /// <param name="emptyTargetMessage"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns>Will return false if the move operation could not be carried out.</returns>
         public static bool MoveTo(IMyEntity source, IMyEntity target, bool safely,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (source == null || source.Closed)
             {
-                if (emptySourceMessage != null)
-                    emptySourceMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.SourceEntityNotFound);
                 return false;
             }
 
             if (target == null || target.Closed)
             {
-                if (emptyTargetMessage != null)
-                    emptyTargetMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.TargetEntityNotFound);
                 return false;
             }
 
@@ -809,13 +814,13 @@ namespace midspace.adminscripts
                 if (target is IMyCubeGrid)
                 {
                     var worldOffset = target.WorldMatrix.Translation - cubeGrid.GetPosition();
-                    return MoveShipByOffset(cubeGrid, worldOffset, safely, updatedPosition, noSafeLocationMessage);
+                    return MoveShipByOffset(cubeGrid, worldOffset, safely, updatedPosition, responseMessage);
                 }
 
                 if (target is IMyVoxelBase)
                 {
                     return MoveShipToVoxel(cubeGrid, (IMyVoxelBase)target, safely,
-                        updatedPosition, emptySourceMessage, emptyTargetMessage, noSafeLocationMessage);
+                        updatedPosition, responseMessage);
                 }
             }
 
@@ -830,30 +835,28 @@ namespace midspace.adminscripts
         /// <param name="targetPlayer"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="emptySourceMessage"></param>
-        /// <param name="emptyTargetMessage"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns>Will return false if the move operation could not be carried out.</returns>
         public static bool MoveTo(IMyEntity source, IMyPlayer targetPlayer, bool safely,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (source == null || source.Closed)
             {
-                if (emptySourceMessage != null)
-                    emptySourceMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.SourceEntityNotFound);
                 return false;
             }
 
             if (targetPlayer == null)
             {
-                if (emptyTargetMessage != null)
-                    emptyTargetMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.TargetEntityNotFound);
                 return false;
             }
 
             // TODO: Is there a better way of targeting the placement of a ship near a player?
             return MoveTo(source, targetPlayer.GetPosition(), safely,
-                updatedPosition, emptySourceMessage, noSafeLocationMessage);
+                updatedPosition, responseMessage);
         }
 
         /// <summary>
@@ -863,31 +866,29 @@ namespace midspace.adminscripts
         /// <param name="target"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="emptySourceMessage"></param>
-        /// <param name="emptyTargetMessage"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns></returns>
         public static bool MoveTo(IMyPlayer sourcePlayer, IMyEntity target, bool safely,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (sourcePlayer == null)
             {
-                if (emptySourceMessage != null)
-                    emptySourceMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.SourceEntityNotFound);
                 return false;
             }
 
             if (target == null || target.Closed)
             {
-                if (emptyTargetMessage != null)
-                    emptyTargetMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.TargetEntityNotFound);
                 return false;
             }
 
             if (sourcePlayer.Controller.ControlledEntity is IMyCubeBlock)
             {
                 // player is piloting a ship. Move ship to entity.
-                return MoveTo(sourcePlayer.Controller.ControlledEntity.Entity.GetTopMostParent(), target, safely, updatedPosition, emptySourceMessage, emptyTargetMessage, noSafeLocationMessage);
+                return MoveTo(sourcePlayer.Controller.ControlledEntity.Entity.GetTopMostParent(), target, safely, updatedPosition, responseMessage);
             }
 
             // Player is free floating, we move the player only.
@@ -918,16 +919,16 @@ namespace midspace.adminscripts
                     }
 
                     if (targetCockpit != null)
-                        return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)targetCockpit, safely, updatedPosition, noSafeLocationMessage);
+                        return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)targetCockpit, safely, updatedPosition, responseMessage);
                 }
 
                 // Small ship grids. Also the fallback if a large ship does not have a cockpit.
-                return MovePlayerToShipGrid(sourcePlayer, (IMyCubeGrid)target, safely, updatedPosition, noSafeLocationMessage);
+                return MovePlayerToShipGrid(sourcePlayer, (IMyCubeGrid)target, safely, updatedPosition, responseMessage);
             }
 
             if (target is IMyVoxelBase)
             {
-                return MovePlayerToVoxel(sourcePlayer, (IMyVoxelBase)target, safely, updatedPosition, emptySourceMessage, emptyTargetMessage, noSafeLocationMessage);
+                return MovePlayerToVoxel(sourcePlayer, (IMyVoxelBase)target, safely, updatedPosition, responseMessage);
             }
 
             return false;
@@ -941,24 +942,22 @@ namespace midspace.adminscripts
         /// <param name="safely">Attempts to find a safe location not inside of a ship wall or asteroid wall.</param>
         /// <param name="agressivePosition">Places the sourcePlayer behind the targetPlayer, otherwise face to face.</param>
         /// <param name="updatedPosition"></param>
-        /// <param name="emptySourceMessage"></param>
-        /// <param name="emptyTargetMessage"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns></returns>
         public static bool MoveTo(IMyPlayer sourcePlayer, IMyPlayer targetPlayer, bool safely, bool agressivePosition,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage, ulong steamId)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage, ulong steamId)
         {
             if (sourcePlayer == null)
             {
-                if (emptySourceMessage != null)
-                    emptySourceMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.SourceEntityNotFound);
                 return false;
             }
 
             if (targetPlayer == null)
             {
-                if (emptyTargetMessage != null)
-                    emptyTargetMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.TargetEntityNotFound);
                 return false;
             }
 
@@ -978,6 +977,9 @@ namespace midspace.adminscripts
             {
                 var cockpit = (IMyCubeBlock)targetPlayer.Controller.ControlledEntity;
 
+                //var remoteControl = MyAPIGateway.Session.ControlledObject as IMyRemoteControl;
+                //var remoteControl = targetPlayer.Controller.ControlledEntity as IMyRemoteControl;
+
                 //var definition = MyDefinitionManager.Static.GetCubeBlockDefinition(cockpit.BlockDefinition);
                 //var cockpitDefinition = definition as MyCockpitDefinition;
                 //var remoteDefinition = definition as MyRemoteControlDefinition;
@@ -986,11 +988,11 @@ namespace midspace.adminscripts
                     // station and large ship grids.
                     // move the player to the ship grid instead, as it is either cockpit, passenger seat, cryo chamber, or remote control.
                     return MovePlayerToCube(sourcePlayer, (IMyCubeBlock)targetPlayer.Controller.ControlledEntity.Entity, safely,
-                        updatedPosition, noSafeLocationMessage);
+                        updatedPosition, responseMessage);
 
                 // small ship grids.
                 return MovePlayerToShipGrid(sourcePlayer, cockpit.CubeGrid, safely,
-                    updatedPosition, noSafeLocationMessage);
+                    updatedPosition, responseMessage);
 
                 //// target is a pilot in cockpit.
                 //if (cockpitDefinition != null)
@@ -1019,8 +1021,8 @@ namespace midspace.adminscripts
 
             if (safely && !FindPlayerFreePosition(ref position, sourcePlayer))
             {
-                if (noSafeLocationMessage != null)
-                    noSafeLocationMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.NoSafeLocation);
                 return false;
             }
 
@@ -1046,9 +1048,9 @@ namespace midspace.adminscripts
         /// <param name="targetCube"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns></returns>
-        public static bool MovePlayerToCube(IMyPlayer sourcePlayer, IMyCubeBlock targetCube, bool safely, Action<Vector3D> updatedPosition, Action noSafeLocationMessage)
+        public static bool MovePlayerToCube(IMyPlayer sourcePlayer, IMyCubeBlock targetCube, bool safely, Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (sourcePlayer == null || targetCube == null)
                 return false;
@@ -1059,8 +1061,8 @@ namespace midspace.adminscripts
 
             if (safely && !FindPlayerFreePosition(ref position, sourcePlayer))
             {
-                if (noSafeLocationMessage != null)
-                    noSafeLocationMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.NoSafeLocation);
                 return false;
             }
 
@@ -1077,7 +1079,7 @@ namespace midspace.adminscripts
             return true;
         }
 
-        public static bool MovePlayerToShipGrid(IMyPlayer sourcePlayer, IMyCubeGrid targetGrid, bool safely, Action<Vector3D> updatedPosition, Action noSafeLocationMessage)
+        public static bool MovePlayerToShipGrid(IMyPlayer sourcePlayer, IMyCubeGrid targetGrid, bool safely, Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             Vector3D destination;
 
@@ -1087,8 +1089,8 @@ namespace midspace.adminscripts
                 var freePos = MyAPIGateway.Entities.FindFreePlace(targetGrid.WorldAABB.Center, (float)sourcePlayer.Controller.ControlledEntity.Entity.WorldVolume.Radius, 500, 20, 1f);
                 if (!freePos.HasValue)
                 {
-                    if (noSafeLocationMessage != null)
-                        noSafeLocationMessage.Invoke();
+                    if (responseMessage != null)
+                        responseMessage.Invoke(MoveResponseMessage.NoSafeLocation);
                     return false;
                 }
 
@@ -1111,8 +1113,17 @@ namespace midspace.adminscripts
             return true;
         }
 
-        private static bool MoveShipByOffset(IMyEntity cubeGrid, Vector3D worldOffset, bool safely, Action<Vector3D> updatedPosition, Action noSafeLocationMessage)
+        private static bool MoveShipByOffset(IMyCubeGrid cubeGrid, Vector3D worldOffset, bool safely, Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
+            // TODO: this needs to be specific to grids either attached to voxel 
+            // or switchable depending on StationVoxelSupport.
+            if (cubeGrid.IsStatic)
+            {
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.CannotTeleportStatic);
+                return false;
+            }
+
             var grids = cubeGrid.GetAttachedGrids();
             var currentPosition = cubeGrid.GetPosition();
             Vector3D position = cubeGrid.GetPosition() + worldOffset;
@@ -1128,8 +1139,8 @@ namespace midspace.adminscripts
                 // TODO: determine good location for moving one ship to another, checking for OrientedBoundingBox.Intersects() for a tighter fit.
                 if (!FindEntityFreePosition(ref position, cubeGrid, worldVolume))
                 {
-                    if (noSafeLocationMessage != null)
-                        noSafeLocationMessage.Invoke();
+                    if (responseMessage != null)
+                        responseMessage.Invoke(MoveResponseMessage.NoSafeLocation);
                     return false;
                 }
             }
@@ -1150,24 +1161,22 @@ namespace midspace.adminscripts
         /// <param name="targetVoxel"></param>
         /// <param name="safely"></param>
         /// <param name="updatedPosition"></param>
-        /// <param name="emptySourceMessage"></param>
-        /// <param name="emptyTargetMessage"></param>
-        /// <param name="noSafeLocationMessage"></param>
+        /// <param name="responseMessage"></param>
         /// <returns></returns>
         public static bool MovePlayerToVoxel(IMyPlayer sourcePlayer, IMyVoxelBase targetVoxel, bool safely,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             if (sourcePlayer == null)
             {
-                if (emptySourceMessage != null)
-                    emptySourceMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.SourceEntityNotFound);
                 return false;
             }
 
             if (targetVoxel == null || targetVoxel.Closed)
             {
-                if (emptyTargetMessage != null)
-                    emptyTargetMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.TargetEntityNotFound);
                 return false;
             }
 
@@ -1211,8 +1220,8 @@ namespace midspace.adminscripts
 
             if (safely && !FindPlayerFreePosition(ref position, sourcePlayer))
             {
-                if (noSafeLocationMessage != null)
-                    noSafeLocationMessage.Invoke();
+                if (responseMessage != null)
+                    responseMessage.Invoke(MoveResponseMessage.NoSafeLocation);
                 return false;
             }
 
@@ -1227,11 +1236,11 @@ namespace midspace.adminscripts
         }
 
         public static bool MoveShipToVoxel(IMyCubeGrid sourceGrid, IMyVoxelBase targetVoxel, bool safely,
-            Action<Vector3D> updatedPosition, Action emptySourceMessage, Action emptyTargetMessage, Action noSafeLocationMessage)
+            Action<Vector3D> updatedPosition, Action<MoveResponseMessage> responseMessage)
         {
             // TODO: find a more accurate position to transport a ship to around a planet and asteroid.
             var worldOffset = targetVoxel.WorldMatrix.Translation - sourceGrid.GetPosition();
-            return MoveShipByOffset(sourceGrid, worldOffset, safely, updatedPosition, noSafeLocationMessage);
+            return MoveShipByOffset(sourceGrid, worldOffset, safely, updatedPosition, responseMessage);
         }
 
         private static bool FindPlayerFreePosition(ref Vector3D position, IMyPlayer player)

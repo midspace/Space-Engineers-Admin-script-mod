@@ -69,19 +69,23 @@
                     CommandTeleportBack.SaveTeleportInHistory(playerId, position);
                 };
 
-                Action emptySourceMsg = delegate
+                Action<Support.MoveResponseMessage> responseMsg = delegate (Support.MoveResponseMessage message)
                 {
-                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Source entity no longer exists.");
-                };
-
-                Action emptyTargetMsg = delegate
-                {
-                    MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Target entity no longer exists.");
-                };
-
-                Action noSafeLocationMsg = delegate
-                {
-                    MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Could not find safe location to transport to.");
+                    switch (message)
+                    {
+                        case Support.MoveResponseMessage.SourceEntityNotFound:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Source entity no longer exists.");
+                            break;
+                        case Support.MoveResponseMessage.TargetEntityNotFound:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Teleport failed", "Target entity no longer exists.");
+                            break;
+                        case Support.MoveResponseMessage.NoSafeLocation:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Could not find safe location to transport to.");
+                            break;
+                        case Support.MoveResponseMessage.CannotTeleportStatic:
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Failed", "Cannot teleport station.");
+                            break;
+                    }
                 };
 
                 IMyPlayer thisPlayer;
@@ -91,7 +95,7 @@
                     return true;
                 }
 
-                var ret = Support.MoveTo(thisPlayer, player, true, true, saveTeleportBack, emptySourceMsg, emptyTargetMsg, noSafeLocationMsg, steamId);
+                var ret = Support.MoveTo(thisPlayer, player, true, true, saveTeleportBack, responseMsg, steamId);
                 return true;
             }
 
