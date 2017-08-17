@@ -207,12 +207,12 @@
             if (!IsProtected(block))
                 return true;
 
-            IMyEntity attackerEntity;
-            if (!MyAPIGateway.Entities.TryGetEntityById(attackerEntityId, out attackerEntity))
-                return false;
-
             if (type == MyDamageType.Grind)
             {
+                IMyEntity attackerEntity;
+                if (!MyAPIGateway.Entities.TryGetEntityById(attackerEntityId, out attackerEntity))
+                    return false;
+
                 if (attackerEntity is IMyShipGrinder)
                 {
                     player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity.GetTopMostParent());
@@ -227,21 +227,21 @@
                 IMyEngineerToolBase handTool = attackerEntity as IMyEngineerToolBase;
                 if (handTool != null)
                 {
-                    if (MyAPIGateway.Entities.TryGetEntityById(handTool.OwnerId, out attackerEntity))
-                    {
-                        player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity);
-                        if (player != null)
-                        {
-                            return CanModify(player, block);
-                        }
-                    }
+                    //if (MyAPIGateway.Entities.TryGetEntityById(handTool.OwnerId, out attackerEntity))
+                    //{
+                    //    player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity);
+                    //    if (player != null)
+                    //    {
+                    //        return CanModify(player, block);
+                    //    }
+                    //}
 
                     // debatable if this code is any faster or more efficient.
-                    //var players = new List<IMyPlayer>();
-                    //MyAPIGateway.Players.GetPlayers(players, p => p != null);
-                    //player = players.FirstOrDefault(p => p.Character != null && p.Character.EntityId == handTool.OwnerId);
-                    //if (player != null)
-                    //    return CanModify(player, block);
+                    var players = new List<IMyPlayer>();
+                    MyAPIGateway.Players.GetPlayers(players, p => p != null);
+                    player = players.FirstOrDefault(p => p.Character != null && p.Character.EntityId == handTool.OwnerId);
+                    if (player != null)
+                        return CanModify(player, block);
                 }
             }
             // we don't want players to destroy things in protection areas...
