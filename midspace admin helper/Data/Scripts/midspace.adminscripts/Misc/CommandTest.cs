@@ -69,31 +69,42 @@
                 {
                     try
                     {
+                        StringBuilder str = new StringBuilder();
                         var players = new List<IMyPlayer>();
                         MyAPIGateway.Players.GetPlayers(players, p => p != null);
-                        MyAPIGateway.Utilities.ShowMessage("Player Count", string.Format("{0}", players.Count));
+                        str.AppendLine("Player Count {0}", players.Count);
 
                         var identities = new List<IMyIdentity>();
                         MyAPIGateway.Players.GetAllIdentites(identities);
-                        MyAPIGateway.Utilities.ShowMessage("Identities Count", string.Format("{0}", identities.Count));
+                        str.AppendLine("Identities Count {0}", identities.Count);
 
-                        MyAPIGateway.Utilities.ShowMessage("Admin Count", string.Format("{0}", config.Administrators.Count));
-                        //MyAPIGateway.Utilities.ShowMessage("WorldName", string.Format("{0}", config.WorldName));
-                        //MyAPIGateway.Utilities.ShowMessage("WorldSize", string.Format("{0}", config.SessionSettings.WorldSizeKm));
-                        MyAPIGateway.Utilities.ShowMessage("Mods Count", string.Format("{0}", config.Mods.Count));
-                        //MyAPIGateway.Utilities.ShowMessage("IP", string.Format("{0}", config.IP));
+                        str.AppendLine("Admin Count {0}", config.Administrators.Count);
+                        //str.AppendLine("WorldName {0}", config.WorldName);
+                        //str.AppendLine("WorldSize {0}", config.SessionSettings.WorldSizeKm);
+                        str.AppendLine("Mods Count {0}", config.Mods.Count);
+                        //str.AppendLine("IP {0}", config.IP));
 
                         var clients = MyAPIGateway.Session.GetWorld().Checkpoint.Clients;
-                        MyAPIGateway.Utilities.ShowMessage("Client Count", clients == null ? "null" : string.Format("{0}", clients.Count));
+                        str.AppendLine("Client Count", clients == null ? "null" : string.Format("{0}", clients.Count));
 
                         if (clients != null)
                         {
                             var client = clients.FirstOrDefault(c => c.SteamId == MyAPIGateway.Multiplayer.MyId);
                             if (client != null)
                             {
-                                MyAPIGateway.Utilities.ShowMessage("IsAdmin", string.Format("{0}", client.IsAdmin));
+                                str.AppendLine("IsAdmin {0}", client.IsAdmin);
                             }
                         }
+
+                        int index = 1;
+                        foreach (var identity in identities.OrderBy(i => i.DisplayName))
+                        {
+                            var steamPlayer = players.FirstOrDefault(p => p.IdentityId == identity.IdentityId);
+                            str.AppendFormat("#{0} {1} {2} '{3}'\r\n", index++, steamPlayer.PromoteLevel, steamPlayer.SteamUserId, identity.DisplayName);
+                        }
+
+                        MyAPIGateway.Utilities.ShowMissionScreen("test", null, null, str.ToString());
+
                     }
                     catch (Exception)
                     {
@@ -139,16 +150,21 @@
                 msg.AppendFormat("IsDedicated {0}\r\n", MyAPIGateway.Utilities.IsDedicated);
                 //msg.AppendFormat("Culture {0}\r\n", MyTexts.Culture.IetfLanguageTag);
                 msg.AppendFormat("Culture {0}\r\n", MyAPIGateway.Session.Config.Language);
-                msg.AppendFormat("Culture {0}-{1}\r\n", MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].CultureName, MyTexts.Languages[(int)MyAPIGateway.Session.Config.Language].SubcultureName);
+                msg.AppendFormat("Culture {0}-{1}\r\n", MyTexts.Languages[MyAPIGateway.Session.Config.Language].CultureName, MyTexts.Languages[MyAPIGateway.Session.Config.Language].SubcultureName);
 
-                var languageRu = MyTexts.Languages[(int)MyLanguagesEnum.Russian];
+
+
+             
+                var languageRu = MyTexts.Languages[MyLanguagesEnum.Russian];
 
                 MyTexts.Clear();
                 MyTexts.LoadTexts(Path.Combine(MyAPIGateway.Utilities.GamePaths.ContentPath, "Data", "Localization"), languageRu.CultureName, languageRu.SubcultureName);
                 var yesRu = MyStringId.Get("DisplayName_Item_GoldIngot").GetString();
                 var russianGold = MyTexts.GetString(MyStringId.Get("DisplayName_Item_GoldIngot"));
 
-                var languageEn = MyTexts.Languages[(int)MyLanguagesEnum.English];
+                
+
+                var languageEn = MyTexts.Languages[MyLanguagesEnum.English];
                 MyTexts.Clear();
                 MyTexts.LoadTexts(Path.Combine(MyAPIGateway.Utilities.GamePaths.ContentPath, "Data", "Localization"), languageEn.CultureName, languageRu.SubcultureName);
                 var yesEn = MyStringId.Get("DisplayName_Item_GoldIngot").GetString();

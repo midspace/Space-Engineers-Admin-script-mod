@@ -4,6 +4,7 @@ namespace midspace.adminscripts
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using Messages.Communication;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
@@ -370,8 +371,8 @@ namespace midspace.adminscripts
             }
 
             return player.PromoteLevel == MyPromoteLevel.Admin ||
-               player.PromoteLevel == MyPromoteLevel.Owner ||
-               player.PromoteLevel == MyPromoteLevel.SpaceMaster;
+                player.PromoteLevel == MyPromoteLevel.Owner ||
+                player.PromoteLevel == MyPromoteLevel.SpaceMaster;
 
             //return player.IsAdmin;
 
@@ -762,6 +763,17 @@ namespace midspace.adminscripts
         }
 
         #endregion
+
+        public static void AppendLine(this StringBuilder stringBuilder, string format, params object[] args)
+        {
+            if (args == null || args.Length == 0)
+                stringBuilder.AppendLine(format);
+            else
+            {
+                stringBuilder.AppendFormat(format, args);
+                stringBuilder.AppendLine();
+            }
+        }
     }
 
     /// <summary>
