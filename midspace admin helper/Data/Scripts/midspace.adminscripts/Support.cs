@@ -1200,10 +1200,7 @@ namespace midspace.adminscripts
 
                 // User current player position as starting point to find surface point.
                 Vector3D findFromPoint = sourcePlayer.GetPosition();
-
-                Vector3D closestSurfacePoint;
-                MyVoxelCoordSystems.WorldPositionToLocalPosition(planet.PositionLeftBottomCorner, ref findFromPoint, out closestSurfacePoint);
-                position = planet.GetClosestSurfacePointGlobal(ref closestSurfacePoint);
+                position = planet.GetClosestSurfacePointGlobal(ref findFromPoint);
 
                 var up = position - planet.WorldMatrix.Translation;
                 up.Normalize();

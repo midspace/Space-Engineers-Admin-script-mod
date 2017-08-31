@@ -370,9 +370,9 @@ namespace midspace.adminscripts
                 return true;
             }
 
-            return player.PromoteLevel == MyPromoteLevel.Admin ||
-                player.PromoteLevel == MyPromoteLevel.Owner ||
-                player.PromoteLevel == MyPromoteLevel.SpaceMaster;
+            return player.PromoteLevel == MyPromoteLevel.Owner ||  // 5 star
+                player.PromoteLevel == MyPromoteLevel.Admin ||     // 4 star
+                player.PromoteLevel == MyPromoteLevel.SpaceMaster; // 3 star
 
             //return player.IsAdmin;
 
@@ -396,7 +396,7 @@ namespace midspace.adminscripts
         }
 
         // TODO: don't like this here. It should be a set of constants somewhere else.
-        public static ulong[] ExperimentalCreatorList = { 76561197961224864UL, 76561198048142826UL };
+        internal static ulong[] ExperimentalCreatorList = { 76561197961224864UL, 76561198048142826UL };
 
         /// <summary>
         /// Determines if the player is an Author/Creator.
@@ -643,6 +643,19 @@ namespace midspace.adminscripts
             while (baseVal < value)
                 baseVal = baseVal * 2;
             return baseVal;
+        }
+
+        public static bool IsBetween(this Vector3D middlePoint, Vector3D point1, Vector3D point2)
+        {
+            return
+            ((point1.X < middlePoint.X && middlePoint.X < point2.X) ||
+            (point1.X > middlePoint.X && middlePoint.X > point2.X))
+            &&
+            ((point1.Y < middlePoint.Y && middlePoint.Y < point2.Y ||
+            point1.Y > middlePoint.Y && middlePoint.Y > point2.Y))
+            &&
+            ((point1.Z < middlePoint.Z && middlePoint.Z < point2.Z ||
+            point1.Z > middlePoint.Z && middlePoint.Z > point2.Z));
         }
 
 

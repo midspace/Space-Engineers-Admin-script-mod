@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.ModAPI;
-    using VRage.Voxels;
     using VRageMath;
 
     public class CommandLaserUpDown : ChatCommand
@@ -41,35 +41,38 @@
 
             if (closestPlanet != null)
             {
+                Vector3D zeroGravity = Vector3D.MinValue;
+                var playerVector = closestPlanet.WorldMatrix.Translation - playerPosition;
+                playerVector.Normalize();
+                bool playerInGravity = false;
+
+                MySphericalNaturalGravityComponent naturalGravity = closestPlanet.Components.Get<MyGravityProviderComponent>() as MySphericalNaturalGravityComponent;
+                if (naturalGravity != null)
+                {
+                    //float gravityLimit = (float)(closestPlanet.MaximumRadius * Math.Pow(closestPlanet.GetInitArguments.SurfaceGravity / 0.05f, 1 / closestPlanet.GetInitArguments.GravityFalloff));
+                    zeroGravity = closestPlanet.WorldMatrix.Translation + (playerVector * -naturalGravity.GravityLimit);
+                    playerInGravity = playerPosition.IsBetween(zeroGravity, closestPlanet.WorldMatrix.Translation);
+                }
+
                 if (messageText.StartsWith("/laserup", StringComparison.InvariantCultureIgnoreCase) ||
                     messageText.StartsWith("/up", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var v1 = closestPlanet.WorldMatrix.Translation - playerPosition;
-                    v1.Normalize();
-                    var gps = MyAPIGateway.Session.GPS.Create("Laser Up", "", playerPosition + (v1 * -1000), true, false);
-                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
+                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, MyAPIGateway.Session.GPS.Create("Laser Up", "", playerPosition + (playerVector * -1000), true, false));
+
+                    if (playerInGravity && zeroGravity != Vector3D.MinValue)
+                        MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, MyAPIGateway.Session.GPS.Create("Laser Zero Gravity", "", zeroGravity, true, false));
                 }
                 if (messageText.StartsWith("/laserdown", StringComparison.InvariantCultureIgnoreCase) ||
                     messageText.StartsWith("/down", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var v1 = closestPlanet.WorldMatrix.Translation - playerPosition;
-                    v1.Normalize();
+                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, MyAPIGateway.Session.GPS.Create("Laser Down", "", playerPosition + (playerVector * 1000), true, false));
 
-                    var gps = MyAPIGateway.Session.GPS.Create("Laser Down", "", playerPosition + (v1 * 1000), true, false);
-                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
+                    var groundPosition = closestPlanet.GetClosestSurfacePointGlobal(ref playerPosition);
+                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, MyAPIGateway.Session.GPS.Create("Laser Ground", "", groundPosition, true, false));
 
-                    Vector3D closestSurfacePoint;
-                    MyVoxelCoordSystems.WorldPositionToLocalPosition(closestPlanet.PositionLeftBottomCorner, ref playerPosition, out closestSurfacePoint);
-                    var groundPosition = closestPlanet.GetClosestSurfacePointGlobal(ref closestSurfacePoint);
-
-                    //closestPlanet.getgrav
-
-                    //var d = Vector3D.Distance(playerPosition, groundPosition);
-
-                    gps = MyAPIGateway.Session.GPS.Create("Laser Ground", "", groundPosition, true, false);
-                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
+                    if (!playerInGravity && zeroGravity != Vector3D.MinValue)
+                        MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, MyAPIGateway.Session.GPS.Create("Laser Zero Gravity", "", zeroGravity, true, false));
                 }
-
 
                 return true;
             }

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using Messages;
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
@@ -38,32 +39,43 @@
                     MessageTaggedEntityStore.RegisterIdentity(playerId, entity.EntityId);
                     string displayType;
                     string displayName;
-                    string description;
+                    StringBuilder description = new StringBuilder();
                     if (entity is IMyVoxelMap)
                     {
                         var voxelMap = (IMyVoxelMap)entity;
                         displayType = "asteroid";
                         displayName = voxelMap.StorageName;
                         var aabb = new BoundingBoxD(voxelMap.PositionLeftBottomCorner, voxelMap.PositionLeftBottomCorner + voxelMap.Storage.Size);
-                        description = string.Format("Distance: {0:N} m\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nUse /detail for more information on asteroid content.",
+                        description.AppendFormat("Distance: {0:N} m\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nUse /detail for more information on asteroid content.",
                             distance, voxelMap.Storage.Size,
                             aabb.Center.X, aabb.Center.Y, aabb.Center.Z);
 
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
                     }
                     else if (entity is Sandbox.Game.Entities.MyPlanet)
                     {
                         var planet = (Sandbox.Game.Entities.MyPlanet)entity;
                         displayType = "planet";
                         displayName = planet.StorageName;
-                        description = string.Format("Distance: {0:N} m\r\nCenter: [X:{1:N} Y:{2:N} Z:{3:N}]\r\nMinimum Radius: {4:N} m\r\nAverage Radius: {5:N} m\r\nAtmosphere Radius: {6:N} m\r\nHas Atmosphere: {7}",
+                        description.AppendFormat("Distance: {0:N} m\r\nCenter: [X:{1:N} Y:{2:N} Z:{3:N}]\r\nMinimum Radius: {4:N} m\r\nMaximum Radius: {5:N} m\r\nAverage Radius: {6:N} m\r\nAtmosphere Radius: {7:N} m\r\nHas Atmosphere: {8}\r\nBreathable Atmosphere: {9}",
                             distance,
                             planet.WorldMatrix.Translation.X, planet.WorldMatrix.Translation.Y, planet.WorldMatrix.Translation.Z,
                             planet.MinimumRadius,
+                            planet.MaximumRadius,
                             planet.AverageRadius,
                             planet.AtmosphereRadius,
-                            planet.HasAtmosphere);
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                            planet.HasAtmosphere,
+                            planet.Generator.Atmosphere.Breathable);
+
+                        MySphericalNaturalGravityComponent naturalGravity = planet.Components.Get<MyGravityProviderComponent>() as MySphericalNaturalGravityComponent;
+                        if (naturalGravity != null)
+                        {
+                            description.AppendLine();
+                            description.AppendLine("Gravity Limit: {0:N} m",
+                            naturalGravity.GravityLimit);
+                        }
+
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
                     }
                     else if (entity is IMyCubeBlock || entity is IMyCubeGrid)
                     {
@@ -142,19 +154,19 @@
                         displayType = gridCube.IsStatic ? "Station" : gridCube.GridSizeEnum.ToString() + " Ship";
                         displayName = gridCube.DisplayName;
 
-                        description = string.Format("Distance: {0:N} m\r\n",
+                        description.AppendFormat("Distance: {0:N} m\r\n",
                             distance);
 
                         if (gridCube.Physics == null)
-                            description += string.Format("Projection has no physics characteristics.\r\n");
+                            description.AppendFormat("Projection has no physics characteristics.\r\n");
                         else
-                            description += string.Format("Mass: {0:N} kg\r\nVector: {1}\r\nVelocity: {2:N} m/s\r\nMass Center: {3}\r\n",
+                            description.AppendFormat("Mass: {0:N} kg\r\nVector: {1}\r\nVelocity: {2:N} m/s\r\nMass Center: {3}\r\n",
                                 gridCube.Physics.Mass,
                                 gridCube.Physics.LinearVelocity,
                                 gridCube.Physics.LinearVelocity.Length(),
                                 gridCube.Physics.CenterOfMassWorld);
 
-                        description += string.Format("Size : {0}\r\nNumber of Blocks : {1:#,##0}\r\nAttached Grids : {2:#,##0} (including this one).\r\nOwners : {3}\r\nBuild : {4} blocks incomplete.",
+                        description.AppendFormat("Size : {0}\r\nNumber of Blocks : {1:#,##0}\r\nAttached Grids : {2:#,##0} (including this one).\r\nOwners : {3}\r\nBuild : {4} blocks incomplete.",
                             gridCube.LocalAABB.Size,
                             blocks.Count,
                             attachedGrids.Count,
@@ -172,17 +184,17 @@
                             var builtBy = identities.FirstOrDefault(p => p.IdentityId == ((MyCubeBlock)cubeBlock).BuiltBy);
                             if (builtBy != null)
                                 builtByName = builtBy.DisplayName;
-                            description += string.Format("\r\n\r\nCube;\r\n  Type : {1}\r\n  SubType : {0}\r\n  Name : {2}\r\n  Owner : {3}\r\n  BuiltBy : {4}", cubeBlock.BlockDefinition.SubtypeName, cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName, builtByName);
+                            description.AppendFormat("\r\n\r\nCube;\r\n  Type : {1}\r\n  SubType : {0}\r\n  Name : {2}\r\n  Owner : {3}\r\n  BuiltBy : {4}", cubeBlock.BlockDefinition.SubtypeName, cubeBlock.DefinitionDisplayNameText, cubeBlock.DisplayNameText, ownerName, builtByName);
                         }
 
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
                     }
                     else if (entity is IMyCharacter)
                     {
                         displayType = "player";
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N} m", distance);
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                        description.AppendFormat("Distance: {0:N} m", distance);
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
                     }
                     else if (entity is MyInventoryBagEntity)
                     {
@@ -197,15 +209,15 @@
                         }
 
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N} m", distance);
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                        description.AppendFormat("Distance: {0:N} m", distance);
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
                     }
                     else
                     {
                         displayType = "unknown";
                         displayName = entity.DisplayName;
-                        description = string.Format("Distance: {0:N} m", distance);
-                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description, null, "OK");
+                        description.AppendFormat("Distance: {0:N} m", distance);
+                        MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
                     }
 
                     return true;
