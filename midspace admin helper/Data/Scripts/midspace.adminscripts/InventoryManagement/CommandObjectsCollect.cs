@@ -80,7 +80,7 @@
                     }
 
                     if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                        CollectObjects(MyAPIGateway.Multiplayer.ServerId, destination, range);
+                        CollectObjects(steamId, destination, range);
                     else
                         ConnectionHelper.SendMessageToServer(new MessageSyncFloatingObjects { Type = SyncFloatingObject.Collect, Position = destination, Range = range });
                     return true;

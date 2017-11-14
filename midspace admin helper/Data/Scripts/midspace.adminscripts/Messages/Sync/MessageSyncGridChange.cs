@@ -142,6 +142,24 @@
                     }
                     break;
 
+                case SyncGridChangeType.OwnerShareNone:
+                    {
+                        foreach (var selectedShip in selectedShips)
+                        {
+                            var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
+                            foreach (var grid in grids)
+                            {
+                                var blocks = new List<IMySlimBlock>();
+                                grid.GetBlocks(blocks, f => f.FatBlock != null && f.FatBlock.OwnerId != 0);
+
+                                foreach (var block in blocks)
+                                    block.FatBlock.ChangeOwner(block.FatBlock.OwnerId, MyOwnershipShareModeEnum.None);
+                            }
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Shared.", selectedShip.DisplayName));
+                        }
+                    }
+                    break;
+
                 case SyncGridChangeType.SwitchOnPower:
                     {
                         int reactors;
@@ -547,6 +565,7 @@
         ScaleUp,
         ScaleDown,
         BuiltBy,
-        Repair
+        Repair,
+        OwnerShareNone,
     }
 }
