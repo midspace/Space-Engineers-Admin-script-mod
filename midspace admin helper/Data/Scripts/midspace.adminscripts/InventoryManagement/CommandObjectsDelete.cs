@@ -8,11 +8,12 @@
     using VRage;
     using VRage.Game.ModAPI;
     using VRageMath;
+    using Messages.Sync;
 
     public class CommandObjectsDelete : ChatCommand
     {
         public CommandObjectsDelete()
-            : base(ChatCommandSecurity.Admin, ChatCommandFlag.Server, "delobjects", new[] { "/delobjects" })
+            : base(ChatCommandSecurity.Admin, "delobjects", new[] { "/delobjects" })
         {
         }
 
@@ -47,7 +48,10 @@
                         destination = worldMatrix.Translation + worldMatrix.Forward * 1.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
                     }
 
-                    DeleteObjects(MyAPIGateway.Multiplayer.ServerId, destination, range);
+                    if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        DeleteObjects(steamId, destination, range);
+                    else
+                        ConnectionHelper.SendMessageToServer(new MessageSyncFloatingObjects { Type = SyncFloatingObject.Delete, Position = destination, Range = range });
                     return true;
                 }
             }

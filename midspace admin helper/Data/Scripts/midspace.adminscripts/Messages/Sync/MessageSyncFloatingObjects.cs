@@ -5,7 +5,7 @@
 
     public enum SyncFloatingObject
     {
-        Count, Collect, Pull
+        Count, Collect, Pull, Delete
     }
 
     [ProtoContract]
@@ -41,6 +41,9 @@
                     break;
                 case SyncFloatingObject.Pull:
                     CommandObjectsPull.PullObjects(SenderSteamId, Position, Range, Velocity);
+                    break;
+                case SyncFloatingObject.Delete:
+                    CommandObjectsDelete.DeleteObjects(SenderSteamId, Position, Range);
                     break;
             }
         }

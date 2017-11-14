@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using midspace.adminscripts.Messages.Sync;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage.Game.Entity;
@@ -32,15 +31,14 @@
                 var playerName = match.Groups["Key"].Value;
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null);
-                IMyIdentity selectedPlayer = null;
 
                 var identities = new List<IMyIdentity>();
-                MyAPIGateway.Players.GetAllIdentites(identities, delegate (IMyIdentity i) { return i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase); });
-                selectedPlayer = identities.FirstOrDefault();
+                MyAPIGateway.Players.GetAllIdentites(identities, i => i.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));
+                IMyIdentity selectedPlayer = identities.FirstOrDefault();
 
                 int index;
                 List<IMyIdentity> cacheList = CommandPlayerStatus.GetIdentityCache(steamId);
-                if (playerName.Substring(0, 1) == "#" && Int32.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
+                if (playerName.Substring(0, 1) == "#" && int.TryParse(playerName.Substring(1), out index) && index > 0 && index <= cacheList.Count)
                 {
                     selectedPlayer = cacheList[index - 1];
                 }
@@ -48,18 +46,7 @@
                 if (selectedPlayer == null)
                     return false;
 
-                if (!MyAPIGateway.Multiplayer.MultiplayerActive)
-                {
-                    ClearInventory(MyAPIGateway.Multiplayer.ServerId, selectedPlayer.IdentityId);
-                }
-                else
-                {
-                    ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
-                    {
-                        EntityId = selectedPlayer.IdentityId,
-                        Type = SyncCreateObjectType.Clear,
-                    });
-                }
+                ClearInventory(steamId, selectedPlayer.IdentityId);
                 return true;
             }
 
@@ -81,7 +68,7 @@
                 
                 var player = listplayers.FirstOrDefault();
                 if (player != null)
-                    entity = (IMyEntity)player.GetCharacter();
+                    entity = player.GetCharacter();
             }
 
             if (entity == null)
