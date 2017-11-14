@@ -82,15 +82,17 @@ namespace midspace.adminscripts.Messages.Sync
             switch (syncType)
             {
                 case SyncFactionType.Join:
-                    {
-                        var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
+                {
+                        //var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
                         //var faction = MyAPIGateway.Session.Factions.TryGetFactionById(factionId);
 
                         // AddPlayerToFaction() Doesn't work right on dedicated servers. To be removed by Keen in future. Is Depriated.
                         //MyAPIGateway.Session.Factions.AddPlayerToFaction(selectedPlayer.IdentityId, factionCollectionBuilder.FactionId);
                         //MyAPIGateway.Session.Factions.AddPlayerToFaction(PlayerId, FactionId);
 
-                        var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == playerId));
+                        //var request = fc.Factions.FirstOrDefault(f => f.JoinRequests.Any(r => r.PlayerId == playerId));
+
+                        var request = MyAPIGateway.Session.Factions.Factions.FirstOrDefault(f => f.Value.JoinRequests.Any(r => r.Value.PlayerId == playerId)).Value;
 
                         if (request != null && request.FactionId != factionId)
                         {
@@ -136,14 +138,12 @@ namespace midspace.adminscripts.Messages.Sync
 
                 case SyncFactionType.AcceptPeace:
                     {
-                        var fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
-
-                        foreach (var faction in fc.Factions)
+                        foreach (var faction in MyAPIGateway.Session.Factions.Factions)
                         {
-                            if (factionId == faction.FactionId)
+                            if (factionId == faction.Value.FactionId)
                                 continue;
-                            if (MyAPIGateway.Session.Factions.IsPeaceRequestStatePending(factionId, faction.FactionId))
-                                MyAPIGateway.Session.Factions.AcceptPeace(factionId, faction.FactionId);
+                            if (MyAPIGateway.Session.Factions.IsPeaceRequestStatePending(factionId, faction.Value.FactionId))
+                                MyAPIGateway.Session.Factions.AcceptPeace(factionId, faction.Value.FactionId);
                         }
                     }
                     break;
