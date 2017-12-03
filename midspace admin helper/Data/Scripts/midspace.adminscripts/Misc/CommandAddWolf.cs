@@ -35,7 +35,7 @@
                 worldMatrix.Translation = worldMatrix.Translation + worldMatrix.Forward * 2.5f + worldMatrix.Up * 0.5f; // Spawn item 1.5m in front of player in cockpit for safety.
             }
 
-            MessageSyncAres.SpawnBot(steamId, "Wolf", worldMatrix);
+            MessageSyncAres.SpawnBot(steamId, "Wolf", new SerializableMatrix(worldMatrix));
             return true;
         }
     }

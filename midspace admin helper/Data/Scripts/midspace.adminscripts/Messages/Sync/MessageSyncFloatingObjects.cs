@@ -3,24 +3,27 @@
     using ProtoBuf;
     using VRageMath;
 
-    public enum SyncFloatingObject
+    public enum SyncFloatingObject : byte
     {
-        Count, Collect, Pull, Delete
+        Count = 0,
+        Collect = 1,
+        Pull = 2,
+        Delete = 3
     }
 
     [ProtoContract]
     public class MessageSyncFloatingObjects : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public SyncFloatingObject Type;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public Vector3D Position;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public double Range;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public double Velocity;
 
         public override void ProcessClient()

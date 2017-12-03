@@ -1,15 +1,15 @@
-﻿using ProtoBuf;
-using Sandbox.ModAPI;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+
     [ProtoContract]
     public class MessagePrivateMessage : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public ChatMessage ChatMessage;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public ulong Receiver;
 
         public override void ProcessClient()

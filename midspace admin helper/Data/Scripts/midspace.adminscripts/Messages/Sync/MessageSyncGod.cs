@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ProtoBuf;
-
-namespace midspace.adminscripts.Messages.Sync
+﻿namespace midspace.adminscripts.Messages.Sync
 {
+    using ProtoBuf;
+
     [ProtoContract]
     public class MessageSyncGod : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public bool Enable;
 
         public override void ProcessClient()

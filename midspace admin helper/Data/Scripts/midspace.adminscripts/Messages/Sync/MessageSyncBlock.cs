@@ -9,10 +9,10 @@
     {
         #region fields
 
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long EntityId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public SyncBlockType SyncType;
 
         #endregion
@@ -69,7 +69,7 @@
         }
     }
 
-    public enum SyncBlockType
+    public enum SyncBlockType : byte
     {
         PowerOn = 0x01,
         PowerOff = 0x02,

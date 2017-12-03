@@ -12,10 +12,10 @@
     [ProtoContract]
     public class MessageTaggedEntityStore : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long PlayerId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public long EntityId;
 
         public readonly static Dictionary<long, long> EntityList = new Dictionary<long, long>();

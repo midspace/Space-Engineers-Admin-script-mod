@@ -1,19 +1,19 @@
-﻿using ProtoBuf;
-using Sandbox.ModAPI;
-using VRage.Game;
-
-namespace midspace.adminscripts.Messages.Communication
+﻿namespace midspace.adminscripts.Messages.Communication
 {
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using VRage.Game;
+
     [ProtoContract]
     public class MessageClientNotification : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string Message;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public int DisappearTimeMs;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string Font;
 
         public override void ProcessClient()

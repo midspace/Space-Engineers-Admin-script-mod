@@ -1394,5 +1394,19 @@ namespace midspace.adminscripts
         }
 
         #endregion
+
+        public static bool? GetBool(string value)
+        {
+            bool boolTest;
+            if (bool.TryParse(value, out boolTest))
+                return boolTest;
+
+            if (value.Equals("off", StringComparison.InvariantCultureIgnoreCase) || value == "0")
+                return false;
+
+            if (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) || value == "1")
+                return true;
+            return null;
+        }
     }
 }

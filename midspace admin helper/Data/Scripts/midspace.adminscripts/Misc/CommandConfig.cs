@@ -1,8 +1,5 @@
 ﻿using midspace.adminscripts.Messages;
 using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -15,7 +12,6 @@ namespace midspace.adminscripts
             : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "cfg", new string[] { "/config", "/cfg" })
         {
         }
-
 
         public override void Help(ulong steamId, bool brief)
         {
@@ -73,24 +69,24 @@ Examples:
                 {
                     case "motd":
                     case "messageoftheday":
-                        ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { Content = value , FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.Content });
+                        ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage { Content = value , FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.Content });
                         break;
                     case "motdheadline":
                     case "motdhl":
-                        ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { HeadLine = value, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.HeadLine });
+                        ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage { HeadLine = value, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.HeadLine });
                         break;
                     case "motdsic":
                     case "motdshowinchat":
-                        bool motdsic;
-                        if (bool.TryParse(value, out motdsic))
-                            ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage() { ShowInChat = motdsic, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.ShowInChat });
+                        bool? motdsic = Support.GetBool(value);
+                        if (motdsic.HasValue)
+                            ConnectionHelper.SendMessageToServer(new MessageOfTheDayMessage { ShowInChat = motdsic.Value, FieldsToUpdate = MessageOfTheDayMessage.ChangedFields.ShowInChat });
                         else
-                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be eiter true or false.", new object[] { value, key });
+                            MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be eiter on or off.", new object[] { value, key });
                         break;
                     case "adminlevel":
                         uint adminLevel;
                         if (uint.TryParse(value, out adminLevel))
-                            ConnectionHelper.SendMessageToServer(new MessageConfig() { Config = new ServerConfigurationStruct() { AdminLevel = adminLevel }, Action = ConfigAction.AdminLevel });
+                            ConnectionHelper.SendMessageToServer(new MessageConfig { Config = new ServerConfigurationStruct { AdminLevel = adminLevel }, Action = ConfigAction.AdminLevel });
                         else
                             MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be an integer higher or equal to {2} and lower or equal to {3}.", new object[] { value, key, uint.MinValue, uint.MaxValue });
                         break;
@@ -98,18 +94,18 @@ Examples:
                     case "ngi":
                         bool noGrindIndestructible;
                         if (bool.TryParse(value, out noGrindIndestructible))
-                            ConnectionHelper.SendMessageToServer(new MessageConfig() { Config = new ServerConfigurationStruct() { NoGrindIndestructible = noGrindIndestructible }, Action = ConfigAction.NoGrindIndestructible });
+                            ConnectionHelper.SendMessageToServer(new MessageConfig { Config = new ServerConfigurationStruct { NoGrindIndestructible = noGrindIndestructible }, Action = ConfigAction.NoGrindIndestructible });
                         else
                             MyAPIGateway.Utilities.ShowMessage("Config", "{0} is an invalid argument for {1}. It must be eiter true or false.", new object[] { value, key });
                         break;
                     case "save":
-                        ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Save });
+                        ConnectionHelper.SendMessageToServer(new MessageConfig { Action = ConfigAction.Save });
                         break;
                     case "reload":
-                        ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Reload });
+                        ConnectionHelper.SendMessageToServer(new MessageConfig { Action = ConfigAction.Reload });
                         break;
                     case "show":
-                        ConnectionHelper.SendMessageToServer(new MessageConfig() { Action = ConfigAction.Show });
+                        ConnectionHelper.SendMessageToServer(new MessageConfig { Action = ConfigAction.Show });
                         break;
                     default:
                         MyAPIGateway.Utilities.ShowMessage("Config", "Invalid setting or action. Type '/help cfg' for help.");

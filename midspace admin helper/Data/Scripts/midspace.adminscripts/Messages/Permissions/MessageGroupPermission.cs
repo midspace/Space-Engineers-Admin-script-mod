@@ -1,31 +1,28 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using midspace.adminscripts.Config;
-
-namespace midspace.adminscripts.Messages.Permissions
+﻿namespace midspace.adminscripts.Messages.Permissions
 {
+    using ProtoBuf;
+    using System.Collections.Generic;
+    using midspace.adminscripts.Config;
+
     [ProtoContract]
     public class MessageGroupPermission : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string GroupName;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public uint GroupLevel;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string Name;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public List<PermissionGroup> Groups;
 
-        [ProtoMember(6)]
+        [ProtoMember(205)]
         public List<string> MemberNames; // TODO that feels unsafe, need to be done properly
 
-        [ProtoMember(7)]
+        [ProtoMember(206)]
         public PermissionGroupAction Action;
 
         public override void ProcessClient()
@@ -67,14 +64,14 @@ namespace midspace.adminscripts.Messages.Permissions
         }
     }
 
-    public enum PermissionGroupAction
+    public enum PermissionGroupAction : byte
     {
-        Level,
-        Name,
-        Add,
-        Remove,
-        Create,
-        Delete,
-        List
+        Level = 0,
+        Name = 1,
+        Add = 2,
+        Remove = 3,
+        Create = 4,
+        Delete = 5,
+        List = 6
     }
 }

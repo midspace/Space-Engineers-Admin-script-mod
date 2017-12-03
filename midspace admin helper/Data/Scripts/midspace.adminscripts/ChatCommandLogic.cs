@@ -14,6 +14,7 @@ namespace midspace.adminscripts
     using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.Components;
+    using VRage.Game.ModAPI;
 
     /// <summary>
     /// Adds special chat commands, allowing the player to get their position, date, time, change their location on the map.
@@ -145,7 +146,6 @@ namespace midspace.adminscripts
                     MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
                     Logger.Debug("Registered ProcessMessage");
                 }
-                ConnectionHelper.Client_MessageCache.Clear();
                 BlockCommandExecution = true;
                 PermissionRequestTimer = new ThreadsafeTimer(10000);
                 PermissionRequestTimer.Elapsed += PermissionRequestTimer_Elapsed;
@@ -182,9 +182,11 @@ namespace midspace.adminscripts
             MyAPIGateway.Multiplayer.RegisterMessageHandler(ConnectionHelper.ConnectionId, MessageHandler);
             Logger.Debug("Registered ProcessMessage");
 
-            ConnectionHelper.Server_MessageCache.Clear();
-
             ServerCfg = new ServerConfig(GetAllChatCommands());
+
+            Sandbox.Game.MyVisualScriptLogicProvider.PlayerConnected += PlayerConnected;
+            Sandbox.Game.MyVisualScriptLogicProvider.PlayerDropped += PlayerDropped;
+            Sandbox.Game.MyVisualScriptLogicProvider.PlayerDisconnected += PlayerDisconnected;
         }
 
         private List<ChatCommand> GetAllChatCommands()
@@ -312,6 +314,10 @@ namespace midspace.adminscripts
         {
             TimerRegistry.Close();
 
+            Sandbox.Game.MyVisualScriptLogicProvider.PlayerConnected = null;
+            Sandbox.Game.MyVisualScriptLogicProvider.PlayerDropped = null;
+            Sandbox.Game.MyVisualScriptLogicProvider.PlayerDisconnected = null;
+
             // servers: listen and dedicated, MP
             if (ServerCfg != null)
             {
@@ -323,7 +329,7 @@ namespace midspace.adminscripts
             if (MyAPIGateway.Utilities != null && MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.IsServer && MyAPIGateway.Utilities.IsDedicated)
                 return;
 
-            if (MyAPIGateway.Multiplayer != null &&  MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerConfig.ServerIsClient))
+            if (MyAPIGateway.Multiplayer != null && MyAPIGateway.Multiplayer.MultiplayerActive || (ServerCfg != null && ServerConfig.ServerIsClient))
             {
                 // all clients, including hosts, MP
                 if (PermissionRequestTimer != null)
@@ -333,7 +339,7 @@ namespace midspace.adminscripts
                 }
                 MyAPIGateway.Session.OnSessionReady -= Session_OnSessionReady;
                 Logger.Debug("Detached Session_OnSessionReady");
-                
+
                 // only clients, not the host
                 if (ServerCfg == null)
                 {
@@ -341,8 +347,9 @@ namespace midspace.adminscripts
                     Logger.Debug("Unregistered MessageHandler");
                 }
             }
-            
-            if (MyAPIGateway.Utilities != null) {
+
+            if (MyAPIGateway.Utilities != null)
+            {
                 MyAPIGateway.Utilities.MessageEntered -= Utilities_MessageEntered;
                 Logger.Debug("Detached MessageEntered");
             }
@@ -376,10 +383,13 @@ namespace midspace.adminscripts
                 sendToOthers = false;
             else
             {
-                var globalMessage = new MessageGlobalMessage { 
-                    ChatMessage = new ChatMessage { 
+                var globalMessage = new MessageGlobalMessage
+                {
+                    ChatMessage = new ChatMessage
+                    {
                         Text = messageText,
-                        Sender = new Player {
+                        Sender = new Player
+                        {
                             SteamId = MyAPIGateway.Session.Player.SteamUserId,
                             PlayerName = MyAPIGateway.Session.Player.DisplayName
                         },
@@ -434,5 +444,69 @@ namespace midspace.adminscripts
         }
 
         #endregion
+
+        #region connection/disconnection events.
+        // TODO: these should be added to the in game -Global Chat History-
+
+        // player exited/crashed/quit.
+        private void PlayerDisconnected(long playerId)
+        {
+            string displayName = GetPlayerDisplayName(playerId);
+            ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
+                new ChatMessage
+                {
+                    Date = DateTime.Now,
+                    Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
+                    Text = $"'{displayName}' disconnected"
+                });
+        }
+
+        // I've never seen 'Dropped'.
+        private void PlayerDropped(string itemTypeName, string itemSubTypeName, long playerId, int amount)
+        {
+            string displayName = GetPlayerDisplayName(playerId);
+            ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
+                new ChatMessage
+                {
+                    Date = DateTime.Now,
+                    Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
+                    Text = $"'{displayName}' dropped"
+                });
+        }
+
+        // player connecte/reconnected.
+        private void PlayerConnected(long playerId)
+        {
+            string displayName = GetPlayerDisplayName(playerId);
+            ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
+                new ChatMessage
+                {
+                    Date = DateTime.Now,
+                    Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
+                    Text = $"'{displayName}' joined server"
+                });
+        }
+
+        private string GetPlayerDisplayName(long identityId)
+        {
+            string displayName = "Unknown";
+
+            IMyPlayer player;
+            MyAPIGateway.Players.TryGetPlayer(identityId, out player);
+            if (player != null)
+                displayName = player.DisplayName;
+            else
+            {
+                IMyIdentity identity;
+                MyAPIGateway.Players.TryGetIdentity(identityId, out identity);
+
+                if (identity != null)
+                    displayName = identity.DisplayName;
+            }
+            return displayName;
+        }
+
+        #endregion
+
     }
 }

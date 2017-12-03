@@ -1,5 +1,8 @@
 ﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+
+    [ProtoContract]
     public class MessagePermissionRequest : MessageBase
     {
         public override void ProcessClient()

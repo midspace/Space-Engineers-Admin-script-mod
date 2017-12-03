@@ -1,14 +1,14 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
     using ProtoBuf;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
     using VRage.Game;
     using VRage.Game.ModAPI;
     using VRage.ModAPI;
@@ -17,19 +17,19 @@
     [ProtoContract]
     public class MessageSyncGridChange : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public SyncGridChangeType SyncType;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public long EntityId;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string SearchEntity;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public long PlayerId;
 
-        [ProtoMember(5)]
+        [ProtoMember(205)]
         public bool SwitchOn;
 
         public static void SendMessage(SyncGridChangeType syncType, long entityId, string searchEntity, long playerId = 0, bool switchOn = false)
@@ -58,12 +58,20 @@
         private void CommonProcess(ulong steamId, SyncGridChangeType syncType, long entityId, string searchEntity, long playerId, bool switchOn)
         {
             List<IMyCubeGrid> selectedShips = new List<IMyCubeGrid>();
+            bool allSelectedShips = false;
 
             if (entityId != 0)
             {
                 var selectedShip = MyAPIGateway.Entities.GetEntityById(entityId) as IMyCubeGrid;
                 if (selectedShip != null)
                     selectedShips.Add(selectedShip);
+            }
+            else if (searchEntity == "**")  // All ships in the players hot list.
+            {
+                List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
+                foreach (IMyEntity ship in shipCache)
+                    selectedShips.Add((IMyCubeGrid)ship);
+                allSelectedShips = true;
             }
             else if (!string.IsNullOrEmpty(searchEntity))
             {
@@ -79,7 +87,7 @@
                     List<IMyEntity> shipCache = CommandListShips.GetShipCache(steamId);
                     if (searchEntity.Substring(0, 1) == "#" && int.TryParse(searchEntity.Substring(1), out index) && index > 0 && index <= shipCache.Count)
                     {
-                        selectedShips.Add((IMyCubeGrid)shipCache[index - 1]);
+                        selectedShips.Add((IMyCubeGrid) shipCache[index - 1]);
                     }
                 }
             }
@@ -179,7 +187,12 @@
                     break;
                 case SyncGridChangeType.DeleteShip:
                     {
-                        if (selectedShips.Count == 1)
+                        if (allSelectedShips)
+                        {
+                            foreach (var selectedShip in selectedShips)
+                                DeleteShip(steamId, selectedShip);
+                        }
+                        else if (selectedShips.Count == 1)
                             DeleteShip(steamId, selectedShips.First());
                         else if (selectedShips.Count > 1)
                             MyAPIGateway.Utilities.SendMessage(steamId, "deleteship", "{0} Ships match that name.", selectedShips.Count);
@@ -552,20 +565,20 @@
         }
     }
 
-    public enum SyncGridChangeType
+    public enum SyncGridChangeType : byte
     {
-        OwnerClaim,
-        OwnerRevoke,
-        OwnerShareAll,
-        SwitchOnPower,
-        SwitchOffPower,
-        DeleteShip,
-        Destructible,
-        Stop,
-        ScaleUp,
-        ScaleDown,
-        BuiltBy,
-        Repair,
-        OwnerShareNone,
+        OwnerClaim = 0,
+        OwnerRevoke = 1,
+        OwnerShareAll = 2,
+        OwnerShareNone = 3,
+        SwitchOnPower = 4,
+        SwitchOffPower = 5,
+        DeleteShip = 6,
+        Destructible = 7,
+        Stop = 8,
+        ScaleUp = 9,
+        ScaleDown = 10,
+        BuiltBy = 11,
+        Repair = 12,
     }
 }

@@ -804,25 +804,45 @@ namespace midspace.adminscripts.Config
         #endregion
     }
 
+    [ProtoContract]
     public struct PermissionGroup
     {
+        [ProtoMember(1)]
         public string GroupName;
+
+        [ProtoMember(2)]
         public uint Level;
+
+        [ProtoMember(3)]
         public List<ulong> Members;
     }
 
+    [ProtoContract]
     public struct CommandStruct
     {
+        [ProtoMember(1)]
         public string Name;
+
+        [ProtoMember(2)]
         public uint NeededLevel;
     }
 
+    [ProtoContract]
     public struct PlayerPermission
     {
+        [ProtoMember(1)]
         public Player Player;
+
+        [ProtoMember(2)]
         public uint Level;
+
+        [ProtoMember(3)]
         public bool UsePlayerLevel;
+
+        [ProtoMember(4)]
         public List<string> Extensions;
+
+        [ProtoMember(5)]
         public List<string> Restrictions;
     }
 }

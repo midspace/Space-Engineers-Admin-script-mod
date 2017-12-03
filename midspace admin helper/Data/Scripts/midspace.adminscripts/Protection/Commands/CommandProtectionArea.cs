@@ -11,13 +11,14 @@ namespace midspace.adminscripts.Protection.Commands
     {
         public CommandProtectionArea()
             : base(
-                ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "protectionarea", new string[] { "/protectionarea", "/pa" }) { }
+                ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "protectionarea", new string[] { "/protectionarea", "/pa" })
+        { }
 
         public override void Help(ulong steamId, bool brief)
         {
             if (brief)
             {
-                MyAPIGateway.Utilities.ShowMessage("/protectionarea <action> [options]", "Can add, remove, modify and list protection areas");
+                MyAPIGateway.Utilities.ShowMessage("/protectionarea <action> [options]", "Can add, cfg, remove, modify and list protection areas");
                 return;
             }
 
@@ -65,7 +66,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
 
             if (match.Success)
             {
-                var commandParts = match.Groups["CommandParts"].Value.Split(new []{ ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var commandParts = match.Groups["CommandParts"].Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (commandParts.Length < 1)
                 {
                     MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Not enough parameters.");
@@ -78,152 +79,158 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                 switch (action.ToLowerInvariant())
                 {
                     case "add":
-                    {
-                        if (commandParts.Length == 7)
                         {
-                            string name = commandParts[1];
-                            string xS = commandParts[2];
-                            string yS = commandParts[3];
-                            string zS = commandParts[4];
-                            string sizeS = commandParts[5];
-                            string shapeS = commandParts[6];
-
-                            double x, y, z, size;
-                            ProtectionAreaShape shape;
-
-                            if (!double.TryParse(xS, out x))
+                            if (commandParts.Length == 7)
                             {
-                                MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse x.");
+                                string name = commandParts[1];
+                                string xS = commandParts[2];
+                                string yS = commandParts[3];
+                                string zS = commandParts[4];
+                                string sizeS = commandParts[5];
+                                string shapeS = commandParts[6];
+
+                                double x, y, z, size;
+                                ProtectionAreaShape shape;
+
+                                if (!double.TryParse(xS, out x))
+                                {
+                                    MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse x.");
+                                    return true;
+                                }
+
+                                if (!double.TryParse(yS, out y))
+                                {
+                                    MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse y.");
+                                    return true;
+                                }
+
+                                if (!double.TryParse(zS, out z))
+                                {
+                                    MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse z.");
+                                    return true;
+                                }
+
+                                if (!double.TryParse(sizeS, out size))
+                                {
+                                    MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse size.");
+                                    return true;
+                                }
+
+                                if (!TryParseShape(shapeS, out shape))
+                                {
+                                    MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
+                                        "Cannot parse shape. Shapes: cube, cubic, sphere, spherical");
+                                    // TODO display help
+                                    return true;
+                                }
+
+                                ProtectionArea area = new ProtectionArea(name, new Vector3D(x, y, z), size, shape);
+                                var message = new MessageProtectionArea()
+                                {
+                                    ProtectionArea = area,
+                                    Type = ProtectionAreaMessageType.Add
+                                };
+                                ConnectionHelper.SendMessageToServer(message);
                                 return true;
                             }
 
-                            if (!double.TryParse(yS, out y))
+                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
+                                "Wrong parameters. /protectionarea add <name> <x> <y> <z> <size> <shape>");
+                            break;
+                        }
+                    case "remove":
+                        {
+                            if (commandParts.Length == 2)
                             {
-                                MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse y.");
+                                string name = commandParts[1];
+                                ProtectionArea area = new ProtectionArea(name, new Vector3D(), 0, ProtectionAreaShape.Cube);
+                                var message = new MessageProtectionArea
+                                {
+                                    ProtectionArea = area,
+                                    Type = ProtectionAreaMessageType.Remove
+                                };
+                                ConnectionHelper.SendMessageToServer(message);
                                 return true;
                             }
 
-                            if (!double.TryParse(zS, out z))
-                            {
-                                MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse z.");
-                                return true;
-                            }
-
-                            if (!double.TryParse(sizeS, out size))
-                            {
-                                MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse size.");
-                                return true;
-                            }
-
-                            if (!TryParseShape(shapeS, out shape))
+                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
+                                "Wrong parameters. /protectionarea remove <name>");
+                            break;
+                        }
+                    case "list":
+                        {
+                            if (ProtectionHandler.Config == null || ProtectionHandler.Config.Areas == null)
                             {
                                 MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                                    "Cannot parse shape. Shapes: cube, cubic, sphere, spherical");
-                                // TODO display help
+                                    "Areas not loaded yet. Please try again later.");
+                                ConnectionHelper.SendMessageToServer(new MessageSyncProtection());
                                 return true;
                             }
 
-                            ProtectionArea area = new ProtectionArea(name, new Vector3D(x, y, z), size, shape);
-                            var message = new MessageProtectionArea()
+                            StringBuilder areaList = new StringBuilder();
+                            int index = 1;
+
+                            areaList.AppendLine("Protection areas is currently : {0}:{1}", 
+                                (ProtectionHandler.Config.ProtectionEnabled ? "Enabled" : "Disabled"),
+                                (ProtectionHandler.Config.ProtectionInverted ? "Inverted" : "Normal"));
+                            areaList.AppendLine();
+
+                            foreach (ProtectionArea protectionArea in ProtectionHandler.Config.Areas)
                             {
-                                ProtectionArea = area,
-                                Type = ProtectionAreaMessageType.Add
-                            };
-                            ConnectionHelper.SendMessageToServer(message);
-                            return true;
+                                areaList.AppendLine("#{0}, {1}:", index++, protectionArea.Name);
+                                areaList.AppendLine("X: {0:#0.0##}, Y: {1:#0.0##}, Z: {2:#0.0##}",
+                                    protectionArea.Center.X, protectionArea.Center.Y, protectionArea.Center.Z);
+                                areaList.AppendLine("Size: {0}, Shape: {1}", protectionArea.Size,
+                                    protectionArea.Shape == ProtectionAreaShape.Cube ? "cube" : "sphere");
+                                areaList.AppendLine("");
+                            }
+
+                            MyAPIGateway.Utilities.ShowMissionScreen("Protection Areas",
+                                string.Format("Count: {0}", ProtectionHandler.Config.Areas.Count), null, areaList.ToString());
+                            break;
                         }
-
-                        MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                            "Wrong parameters. /protectionarea add <name> <x> <y> <z> <size> <shape>");
-                        break;
-                    }
-                    case "remove":
-                    {
-                        if (commandParts.Length == 2)
-                        {
-                            string name = commandParts[1];
-                            ProtectionArea area = new ProtectionArea(name, new Vector3D(), 0, ProtectionAreaShape.Cube);
-                            var message = new MessageProtectionArea()
-                            {
-                                ProtectionArea = area,
-                                Type = ProtectionAreaMessageType.Remove
-                            };
-                            ConnectionHelper.SendMessageToServer(message);
-                            return true;
-                        }
-
-                        MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                            "Wrong parameters. /protectionarea remove <name>");
-                        break;
-                    }
-                    case "list":
-                    {
-                        if (ProtectionHandler.Config == null || ProtectionHandler.Config.Areas == null)
-                        {
-                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                                "Areas not loaded yet. Please try again later.");
-                            ConnectionHelper.SendMessageToServer(new MessageSyncProtection());
-                            return true;
-                        }
-
-                        StringBuilder areaList = new StringBuilder();
-                        int index = 1;
-
-                        foreach (ProtectionArea protectionArea in ProtectionHandler.Config.Areas)
-                        {
-                            areaList.AppendLine(String.Format("#{0}, {1}:", index++, protectionArea.Name));
-                            areaList.AppendLine(String.Format("X: {0:#0.0##}, Y: {1:#0.0##}, Z: {2:#0.0##}",
-                                protectionArea.Center.X, protectionArea.Center.Y, protectionArea.Center.Z));
-                            areaList.AppendLine(String.Format("Size: {0}, Shape: {1}", protectionArea.Size,
-                                protectionArea.Shape == ProtectionAreaShape.Cube ? "cube" : "sphere"));
-                            areaList.AppendLine("");
-                        }
-
-                        MyAPIGateway.Utilities.ShowMissionScreen("Protection Areas",
-                            String.Format("Count: {0}", ProtectionHandler.Config.Areas.Count), null, areaList.ToString());
-                        break;
-                    }
                     case "config":
                     case "cfg":
-                    {
-                        if (commandParts.Length != 3)
                         {
-                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                                "Wrong parameters. /protectionarea cfg <setting> <value>");
-                            return true;
-                        }
-
-                        var setting = commandParts[1].ToLowerInvariant();
-
-                        bool value;
-                        if (!bool.TryParse(commandParts[2], out value))
-                        {
-                            MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse value. It must be either true or false.");
-                            return true;
-                        }
-
-                        var message = new MessageProtectionConfig() { Value = value};
-
-                        switch (setting)
-                        {
-                            case "invert":
-                                message.Type = ProtectionConfigType.Invert;
-                                break;
-                            case "enable":
-                                message.Type = ProtectionConfigType.Enable;
-                                break;
-                            default:
+                            if (commandParts.Length != 3)
+                            {
                                 MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                                    String.Format("{0} is no valid setting. Actions: invert, enable", setting));
+                                    "Wrong parameters. /protectionarea cfg <setting> <value>");
                                 return true;
-                        }
+                            }
 
-                        ConnectionHelper.SendMessageToServer(message);
-                        break;
-                    }
+                            var setting = commandParts[1].ToLowerInvariant();
+
+                            bool? value = Support.GetBool(commandParts[2]);
+                            if (!value.HasValue)
+                            {
+                                MyAPIGateway.Utilities.ShowMessage("ProtectionArea", "Cannot parse value. It must be either on or off.");
+                                return true;
+                            }
+
+                            var message = new MessageProtectionConfig { Value = value.Value };
+
+                            switch (setting)
+                            {
+                                case "invert":
+                                    message.Type = ProtectionConfigType.Invert;
+                                    break;
+                                case "enable":
+                                case "enabled":
+                                    message.Type = ProtectionConfigType.Enable;
+                                    break;
+                                default:
+                                    MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
+                                        string.Format("{0} is no valid setting. Actions: invert, enable", setting));
+                                    return true;
+                            }
+
+                            ConnectionHelper.SendMessageToServer(message);
+                            break;
+                        }
                     default:
                         MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                            String.Format("{0} is no valid action. Actions: add, remove, list", action));
+                            string.Format("{0} is no valid action. Actions: add, remove, list", action));
                         break;
                 }
             }

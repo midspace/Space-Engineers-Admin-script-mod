@@ -1,16 +1,14 @@
-﻿using Sandbox.ModAPI;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
     using ProtoBuf;
 
     [ProtoContract]
     public class MessageChatCommand : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long PlayerId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public string TextCommand;
 
         public override void ProcessClient()

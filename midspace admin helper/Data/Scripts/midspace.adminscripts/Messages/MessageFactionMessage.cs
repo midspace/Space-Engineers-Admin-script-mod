@@ -1,19 +1,19 @@
-﻿using System;
-using ProtoBuf;
-using Sandbox.ModAPI;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using System;
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+
     [ProtoContract]
     public class MessageFactionMessage : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public ChatMessage ChatMessage;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public ulong Receiver;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public FactionMessageType Type;
 
         public override void ProcessClient()
@@ -25,7 +25,7 @@ namespace midspace.adminscripts.Messages
                 case FactionMessageType.OwnFaction:
                     prefix = "[F]";
                     break;
-                case FactionMessageType.AlliedFacitons: 
+                case FactionMessageType.AlliedFacitons:
                     prefix = "[A]";
                     break;
                 case FactionMessageType.AlliedWithHub:
@@ -48,11 +48,11 @@ namespace midspace.adminscripts.Messages
         }
     }
 
-    public enum FactionMessageType
+    public enum FactionMessageType : byte
     {
-        OwnFaction,
-        AlliedFacitons,
-        AlliedWithHub,
-        Broadcast
+        OwnFaction = 0,
+        AlliedFacitons = 1,
+        AlliedWithHub = 2,
+        Broadcast = 3
     }
 }

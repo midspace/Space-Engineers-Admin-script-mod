@@ -28,7 +28,7 @@ namespace midspace.adminscripts.Config.Files
                 string fileName;
 
                 if (!string.IsNullOrEmpty(customSaveName))
-                    fileName = String.Format(Format, customSaveName);
+                    fileName = string.Format(Format, customSaveName);
                 else
                     fileName = Name;
 

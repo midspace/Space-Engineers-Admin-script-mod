@@ -1,8 +1,8 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
-    using System;
     using ProtoBuf;
     using Sandbox.ModAPI;
+    using System;
     using VRage.ModAPI;
     using VRageMath;
 
@@ -11,20 +11,20 @@
     {
         #region fields
 
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long EntityId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public SyncEntityType SyncType;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public Vector3 Velocity;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public Vector3D Position;
 
-        [ProtoMember(5)]
-        public MatrixD Matrix;
+        [ProtoMember(205)]
+        public SerializableMatrix Matrix;
 
         #endregion
 
@@ -104,8 +104,9 @@
     }
 
     [Flags]
-    public enum SyncEntityType
+    public enum SyncEntityType : byte
     {
+        None = 0x00,
         Position = 0x01,
         Stop = 0x02,
         Velocity = 0x4,

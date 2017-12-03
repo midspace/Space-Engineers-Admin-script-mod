@@ -1,19 +1,18 @@
-﻿using midspace.adminscripts.Config;
-using midspace.adminscripts.Config.Files;
-
-namespace midspace.adminscripts
+﻿namespace midspace.adminscripts
 {
+    using midspace.adminscripts.Config;
+    using midspace.adminscripts.Config.Files;
+    using midspace.adminscripts.Messages;
+    using midspace.adminscripts.Protection;
+    using ProtoBuf;
+    using Sandbox.ModAPI;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Text;
     using System.Xml.Serialization;
-    using midspace.adminscripts.Messages;
-    using midspace.adminscripts.Messages.Communication;
-    using midspace.adminscripts.Messages.Permissions;
-    using midspace.adminscripts.Protection;
-    using Sandbox.ModAPI;
     using VRage.Game;
     using VRage.Game.ModAPI;
 
@@ -435,10 +434,12 @@ namespace midspace.adminscripts
     }
 
     #region XMLStructs
+
     /// <summary>
     /// Contains the settings from the file.
     /// </summary>
     //must be a class otherwise we can't define a ctor without parameters
+    [ProtoContract]
     public class ServerConfigurationStruct
     {
         public string WorldLocation;
@@ -446,29 +447,45 @@ namespace midspace.adminscripts
         /// <summary>
         /// The suffix for the motd file. For a better identification.
         /// </summary>
+        [ProtoMember(1)]
         public string MotdFileSuffix;
-        public string MotdHeadLine;
-        public bool MotdShowInChat;
-        public bool LogPrivateMessages;
+
+        [ProtoMember(2)]
+        [DefaultValue("")]
+        public string MotdHeadLine { get; set; } = "";
+
+        [ProtoMember(3)]
+        [DefaultValue(false)]
+        public bool MotdShowInChat { get; set; } = false;
+
+        [ProtoMember(4)]
+        [DefaultValue(true)]
+        public bool LogPrivateMessages { get; set; } = true;
+
+        [ProtoMember(5)]
         [XmlArray("ForceBannedPlayers")]
         [XmlArrayItem("BannedPlayer")]
         public List<Player> ForceBannedPlayers;
-        public uint AdminLevel;
-        public bool EnableLog;
-        public bool NoGrindIndestructible;
+
+        [ProtoMember(6)]
+        [DefaultValue(ChatCommandSecurity.Admin)]
+        public uint AdminLevel { get; set; } = ChatCommandSecurity.Admin;
+
+        [ProtoMember(7)]
+        [DefaultValue(false)]
+        public bool EnableLog { get; set; } = false;
+
+        [ProtoMember(8)]
+        [DefaultValue(false)]
+        public bool NoGrindIndestructible { get; set; } = false;
+
 
         public ServerConfigurationStruct()
         {
-            //init default values
+            // init default values
             WorldLocation = MyAPIGateway.Session.CurrentPath;
             MotdFileSuffix = MyAPIGateway.Session.Name.ReplaceForbiddenChars();
-            MotdHeadLine = "";
-            MotdShowInChat = false;
-            LogPrivateMessages = true;
             ForceBannedPlayers = new List<Player>();
-            AdminLevel = ChatCommandSecurity.Admin;
-            EnableLog = false;
-            NoGrindIndestructible = false;
         }
 
         public void Show()
@@ -488,9 +505,13 @@ namespace midspace.adminscripts
         }
     }
 
+    [ProtoContract]
     public struct Player
     {
+        [ProtoMember(1)]
         public ulong SteamId;
+
+        [ProtoMember(2)]
         public string PlayerName;
     }
 
@@ -506,14 +527,21 @@ namespace midspace.adminscripts
         public ulong Receiver;
         public DateTime Date;
         [XmlElement("Message")]
+        [ProtoMember(Name = "Message")]
         public string Text;
     }
 
+    [ProtoContract]
     public struct ChatMessage
     {
+        [ProtoMember(1)]
         public Player Sender;
+
+        [ProtoMember(2)]
         public DateTime Date;
+
         [XmlElement("Message")]
+        [ProtoMember(3, Name="Message")]
         public string Text;
     }
 

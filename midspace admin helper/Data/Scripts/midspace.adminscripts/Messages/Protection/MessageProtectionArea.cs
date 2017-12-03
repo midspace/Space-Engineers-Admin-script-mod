@@ -1,17 +1,16 @@
-﻿using System.Collections.Generic;
-using midspace.adminscripts.Messages.Communication;
-using midspace.adminscripts.Protection;
-using ProtoBuf;
-
-namespace midspace.adminscripts.Messages.Protection
+﻿namespace midspace.adminscripts.Messages.Protection
 {
+    using midspace.adminscripts.Messages.Communication;
+    using midspace.adminscripts.Protection;
+    using ProtoBuf;
+
     [ProtoContract]
     public class MessageProtectionArea : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public ProtectionArea ProtectionArea;
 
-        [ProtoMember(2)] 
+        [ProtoMember(202)] 
         public ProtectionAreaMessageType Type;
 
         public override void ProcessClient()
@@ -53,9 +52,9 @@ namespace midspace.adminscripts.Messages.Protection
         }
     }
 
-    public enum ProtectionAreaMessageType
+    public enum ProtectionAreaMessageType : byte
     {
-        Add,
-        Remove
+        Add = 0,
+        Remove = 1
     }
 }

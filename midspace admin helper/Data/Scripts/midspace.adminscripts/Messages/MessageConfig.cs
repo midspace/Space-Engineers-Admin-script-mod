@@ -1,20 +1,15 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-using midspace.adminscripts.Messages.Communication;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+    using midspace.adminscripts.Messages.Communication;
+
     [ProtoContract]
     public class MessageConfig : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public ConfigAction Action;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public ServerConfigurationStruct Config;
 
         public override void ProcessClient()
@@ -58,13 +53,13 @@ namespace midspace.adminscripts.Messages
         }
     }
 
-    public enum ConfigAction
+    public enum ConfigAction : byte
     {
-        Reload,
-        Save,
-        AdminLevel,
-        LogPrivateMessages,
-        NoGrindIndestructible,
-        Show
+        Reload = 0,
+        Save = 1,
+        AdminLevel = 2,
+        LogPrivateMessages = 3,
+        NoGrindIndestructible = 4,
+        Show = 5
     }
 }

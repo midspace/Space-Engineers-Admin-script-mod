@@ -1,31 +1,28 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using midspace.adminscripts.Config;
-
-namespace midspace.adminscripts.Messages.Permissions
+﻿namespace midspace.adminscripts.Messages.Permissions
 {
+    using ProtoBuf;
+    using System.Collections.Generic;
+    using midspace.adminscripts.Config;
+
     [ProtoContract]
     public class MessagePlayerPermission : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string PlayerName;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public uint PlayerLevel;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string CommandName;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public bool UsePlayerLevel;
 
-        [ProtoMember(5)]
+        [ProtoMember(205)]
         public List<PlayerPermission> PlayerPermissions;
 
-        [ProtoMember(6)]
+        [ProtoMember(206)]
         public PlayerPermissionAction Action;
 
         public override void ProcessClient()
@@ -74,12 +71,12 @@ namespace midspace.adminscripts.Messages.Permissions
         }
     }
 
-    public enum PlayerPermissionAction
+    public enum PlayerPermissionAction : byte
     {
-        Level,
-        Extend,
-        Restrict,
-        UsePlayerLevel,
-        List
+        Level = 0,
+        Extend = 1,
+        Restrict = 2,
+        UsePlayerLevel = 3,
+        List = 4
     }
 }

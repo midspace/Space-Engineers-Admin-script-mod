@@ -1,16 +1,15 @@
 namespace midspace.adminscripts
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
     using Messages.Communication;
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
-    using SpaceEngineers.Game.ModAPI;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
     using VRage;
     using VRage.Game;
     using VRage.Game.Entity;
@@ -41,164 +40,15 @@ namespace midspace.adminscripts
             if (cubeGrid == null)
                 return new List<IMyCubeGrid>();
 
-            var results = new List<IMyCubeGrid> { cubeGrid };
-            GetAttachedGrids(cubeGrid, ref results, type);
-            return results;
-        }
-
-        private static void GetAttachedGrids(IMyCubeGrid cubeGrid, ref List<IMyCubeGrid> results, AttachedGrids type)
-        {
-            if (cubeGrid == null)
-                return;
-
-            var blocks = new List<IMySlimBlock>();
-            cubeGrid.GetBlocks(blocks, b => b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull);
-
-            foreach (var block in blocks)
+            switch (type)
             {
-                //MyAPIGateway.Utilities.ShowMessage("Block", string.Format("{0}", block.FatBlock.BlockDefinition.TypeId));
-
-                if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorSuspension) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorBase))
-                {
-                    // The MotorStator which inherits from MotorBase.
-                    IMyMotorBase motorBase = block.FatBlock as IMyMotorBase;
-                    if (motorBase == null || motorBase.Top == null)
-                        continue;
-
-                    IMyCubeGrid entityParent = motorBase.TopGrid;
-                    if (entityParent == null)
-                        continue;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results, type);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedRotor) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorRotor) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_RealWheel) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Wheel))
-                {
-                    // The Rotor Part.
-                    IMyMotorRotor motorRotor = block.FatBlock as IMyMotorRotor;
-                    IMyCubeGrid entityParent = null;
-                    if (motorRotor == null || motorRotor.Base == null)
-                    {
-                        // Wheels appear to not properly populate the Stator property.
-                        IMyCubeBlock altBlock = Support.FindRotorBase(motorRotor.EntityId);
-                        if (altBlock == null)
-                            continue;
-
-                        entityParent = altBlock.CubeGrid;
-                    }
-                    else
-                        entityParent = motorRotor.Base.CubeGrid;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results, type);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonTop))
-                {
-                    // The Piston Top.
-                    IMyPistonTop pistonTop = block.FatBlock as IMyPistonTop;
-                    if (pistonTop == null || pistonTop.Piston == null)
-                        continue;
-
-                    IMyCubeGrid entityParent = pistonTop.Piston.CubeGrid;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results, type);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase) ||
-                    block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase))
-                {
-                    IMyPistonBase pistonBase = block.FatBlock as IMyPistonBase;
-                    if (pistonBase == null || pistonBase.Top == null)
-                        continue;
-
-                    IMyCubeGrid entityParent = pistonBase.TopGrid;
-                    if (entityParent == null)
-                        continue;
-                    if (!results.Any(e => e.EntityId == entityParent.EntityId))
-                    {
-                        results.Add(entityParent);
-                        GetAttachedGrids(entityParent, ref results, type);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipConnector) && type == AttachedGrids.All)
-                {
-                    var connector = (IMyShipConnector)block.FatBlock;
-
-                    if (connector.Status != Sandbox.ModAPI.Ingame.MyShipConnectorStatus.Connected || connector.OtherConnector == null)
-                        continue;
-
-                    var otherGrid = connector.OtherConnector.CubeGrid;
-
-                    if (!results.Any(e => e.EntityId == otherGrid.EntityId))
-                    {
-                        results.Add(otherGrid);
-                        GetAttachedGrids(otherGrid, ref results, type);
-                    }
-                }
-                else if (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_LandingGear) && type == AttachedGrids.All)
-                {
-                    var landingGear = (IMyLandingGear)block.FatBlock;
-                    if (landingGear.IsLocked == false)
-                        continue;
-
-                    var entity = landingGear.GetAttachedEntity();
-                    if (entity == null || !(entity is IMyCubeGrid))
-                        continue;
-
-                    var otherGrid = (IMyCubeGrid)entity;
-                    if (!results.Any(e => e.EntityId == otherGrid.EntityId))
-                    {
-                        results.Add(otherGrid);
-                        GetAttachedGrids(otherGrid, ref results, type);
-                    }
-                }
-            }
-
-            // Loop through all other grids, find their Landing gear, and figure out if they are attached to <cubeGrid>.
-            var allShips = new HashSet<IMyEntity>();
-            var checkList = results; // cannot use ref paramter in Lambada expression!?!.
-            MyAPIGateway.Entities.GetEntities(allShips, e => e is IMyCubeGrid && !checkList.Contains(e));
-
-            if (type == AttachedGrids.All)
-            {
-                foreach (IMyCubeGrid ship in allShips)
-                {
-                    blocks = new List<IMySlimBlock>();
-                    ship.GetBlocks(blocks,
-                        b =>
-                            b != null && b.FatBlock != null && !b.FatBlock.BlockDefinition.TypeId.IsNull &&
-                            b.FatBlock is IMyLandingGear);
-
-                    foreach (var block in blocks)
-                    {
-                        var landingGear = (IMyLandingGear)block.FatBlock;
-                        if (landingGear.IsLocked == false)
-                            continue;
-
-                        var entity = landingGear.GetAttachedEntity();
-
-                        if (entity == null || entity.EntityId != cubeGrid.EntityId)
-                            continue;
-
-                        if (!results.Any(e => e.EntityId == ship.EntityId))
-                        {
-                            results.Add(ship);
-                            GetAttachedGrids(ship, ref results, type);
-                        }
-                    }
-                }
+                case AttachedGrids.Static:
+                    // Should include connections via: Rotors, Pistons, Suspension.
+                    return MyAPIGateway.GridGroups.GetGroup(cubeGrid, GridLinkTypeEnum.Mechanical);
+                case AttachedGrids.All:
+                default:
+                    // Should include connections via: Landing Gear, Connectors, Rotors, Pistons, Suspension.
+                    return MyAPIGateway.GridGroups.GetGroup(cubeGrid, GridLinkTypeEnum.Physical);
             }
         }
 
@@ -417,7 +267,7 @@ namespace midspace.adminscripts
         /// <param name="damageType"></param>
         public static bool KillPlayer(this IMyPlayer player, MyStringHash damageType)
         {
-            var character = player.GetCharacter();
+            var character = player.Character;
             var destroyable = character as IMyDestroyableObject;
             if (destroyable == null)
                 return false;
@@ -444,13 +294,22 @@ namespace midspace.adminscripts
         public static bool TryGetPlayer(this IMyPlayerCollection collection, ulong steamId, out IMyPlayer player)
         {
             var players = new List<IMyPlayer>();
-            collection.GetPlayers(players, p => p != null);
+            collection.GetPlayers(players, p => p != null && p.SteamUserId == steamId);
 
-            player = players.FirstOrDefault(p => p.SteamUserId == steamId);
+            player = players.FirstOrDefault();
             if (player == null)
                 return false;
 
             return true;
+        }
+
+        public static bool TryGetPlayer(this IMyPlayerCollection collection, long identityId, out IMyPlayer player)
+        {
+            var players = new List<IMyPlayer>();
+            collection.GetPlayers(players, p => p != null && p.IdentityId == identityId);
+
+            player = players.FirstOrDefault();
+            return player != null;
         }
 
         public static IMyPlayer GetPlayer(this IMyPlayerCollection collection, ulong steamId)
@@ -460,7 +319,6 @@ namespace midspace.adminscripts
 
             return players.FirstOrDefault(p => p.SteamUserId == steamId);
         }
-
 
         public static IMyPlayer Player(this IMyIdentity identity)
         {
@@ -483,45 +341,12 @@ namespace midspace.adminscripts
             return listplayers.FirstOrDefault();
         }
 
-        /// <summary>
-        /// Used to find the Character Entity (which is the physical representation in game) from the Player (the network connected human).
-        /// This is a kludge as a proper API doesn't exist, even though the game code could easily expose this and save all this processing we are forced to do.
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        public static IMyCharacter GetCharacter(this IMyPlayer player)
+        public static bool TryGetIdentity(this IMyPlayerCollection collection, long identityId, out IMyIdentity identity)
         {
-            var character = player.Controller.ControlledEntity as IMyCharacter;
-            if (character != null)
-                return character;
-
-            var cubeBlock = player.Controller.ControlledEntity as IMyCubeBlock;
-            if (cubeBlock == null)
-                return null;
-
-            var shipController = cubeBlock as Sandbox.Game.Entities.MyShipController;
-            if (shipController != null)
-                return shipController.Pilot;
-
-            // TODO: test conditions for MyCryoChamber block.
-
-            // Cannot determine Character controlling MyLargeTurretBase as class is not whitelisted.
-            // TODO: find if the player is controlling a turret.
-            //var turretTontroller = cubeBlock as Sandbox.Game.Weapons.MyLargeTurretBase;
-            //if (turretTontroller != null)
-            //    return turretTontroller.Pilot;
-
-            //var charComponent = cubeBlock.Components.Get<MyCharacterComponent>();
-
-            //if (charComponent != null)
-            //{
-            //    var entity = charComponent.Entity;
-            //    MyAPIGateway.Utilities.ShowMessage("Entity", "Good");
-            //}
-            //var turret = cubeBlock as Sandbox.Game.Weapons.MyLargeTurretBase; // not whitelisted.
-            //var turret = cubeBlock as IMyControllableEntity;
-
-            return null;
+            var listIdentites = new List<IMyIdentity>();
+            MyAPIGateway.Players.GetAllIdentites(listIdentites, p => p.IdentityId == identityId);
+            identity = listIdentites.FirstOrDefault();
+            return identity != null;
         }
 
         public static bool IsHost(this IMyPlayer player)
@@ -531,7 +356,7 @@ namespace midspace.adminscripts
 
         public static IMyInventory GetPlayerInventory(this IMyPlayer player)
         {
-            var character = player.GetCharacter();
+            var character = player.Character;
             if (character == null)
                 return null;
             return character.GetPlayerInventory();
@@ -803,4 +628,5 @@ namespace midspace.adminscripts
         /// </summary>
         Static
     }
+
 }

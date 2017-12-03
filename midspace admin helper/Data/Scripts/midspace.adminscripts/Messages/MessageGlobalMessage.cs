@@ -1,16 +1,11 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+
     [ProtoContract]
     public class MessageGlobalMessage : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public ChatMessage ChatMessage;
 
         public override void ProcessClient()

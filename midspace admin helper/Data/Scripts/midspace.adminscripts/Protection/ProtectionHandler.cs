@@ -121,7 +121,7 @@
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null && p.Controller.ControlledEntity != null && p.Controller.ControlledEntity.Entity != null);
 
-                var player = players.FirstOrDefault(p => p.GetCharacter() == character);
+                var player = players.FirstOrDefault(p => p.Character == character);
                 if (player == null)
                     return;
 
@@ -176,7 +176,7 @@
                 var players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => p != null && p.Controller.ControlledEntity != null && p.Controller.ControlledEntity.Entity != null);
 
-                var player = players.FirstOrDefault(p => p.GetCharacter() == character);
+                var player = players.FirstOrDefault(p => p.Character == character);
                 if (player == null)
                     return;
 

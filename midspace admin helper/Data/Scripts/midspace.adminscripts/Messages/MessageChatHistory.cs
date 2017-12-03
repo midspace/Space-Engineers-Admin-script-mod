@@ -6,10 +6,10 @@
     [ProtoContract]
     public class MessageChatHistory : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public List<ChatMessage> ChatHistory;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public uint EntryCount;
 
         public override void ProcessClient()

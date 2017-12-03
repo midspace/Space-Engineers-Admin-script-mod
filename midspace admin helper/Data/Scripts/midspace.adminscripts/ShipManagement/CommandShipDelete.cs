@@ -15,7 +15,7 @@
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/deleteship <#>", "Deletes the specified <#> ship.");
+            MyAPIGateway.Utilities.ShowMessage("/deleteship <#>", "Deletes the specified <#> ship.  Use `/delship **` to delete the entire hotlist.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)

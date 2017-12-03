@@ -28,19 +28,19 @@
 
         #region fields
 
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public SyncAresType SyncType;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public ulong SteamId;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string OreMaterial;
 
-        [ProtoMember(4)]
-        public MatrixD ViewMatrix;
+        [ProtoMember(204)]
+        public SerializableMatrix ViewMatrix;
 
-        [ProtoMember(5)]
+        [ProtoMember(205)]
         public string SubtypeName;
 
         #endregion
@@ -150,7 +150,7 @@
 
         private void Slap(IMyPlayer player)
         {
-            var character = player.GetCharacter();
+            var character = player.Character;
             var destroyable = character as IMyDestroyableObject;
             if (destroyable == null)
             {
@@ -268,32 +268,13 @@
             if (player.Controller.ControlledEntity.Entity.Parent != null)
             {
                 MyAPIGateway.Utilities.SendMessage(SenderSteamId, "ejecting", player.DisplayName);
-
-                // this will find the cockpit the player's character is inside of.
-                var character = player.GetCharacter();
-                if (character != null)
-                {
-                    var baseController = ((IMyEntity)character).Parent as IMyControllableEntity;
-
-                    if (baseController != null) // this will eject the Character from the cockpit.
-                        baseController.Use();
-                }
-
-                // This may cause issues with not properly seperating the player's resource sink from the controlled entity.
+                
+                // To eject the player from controlling a cube, like a turret or cryo.
                 player.Controller.ControlledEntity.Use();
 
-                //// Enqueue the command a second time, to make sure the player is ejected from a remote controlled ship and a piloted ship.
-                //_workQueue.Enqueue(delegate ()
-                //{
-                //    if (selectedPlayer.Controller.ControlledEntity.Entity.Parent != null)
-                //    {
-                //        selectedPlayer.Controller.ControlledEntity.Use();
-                //    }
-                //});
-
-                // Neither of these do what I expect them to. In fact, I'm not sure what they do.
-                //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity);
-                //MyAPIGateway.Players.RemoveControlledEntity(player.Controller.ControlledEntity.Entity.Parent);
+                MyShipController shipController = player.Controller.ControlledEntity as MyShipController;
+                // To eject from any cockpit the player's character is inside of.
+                shipController?.Use();
             }
             else
             {
@@ -329,15 +310,15 @@
             }
         }
 
-        public enum SyncAresType
+        public enum SyncAresType : byte
         {
-            Smite,
-            Slay,
-            Slap,
-            Bomb,
-            Meteor,
-            Eject,
-            SpawnBot
+            Smite = 0,
+            Slay = 1,
+            Slap = 2,
+            Bomb = 3,
+            Meteor = 4,
+            Eject = 5,
+            SpawnBot = 6
         }
     }
 }

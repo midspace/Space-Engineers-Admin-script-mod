@@ -10,10 +10,10 @@
     [ProtoContract]
     public class MessageSyncBlockOwner : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long OwnerId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public long EntityId;
 
         public override void ProcessClient()

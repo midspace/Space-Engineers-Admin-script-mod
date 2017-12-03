@@ -1,19 +1,20 @@
 ﻿namespace midspace.adminscripts
 {
+    using midspace.adminscripts.Messages.Sync;
+    using Sandbox.ModAPI;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using midspace.adminscripts.Messages.Sync;
-    using Sandbox.ModAPI;
     using VRage.Game.ModAPI;
 
     public class CommandGodMode : ChatCommand
     {
-        private static List<IMyPlayer> Players = new List<IMyPlayer>();
+        private static List<IMyPlayer> _players = new List<IMyPlayer>();
 
-        private static bool RegisteredHandler = false;
-        public bool GodModeEnabled = false;
+        private static bool _registeredHandler;
+
+        public bool GodModeEnabled;
 
         public CommandGodMode()
             : base(ChatCommandSecurity.Admin, "god", new string[] {"/god"})
@@ -43,21 +44,21 @@
                         GodModeEnabled = false;
                     else
                     {
-                        MyAPIGateway.Utilities.ShowMessage("GodMode", string.Format("'{0}' is no valid setting. Use 'On' or 'Off'.", state));
+                        MyAPIGateway.Utilities.ShowMessage("GodMode", $"'{state}' is no valid setting. Use 'On' or 'Off'.");
                         return true;
                     }
                 }
                 else
                     GodModeEnabled ^= true;
 
-                if (GodModeEnabled && !RegisteredHandler)
+                if (GodModeEnabled && !_registeredHandler)
                 {
                     MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, GodModeDamageHandler_Client);
-                    RegisteredHandler = true;
+                    _registeredHandler = true;
                 }
 
                 if (MyAPIGateway.Multiplayer.MultiplayerActive)
-                    ConnectionHelper.SendMessageToServer(new MessageSyncGod() { Enable = GodModeEnabled });
+                    ConnectionHelper.SendMessageToServer(new MessageSyncGod { Enable = GodModeEnabled });
 
                 MyAPIGateway.Utilities.ShowMessage("GodMode", GodModeEnabled ? "On" : "Off");
 
@@ -69,7 +70,7 @@
 
         private void GodModeDamageHandler_Client(object target, ref MyDamageInformation info)
         {
-            if (GodModeEnabled && target is IMyCharacter && target == MyAPIGateway.Session.Player.GetCharacter())
+            if (GodModeEnabled && target is IMyCharacter && target == MyAPIGateway.Session.Player.Character)
                 info.Amount = 0;
         }
 
@@ -87,24 +88,24 @@
 
             if (enable)
             {
-                if (Players.Contains(player))
+                if (_players.Contains(player))
                     return;
 
-                Players.Add(player);
+                _players.Add(player);
 
-                if (!RegisteredHandler)
+                if (!_registeredHandler)
                 {
                     MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, GodModeDamageHandler_Server);
-                    RegisteredHandler = true;
+                    _registeredHandler = true;
                 }
             }
-            else if (Players.Contains(player))
-                Players.Remove(player);
+            else if (_players.Contains(player))
+                _players.Remove(player);
         }
 
         private static void GodModeDamageHandler_Server(object target, ref MyDamageInformation info)
         {
-            if (target is IMyCharacter && Players.Any(p => target == p.GetCharacter()))
+            if (target is IMyCharacter && _players.Any(p => target == p.Character))
                 info.Amount = 0;
         }
     }

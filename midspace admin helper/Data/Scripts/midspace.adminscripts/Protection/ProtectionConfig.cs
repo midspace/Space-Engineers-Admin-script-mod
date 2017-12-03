@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using ProtoBuf;
-
-namespace midspace.adminscripts.Protection
+﻿namespace midspace.adminscripts.Protection
 {
+    using ProtoBuf;
+    using System.Collections.Generic;
+
     [ProtoContract(UseProtoMembersOnly = true)]
     public class ProtectionConfig
     {
+        /// <remarks>ProtoBuf treats empty collections as null, so they need to be constructed by default,
+        /// otherwise an empty collection will not deserialize.</remarks>
         [ProtoMember(1)]
         public List<ProtectionArea> Areas;
 

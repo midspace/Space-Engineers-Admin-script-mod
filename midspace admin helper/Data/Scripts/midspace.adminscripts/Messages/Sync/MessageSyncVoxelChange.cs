@@ -1,26 +1,26 @@
 ﻿namespace midspace.adminscripts.Messages.Sync
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using ProtoBuf;
     using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using VRage.ModAPI;
 
     [ProtoContract]
     public class MessageSyncVoxelChange : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public SyncVoxelChangeType SyncType;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public long EntityId;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string SearchEntity;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public bool Planet;
 
         public static void SendMessage(SyncVoxelChangeType syncType, long entityId, string searchEntity, bool planet)
@@ -113,8 +113,8 @@
         }
     }
 
-    public enum SyncVoxelChangeType
+    public enum SyncVoxelChangeType : byte
     {
-        DeletePlanet,
+        DeletePlanet = 0
     }
 }

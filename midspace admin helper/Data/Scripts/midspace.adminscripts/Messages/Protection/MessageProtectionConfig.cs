@@ -1,15 +1,17 @@
-﻿using midspace.adminscripts.Messages.Communication;
-using midspace.adminscripts.Protection;
-using ProtoBuf;
-
-namespace midspace.adminscripts.Messages.Protection
+﻿namespace midspace.adminscripts.Messages.Protection
 {
+    using midspace.adminscripts.Messages.Communication;
+    using midspace.adminscripts.Protection;
+    using ProtoBuf;
+
     [ProtoContract]
     public class MessageProtectionConfig : MessageBase
     {
-        [ProtoMember(1)] public bool Value;
+        [ProtoMember(201)]
+        public bool Value;
 
-        [ProtoMember(2)] public ProtectionConfigType Type;
+        [ProtoMember(202)]
+        public ProtectionConfigType Type;
 
         public override void ProcessClient()
         {
@@ -50,9 +52,9 @@ namespace midspace.adminscripts.Messages.Protection
         }
     }
 
-    public enum ProtectionConfigType
+    public enum ProtectionConfigType : byte
     {
-        Invert,
-        Enable
+        Invert = 0,
+        Enable = 1
     }
 }

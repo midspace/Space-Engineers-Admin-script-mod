@@ -1,13 +1,13 @@
-﻿using ProtoBuf;
-using Sandbox.ModAPI;
-using midspace.adminscripts.Messages.Communication;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using midspace.adminscripts.Messages.Communication;
+
     [ProtoContract]
     public class MessageSave : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string Name;
 
         public override void ProcessClient()

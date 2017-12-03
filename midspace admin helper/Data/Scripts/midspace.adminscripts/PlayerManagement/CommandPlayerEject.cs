@@ -27,7 +27,7 @@
             {
                 var playerName = match.Groups["name"].Value;
                 var players = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(players, p => p != null);
+                MyAPIGateway.Players.GetPlayers(players);
                 IMyPlayer selectedPlayer = null;
 
                 var findPlayer = players.FirstOrDefault(p => p.DisplayName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase));

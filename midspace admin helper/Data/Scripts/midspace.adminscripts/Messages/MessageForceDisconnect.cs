@@ -6,10 +6,10 @@
     [ProtoContract]
     public class MessageForceDisconnect : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public ulong SteamId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public bool Ban = false;
 
         public override void ProcessClient()

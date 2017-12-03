@@ -68,7 +68,7 @@
                 
                 var player = listplayers.FirstOrDefault();
                 if (player != null)
-                    entity = player.GetCharacter();
+                    entity = player.Character;
             }
 
             if (entity == null)

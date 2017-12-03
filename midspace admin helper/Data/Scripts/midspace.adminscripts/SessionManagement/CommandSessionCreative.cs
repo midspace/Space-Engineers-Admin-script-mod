@@ -1,11 +1,9 @@
 ﻿namespace midspace.adminscripts
 {
+    using midspace.adminscripts.Messages;
+    using Sandbox.ModAPI;
     using System;
     using System.Linq;
-    using midspace.adminscripts.Messages;
-    using Sandbox.Common.ObjectBuilders;
-    using Sandbox.ModAPI;
-    using VRage.Game;
     using VRage.Library.Utils;
 
     public class CommandSessionCreative : ChatCommand

@@ -6,10 +6,10 @@
     [ProtoContract]
     public class MessageSaveTeleportHistory : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long PlayerId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public Vector3D Position;
 
         public static void SaveToHistory(long playerId, Vector3D position)

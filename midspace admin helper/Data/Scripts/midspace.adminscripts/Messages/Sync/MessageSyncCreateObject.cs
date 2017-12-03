@@ -3,7 +3,6 @@
     using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
     using Sandbox.Definitions;
-    using Sandbox.Game.Entities;
     using Sandbox.ModAPI;
     using VRage;
     using VRage.Game.Entity;
@@ -12,22 +11,22 @@
     [ProtoContract]
     public class MessageSyncCreateObject : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long EntityId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public SyncCreateObjectType Type;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string TypeId;
 
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public string SubtypeName;
 
-        [ProtoMember(5)]
+        [ProtoMember(205)]
         public decimal Amount;
 
-        [ProtoMember(6)]
+        [ProtoMember(206)]
         public Vector3D Position;
 
         public override void ProcessClient()
@@ -72,10 +71,10 @@
         }
     }
 
-    public enum SyncCreateObjectType
+    public enum SyncCreateObjectType : byte
     {
-        Floating,
-        Inventory,
-        Clear
+        Floating = 0,
+        Inventory = 1,
+        Clear = 2
     }
 }

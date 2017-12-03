@@ -1,22 +1,19 @@
-﻿using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using midspace.adminscripts.Config;
-
-namespace midspace.adminscripts.Messages.Permissions
+﻿namespace midspace.adminscripts.Messages.Permissions
 {
+    using ProtoBuf;
+    using System.Collections.Generic;
+    using midspace.adminscripts.Config;
+
     [ProtoContract]
     public class MessageCommandPermission : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public List<CommandStruct> Commands;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public CommandActions CommandAction;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string ListParameter;
 
         public override void ProcessClient()
@@ -48,9 +45,9 @@ namespace midspace.adminscripts.Messages.Permissions
         }
     }
 
-    public enum CommandActions
+    public enum CommandActions : byte
     {
-        Level,
-        List
+        Level = 0,
+        List = 1
     }
 }

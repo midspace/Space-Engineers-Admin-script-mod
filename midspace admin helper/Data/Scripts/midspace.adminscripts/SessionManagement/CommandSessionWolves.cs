@@ -1,10 +1,9 @@
 ﻿namespace midspace.adminscripts
 {
+    using midspace.adminscripts.Messages;
+    using Sandbox.ModAPI;
     using System;
     using System.Linq;
-
-    using Sandbox.ModAPI;
-    using midspace.adminscripts.Messages;
 
     public class CommandSessionWolves : ChatCommand
     {
@@ -46,7 +45,7 @@
             // Display the current state.
 
             var checkpoint = MyAPIGateway.Session.GetCheckpoint("null");
-            var currentState = checkpoint.Settings.EnableWolfs;
+            bool currentState = checkpoint.Settings.EnableWolfs;
 
             MyAPIGateway.Utilities.ShowMessage("Cyber Hounds", currentState ? "On" : "Off");
             return true;

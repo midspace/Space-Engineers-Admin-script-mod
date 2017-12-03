@@ -1,9 +1,7 @@
-﻿using midspace.adminscripts.Messages;
-using midspace.adminscripts.Messages.Permissions;
+﻿using midspace.adminscripts.Messages.Permissions;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using midspace.adminscripts.Config;
@@ -15,7 +13,6 @@ namespace midspace.adminscripts
         public CommandPermission()
             : base(ChatCommandSecurity.Admin, ChatCommandFlag.Client | ChatCommandFlag.MultiplayerOnly, "perm", new string[] { "/permission", "/perm" })
         {
-
         }
 
         public override void Help(ulong steamId, bool brief)

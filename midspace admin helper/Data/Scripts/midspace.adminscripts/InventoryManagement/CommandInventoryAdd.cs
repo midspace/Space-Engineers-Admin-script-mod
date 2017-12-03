@@ -85,13 +85,13 @@
                 if (!MyAPIGateway.Multiplayer.MultiplayerActive)
                 {
                     var definitionId = new MyDefinitionId(content.GetType(), content.SubtypeName);
-                    if (!Support.InventoryAdd((MyEntity)MyAPIGateway.Session.Player.GetCharacter(), (MyFixedPoint)amount, definitionId))
+                    if (!Support.InventoryAdd((MyEntity)MyAPIGateway.Session.Player.Character, (MyFixedPoint)amount, definitionId))
                         MyAPIGateway.Utilities.ShowMessage("Failed", "Inventory full. Could not add the item.");
                 }
                 else
                     ConnectionHelper.SendMessageToServer(new MessageSyncCreateObject()
                     {
-                        EntityId = ((IMyEntity)MyAPIGateway.Session.Player.GetCharacter()).EntityId,
+                        EntityId = MyAPIGateway.Session.Player.Character.EntityId,
                         Type = SyncCreateObjectType.Inventory,
                         TypeId = content.TypeId.ToString(),
                         SubtypeName = content.SubtypeName,

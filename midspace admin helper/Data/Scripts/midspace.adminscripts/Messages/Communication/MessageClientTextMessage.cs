@@ -6,10 +6,10 @@
     [ProtoContract]
     public class MessageClientTextMessage : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string Prefix;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public string Content;
 
         public override void ProcessClient()

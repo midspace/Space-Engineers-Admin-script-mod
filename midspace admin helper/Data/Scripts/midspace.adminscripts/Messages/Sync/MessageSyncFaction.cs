@@ -1,21 +1,21 @@
-﻿using System.Linq;
-using ProtoBuf;
-using Sandbox.ModAPI;
-
-namespace midspace.adminscripts.Messages.Sync
+﻿namespace midspace.adminscripts.Messages.Sync
 {
+    using System.Linq;
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+
     [ProtoContract]
     public class MessageSyncFaction : MessageBase
     {
         #region fields
 
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public SyncFactionType SyncType;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public long FactionId;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public long PlayerId;
 
         #endregion
@@ -151,8 +151,9 @@ namespace midspace.adminscripts.Messages.Sync
         }
     }
 
-    public enum SyncFactionType
+    public enum SyncFactionType : byte
     {
+        None = 0,
         Join = 1,
         Kick = 2,
         Promote = 3,

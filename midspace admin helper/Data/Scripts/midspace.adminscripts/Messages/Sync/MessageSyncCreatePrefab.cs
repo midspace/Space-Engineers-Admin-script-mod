@@ -5,7 +5,6 @@
     using System.Linq;
     using midspace.adminscripts.Messages.Communication;
     using ProtoBuf;
-    using Sandbox.Common.ObjectBuilders;
     using Sandbox.Definitions;
     using Sandbox.ModAPI;
     using VRage;
@@ -16,13 +15,13 @@
     [ProtoContract]
     public class MessageSyncCreatePrefab : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public SyncCreatePrefabType Type;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public string PrefabName;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public long PositionEntityId;
 
         public override void ProcessClient()
@@ -115,10 +114,10 @@
         }
     }
 
-    public enum SyncCreatePrefabType
+    public enum SyncCreatePrefabType : byte
     {
-        Stock,
-        Wireframe,
-        Pirate
+        Stock = 0,
+        Wireframe = 1,
+        Pirate = 2
     }
 }

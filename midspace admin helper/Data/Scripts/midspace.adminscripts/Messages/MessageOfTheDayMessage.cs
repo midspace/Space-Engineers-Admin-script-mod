@@ -1,39 +1,35 @@
-﻿using ProtoBuf;
-using Sandbox.ModAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-using midspace.adminscripts.Messages.Communication;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using System;
+    using midspace.adminscripts.Messages.Communication;
+
     [ProtoContract]
     public class MessageOfTheDayMessage : MessageBase
     {
         /// <summary>
         /// The content of the message of the day.
         /// </summary>
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string Content;
 
         /// <summary>
         /// The head line of the message of the day.
         /// </summary>
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public string HeadLine;
 
         /// <summary>
         /// Determines if the message of the day is displayed in the chat or in a dialog.
         /// </summary>
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public bool ShowInChat;
 
         /// <summary>
         /// The fields are supposed to be updated must be set here.
         /// </summary>
-        [ProtoMember(4)]
+        [ProtoMember(204)]
         public ChangedFields FieldsToUpdate;
 
         public override void ProcessClient()
@@ -90,11 +86,12 @@ namespace midspace.adminscripts.Messages
         }
 
         [Flags]
-        public enum ChangedFields
+        public enum ChangedFields : byte
         {
-            Content = 1,
-            HeadLine = 2,
-            ShowInChat = 4
+            None = 0x00,
+            Content = 0x01,
+            HeadLine = 0x02,
+            ShowInChat = 0x04
         }
     }
 }

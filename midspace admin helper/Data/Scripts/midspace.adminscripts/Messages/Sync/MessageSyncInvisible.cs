@@ -5,10 +5,10 @@
     [ProtoContract]
     public class MessageSyncInvisible : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public long PlayerId;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public bool VisibleState;
 
         public override void ProcessClient()

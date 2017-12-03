@@ -6,13 +6,13 @@
     [ProtoContract]
     public class MessageClientDialogMessage : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public string Title;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public string Prefix;
 
-        [ProtoMember(3)]
+        [ProtoMember(203)]
         public string Content;
 
         public override void ProcessClient()

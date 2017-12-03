@@ -8,11 +8,14 @@
     [ProtoContract]
     public class MessageSession : MessageBase
     {
-        [ProtoMember(1)]
+        [ProtoMember(201)]
         public bool State;
 
-        [ProtoMember(2)]
+        [ProtoMember(202)]
         public SessionSetting Setting;
+
+        [ProtoMember(203)]
+        public int StateValue;
 
         public override void ProcessClient()
         {
@@ -20,7 +23,7 @@
                 SetSetting();
 
             if (MyAPIGateway.Session.Player.IsAdmin())
-                MyAPIGateway.Utilities.ShowMessage(string.Format("Server {0}", Setting.ToString()), State ? "On" : "Off");
+                MyAPIGateway.Utilities.ShowMessage(string.Format("Server {0}", Setting), State ? "On" : "Off");
         }
 
         public override void ProcessServer()
@@ -56,18 +59,22 @@
                 case SessionSetting.Spiders:
                     MyAPIGateway.Session.SessionSettings.EnableSpiders = State;
                     break;
+                case SessionSetting.Meteors:
+                    MyAPIGateway.Session.SessionSettings.EnvironmentHostility = (MyEnvironmentHostilityEnum)StateValue;
+                    break;
             }
         }
     }
 
-    public enum SessionSetting
+    public enum SessionSetting : byte
     {
-        CargoShips,
-        CopyPaste,
-        Creative,
-        Spectator,
-        Weapons,
-        Wolves,
-        Spiders
+        CargoShips = 0,
+        CopyPaste = 1,
+        Creative = 2,
+        Spectator = 3,
+        Weapons = 4,
+        Wolves = 5,
+        Spiders = 6,
+        Meteors = 7,
     }
 }

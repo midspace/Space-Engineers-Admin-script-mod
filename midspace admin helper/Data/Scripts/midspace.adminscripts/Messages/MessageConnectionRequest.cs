@@ -1,9 +1,14 @@
-﻿using System.Linq;
-using midspace.adminscripts.Messages.Protection;
-using midspace.adminscripts.Protection;
-
-namespace midspace.adminscripts.Messages
+﻿namespace midspace.adminscripts.Messages
 {
+    using midspace.adminscripts.Messages.Protection;
+    using midspace.adminscripts.Protection;
+    using ProtoBuf;
+    using Sandbox.ModAPI;
+    using System;
+    using System.Linq;
+    using VRage.Game.ModAPI;
+
+    [ProtoContract]
     public class MessageConnectionRequest : MessageBase
     {
         public override void ProcessClient()
@@ -17,11 +22,11 @@ namespace midspace.adminscripts.Messages
                 AdminNotificator.SendEnqueuedNotifications(SenderSteamId);
 
             if (!ServerConfig.IsServerAdmin(SenderSteamId) && ChatCommandLogic.Instance.ServerCfg.Config.ForceBannedPlayers.Any(p => p.SteamId == SenderSteamId))
-                ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageForceDisconnect() { SteamId = SenderSteamId });
+                ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageForceDisconnect { SteamId = SenderSteamId });
 
-            ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageConfig()
+            ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageConfig
             {
-                Config = new ServerConfigurationStruct()
+                Config = new ServerConfigurationStruct
                 {
                     LogPrivateMessages = CommandPrivateMessage.LogPrivateMessages
                 },
@@ -29,14 +34,14 @@ namespace midspace.adminscripts.Messages
             });
 
             ChatCommandLogic.Instance.ServerCfg.SendPermissions(SenderSteamId);
-            ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageSyncProtection()
+            ConnectionHelper.SendMessageToPlayer(SenderSteamId, new MessageSyncProtection
             {
                 Config = ProtectionHandler.Config
             });
 
             if (!ServerConfig.ServerIsClient)
             {
-                var motdMessage = new MessageOfTheDayMessage()
+                var motdMessage = new MessageOfTheDayMessage
                 {
                     Content = CommandMessageOfTheDay.Content,
                     HeadLine = CommandMessageOfTheDay.HeadLine,

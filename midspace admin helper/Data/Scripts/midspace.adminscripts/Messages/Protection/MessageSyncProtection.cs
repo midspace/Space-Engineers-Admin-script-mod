@@ -1,12 +1,13 @@
-﻿using midspace.adminscripts.Protection;
-using ProtoBuf;
-
-namespace midspace.adminscripts.Messages.Protection
+﻿namespace midspace.adminscripts.Messages.Protection
 {
+    using midspace.adminscripts.Protection;
+    using ProtoBuf;
+
     [ProtoContract]
     public class MessageSyncProtection : MessageBase
     {
-        [ProtoMember(1)] public ProtectionConfig Config;
+        [ProtoMember(201)]
+        public ProtectionConfig Config;
 
         public override void ProcessClient()
         {
