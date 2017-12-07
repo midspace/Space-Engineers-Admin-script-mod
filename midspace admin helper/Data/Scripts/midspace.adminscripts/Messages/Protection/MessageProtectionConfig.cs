@@ -29,7 +29,7 @@
                     {
                         sync = true;
                         ProtectionHandler.Config.ProtectionInverted = Value;
-                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("The protection is {0} now.", Value ? "inverted" : "normal"));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", $"The protection is {(Value ? "inverted" : "normal")} now.");
                     }
                     break;
                 case ProtectionConfigType.Enable:
@@ -37,7 +37,15 @@
                     {
                         sync = true;
                         ProtectionHandler.Config.ProtectionEnabled = Value;
-                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("The protection is {0} now", Value ? "enabled" : "disabled"));
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", $"The protection is {(Value ? "enabled" : "disabled")} now");
+                    }
+                    break;
+                case ProtectionConfigType.LandingGear:
+                    if (ProtectionHandler.Config.ProtectionAllowLandingGear != Value)
+                    {
+                        sync = true;
+                        ProtectionHandler.Config.ProtectionAllowLandingGear = Value;
+                        MessageClientTextMessage.SendMessage(SenderSteamId, "Server", $"Protection area LandingGear is now {(Value ? "allowed" : "disabled")}.");
                     }
                     break;
             }
@@ -55,6 +63,7 @@
     public enum ProtectionConfigType : byte
     {
         Invert = 0,
-        Enable = 1
+        Enable = 1,
+        LandingGear = 2
     }
 }
