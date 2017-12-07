@@ -5,7 +5,7 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mid-Space Productions")]
 [assembly: AssemblyProduct("Space Engineers")]
-[assembly: AssemblyCopyright("Copyright © MidSpace 2014-2017")]
+[assembly: AssemblyCopyright("Copyright © MidSpace 2014-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

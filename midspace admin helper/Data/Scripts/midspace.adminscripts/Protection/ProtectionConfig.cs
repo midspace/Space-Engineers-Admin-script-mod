@@ -17,9 +17,6 @@
         [ProtoMember(3)]
         public bool ProtectionInverted;
 
-        [ProtoMember(4)]
-        public bool ProtectionAllowLandingGear;
-
         public ProtectionConfig()
         {
             Areas = new List<ProtectionArea>();

@@ -2,10 +2,10 @@
 {
     using Sandbox.Common.ObjectBuilders;
     using Sandbox.ModAPI;
+    using SpaceEngineers.Game.ModAPI;
     using VRage.Game.Components;
     using VRage.Game.ModAPI;
     using VRage.ObjectBuilders;
-    using IMyLandingGear = SpaceEngineers.Game.ModAPI.IMyLandingGear;
 
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LandingGear), true)] // leave useEntityUpdate=true, otherwise the protection won't work.
     public class ProtectedLandingGear : MyGameLogicComponent
@@ -43,8 +43,6 @@
             // StateChanged is Obsolete, but the replacement is blocked from use in ModAPI.
             _landingGear.StateChanged += LandingGearOnStateChanged;
             //_landingGear.LockModeChanged += LandingGearOnLockModeChanged;
-
-            //((SpaceEngineers.Game.ModAPI.IMyLandingGear)_landingGear).LockModeChanged += delegate(SpaceEngineers.Game.ModAPI.IMyLandingGear gear, SpaceEngineers.Game.ModAPI.LandingGearMode mode) {  };
         }
 
         public override void UpdateBeforeSimulation()
@@ -55,19 +53,14 @@
             base.UpdateBeforeSimulation();
         }
 
-        private void LandingGearOnStateChanged(bool state)
+        private void LandingGearOnStateChanged(bool state)    
         {
-            if (!state)
+                if (!state)
                 return;
-            //private void LandingGearOnLockModeChanged(IMyLandingGear myLandingGear, SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode landingGearMode)
-            //{
-            //    if (landingGearMode != SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode.Locked)
-            //        return;
-
-            if (ProtectionHandler.Config == null ||
-                !ProtectionHandler.Config.ProtectionEnabled ||
-                ProtectionHandler.Config.ProtectionAllowLandingGear)
-                return;
+        //private void LandingGearOnLockModeChanged(IMyLandingGear myLandingGear, SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode landingGearMode)
+        //{
+        //    if (landingGearMode != SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode.Locked)
+        //        return;
 
             var ship = _landingGear.GetTopMostParent(typeof(IMyCubeGrid));
             if (ship == null)
@@ -92,7 +85,7 @@
 
             if (player == null)
             {
-                _landingGear.Unlock();
+                _landingGear.ApplyAction("Unlock");
                 // we turn it off to prevent 'spamming'
                 _landingGear.Enabled = false;
                 return;
@@ -101,7 +94,7 @@
             if (ProtectionHandler.CanModify(player, attachedEntity))
                 return;
 
-            _landingGear.Unlock();
+            _landingGear.ApplyAction("Unlock");
             // we turn it off to prevent 'spamming'
             _landingGear.Enabled = false;
         }
