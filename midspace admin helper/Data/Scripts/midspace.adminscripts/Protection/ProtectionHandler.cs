@@ -266,7 +266,7 @@
         /// <returns></returns>
         public static bool CanModify(IMyPlayer player, IMyCubeGrid cubeGrid)
         {
-            var allSmallOwners = cubeGrid.GetAllSmallOwners();
+            List<long> allSmallOwners = cubeGrid.GetAllSmallOwners();
             return allSmallOwners.Count == 0 || allSmallOwners.Contains(player.IdentityId);
         }
 
@@ -277,7 +277,7 @@
         /// <returns>True if the block is inside a protected area. If the block is null it will return false.</returns>
         public static bool IsProtected(IMyEntity entity)
         {
-            if (entity == null || Config == null || Config.Areas == null || !Config.ProtectionEnabled)
+            if (entity == null || Config?.Areas == null || !Config.ProtectionEnabled)
                 return false;
 
             return Config.Areas.Any(area => area.Contains(entity)) ^ Config.ProtectionInverted;
@@ -290,7 +290,7 @@
         /// <returns>True if the block is inside a protected area. If the block is null it will return false.</returns>
         public static bool IsProtected(IMySlimBlock block)
         {
-            if (block == null || Config == null || Config.Areas == null || !Config.ProtectionEnabled)
+            if (block == null || Config?.Areas == null || !Config.ProtectionEnabled)
                 return false;
 
             return Config.Areas.Any(area => area.Contains(block)) ^ Config.ProtectionInverted;

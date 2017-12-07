@@ -170,9 +170,10 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                             StringBuilder areaList = new StringBuilder();
                             int index = 1;
 
-                            areaList.AppendLine("Protection areas is currently : {0}:{1}", 
-                                (ProtectionHandler.Config.ProtectionEnabled ? "Enabled" : "Disabled"),
-                                (ProtectionHandler.Config.ProtectionInverted ? "Inverted" : "Normal"));
+                            areaList.AppendLine($"Protection areas is currently :");
+                            areaList.AppendLine($"   Enabled: {(ProtectionHandler.Config.ProtectionEnabled ? "Yes" : "No")}");
+                            areaList.AppendLine($"   Inverted: {(ProtectionHandler.Config.ProtectionInverted ? "Yes" : "No")}");
+                            areaList.AppendLine($"   LandingGear: {(ProtectionHandler.Config.ProtectionAllowLandingGear ? "Allowed" : "Disabled")}");
                             areaList.AppendLine();
 
                             foreach (ProtectionArea protectionArea in ProtectionHandler.Config.Areas)
@@ -195,7 +196,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                             if (commandParts.Length != 3)
                             {
                                 MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                                    "Wrong parameters. /protectionarea cfg <setting> <value>");
+                                    "Wrong parameters. /protectionarea cfg <setting> <value>.  Settings: invert, enable, landinggear");
                                 return true;
                             }
 
@@ -219,9 +220,14 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                                 case "enabled":
                                     message.Type = ProtectionConfigType.Enable;
                                     break;
+                                case "landinggear":
+                                case "landing":
+                                case "gear":
+                                    message.Type = ProtectionConfigType.LandingGear;
+                                    break;
                                 default:
                                     MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                                        string.Format("{0} is no valid setting. Actions: invert, enable", setting));
+                                        $"{setting} is no valid setting. Settings: invert, enable, landinggear");
                                     return true;
                             }
 
@@ -230,7 +236,7 @@ We know that '/protectionarea' is a bit long. Just use '/pa' instead and be happ
                         }
                     default:
                         MyAPIGateway.Utilities.ShowMessage("ProtectionArea",
-                            string.Format("{0} is no valid action. Actions: add, remove, list", action));
+                            $"{action} is no valid action. Actions: add, remove, list");
                         break;
                 }
             }
