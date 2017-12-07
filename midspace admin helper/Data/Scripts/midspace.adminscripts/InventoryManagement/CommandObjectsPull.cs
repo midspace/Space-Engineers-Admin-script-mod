@@ -58,7 +58,7 @@
         public static void PullObjects(ulong steamId, Vector3D destination, double range, double velocity)
         {
             var sphere = new BoundingSphereD(destination, range);
-            var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            var floatingList = MyAPIGateway.Entities.GetTopMostEntitiesInSphere(ref sphere);
             floatingList = floatingList.Where(e => (e is IMyFloatingObject) || (e is Sandbox.Game.Entities.MyInventoryBagEntity) || (e is IMyCharacter)).ToList();
 
             foreach (var item in floatingList)

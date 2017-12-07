@@ -93,7 +93,7 @@
         public static void CollectObjects(ulong steamId, Vector3D destination, double range)
         {
             var sphere = new BoundingSphereD(destination, range);
-            var floatingList = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            var floatingList = MyAPIGateway.Entities.GetTopMostEntitiesInSphere(ref sphere);
             //floatingList = floatingList.Where(e => (e is Sandbox.ModAPI.IMyFloatingObject) || (e is Sandbox.ModAPI.IMyCharacter)).ToList();
             floatingList = floatingList.Where(e => (e is IMyFloatingObject) || (e is Sandbox.Game.Entities.MyInventoryBagEntity)).ToList();
 
