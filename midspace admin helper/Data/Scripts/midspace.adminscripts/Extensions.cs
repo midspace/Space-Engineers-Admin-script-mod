@@ -315,9 +315,8 @@ namespace midspace.adminscripts
         public static IMyPlayer GetPlayer(this IMyPlayerCollection collection, ulong steamId)
         {
             var players = new List<IMyPlayer>();
-            collection.GetPlayers(players, p => p != null);
-
-            return players.FirstOrDefault(p => p.SteamUserId == steamId);
+            collection.GetPlayers(players, p => p.SteamUserId == steamId);
+            return players.FirstOrDefault();
         }
 
         public static IMyPlayer Player(this IMyIdentity identity)
@@ -332,13 +331,6 @@ namespace midspace.adminscripts
             var listIdentites = new List<IMyIdentity>();
             MyAPIGateway.Players.GetAllIdentites(listIdentites, p => p.IdentityId == player.IdentityId);
             return listIdentites.FirstOrDefault();
-        }
-
-        public static IMyPlayer FindPlayerBySteamId(this IMyPlayerCollection collection, ulong steamId)
-        {
-            var listplayers = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(listplayers, p => p.SteamUserId == steamId);
-            return listplayers.FirstOrDefault();
         }
 
         public static bool TryGetIdentity(this IMyPlayerCollection collection, long identityId, out IMyIdentity identity)

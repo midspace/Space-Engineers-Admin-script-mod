@@ -172,8 +172,7 @@
                     {
                         int reactors;
                         int batteries;
-                        TurnOnShips(selectedShips, out reactors, out batteries);
-                        MyAPIGateway.Utilities.SendMessage(steamId, selectedShips.First().DisplayName, "{0} Reactors, {1} Batteries turned on.", reactors, batteries);
+                        TurnOnShips(steamId, selectedShips, out reactors, out batteries);
                     }
                     break;
 
@@ -181,8 +180,7 @@
                     {
                         int reactors;
                         int batteries;
-                        TurnOffShips(selectedShips, out reactors, out batteries);
-                        MyAPIGateway.Utilities.SendMessage(steamId, selectedShips.First().DisplayName, "{0} Reactors, {1} Batteries turned off.", reactors, batteries);
+                        TurnOffShips(steamId, selectedShips, out reactors, out batteries);
                     }
                     break;
                 case SyncGridChangeType.DeleteShip:
@@ -303,7 +301,7 @@
             }
         }
 
-        private void TurnOnShips(IEnumerable<IMyEntity> shipList, out int reactorCounter, out int batteryCounter)
+        private void TurnOnShips(ulong steamId, IEnumerable<IMyEntity> shipList, out int reactorCounter, out int batteryCounter)
         {
             reactorCounter = 0;
             batteryCounter = 0;
@@ -314,6 +312,7 @@
                 TurnOnShip(selectedShip, out reactors, out batteries);
                 reactorCounter += reactors;
                 batteryCounter += batteries;
+                MyAPIGateway.Utilities.SendMessage(steamId, selectedShip.DisplayName, "{0} Reactors, {1} Batteries turned on.", reactors, batteries);
             }
         }
 
@@ -345,7 +344,7 @@
             }
         }
 
-        private void TurnOffShips(IEnumerable<IMyEntity> shipList, out int reactorCounter, out int batteryCounter)
+        private void TurnOffShips(ulong steamId, IEnumerable<IMyEntity> shipList, out int reactorCounter, out int batteryCounter)
         {
             reactorCounter = 0;
             batteryCounter = 0;
@@ -354,6 +353,7 @@
                 int reactors;
                 int batteries;
                 TurnOffShip(selectedShip, out reactors, out batteries);
+                MyAPIGateway.Utilities.SendMessage(steamId, selectedShip.DisplayName, "{0} Reactors, {1} Batteries turned off.", reactors, batteries);
                 reactorCounter += reactors;
                 batteryCounter += batteries;
             }
@@ -393,6 +393,9 @@
 
             foreach (var cubeGrid in grids)
             {
+                if (cubeGrid == null || cubeGrid.Closed)
+                    continue;
+
                 // ejects any player prior to deleting the grid.
                 cubeGrid.EjectControllingPlayers();
 

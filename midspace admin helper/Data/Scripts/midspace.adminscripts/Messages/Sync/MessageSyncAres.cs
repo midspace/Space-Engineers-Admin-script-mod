@@ -104,7 +104,7 @@
 
         private void CommonProcess(SyncAresType syncType, ulong steamId, string oreMaterial, MatrixD viewMatrix)
         {
-            var player = MyAPIGateway.Players.FindPlayerBySteamId(steamId);
+            var player = MyAPIGateway.Players.GetPlayer(steamId);
             if (player == null)
                 return;
 
