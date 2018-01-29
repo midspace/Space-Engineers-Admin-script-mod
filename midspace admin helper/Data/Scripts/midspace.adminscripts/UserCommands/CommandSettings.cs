@@ -57,8 +57,8 @@
             switch (MyAPIGateway.Session.EnvironmentHostility)
             {
                 case MyEnvironmentHostilityEnum.CATACLYSM: environmentHostility = Localize.GetResource("WorldSettings_EnvironmentHostilityCataclysm"); break;
-                case MyEnvironmentHostilityEnum.CATACLYSM_UNREAL: environmentHostility = Localize.GetResource("WorldSettings_OnlineModeOffline"); break;
-                case MyEnvironmentHostilityEnum.NORMAL: environmentHostility = Localize.GetResource("WorldSettings_EnvironmentHostilityCataclysmUnreal"); break;
+                case MyEnvironmentHostilityEnum.CATACLYSM_UNREAL: environmentHostility = Localize.GetResource("WorldSettings_EnvironmentHostilityCataclysmUnreal"); break;
+                case MyEnvironmentHostilityEnum.NORMAL: environmentHostility = Localize.GetResource("WorldSettings_EnvironmentHostilityNormal"); break;
                 case MyEnvironmentHostilityEnum.SAFE: environmentHostility = Localize.GetResource("WorldSettings_EnvironmentHostilitySafe"); break;
             }
             info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_EnvironmentHostility"), environmentHostility);
