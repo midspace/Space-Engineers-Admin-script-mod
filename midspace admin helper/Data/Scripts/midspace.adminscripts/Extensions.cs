@@ -191,12 +191,6 @@ namespace midspace.adminscripts
             block.ChangeBlockOwnerRequest(playerId, shareMode);
         }
 
-        // copy of Sandbox.ModAPI.Ingame.TerminalBlockExtentions, but without Ingame.
-        public static void ApplyAction(this IMyTerminalBlock block, string actionName)
-        {
-            block.GetActionWithName(actionName).Apply(block);
-        }
-
         #endregion
 
         #region player
