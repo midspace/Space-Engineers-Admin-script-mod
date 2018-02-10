@@ -62,9 +62,8 @@
                 case MyEnvironmentHostilityEnum.SAFE: environmentHostility = Localize.GetResource("WorldSettings_EnvironmentHostilitySafe"); break;
             }
             info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_EnvironmentHostility"), environmentHostility);
-            info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_AutoSave"), MyAPIGateway.Session.SessionSettings.AutoSave ? yes : no);
-            //info.AppendFormat("Auto Save?? Test: {0} {1} {2}\r\n", MyAPIGateway.Session.AutoSaveInMinutes, MyAPIGateway.Session.SessionSettings.AutoSaveInMinutes, MyAPIGateway.Session.GetCheckpoint("null").Settings.AutoSaveInMinutes);
-            //info.AppendFormat("Auto Save In Minutes: {0}\r\n", MyAPIGateway.Session.AutoSaveInMinutes); // Dedicated Server.
+            info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_AutoSave"), MyAPIGateway.Session.AutoSaveInMinutes > 0 ? yes : no);
+            info.AppendFormat("Auto Save In Minutes: {0}\r\n", MyAPIGateway.Session.AutoSaveInMinutes);
             info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_ScenarioEditMode"), MyAPIGateway.Session.SessionSettings.ScenarioEditMode ? yes : no);
 
             info.AppendFormat("\r\n");
