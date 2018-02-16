@@ -114,6 +114,18 @@
                 return;
             }
 
+            IMyCubeBlock cube = target as IMyCubeBlock;
+            if (cube != null)
+            {
+                IMyPlayer player;
+                if (CanDamageBlock(info.AttackerId, cube.SlimBlock, info.Type, out player))
+                    return;
+
+                info.Amount = 0;
+                return;
+            }
+
+
             // disable pvp in PAs
             IMyCharacter character = target as IMyCharacter;
             if (character != null)
@@ -154,6 +166,26 @@
             {
                 IMyPlayer player;
                 if (CanDamageBlock(info.AttackerId, block, info.Type, out player))
+                    return;
+
+                info.Amount = 0;
+
+                // notify player
+                DateTime time;
+                if (player != null && (!_sentFailedMessage.TryGetValue(player, out time) || DateTime.Now - time >= TimeSpan.FromMilliseconds(GrindFailedMessageInterval)))
+                {
+                    MessageClientNotification.SendMessage(player.SteamUserId, "You are not allowed to damage this block.", MyFontEnum.Red, GrindFailedMessageInterval);
+                    _sentFailedMessage.Update(player, DateTime.Now);
+                }
+
+                return;
+            }
+
+            IMyCubeBlock cube = target as IMyCubeBlock;
+            if (cube != null)
+            {
+                IMyPlayer player;
+                if (CanDamageBlock(info.AttackerId, cube.SlimBlock, info.Type, out player))
                     return;
 
                 info.Amount = 0;
