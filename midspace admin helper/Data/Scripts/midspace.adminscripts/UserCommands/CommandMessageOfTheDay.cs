@@ -60,6 +60,7 @@ namespace midspace.adminscripts
         public static void ReplaceUserVariables()
         {
             Content = Content.Replace("%USER_NAME%", MyAPIGateway.Session.Player.DisplayName);
+            HeadLine = HeadLine.Replace("%USER_NAME%", MyAPIGateway.Session.Player.DisplayName);
         }
         
     }

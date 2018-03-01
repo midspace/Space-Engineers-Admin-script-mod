@@ -78,7 +78,7 @@
                 if (factionCollectionBuilder != null)
                 {
                     MessageSyncFaction.JoinFaction(factionCollectionBuilder.FactionId, selectedPlayer.IdentityId);
-                    MyAPIGateway.Utilities.SendMessage(steamId, "join", "{0} has been addded to faction.", selectedPlayer.DisplayName);
+                    MyAPIGateway.Utilities.SendMessage(steamId, "join", $"{selectedPlayer.DisplayName} has been addded to faction.");
                 }
 
                 return true;

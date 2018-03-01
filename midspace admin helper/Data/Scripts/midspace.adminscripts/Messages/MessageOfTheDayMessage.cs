@@ -36,13 +36,12 @@
         {
             //update the fields
             if (FieldsToUpdate.HasFlag(ChangedFields.Content))
-            {
                 CommandMessageOfTheDay.Content = Content;
-                CommandMessageOfTheDay.ReplaceUserVariables();
-            }
 
             if (FieldsToUpdate.HasFlag(ChangedFields.HeadLine))
                 CommandMessageOfTheDay.HeadLine = HeadLine;
+
+            CommandMessageOfTheDay.ReplaceUserVariables();
 
             if (FieldsToUpdate.HasFlag(ChangedFields.ShowInChat))
                 CommandMessageOfTheDay.ShowInChat = ShowInChat;
@@ -79,7 +78,7 @@
             if (FieldsToUpdate.HasFlag(ChangedFields.ShowInChat))
             {
                 CommandMessageOfTheDay.ShowInChat = ShowInChat;
-                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", string.Format("The setting motdShowInChat was set to {0}. Please note that you have to use '/cfg save' to save it permanently.", ShowInChat));
+                MessageClientTextMessage.SendMessage(SenderSteamId, "Server", $"The setting motdShowInChat was set to {ShowInChat}. Please note that you have to use '/cfg save' to save it permanently.");
             }
 
             ConnectionHelper.SendMessageToAllPlayers(this);

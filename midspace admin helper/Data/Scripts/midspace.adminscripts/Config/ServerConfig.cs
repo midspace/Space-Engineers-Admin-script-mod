@@ -164,7 +164,7 @@
             CommandMessageOfTheDay.HeadLine = Config.MotdHeadLine;
             if (sendMotdHl)
             {
-                message.HeadLine = CommandMessageOfTheDay.HeadLine;
+                message.HeadLine = ReplaceVariables(CommandMessageOfTheDay.HeadLine);
                 message.FieldsToUpdate = message.FieldsToUpdate | MessageOfTheDayMessage.ChangedFields.HeadLine;
             }
 
