@@ -198,7 +198,7 @@ namespace midspace.adminscripts
             // New command classes must be added in here.
 
             //commands.Add(new CommandAsteroidFindOre(_oreNames));
-            commands.Add(new CommandAsteroidScanOre(_oreNames));
+            commands.Add(new CommandAsteroidScanOre());
             //commands.Add(new CommandAsteroidEditClear());
             //commands.Add(new CommandAsteroidEditSet());
             commands.Add(new CommandAsteroidFill());

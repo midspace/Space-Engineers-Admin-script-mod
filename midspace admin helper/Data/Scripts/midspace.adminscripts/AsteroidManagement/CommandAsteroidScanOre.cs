@@ -19,12 +19,9 @@
     /// </summary>
     public class CommandAsteroidScanOre : ChatCommand
     {
-        private readonly string[] _oreNames;
-
-        public CommandAsteroidScanOre(string[] oreNames)
+        public CommandAsteroidScanOre()
             : base(ChatCommandSecurity.Admin, "scanore", new[] { "/scanore" })
         {
-            _oreNames = oreNames;
         }
 
         public override void Help(ulong steamId, bool brief)
@@ -69,18 +66,28 @@
                 var currentAsteroidList = new List<IMyVoxelBase>();
                 var position = MyAPIGateway.Session.Player.Controller.ControlledEntity.Entity.GetPosition();
                 MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => Math.Sqrt((position - v.PositionLeftBottomCorner).LengthSquared()) < Math.Sqrt(Math.Pow(v.Storage.Size.X, 2) * 3) + scanRange + 500f);
-                var asteroids = new List<IMyVoxelBase>();
-                int hits = 0;
 
                 //var vm = Support.FindLookAtEntity(MyAPIGateway.Session.ControlledObject, false, false, true, false) as IMyVoxelBase;
                 //hits += FindMaterial(vm, position, 3, scanRange);
 
-                foreach(var voxelMap in currentAsteroidList)
+                List<ScanHit> scanHits = new List<ScanHit>();
+
+                foreach (var voxelMap in currentAsteroidList)
                 {
-                    hits += FindMaterial(voxelMap, position, 3, scanRange);
+                    FindMaterial(voxelMap, position, 3, scanRange, scanHits);
                 }
 
-                MyAPIGateway.Utilities.ShowMessage("Scanned", "{0} ore deposits found on {1} asteroids within {2}m range.", hits, currentAsteroidList.Count, scanRange);
+                var materials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(v => v.IsRare).ToArray();
+                var findMaterial = materials.Select(f => f.Index).ToArray();
+                foreach (ScanHit scanHit in scanHits)
+                {
+                    var index = Array.IndexOf(findMaterial, scanHit.Material);
+                    var name = materials[index].MinedOre;
+                    MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, MyAPIGateway.Session.GPS.Create("Ore " + name, "scanore", scanHit.Position, true, false));
+                }
+
+
+                MyAPIGateway.Utilities.ShowMessage("Scanned", "{0} ore deposits found on {1} asteroids within {2}m range.", scanHits.Count, currentAsteroidList.Count, scanRange);
                 return true;
             }
 
@@ -91,12 +98,14 @@
         /// 
         /// </summary>
         /// <param name="voxelMap"></param>
+        /// <param name="center"></param>
         /// <param name="resolution">0 to 8. 0 for fine/slow detail.</param>
         /// <param name="distance"></param>
+        /// <param name="scanHits"></param>
         /// <returns></returns>
-        private int FindMaterial(IMyVoxelBase voxelMap, Vector3D center, int resolution, double distance)
+        private void FindMaterial(IMyVoxelBase voxelMap, Vector3D center, int resolution, double distance, List<ScanHit> scanHits)
         {
-            int hits = 0;
+            const double checkDistance = 50 * 50;  // 50 meter seperation.
             var materials = MyDefinitionManager.Static.GetVoxelMaterialDefinitions().Where(v => v.IsRare).ToArray();
             var findMaterial = materials.Select(f => f.Index).ToArray();
             var storage = voxelMap.Storage;
@@ -121,7 +130,7 @@
                 min.Z >= storage.Size.Z)
             {
                 //MyAPIGateway.Utilities.ShowMessage("size", "out of range");
-                return 0;
+                return;
             }
 
             var oldCache = new MyStorageData();
@@ -150,24 +159,41 @@
                     for (p.X = 0; p.X < size.X; ++p.X)
                     {
                         // place GPS in the center of the Voxel
-                        var position = voxelMap.PositionLeftBottomCorner + (p * scale) + (scale / 2) + min;
+                        Vector3D position = voxelMap.PositionLeftBottomCorner + (p * scale) + (scale / 2f) + min;
 
                         if (Math.Sqrt((position - center).LengthSquared()) < distance)
                         {
-                            var content = oldCache.Content(ref p);
-                            var material = oldCache.Material(ref p);
+                            byte content = oldCache.Content(ref p);
+                            byte material = oldCache.Material(ref p);
 
                             if (content > 0 && findMaterial.Contains(material))
                             {
-                                var index = Array.IndexOf(findMaterial, material);
-                                var name = materials[index].MinedOre;
-                                var gps = MyAPIGateway.Session.GPS.Create("Ore " + name, "scanore", position, true, false);
-                                MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.Player.IdentityId, gps);
-                                hits++;
+                                bool addHit = true;
+                                foreach (ScanHit scanHit in scanHits)
+                                {
+                                    if (scanHit.Material == material && Vector3D.DistanceSquared(position, scanHit.Position) < checkDistance)
+                                    {
+                                        addHit = false;
+                                        break;
+                                    }
+                                }
+                                if (addHit)
+                                    scanHits.Add(new ScanHit(position, material));
                             }
                         }
                     }
-            return hits;
+        }
+
+        protected class ScanHit
+        {
+            public Vector3D Position;
+            public byte Material;
+
+            public ScanHit(Vector3D position, byte material)
+            {
+                Position = position;
+                Material = material;
+            }
         }
     }
 }
