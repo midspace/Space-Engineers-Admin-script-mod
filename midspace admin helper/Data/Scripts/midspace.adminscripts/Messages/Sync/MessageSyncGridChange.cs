@@ -13,6 +13,7 @@
     using VRage.Game.ModAPI;
     using VRage.ModAPI;
     using VRage.ObjectBuilders;
+    using VRageMath;
 
     [ProtoContract]
     public class MessageSyncGridChange : MessageBase
@@ -447,8 +448,22 @@
             { "SmallBlockMediumContainer", "LargeBlockLargeContainer" },
         };
 
-        // TODO: deal with cubes that need to be rotated.
-        // LargeBlockBeacon, SmallBlockBeacon, ConveyorTube, ConveyorTubeSmall
+        // deal with cubes that need to be rotated, because the small and large grid varients don't have the same orientation.
+        private static readonly Dictionary<string, Quaternion> SmallToLargeRotate = new Dictionary<string, Quaternion>
+        {
+            {"ConveyorTubeSmall", Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Forward)},
+            {"ConveyorTubeSmallCurved", Quaternion.CreateFromForwardUp(Vector3.Right, Vector3.Up)},
+            {"SmallBlockBeacon",  Quaternion.CreateFromForwardUp(Vector3.Up, Vector3.Backward)},
+            {"SmallBlockSmallGenerator",  Quaternion.CreateFromForwardUp(Vector3.Backward, Vector3.Up)},
+        };
+
+        private static readonly Dictionary<string, Quaternion> LargeToSmallRotate = new Dictionary<string, Quaternion>
+        {
+            {"ConveyorTube", Quaternion.CreateFromForwardUp(Vector3.Up, Vector3.Left)},
+            {"ConveyorTubeCurved",  Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Up)},
+            {"LargeBlockBeacon",  Quaternion.CreateFromForwardUp(Vector3.Down, Vector3.Forward)},
+            {"LargeBlockSmallGenerator",  Quaternion.CreateFromForwardUp(Vector3.Backward, Vector3.Up)},
+        };
 
         private bool ScaleShip(ulong steamId, IMyCubeGrid shipEntity, MyCubeSize newScale)
         {
@@ -507,6 +522,25 @@
                                 newSubType = newDef.Id.SubtypeName;
                         }
                     }
+
+                    Quaternion? rotate = null;
+                    if (newScale == MyCubeSize.Small && LargeToSmallRotate.ContainsKey(block.SubtypeName))
+                        rotate = LargeToSmallRotate[block.SubtypeName];
+                    else if (newScale == MyCubeSize.Large && SmallToLargeRotate.ContainsKey(block.SubtypeName))
+                        rotate = SmallToLargeRotate[block.SubtypeName];
+
+                    if (rotate != null)
+                    {
+                        MyBlockOrientation o1 = block.BlockOrientation;
+                        Quaternion q1;
+                        o1.GetQuaternion(out q1);
+
+                        Quaternion q2 = Quaternion.Normalize(q1 * rotate.Value);
+                        MyBlockOrientation o2 = new MyBlockOrientation(ref q2);
+                        //VRage.Utils.MyLog.Default.WriteLine($"##Mod## Q2 {o1.Forward}, {o1.Up} -> {o2.Forward}, {o2.Up}");
+                        block.BlockOrientation = o2;
+                    }
+
                     if (MyDefinitionManager.Static.TryGetCubeBlockDefinition(new MyDefinitionId(block.GetType(), newSubType), out definition) && definition.CubeSize == newScale)
                     {
                         block.SubtypeName = newSubType;
