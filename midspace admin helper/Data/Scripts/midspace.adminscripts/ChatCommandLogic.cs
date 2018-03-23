@@ -52,6 +52,7 @@ namespace midspace.adminscripts
         private int _timerCounter = 0;
         private static string[] _oreNames;
         private static List<string> _ingotNames;
+        private static List<string> _botModelNames;
         private static MyPhysicalItemDefinition[] _physicalItems;
 
         private Action<byte[]> MessageHandler = new Action<byte[]>(HandleMessage);
@@ -417,6 +418,8 @@ namespace midspace.adminscripts
                     _ingotNames.Add(physicalItem.Id.SubtypeName);
                 }
             }
+
+            _botModelNames = MyDefinitionManager.Static.GetBotDefinitions().Where(e => e is MyAgentDefinition).Cast<MyAgentDefinition>().Select(e => e.BotModel).ToList();
         }
 
         #endregion
@@ -451,59 +454,77 @@ namespace midspace.adminscripts
         // player exited/crashed/quit.
         private void PlayerDisconnected(long playerId)
         {
-            string displayName = GetPlayerDisplayName(playerId);
-            ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
-                new ChatMessage
-                {
-                    Date = DateTime.Now,
-                    Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
-                    Text = $"'{displayName}' disconnected"
-                });
+            string displayName;
+            if (!GetPlayerDisplayName(playerId, out displayName))
+            {
+                ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
+                    new ChatMessage
+                    {
+                        Date = DateTime.Now,
+                        Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
+                        Text = $"'{displayName}' disconnected"
+                    });
+            }
         }
 
         // I've never seen 'Dropped'.
         private void PlayerDropped(string itemTypeName, string itemSubTypeName, long playerId, int amount)
         {
-            string displayName = GetPlayerDisplayName(playerId);
-            ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
-                new ChatMessage
-                {
-                    Date = DateTime.Now,
-                    Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
-                    Text = $"'{displayName}' dropped"
-                });
+            string displayName;
+            if (!GetPlayerDisplayName(playerId, out displayName))
+            {
+                ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
+                    new ChatMessage
+                    {
+                        Date = DateTime.Now,
+                        Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
+                        Text = $"'{displayName}' dropped"
+                    });
+            }
         }
 
-        // player connecte/reconnected.
+        // player connect/reconnected.
         private void PlayerConnected(long playerId)
         {
-            string displayName = GetPlayerDisplayName(playerId);
-            ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
-                new ChatMessage
-                {
-                    Date = DateTime.Now,
-                    Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
-                    Text = $"'{displayName}' joined server"
-                });
+            string displayName;
+            if (!GetPlayerDisplayName(playerId, out displayName))
+            {
+                ChatCommandLogic.Instance.ServerCfg.LogGlobalMessage(
+                    new ChatMessage
+                    {
+                        Date = DateTime.Now,
+                        Sender = new Player { PlayerName = "Server", SteamId = MyAPIGateway.Multiplayer.ServerId },
+                        Text = $"'{displayName}' joined server"
+                    });
+            }
         }
 
-        private string GetPlayerDisplayName(long identityId)
+        private bool GetPlayerDisplayName(long identityId, out string displayName)
         {
-            string displayName = "Unknown";
+            displayName = "Unknown";
+            bool isBot = false;
 
             IMyPlayer player;
             MyAPIGateway.Players.TryGetPlayer(identityId, out player);
             if (player != null)
+            {
+                isBot = player.IsBot;
                 displayName = player.DisplayName;
+            }
             else
             {
                 IMyIdentity identity;
                 MyAPIGateway.Players.TryGetIdentity(identityId, out identity);
 
                 if (identity != null)
+                {
                     displayName = identity.DisplayName;
+
+                    // Making a strong assumption, that if the name of the identity is blank, then it's a bot.
+                    isBot = string.IsNullOrEmpty(displayName) && _botModelNames.Contains(identity.Model);
+                }
             }
-            return displayName;
+            return isBot;
         }
 
         #endregion
