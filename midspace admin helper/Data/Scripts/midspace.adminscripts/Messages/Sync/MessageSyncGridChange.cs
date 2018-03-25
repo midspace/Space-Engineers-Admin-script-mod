@@ -214,11 +214,13 @@
                         }
                     }
                     break;
+
                 case SyncGridChangeType.ScaleDown:
                     {
                         ScaleShip(steamId, selectedShips.First(), MyCubeSize.Small);
                     }
                     break;
+
                 case SyncGridChangeType.ScaleUp:
                     {
                         ScaleShip(steamId, selectedShips.First(), MyCubeSize.Large);
@@ -296,6 +298,32 @@
                             }
 
                             MyAPIGateway.Utilities.SendMessage(steamId, "Server", string.Format("Grid {0} Repaired.", selectedShip.DisplayName));
+                        }
+                    }
+                    break;
+
+                case SyncGridChangeType.ConvertToStation:
+                    {
+                        foreach (var selectedShip in selectedShips)
+                        {
+                            var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
+                            foreach (var grid in grids)
+                                grid.IsStatic = true;
+
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", $"Grid {selectedShip.DisplayName} convert to Station.");
+                        }
+                    }
+                    break;
+
+                case SyncGridChangeType.ConvertToShip:
+                    {
+                        foreach (var selectedShip in selectedShips)
+                        {
+                            var grids = selectedShip.GetAttachedGrids(AttachedGrids.Static);
+                            foreach (var grid in grids)
+                                grid.IsStatic = false;
+
+                            MyAPIGateway.Utilities.SendMessage(steamId, "Server", $"Grid {selectedShip.DisplayName} convert to Ship.");
                         }
                     }
                     break;
@@ -617,5 +645,7 @@
         ScaleDown = 10,
         BuiltBy = 11,
         Repair = 12,
+        ConvertToShip = 13,
+        ConvertToStation = 14,
     }
 }

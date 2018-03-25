@@ -176,6 +176,8 @@
     <Compile Include="ShipManagement\CommandShipCubeRenumber.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRename.cs" />
     <Compile Include="ShipManagement\CommandShipBuiltBy.cs" />
+    <Compile Include="ShipManagement\CommandStationToShip.cs" />
+    <Compile Include="ShipManagement\CommandShipToStation.cs" />
     <Compile Include="ShipManagement\CommandShipSwitch.cs" />
     <Compile Include="ShipManagement\CommandShipRepair.cs" />
     <Compile Include="ShipManagement\CommandShipDestructible.cs" />
