@@ -277,15 +277,11 @@
             foreach (var kvp in assetNameCount)
                 ores.AppendFormat("{0}  {1:N}  {2:P}\r\n", kvp.Key, (double)kvp.Value / 255, (double)kvp.Value / (double)sum);
 
-            var contentBox = new BoundingBoxD(voxelMap.PositionLeftBottomCorner + min, voxelMap.PositionLeftBottomCorner + max);
-            var description = string.Format("Distance: {0:N}\r\nSize: {1}\r\nBoundingBox Center: [X:{2:N} Y:{3:N} Z:{4:N}]\r\n\r\nContent Size:{5}\r\nLOD0 Content Center: [X:{6:N} Y:{7:N} Z:{8:N}]\r\n\r\nMaterial  Mass  Percent\r\n{9}",
-                distance, voxelMap.Storage.Size,
-                aabb.Center.X, aabb.Center.Y, aabb.Center.Z,
-                max - min,
-                contentBox.Center.X, contentBox.Center.Y, contentBox.Center.Z,
-                ores);
+            var contentBox = new BoundingBoxD(voxelMap.PositionLeftBottomCorner + min - 0.5f, voxelMap.PositionLeftBottomCorner + max - 0.5f);
+            Vector3D center = aabb.Center - 0.5f; // offset for fact that the game offsets the position compared to the volume.
+            var description = $"Distance: {distance:N}\r\nSize: {voxelMap.Storage.Size}\r\nBoundingBox Center: [X:{center.X:N} Y:{center.Y:N} Z:{center.Z:N}]\r\n\r\nContent Size:{max - min}\r\nLOD0 Content Center: [X:{contentBox.Center.X:N} Y:{contentBox.Center.Y:N} Z:{contentBox.Center.Z:N}]\r\n\r\nMaterial  Mass  Percent\r\n{ores}";
 
-            MyAPIGateway.Utilities.ShowMissionScreen(string.Format("ID {0}:", displayType), string.Format("'{0}'", displayName), " ", description.ToString(), null, "OK");
+            MyAPIGateway.Utilities.ShowMissionScreen($"ID {displayType}:", $"'{displayName}'", " ", description, null, "OK");
         }
     }
 }
