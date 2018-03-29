@@ -26,7 +26,11 @@
             Medical = 0x100,
             Mass = 0x200,
             Welder = 0x400,
-            Grinder = 0x800
+            Grinder = 0x800,
+            Lights = 0x1000, // interior lights and bar lights.
+            Drill = 0x2000,
+            Rotor = 0x4000,
+            Piston = 0x8000,  // not sure why this is requested, as pistons only move for a short period before stopping.
         };
 
         public CommandShipSwitch()
@@ -36,7 +40,7 @@
 
         public override void Help(ulong steamId, bool brief)
         {
-            MyAPIGateway.Utilities.ShowMessage("/switch [grinder] [power] [production] [program] [projection] [sensor] [spot] [timer] [weapon] [welder] on/off", "Turns globally on/off the selected systems.");
+            MyAPIGateway.Utilities.ShowMessage("/switch [grinder] [power] [production] [program] [projection] [sensor] [spot] [timer] [weapon] [welder] [light] [drill] [rotor] [piston] on/off", "Turns globally on/off the selected systems.");
         }
 
         public override bool Invoke(ulong steamId, long playerId, string messageText)
@@ -75,6 +79,14 @@
                         control |= SwitchSystems.Grinder;
                     else if (controlStr.IndexOf("weld", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         control |= SwitchSystems.Welder;
+                    else if (controlStr.IndexOf("lig", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Lights;
+                    else if (controlStr.IndexOf("dri", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Drill;
+                    else if (controlStr.IndexOf("rot", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Rotor;
+                    else if (controlStr.IndexOf("pis", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        control |= SwitchSystems.Piston;
                 }
 
                 if (control == SwitchSystems.None)
@@ -196,6 +208,32 @@
                 }
                 if ((SwitchSystems.Welder & control) == SwitchSystems.Welder && block.FatBlock is IMyFunctionalBlock
                     && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ShipWelder)))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
+                    counter++;
+                }
+                if ((SwitchSystems.Lights & control) == SwitchSystems.Lights && block.FatBlock is IMyFunctionalBlock
+                    && block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_InteriorLight))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
+                    counter++;
+                }
+                if ((SwitchSystems.Drill & control) == SwitchSystems.Drill && block.FatBlock is IMyFunctionalBlock
+                    && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Drill)))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
+                    counter++;
+                }
+                if ((SwitchSystems.Rotor & control) == SwitchSystems.Rotor && block.FatBlock is IMyFunctionalBlock
+                    && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorStator)
+                    || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_MotorAdvancedStator)))
+                {
+                    ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
+                    counter++;
+                }
+                if ((SwitchSystems.Piston & control) == SwitchSystems.Piston && block.FatBlock is IMyFunctionalBlock
+                    && (block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_PistonBase)
+                    || block.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_ExtendedPistonBase)))
                 {
                     ((IMyFunctionalBlock)block.FatBlock).Enabled = mode; // turn power on/off.
                     counter++;
