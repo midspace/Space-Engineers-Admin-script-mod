@@ -598,6 +598,47 @@ namespace midspace.adminscripts
                 stringBuilder.AppendLine();
             }
         }
+
+        public static Vector3I Add(this Vector3I size, int value)
+        {
+            return new Vector3I(size.X + value, size.Y + value, size.Z + value);
+        }
+
+        public static Vector3I Transform(this Vector3I size, SerializableBlockOrientation orientation)
+        {
+            var matrix = Matrix.CreateFromDir(Base6Directions.GetVector(orientation.Forward), Base6Directions.GetVector(orientation.Up));
+            var rotation = Quaternion.CreateFromRotationMatrix(matrix);
+            return Vector3I.Transform(size, rotation);
+        }
+
+        public static Vector3I Abs(this Vector3I size)
+        {
+            return new Vector3I(Math.Abs(size.X), Math.Abs(size.Y), Math.Abs(size.Z));
+        }
+
+        internal static SerializableVector3I Mirror(this Vector3I vector, MirrorDirection xMirror, int xAxis, MirrorDirection yMirror, int yAxis, MirrorDirection zMirror, int zAxis)
+        {
+            var newVector = new Vector3I(vector.X, vector.Y, vector.Z);
+            switch (xMirror)
+            {
+                case MirrorDirection.Odd: newVector.X = xAxis - (vector.X - xAxis); break;
+                case MirrorDirection.EvenUp: newVector.X = xAxis - (vector.X - xAxis) + 1; break;
+                case MirrorDirection.EvenDown: newVector.X = xAxis - (vector.X - xAxis) - 1; break;
+            }
+            switch (yMirror)
+            {
+                case MirrorDirection.Odd: newVector.Y = yAxis - (vector.Y - yAxis); break;
+                case MirrorDirection.EvenUp: newVector.Y = yAxis - (vector.Y - yAxis) + 1; break;
+                case MirrorDirection.EvenDown: newVector.Y = yAxis - (vector.Y - yAxis) - 1; break;
+            }
+            switch (zMirror)
+            {
+                case MirrorDirection.Odd: newVector.Z = zAxis - (vector.Z - zAxis); break;
+                case MirrorDirection.EvenUp: newVector.Z = zAxis - (vector.Z - zAxis) + 1; break;
+                case MirrorDirection.EvenDown: newVector.Z = zAxis - (vector.Z - zAxis) - 1; break;
+            }
+            return newVector;
+        }
     }
 
     /// <summary>
@@ -615,4 +656,11 @@ namespace midspace.adminscripts
         Static
     }
 
+    public enum MirrorDirection
+    {
+        None,
+        EvenUp,
+        EvenDown,
+        Odd
+    };
 }

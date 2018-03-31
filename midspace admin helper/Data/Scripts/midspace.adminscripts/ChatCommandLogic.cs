@@ -291,6 +291,7 @@ namespace midspace.adminscripts
             commands.Add(new CommandShipBuiltBy());
             commands.Add(new CommandShipDelete());
             commands.Add(new CommandShipRepair());
+            commands.Add(new CommandShipMirror());
             commands.Add(new CommandShipDestructible());
             commands.Add(new CommandShipScaleDown());
             commands.Add(new CommandShipScaleUp());

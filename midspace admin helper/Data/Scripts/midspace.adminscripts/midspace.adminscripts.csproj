@@ -133,6 +133,7 @@
     <Compile Include="Messages\Sync\MessageSyncBlockOwner.cs" />
     <Compile Include="Messages\Sync\MessageSyncBlock.cs" />
     <Compile Include="Messages\Sync\MessageSyncAres.cs" />
+    <Compile Include="Messages\Sync\MessageSyncMirror.cs" />
     <Compile Include="Messages\Sync\MessageSyncFaction.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreatePrefab.cs" />
     <Compile Include="Messages\Sync\MessageSyncCreateObject.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="SerializableMatrix.cs" />
     <Compile Include="SessionManagement\CommandSessionWolves.cs" />
     <Compile Include="SessionManagement\CommandSessionSpiders.cs" />
+    <Compile Include="ShipManagement\CommandShipMirror.cs" />
     <Compile Include="ShipManagement\CommandPrefabAddDrone.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRenumber.cs" />
     <Compile Include="ShipManagement\CommandShipCubeRename.cs" />

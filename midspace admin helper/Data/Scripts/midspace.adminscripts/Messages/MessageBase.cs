@@ -46,6 +46,7 @@
     [ProtoInclude(59, typeof(MessageSyncCreateObject))]
     [ProtoInclude(60, typeof(MessageSyncCreatePrefab))]
     [ProtoInclude(61, typeof(MessageSyncFloatingObjects))]
+    [ProtoInclude(62, typeof(MessageSyncMirror))]
     //communication
     [ProtoInclude(70, typeof(MessageClientDialogMessage))]
     [ProtoInclude(71, typeof(MessageClientNotification))]

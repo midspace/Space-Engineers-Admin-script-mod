@@ -217,6 +217,202 @@ namespace midspace.adminscripts
             hitPoint = startPosition + (Vector3D.Normalize(ray.Direction) * lookDistance);
         }
 
+        public static object FindLookAtEntity_New(IMyControllableEntity controlledEntity, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable, bool playerViewOnly = false)
+        {
+            object entity;
+            double distance;
+            Vector3D hitPoint;
+            FindLookAtEntity_New(controlledEntity, true, false, out entity, out distance, out hitPoint, findShips, findCubes, findPlayers, findAsteroids, findPlanets, findReplicable, playerViewOnly);
+            return entity;
+        }
+
+        // Doesn't work quite right, as raycast does not allow filtering of object type.
+        public static void FindLookAtEntity_New(IMyControllableEntity controlledEntity, bool ignoreOccupiedGrid, bool ignoreProjection, out object lookEntity, out double lookDistance, out Vector3D hitPoint, bool findShips, bool findCubes, bool findPlayers, bool findAsteroids, bool findPlanets, bool findReplicable, bool playerViewOnly = false)
+        {
+            const float range = 5000000;
+            Matrix worldMatrix;
+            Vector3D startPosition;
+            Vector3D endPosition;
+            IMyCubeGrid occupiedGrid = null;
+
+            if (!playerViewOnly && MyAPIGateway.Session.CameraController is MySpectator)
+            {
+                worldMatrix = MyAPIGateway.Session.Camera.WorldMatrix;
+                startPosition = worldMatrix.Translation;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * range;
+                ignoreOccupiedGrid = false;
+            }
+            else if (controlledEntity.Entity.Parent == null)
+            {
+                worldMatrix = controlledEntity.GetHeadMatrix(true, true, false); // dead center of player cross hairs, or the direction the player is looking with ALT.
+                startPosition = worldMatrix.Translation + worldMatrix.Forward * 0.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 0.5f);
+            }
+            else
+            {
+                occupiedGrid = controlledEntity.Entity.GetTopMostParent() as IMyCubeGrid;
+                worldMatrix = controlledEntity.Entity.WorldMatrix;
+                // TODO: need to adjust for position of cockpit within ship.
+                startPosition = worldMatrix.Translation + worldMatrix.Forward * 1.5f;
+                endPosition = worldMatrix.Translation + worldMatrix.Forward * (range + 1.5f);
+            }
+
+            //var worldMatrix = MyAPIGateway.Session.Player.PlayerCharacter.Entity.WorldMatrix;
+            //var position = MyAPIGateway.Session.Player.PlayerCharacter.Entity.GetPosition();
+            //var position = worldMatrix.Translation + worldMatrix.Forward * 0.5f + worldMatrix.Up * 1.0f;
+            //MyAPIGateway.Utilities.ShowMessage("Pos", string.Format("x={0:N},y={1:N},z={2:N}  x={3:N},y={4:N},z={5:N}", playerPos.X, playerPos.Y, playerPos.Z, playerMatrix.Forward.X, playerMatrix.Forward.Y, playerMatrix.Forward.Z));
+
+            // The CameraController.GetViewMatrix appears warped at the moment.
+            //var position = ((IMyEntity)MyAPIGateway.Session.CameraController).GetPosition();
+            //var worldMatrix = MyAPIGateway.Session.CameraController.GetViewMatrix();
+            //var position = worldMatrix.Translation;
+            //MyAPIGateway.Utilities.ShowMessage("Cam", string.Format("x={0:N},y={1:N},z={2:N}  x={3:N},y={4:N},z={5:N}", position.X, position.Y, position.Z, worldMatrix.Forward.X, worldMatrix.Forward.Y, worldMatrix.Forward.Z));
+
+
+            var list = new List<DistancePosition>();
+            List<IHitInfo> toList = new List<IHitInfo>();
+            MyAPIGateway.Physics.CastRay(startPosition, endPosition, toList);
+            //VRage.Utils.MyLog.Default.WriteLine($"#### INFO CHECK CastRay Found Items: {toList.Count}");
+            //foreach (IHitInfo info in toList)
+            //    VRage.Utils.MyLog.Default.WriteLine($"#### INFO CHECK Info: {info?.HitEntity == null} {info?.HitEntity?.GetType()} {info?.Position} {info?.Fraction}");
+
+            foreach (IHitInfo info in toList)
+            {
+                if (findShips || findCubes)
+                {
+                    var cubeGrid = info.HitEntity as IMyCubeGrid;
+                    if (cubeGrid != null)
+                    {
+                        bool skip = false;
+
+                        if (ignoreOccupiedGrid && occupiedGrid != null && occupiedGrid.EntityId == cubeGrid.EntityId)
+                            skip = true;
+
+                        // TODO: ignore construction. New cube, new ship, new station, new paste.
+                        //if (ignoreConstruction && (MyAPIGateway.CubeBuilder.BlockCreationIsActivated || MyAPIGateway.CubeBuilder.ShipCreationIsActivated || MyAPIGateway.CubeBuilder.CopyPasteIsActivated))
+                        //    continue;
+
+                        // Will ignore Projected grids, new grid/cube placement, and grids in middle of copy/paste.
+                        // TODO: need a better way of determining projection other than Physics, as constructions have no physics either..
+                        if (ignoreProjection && cubeGrid.Physics == null)
+                            skip = true;
+
+                        if (!skip)
+                        {
+                            var distance = Vector3D.Distance(startPosition, info.Position);
+
+                            // Funny thing. the info.Position only tells you the surface point of the Havok object.
+                            // if the object is a cube, like an armour block, it will be outside of the WorldToGridInteger() detection.
+                            // A sloped surface is inside however. So I have to adjust the hit detection by 0.1 metres!
+                            var hitPos = startPosition + (Vector3D.Normalize(info.Position - startPosition) * (distance + 0.1f));
+                            
+                            IMySlimBlock block = cubeGrid.GetCubeBlock(cubeGrid.WorldToGridInteger(hitPos));
+
+                            if (block?.FatBlock != null && findCubes)
+                                list.Add(new DistancePosition(block.FatBlock, distance, info.Position));
+                            else if (block != null && findCubes)
+                            {
+                                // Have to pass SlimBlock instead of CubeBlock.
+                                // IMySlimBlock does not share the same base as IMyCubeGrid (IMyEntity)
+                                list.Add(new DistancePosition(block, distance, info.Position));
+                            }
+                            else if (findShips)
+                                list.Add(new DistancePosition(cubeGrid, distance, info.Position));
+                        }
+                    }
+                }
+
+                if (findPlayers)
+                {
+                    var character = info.HitEntity as IMyCharacter;
+                    if (character != null && controlledEntity.Entity.EntityId != character.EntityId)
+                    {
+                        list.Add(new DistancePosition(character, Vector3D.Distance(startPosition, info.Position), info.Position));
+                    }
+                }
+
+                if (findReplicable)
+                {
+                    var replicable = info.HitEntity as MyInventoryBagEntity;
+                    if (replicable != null)
+                    {
+                        list.Add(new DistancePosition(replicable, Vector3D.Distance(startPosition, info.Position), info.Position));
+                    }
+                }
+
+                if (findAsteroids)
+                {
+                    var voxelMap = info.HitEntity as IMyVoxelMap;
+                    if (voxelMap != null)
+                    {
+                        list.Add(new DistancePosition(voxelMap, Vector3D.Distance(startPosition, info.Position), info.Position));
+                    }
+                }
+
+                if (findPlanets)
+                {
+                    //MyVoxelPhysics // LOD0 planet voxels marked as internal ????
+                    // MyAPIGateway.Physics.CastRay doesn't detect planets from a distance.
+                    // Have to do it the old way, by looping through objects further below.
+                    var voxelBase = info.HitEntity as MyVoxelBase;
+                    if (voxelBase != null)
+                    {
+                        list.Add(new DistancePosition(voxelBase, Vector3D.Distance(startPosition, info.Position), info.Position));
+                    }
+                }
+            }
+
+            if (findPlanets)
+            {
+                var entites = new HashSet<IMyEntity>();
+                MyAPIGateway.Entities.GetEntities(entites, e => e is Sandbox.Game.Entities.MyPlanet);
+                var ray = new RayD(startPosition, worldMatrix.Forward);
+                foreach (var entity in entites)
+                {
+                    var planet = entity as Sandbox.Game.Entities.MyPlanet;
+                    if (planet != null)
+                    {
+                        var sphere = new BoundingSphereD(planet.WorldMatrix.Translation, planet.MinimumRadius);
+                        var hit = ray.Intersects(sphere);
+                        if (hit.HasValue)
+                        {
+                            // TODO: get proper hit point on planet surface.
+
+                            Vector3D pos;
+                            double distance;
+                            if (hit.Value == 0f) // inside sphere.
+                            {
+                                pos = planet.WorldMatrix.Translation;
+                                distance = Vector3D.Distance(startPosition, pos);// use distance to center of planet.
+                            }
+                            else
+                            {
+                                pos = startPosition + (Vector3D.Normalize(ray.Direction) * hit.Value);
+                                distance = hit.Value;
+                            }
+                            list.Add(new DistancePosition(entity, distance, pos));
+                        }
+                    }
+                }
+            }
+
+            //VRage.Utils.MyLog.Default.WriteLine($"#### INFO CHECK Final Found Items: {list.Count}");
+
+            if (list.Count == 0)
+            {
+                lookEntity = null;
+                lookDistance = 0;
+                hitPoint = Vector3D.Zero;
+                return;
+            }
+
+            // find the closest Entity.
+            var item = list.OrderBy(f => f.Distance).First();
+            lookEntity = item.Entity;
+            lookDistance = item.Distance;
+            hitPoint = item.HitPoint;
+        }
+
         public static HashSet<IMyEntity> FindShipsByName(string findShipName, bool searchTransmittingBlockNames = true, bool partNameMatch = true)
         {
             var allShips = new HashSet<IMyEntity>();
@@ -1407,6 +1603,22 @@ namespace midspace.adminscripts
             if (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) || value == "1")
                 return true;
             return null;
+        }
+
+        public class DistancePosition
+        {
+            // should be IMyEntity, but it isn't compatible with MySlimCube.
+            // IMySlimBlock does not share the same base as IMyCubeGrid (IMyEntity)
+            public object Entity;
+            public double Distance;
+            public Vector3D HitPoint;
+
+            public DistancePosition(object entity, double distance, Vector3D hitPoint)
+            {
+                Entity = entity;
+                Distance = distance;
+                HitPoint = hitPoint;
+            }
         }
 
         public static string[] SplitOnQuotes(this string value)
