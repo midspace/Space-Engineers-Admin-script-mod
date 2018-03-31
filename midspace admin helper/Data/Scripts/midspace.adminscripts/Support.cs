@@ -1408,5 +1408,31 @@ namespace midspace.adminscripts
                 return true;
             return null;
         }
+
+        public static string[] SplitOnQuotes(this string value)
+        {
+            List<string> matchList = new List<string>();
+            Regex regex = new Regex(@"[^\s""']+|""([^""]*)""|'([^']*)'", RegexOptions.IgnoreCase);
+            MatchCollection regexMatcher = regex.Matches(value);
+            foreach (Match match in regexMatcher)
+            {
+                if (match.Groups[2].Value != "")
+                {
+                    // Add double-quoted string without the quotes
+                    matchList.Add(match.Groups[2].Value);
+                }
+                else if (match.Groups[1].Value != "")
+                {
+                    // Add single-quoted string without the quotes
+                    matchList.Add(match.Groups[1].Value);
+                }
+                else
+                {
+                    // Add unquoted word
+                    matchList.Add(match.Groups[0].Value);
+                }
+            }
+            return matchList.ToArray();
+        }
     }
 }

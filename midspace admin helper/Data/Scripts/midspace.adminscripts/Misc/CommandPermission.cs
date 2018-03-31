@@ -116,7 +116,7 @@ Example: /perm group list
 
             if (match.Success)
             {
-                var commandParts = match.Groups["CommandParts"].Value.Split(' ');
+                var commandParts = match.Groups["CommandParts"].Value.SplitOnQuotes();
 
                 //not enough parameters, return false to show brief help
                 if (commandParts.Length < 2)
@@ -137,7 +137,7 @@ Example: /perm group list
                         ProcessGroupPermission(steamId, commandParts);
                         break;
                     default:
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no domain named {0}. Available domains: command, player, group.", commandParts[0]));
+                        MyAPIGateway.Utilities.ShowMessage("Permissions", $"There is no domain named {commandParts[0]}. Available domains: command, player, group.");
                         break;
                 }
                 //if there is a mistake, we already informed the player about it
@@ -185,7 +185,7 @@ Example: /perm group list
                     }
                     else
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        MyAPIGateway.Utilities.ShowMessage("Permissions", $"{args[3]} is no valid level. It must be an integer and can't be below 0.");
                         return;
                     }
                     break;
@@ -195,7 +195,7 @@ Example: /perm group list
                         commandMessage.ListParameter = args[2];
                     break;
                 default:
-                    MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, list.", args[1]));
+                    MyAPIGateway.Utilities.ShowMessage("Permissions", $"There is no action named {args[1]}. Available actions: setlevel, list.");
                     return;
             }
 
@@ -224,7 +224,7 @@ Example: /perm group list
                     }
                     else
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        MyAPIGateway.Utilities.ShowMessage("Permissions", $"{args[3]} is no valid level. It must be an integer and can't be below 0.");
                         return;
                     }
                     break;
@@ -273,7 +273,7 @@ Example: /perm group list
                     }
                     else
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid value. It must be either true or false.", args[3]));
+                        MyAPIGateway.Utilities.ShowMessage("Permissions", $"{args[3]} is no valid value. It must be either true or false.");
                         return;
                     }
                     break;
@@ -286,7 +286,7 @@ Example: /perm group list
                     playerMessage.PlayerName = param;
                     break;
                 default:
-                    MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, extend, restrict, useplayerlevel, list.", args[1]));
+                    MyAPIGateway.Utilities.ShowMessage("Permissions", $"There is no action named {args[1]}. Available actions: setlevel, extend, restrict, useplayerlevel, list.");
                     return;
             }
 
@@ -316,7 +316,7 @@ Example: /perm group list
                     }
                     else
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        MyAPIGateway.Utilities.ShowMessage("Permissions", $"{args[3]} is no valid level. It must be an integer and can't be below 0.");
                         return;
                     }
                     break;
@@ -375,7 +375,7 @@ Example: /perm group list
                     }
                     else
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("{0} is no valid level. It must be an integer and can't be below 0.", args[3]));
+                        MyAPIGateway.Utilities.ShowMessage("Permissions", $"{args[3]} is no valid level. It must be an integer and can't be below 0.");
                         return;
                     }
                     break;
@@ -399,7 +399,7 @@ Example: /perm group list
                     groupMessage.GroupName = param;
                     break;
                 default:
-                    MyAPIGateway.Utilities.ShowMessage("Permissions", string.Format("There is no action named {0}. Available actions: setlevel, setname, add, remove, create, delete, list.", args[1]));
+                    MyAPIGateway.Utilities.ShowMessage("Permissions", $"There is no action named {args[1]}. Available actions: setlevel, setname, add, remove, create, delete, list.");
                     return;
             }
 
@@ -410,7 +410,7 @@ Example: /perm group list
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendLine(string.Format(@"{0} results found:", commands.Count));
+            builder.AppendLine($@"{commands.Count} results found:");
 
             int index = 0;
             foreach (CommandStruct command in commands)
@@ -428,7 +428,7 @@ Level: {2}
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendLine(string.Format(@"{0} results found:", players.Count));
+            builder.AppendLine($@"{players.Count} results found:");
 
             int index = 0;
             foreach (PlayerPermission playerPermission in players)
@@ -456,7 +456,7 @@ Restrictions: {4}
 
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendLine(string.Format(@"{0} results found:", groups.Count));
+            builder.AppendLine($@"{groups.Count} results found:");
 
             int index = 0;
             foreach (PermissionGroup group in groups)
