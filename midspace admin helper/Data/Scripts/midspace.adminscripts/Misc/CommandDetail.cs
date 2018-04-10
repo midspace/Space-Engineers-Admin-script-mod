@@ -278,7 +278,7 @@
                 ores.AppendFormat("{0}  {1:N}  {2:P}\r\n", kvp.Key, (double)kvp.Value / 255, (double)kvp.Value / (double)sum);
 
             var contentBox = new BoundingBoxD(voxelMap.PositionLeftBottomCorner + min - 0.5f, voxelMap.PositionLeftBottomCorner + max - 0.5f);
-            Vector3D center = aabb.Center - 0.5f; // offset for fact that the game offsets the position compared to the volume.
+            Vector3D center = aabb.Center;
             var description = $"Distance: {distance:N}\r\nSize: {voxelMap.Storage.Size}\r\nBoundingBox Center: [X:{center.X:N} Y:{center.Y:N} Z:{center.Z:N}]\r\n\r\nContent Size:{max - min}\r\nLOD0 Content Center: [X:{contentBox.Center.X:N} Y:{contentBox.Center.Y:N} Z:{contentBox.Center.Z:N}]\r\n\r\nMaterial  Mass  Percent\r\n{ores}";
 
             MyAPIGateway.Utilities.ShowMissionScreen($"ID {displayType}:", $"'{displayName}'", " ", description, null, "OK");
