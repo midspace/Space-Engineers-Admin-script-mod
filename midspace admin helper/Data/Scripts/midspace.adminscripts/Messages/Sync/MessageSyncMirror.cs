@@ -13,6 +13,7 @@
     using VRage.Game;
     using VRage.Game.Entity;
     using VRage.Game.ModAPI;
+    using VRage.Utils;
     using VRageMath;
 
     [ProtoContract]
@@ -275,11 +276,11 @@
 
             MySymmetryAxisEnum blockMirrorAxis = MySymmetryAxisEnum.None;
 
-            if (MathHelper.IsZero(Math.Abs(Vector3.Dot(sourceMatrix.Right, mirrorNormal)) - 1.0f))
+            if (MyUtils.IsZero(Math.Abs(Vector3.Dot(sourceMatrix.Right, mirrorNormal)) - 1.0f))
                 blockMirrorAxis = MySymmetryAxisEnum.X;
-            else if (MathHelper.IsZero(Math.Abs(Vector3.Dot(sourceMatrix.Up, mirrorNormal)) - 1.0f))
+            else if (MyUtils.IsZero(Math.Abs(Vector3.Dot(sourceMatrix.Up, mirrorNormal)) - 1.0f))
                 blockMirrorAxis = MySymmetryAxisEnum.Y;
-            else if (MathHelper.IsZero(Math.Abs(Vector3.Dot(sourceMatrix.Forward, mirrorNormal)) - 1.0f))
+            else if (MyUtils.IsZero(Math.Abs(Vector3.Dot(sourceMatrix.Forward, mirrorNormal)) - 1.0f))
                 blockMirrorAxis = MySymmetryAxisEnum.Z;
 
             MySymmetryAxisEnum blockMirrorOption = MySymmetryAxisEnum.None;
