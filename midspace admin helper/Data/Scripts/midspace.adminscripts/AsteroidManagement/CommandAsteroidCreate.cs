@@ -30,7 +30,13 @@
                     double.Parse(match.Groups["Z"].Value, CultureInfo.InvariantCulture));
 
                 var length = int.Parse(match.Groups["Size"].Value, CultureInfo.InvariantCulture);
-                if (length < 1 || length % 64 != 0)
+                if (length < 8)  // the size of 4x4x4 is too small. the game allows it, but the physics is broken.
+                {
+                    MyAPIGateway.Utilities.ShowMessage("Invalid", "Size specified.");
+                    return true;
+                }
+                int checkLength = MathHelper.GetNearestBiggerPowerOfTwo(length);
+                if (checkLength != length)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Invalid", "Size specified.");
                     return true;

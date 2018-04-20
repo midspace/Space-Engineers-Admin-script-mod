@@ -90,10 +90,8 @@ The following materials are available:
                     var searchMaterialName2 = match.Groups["Material2"].Value;
                     return ReplaceAsteroidMaterial(steamId, voxelMap, searchMaterialName1, searchMaterialName2);
                 }
-                else
-                {
-                    MyAPIGateway.Utilities.SendMessage(steamId, "Asteroid", "Was not targeted.");
-                }
+
+                MyAPIGateway.Utilities.SendMessage(steamId, "Asteroid", "Was not targeted.");
             }
 
             return false;

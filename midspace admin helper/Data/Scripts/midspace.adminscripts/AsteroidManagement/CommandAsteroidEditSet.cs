@@ -113,7 +113,7 @@
                         if (_activeVoxelSetterPositionA.HasValue && _activeVoxelSetterPositionB.HasValue && _activeVoxelSetterNameA == _activeVoxelSetterNameB)
                         {
                             var currentAsteroidList = new List<IMyVoxelBase>();
-                            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(_activeVoxelSetterNameA, StringComparison.InvariantCultureIgnoreCase));
+                            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName != null && v.StorageName.Equals(_activeVoxelSetterNameA, StringComparison.InvariantCultureIgnoreCase));
                             if (currentAsteroidList.Count > 0)
                             {
                                 var storage = currentAsteroidList[0].Storage;
@@ -154,7 +154,7 @@
                         if (_activeVoxelSetterPositionA.HasValue && _activeVoxelSetterPositionB.HasValue && _activeVoxelSetterNameA == _activeVoxelSetterNameB)
                         {
                             var currentAsteroidList = new List<IMyVoxelBase>();
-                            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(_activeVoxelSetterNameA, StringComparison.InvariantCultureIgnoreCase));
+                            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName != null && v.StorageName.Equals(_activeVoxelSetterNameA, StringComparison.InvariantCultureIgnoreCase));
                             if (currentAsteroidList.Count > 0)
                             {
                                 var storage = currentAsteroidList[0].Storage;

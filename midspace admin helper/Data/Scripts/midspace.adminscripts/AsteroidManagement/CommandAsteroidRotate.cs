@@ -40,7 +40,7 @@
 
                     var currentAsteroidList = new List<IMyVoxelBase>();
                     IMyVoxelBase originalAsteroid = null;
-                    MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(searchName, StringComparison.InvariantCultureIgnoreCase));
+                    MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName != null && v.StorageName.Equals(searchName, StringComparison.InvariantCultureIgnoreCase));
                     if (currentAsteroidList.Count == 1)
                     {
                         originalAsteroid = currentAsteroidList[0];

@@ -464,10 +464,10 @@ namespace midspace.adminscripts
                 shipList = FindShipsByName(entityName);
 
             if (findAsteroids)
-                MyAPIGateway.Session.VoxelMaps.GetInstances(asteroidList, v => v is IMyVoxelMap && (entityName == null || v.StorageName.Equals(entityName, StringComparison.InvariantCultureIgnoreCase)));
+                MyAPIGateway.Session.VoxelMaps.GetInstances(asteroidList, v => v is IMyVoxelMap && (entityName == null || (v.StorageName != null && v.StorageName.Equals(entityName, StringComparison.InvariantCultureIgnoreCase))));
 
             if (findPlanets)
-                MyAPIGateway.Session.VoxelMaps.GetInstances(planetList, v => v is Sandbox.Game.Entities.MyPlanet && (entityName == null || v.StorageName.Equals(entityName, StringComparison.InvariantCultureIgnoreCase)));
+                MyAPIGateway.Session.VoxelMaps.GetInstances(planetList, v => v is Sandbox.Game.Entities.MyPlanet && (entityName == null || (v.StorageName != null && v.StorageName.Equals(entityName, StringComparison.InvariantCultureIgnoreCase))));
 
             if (findGps)
                 gpsList = MyAPIGateway.Session.GPS.GetGpsList(playerId).Where(g => entityName == null || g.Name.Equals(entityName, StringComparison.InvariantCultureIgnoreCase)).ToList();
@@ -780,7 +780,7 @@ namespace midspace.adminscripts
         public static bool FindAsteroid(ulong steamId, string searchAsteroidName, out IMyVoxelBase originalAsteroid)
         {
             var currentAsteroidList = new List<IMyVoxelBase>();
-            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName.Equals(searchAsteroidName, StringComparison.InvariantCultureIgnoreCase));
+            MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v.StorageName != null && v.StorageName.Equals(searchAsteroidName, StringComparison.InvariantCultureIgnoreCase));
             if (currentAsteroidList.Count == 1)
             {
                 originalAsteroid = currentAsteroidList[0];
@@ -850,14 +850,15 @@ namespace midspace.adminscripts
                 long.TryParse(match.Groups["Value"].Captures[0].Value, out index);
             }
 
-            var uniqueName = string.Format("{0}{1}", baseName, index);
+            string uniqueName = $"{baseName}{index}";
             var currentAsteroidList = new List<IMyVoxelBase>();
             MyAPIGateway.Session.VoxelMaps.GetInstances(currentAsteroidList, v => v != null);
 
-            while (currentAsteroidList.Any(a => a.StorageName.Equals(uniqueName, StringComparison.InvariantCultureIgnoreCase)))
+            // IMyVoxelBase.StorageName can be null on MyVoxelPhysics, which is a Octree slice of a planet containing voxel changes.
+            while (currentAsteroidList.Any(a => a.StorageName != null && a.StorageName.Equals(uniqueName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 index++;
-                uniqueName = string.Format("{0}{1}", baseName, index);
+                uniqueName = $"{baseName}{index}";
             }
 
             return uniqueName;
@@ -866,7 +867,7 @@ namespace midspace.adminscripts
         /// <summary>
         /// Create a new Asteroid, ready for some manipulation.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="storageName"></param>
         /// <param name="size">Currently the size must be multiple of 64, eg. 128x64x256</param>
         /// <param name="position"></param>
         public static IMyVoxelMap CreateNewAsteroid(string storageName, Vector3I size, Vector3D position)
