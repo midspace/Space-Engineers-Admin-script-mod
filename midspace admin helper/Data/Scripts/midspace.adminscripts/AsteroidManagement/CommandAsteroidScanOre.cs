@@ -166,7 +166,7 @@
                             byte content = oldCache.Content(ref p);
                             byte material = oldCache.Material(ref p);
 
-                            if (content > 0 && findMaterial.Contains(material))
+                            if (content > 0 && findMaterial.Any(m => m == material))
                             {
                                 bool addHit = true;
                                 foreach (ScanHit scanHit in scanHits)

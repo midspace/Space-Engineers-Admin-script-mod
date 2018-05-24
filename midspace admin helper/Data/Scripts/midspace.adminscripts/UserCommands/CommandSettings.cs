@@ -124,7 +124,8 @@
 
             info.AppendFormat("\r\n");
 
-            info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_BlockLimits"), MyAPIGateway.Session.SessionSettings.EnableBlockLimits ? yes : no);
+            //MyAPIGateway.Session.SessionSettings.BlockLimitsEnabled == 
+            //info.AppendFormat("{0}: {1}\r\n", Localize.GetResource("WorldSettings_BlockLimits"), MyAPIGateway.Session.SessionSettings.EnableBlockLimits ? yes : no);
             foreach (var kvp in MyAPIGateway.Session.SessionSettings.BlockTypeLimits.Dictionary)
             {
                 info.AppendFormat("  {0}: {1}\r\n", kvp.Key, kvp.Value);

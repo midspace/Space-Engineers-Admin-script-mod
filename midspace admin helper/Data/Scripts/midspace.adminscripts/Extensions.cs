@@ -251,7 +251,7 @@ namespace midspace.adminscripts
         /// <returns></returns>
         public static bool IsExperimentalCreator(this IMyPlayer player)
         {
-            return ExperimentalCreatorList.Contains(player.SteamUserId);
+            return ExperimentalCreatorList.Any(e => e == player.SteamUserId);
         }
 
         /// <summary>

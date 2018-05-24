@@ -279,7 +279,7 @@
                     {
                         // Exception handling to prevent any crash in the ChatCommand's reaching the user.
                         // Additional information for developers
-                        if (Extensions.ExperimentalCreatorList.Contains(steamId))
+                        if (Extensions.ExperimentalCreatorList.Any(e => e == steamId))
                         {
                             MyAPIGateway.Utilities.SendMissionScreen(steamId, string.Format("Error in {0}", command.Value.Name), "Input: ", messageText, ex.ToString(), null, null);
                             VRage.Utils.MyLog.Default.WriteLine(String.Format("##Mod## Admin Helper mod Exception caught. Message: {0}", ex));
@@ -340,7 +340,7 @@
         public static bool HasRight(ulong steamId, ChatCommand command)
         {
             if (command.HasFlag(ChatCommandFlag.Experimental))
-                return Extensions.ExperimentalCreatorList.Contains(steamId) && command.Security <= _userSecurity;
+                return Extensions.ExperimentalCreatorList.Any(e => e == steamId) && command.Security <= _userSecurity;
 
             return command.Security <= _userSecurity;
         }

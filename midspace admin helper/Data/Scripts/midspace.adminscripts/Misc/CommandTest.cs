@@ -53,19 +53,20 @@
                 //MyAPIGateway.Utilities.ShowMessage("size1", MyAPIGateway.Utilities.ConfigDedicated.SessionSettings.WorldSizeKm.ToString());
                 //MyAPIGateway.Utilities.ShowMessage("size2", MyAPIGateway.Session.GetWorld().Checkpoint.Settings.WorldSizeKm.ToString());
 
-                IMyConfigDedicated config = null;
+
+                //IMyConfigDedicated config = null;
                 //List<string> admins = null;
                 try
                 {
-                    config = MyAPIGateway.Utilities.ConfigDedicated;
-                    config.Load();
+                    //config = MyAPIGateway.Utilities.ConfigDedicated;
+                    //config.Load();
                     //config.
                 }
                 catch (Exception)
                 {
                     MyAPIGateway.Utilities.ShowMessage("Exception", "ConfigDedicated"); //ex.Message);
                 }
-                if (config != null)
+                //if (config != null)
                 {
                     try
                     {
@@ -78,37 +79,40 @@
                         MyAPIGateway.Players.GetAllIdentites(identities);
                         str.AppendLine("Identities Count {0}", identities.Count);
 
-                        str.AppendLine("Admin Count {0}", config.Administrators.Count);
-                        //str.AppendLine("WorldName {0}", config.WorldName);
-                        //str.AppendLine("WorldSize {0}", config.SessionSettings.WorldSizeKm);
-                        str.AppendLine("Mods Count {0}", config.Mods.Count);
-                        //str.AppendLine("IP {0}", config.IP));
+                        //str.AppendLine("Admin Count {0}", config.Administrators.Count);
+                        ////str.AppendLine("WorldName {0}", config.WorldName);
+                        ////str.AppendLine("WorldSize {0}", config.SessionSettings.WorldSizeKm);
+                        //str.AppendLine("Mods Count {0}", config.Mods.Count);
+                        ////str.AppendLine("IP {0}", config.IP));
 
-                        var clients = MyAPIGateway.Session.GetWorld().Checkpoint.Clients;
-                        str.AppendLine("Client Count", clients == null ? "null" : string.Format("{0}", clients.Count));
+                        //var clients = MyAPIGateway.Session.GetWorld().Checkpoint.Clients;
+                        //str.AppendLine("Client Count", clients == null ? "null" : string.Format("{0}", clients.Count));
 
-                        if (clients != null)
-                        {
-                            var client = clients.FirstOrDefault(c => c.SteamId == MyAPIGateway.Multiplayer.MyId);
-                            if (client != null)
-                            {
-                                str.AppendLine("IsAdmin {0}", client.IsAdmin);
-                            }
-                        }
+                        //if (clients != null)
+                        //{
+                        //    var client = clients.FirstOrDefault(c => c.SteamId == MyAPIGateway.Multiplayer.MyId);
+                        //    if (client != null)
+                        //    {
+                        //        str.AppendLine("IsAdmin {0}", client.IsAdmin);
+                        //    }
+                        //}
 
                         int index = 1;
                         foreach (var identity in identities.OrderBy(i => i.DisplayName))
                         {
                             var steamPlayer = players.FirstOrDefault(p => p.IdentityId == identity.IdentityId);
-                            str.AppendFormat("#{0} {1} {2} '{3}'\r\n", index++, steamPlayer.PromoteLevel, steamPlayer.SteamUserId, identity.DisplayName);
+                            if (steamPlayer != null)
+                            {
+                                str.AppendFormat("#{0} {1} {2} '{3}'\r\n", index++, steamPlayer?.PromoteLevel, steamPlayer?.SteamUserId, identity.DisplayName);
+                            }
                         }
 
                         MyAPIGateway.Utilities.ShowMissionScreen("test", null, null, str.ToString());
 
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        MyAPIGateway.Utilities.ShowMessage("Exception", "reading config"); //ex.Message);
+                        MyAPIGateway.Utilities.ShowMissionScreen("Exception", "reading config", null, ex.ToString());
                     }
                 }
                 return true;

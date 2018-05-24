@@ -103,7 +103,7 @@
                         var content = oldCache.Content(ref p);
                         var material = oldCache.Material(ref p);
 
-                        if (content > 0 && findMaterial.Contains(material))
+                        if (content > 0 && findMaterial.Any(m => m == material))
                         {
                             return true;
                         }
