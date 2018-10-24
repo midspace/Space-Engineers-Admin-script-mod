@@ -433,7 +433,7 @@
                 // This will Delete the entity and sync to all.
                 // Using this, also works with player ejection in the same Tick.
 
-                cubeGrid.SyncObject.SendCloseRequest();
+                cubeGrid.Close();
 
                 MyAPIGateway.Utilities.SendMessage(steamId, "ship", "'{0}' deleted.", name);
             }
@@ -453,7 +453,7 @@
 
             // This will Delete the entity and sync to all.
             // Using this, also works with player ejection in the same Tick.
-            shipEntity.SyncObject.SendCloseRequest();
+            shipEntity.Close();
 
             var tempList = new List<MyObjectBuilder_EntityBase>();
             tempList.Add(gridObjectBuilder);
@@ -587,7 +587,7 @@
 
                 // This will Delete the entity and sync to all.
                 // Using this, also works with player ejection in the same Tick.
-                cubeGrid.SyncObject.SendCloseRequest();
+                cubeGrid.Close();
 
                 var name = cubeGrid.DisplayName;
                 MyAPIGateway.Utilities.SendMessage(steamId, "ship", "'{0}' resized.", name);

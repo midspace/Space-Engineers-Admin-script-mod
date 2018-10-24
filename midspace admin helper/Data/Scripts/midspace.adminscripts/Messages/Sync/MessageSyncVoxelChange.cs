@@ -108,7 +108,7 @@
                 return;
             }
             var name = planetEntity.StorageName;
-            planetEntity.SyncObject.SendCloseRequest();
+            planetEntity.Close();
             MyAPIGateway.Utilities.SendMessage(steamId, "planet", "'{0}' deleted.", name);
         }
     }
