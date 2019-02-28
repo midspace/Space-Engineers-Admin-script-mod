@@ -161,7 +161,7 @@ namespace midspace.adminscripts
                             if (voxelMap.WorldAABB.IntersectPoints(startPosition, endPosition, out hitIngoing, out hitOutgoing)
                                 && Sandbox.Game.Entities.MyEntities.IsRaycastBlocked(hitIngoing.Value, hitOutgoing.Value))
                             {
-                                Vector3 lastOutsidePos;
+                                Vector3D lastOutsidePos;
                                 // TODO: IsInsideVoxel doesn't appear to be reliable. Need to find an improved method.
 
                                 //List<Sandbox.Engine.Physics.MyPhysics.HitInfo> m_hits = new List<Sandbox.Engine.Physics.MyPhysics.HitInfo>();

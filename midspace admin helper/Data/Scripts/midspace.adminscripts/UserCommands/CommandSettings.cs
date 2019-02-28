@@ -133,7 +133,7 @@
 
             info.AppendFormat("\r\n");
 
-            var mods = MyAPIGateway.Session.GetCheckpoint("null").Mods;
+            var mods = MyAPIGateway.Session.Mods;
             info.AppendFormat("{0}: {1:#,###0}\r\n", Localize.GetResource("WorldSettings_Mods"), mods.Count);
             foreach (var mod in mods.OrderBy(e => e.FriendlyName))
                 info.AppendFormat("#{0} : '{1}'\r\n", mod.PublishedFileId, mod.FriendlyName);
